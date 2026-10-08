@@ -1,5 +1,5 @@
 import {View, StyleSheet} from 'react-native'
-import {COLORS, SPACING } from '../theme'
+import {COLORS, SPACING, FONTS } from '../theme'
 
 function Card(props) {
     return(
@@ -21,6 +21,8 @@ const styles = StyleSheet.create({
         shadowOffset: {width: 0, height: 4},
         shadowOpacity: .3,
         shadowRadius: 6,
+        fontFamily: FONTS.body,
+        alignSelf: 'center',
     }
 
 })

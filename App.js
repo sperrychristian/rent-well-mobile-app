@@ -1,42 +1,63 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { COLORS, SPACING, FONT_SIZES } from './theme'
-import ScreenTitle from './components/ScreenTitle';
-import Card from './components/Card'
-import PrimaryButton from './components/PrimaryButton'
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import WelcomeScreen from "./screens/WelcomeScreen";
+import DashboardScreen from "./screens/DashboardScreen";
+import ChecklistScreen from "./screens/ChecklistScreen";
+import WorkOrdersScreen from "./screens/WorkOrdersScreen";
+import MessagesScreen from "./screens/MessagesScreen";
+import DocumentsScreen from "./screens/DocumentsScreen";
+import ExpensesScreen from "./screens/ExpensesScreen";
+import { WorkOrdersProvider } from "./context/WorkOrdersContext";
+import WorkOrderDetailScreen from "./screens/WorkOrderDetailScreen";
+import MileageScreen from "./screens/MileageScreen";
+import YearEndReportScreen from "./screens/YearEndReportScreen";
+
+import {
+  useFonts,
+  Inter_400Regular,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  Inter_800ExtraBold,
+} from "@expo-google-fonts/inter";
+
+// I make the stack once out here so every screen can be registered on it
+const Stack = createNativeStackNavigator();
 
 export default function App() {
+  // load the fonts first and show nothing until they're ready
+  const [fonts_loaded] = useFonts({
+    Inter_400Regular,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Inter_800ExtraBold,
+  });
+
+  if (!fonts_loaded) {
+    return null;
+  }
+
   return (
-    <View style={styles.container}>
-      <ScreenTitle>Rent Well</ScreenTitle>
-      <Card>
-        <Text style={styles.body_text}>Property Management Made Simple</Text>
-      </Card>
-      <View style={styles.button_container}>
-      <PrimaryButton title='Login' style={styles.button_styling} />
-      <PrimaryButton title='Sign Up' style={styles.button_styling}/>
-      </View>
-    </View>
+    <WorkOrdersProvider>
+      <NavigationContainer>
+        {/* I'm hiding the default header since my screens have their own title */}
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {/* first screen listed is the one that shows on launch */}
+          <Stack.Screen name="Welcome" component={WelcomeScreen} />
+          {/* this name has to match navigate('Dashboard') exactly */}
+          <Stack.Screen name="Dashboard" component={DashboardScreen} />
+          <Stack.Screen name="WorkOrders" component={WorkOrdersScreen} />
+          <Stack.Screen
+            name="WorkOrderDetail"
+            component={WorkOrderDetailScreen}
+          />
+          <Stack.Screen name="Messages" component={MessagesScreen} />
+          <Stack.Screen name="Documents" component={DocumentsScreen} />
+          <Stack.Screen name="Checklist" component={ChecklistScreen} />
+          <Stack.Screen name="Expenses" component={ExpensesScreen} />
+          <Stack.Screen name="Mileage" component={MileageScreen} />
+          <Stack.Screen name="YearEndReport" component={YearEndReportScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </WorkOrdersProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: SPACING.lg,
-  },
-
-  body_text: {
-    colors: COLORS.text,
-    fontSize: FONT_SIZES.body,
-    textAlign: 'center'
-  },
-
-  button_container: {
-    flexDirection: 'row',
-    margin: SPACING.sm,
-  },
-
-});

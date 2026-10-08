@@ -2,9 +2,11 @@
 
 export const COLORS = {
     primary: '#859eb0',
-    background: '#dcd0bc',
+    background: '#d8dee5',
     text: '#171b24',
-    muted: '#c69a5d'
+    muted: '#cdd5e1',
+    title: '#293355',
+    title_text: 'white'
 }
 
 export const SPACING = {
@@ -20,4 +22,9 @@ export const FONT_SIZES = {
     title: 24
 }
 
-
+export const FONTS = {
+  heading: 'Inter_800ExtraBold',
+  subheading: 'Inter_600SemiBold',
+  body: 'Inter_400Regular',
+  body_bold: 'Inter_700Bold',
+};
