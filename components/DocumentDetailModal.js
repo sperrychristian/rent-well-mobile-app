@@ -3,7 +3,8 @@ import { Ionicons } from '@expo/vector-icons';
 import Card from './Card';
 import PrimaryButton from './PrimaryButton';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
-import { getDocumentUri, isImage, iconFor, expiryTag, daysUntil, formatSize } from '../utils/documentFiles';
+import { getDocumentUri } from '../utils/documentFiles';
+import { isImage, iconFor, expiryTag, daysUntil, formatSize } from '../utils/documentHelpers';
 
 // props: visible, document, in_demo, onOpen, onEdit, onDelete, onClose, and onDismiss (iOS calls it once the modal is fully gone)
 function DocumentDetailModal(props) {

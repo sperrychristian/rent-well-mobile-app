@@ -20,7 +20,8 @@ import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
 import { document_categories, dated_categories } from '../data/documentOptions';
 import { todayString } from '../utils/formatDate';
 import { addPeriod } from '../utils/recurring';
-import { pickDocument, nameFromFile, iconFor, formatSize } from '../utils/documentFiles';
+import { pickDocument } from '../utils/documentFiles';
+import { nameFromFile, iconFor, formatSize } from '../utils/documentHelpers';
 
 // props: visible, onSave, onClose, plus optional document (edit mode), initial_file (a scan taken first),
 // default_name, default_category, default_property, and property_names

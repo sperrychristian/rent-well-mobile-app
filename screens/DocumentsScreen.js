@@ -25,10 +25,8 @@ import {
   deleteDocumentFile,
   openDocument,
   fileFromPhoto,
-  iconFor,
-  expiryTag,
-  daysUntil,
 } from '../utils/documentFiles';
+import { iconFor, expiryTag, daysUntil } from '../utils/documentHelpers';
 import { document_categories, expiring_soon_days } from '../data/documentOptions';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
 
