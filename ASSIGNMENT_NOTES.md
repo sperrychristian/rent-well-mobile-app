@@ -1,7 +1,7 @@
 # Assignment notes (DRAFT, rewrite in your own words)
 
 Screen audited: `screens/NewWorkOrderScreen.js` (tenant "Report an Issue").
-Tested on iPhone SE and iPad, portrait and landscape.
+Tested on iPhone 18 Pro and iPad, portrait and landscape.
 
 Note on order: the top-inset fix (pushing the title below the status bar) and the property chip fix were made in an earlier step, after the before screenshots and before the three fixes below.
 
@@ -21,7 +21,7 @@ The form was a plain `View`, so when the keyboard opened it could cover the Deta
 Platform.OS: I used `Platform.OS` to set the `KeyboardAvoidingView` behavior to `padding` on iOS and leave it unset on Android, because iOS does not resize the app when the keyboard opens but Android already moves the content up on its own (this follows the Expo keyboard handling guide).
 
 ## Fix 3: Layout with useWindowDimensions
-On the iPad the form stretched edge to edge, which made the fields very wide and hard to read, and in landscape on the iPhone SE the photo preview took up most of the short screen. I capped the form at 600 wide and centered it, so it looks the same on a tablet as on a phone. I used `useWindowDimensions` to check whether the screen is wider than it is tall, and in that case the photo preview shrinks to 120 tall.
+On the iPad the form stretched edge to edge, which made the fields very wide and hard to read, and in landscape on the iPhone 18 Pro the photo preview took up most of the short screen. I capped the form at 600 wide and centered it, so it looks the same on a tablet as on a phone. I used `useWindowDimensions` to check whether the screen is wider than it is tall, and in that case the photo preview shrinks to 120 tall.
 
 ## Separate bug (not one of the three required fixes)
 The horizontal list of property chips was growing to fill the spare height on the screen, so the chips looked too tall. Setting `flexGrow: 0` on that list keeps it only as tall as the chips.
