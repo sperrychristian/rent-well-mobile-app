@@ -11,6 +11,7 @@ The code so far was written in an earlier chat session and has been run only par
 - AsyncStorage for saving, `expo-image-picker`, `expo-file-system` and `expo-sharing` (CSV export, documents), `expo-document-picker`, `@react-native-community/datetimepicker`, `@expo/vector-icons` (Ionicons)
 - Inter fonts from `@expo-google-fonts/inter`, loaded in `App.js`
 - Run with `npx expo start -c` (clear the cache after adding or renaming files)
+- Checks: `npm run lint` (whole project), `npm test` (runs once, `npm run test:watch` to watch), `npm run format:check`. Format with `npx prettier --write <files>`. Prettier keeps quoted keys as written (`quoteProps: preserve`). Lint has 17 known problems in existing code, listed in the Phase 1 report, left alone during the refactor.
 
 ## Layout (project root)
 - `App.js`: font loading, `WorkOrdersProvider`, navigator. Header is hidden, every screen draws its own `ScreenTitle`.
@@ -18,7 +19,7 @@ The code so far was written in an earlier chat session and has been run only par
 - `context/WorkOrdersContext.js`: all shared data and actions (see below)
 - `screens/`: Welcome, Dashboard, WorkOrders, WorkOrderDetail, NewWorkOrder, Expenses, Mileage, YearEndReport, Messages (placeholder), Documents, Checklist (placeholder)
 - `components/`: ScreenTitle (shimmer card title), Card, PrimaryButton, WorkOrderCard, ExpenseDetailsModal, AddExpenseModal (full expense form), TripModal, BudgetsModal, RecurringModal, DateField, DemoBanner, DocumentDetailModal, DocumentFormModal
-- `utils/`: formatDate.js (formatDate, todayString), dateInput.js, recurring.js (addPeriod), expenseStats.js, exportExpenses.js, documentFiles.js (pick, save, delete, open document files)
+- `utils/`: formatDate.js (formatDate, todayString), dateInput.js, recurring.js (addPeriod), expenseStats.js, exportExpenses.js, documentFiles.js (pick, save, delete, open document files), documentHelpers.js (pure helpers: icons, names, sizes, daysUntil and expiryTag with an optional today). Tests live in `utils/__tests__/`.
 - `data/`: workOrders.js, expenses.js, expenseOptions.js, expenseExtras.js, documents.js, documentOptions.js (mock and seed data)
 
 ## How the data works
