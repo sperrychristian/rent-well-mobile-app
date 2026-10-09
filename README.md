@@ -28,8 +28,8 @@ Before these three fixes, I made two smaller changes: a first version of the top
 
 | Condition | Before | After |
 | --- | --- | --- |
-| iPhone SE portrait | ![](assignment/screenshots/before/se-portrait.png) | ![](assignment/screenshots/after/se-portrait.png) |
-| iPhone SE landscape | ![](assignment/screenshots/before/se-landscape.png) | ![](assignment/screenshots/after/se-landscape.png) |
+| Phone portrait | ![](assignment/screenshots/before/phone-portrait.png) | ![](assignment/screenshots/after/phone-portrait.png) |
+| Phone landscape | ![](assignment/screenshots/before/phone-landscape.png) | ![](assignment/screenshots/after/phone-landscape.png) |
 | iPad portrait | ![](assignment/screenshots/before/ipad-portrait.png) | ![](assignment/screenshots/after/ipad-portrait.png) |
 | iPad landscape | ![](assignment/screenshots/before/ipad-landscape.png) | ![](assignment/screenshots/after/ipad-landscape.png) |
 
