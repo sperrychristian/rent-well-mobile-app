@@ -9,5 +9,22 @@ module.exports = defineConfig([
   prettierConfig,
   {
     ignores: ["dist/*"],
-  }
+  },
+  // Jest puts these on every test file, so ESLint needs to know they exist
+  {
+    files: ['**/__tests__/**/*.js', '**/*.test.js'],
+    languageOptions: {
+      globals: {
+        describe: 'readonly',
+        test: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        jest: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+      },
+    },
+  },
 ]);
