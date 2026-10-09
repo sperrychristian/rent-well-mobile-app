@@ -8,12 +8,15 @@ import {
   seed_recurring_rules,
   default_mileage_rate,
 } from '../data/expenseExtras';
+import { seed_documents } from '../data/documents';
 import { todayString } from '../utils/formatDate';
 import { addPeriod } from '../utils/recurring';
+import { deleteDocumentFile, clearDemoFiles } from '../utils/documentFiles';
 
 const orders_key = 'rent_well_work_orders';
 const expenses_key = 'rent_well_expenses';
 const extras_key = 'rent_well_extras';
+const documents_key = 'rent_well_documents';
 
 const WorkOrdersContext = createContext(null);
 
@@ -54,6 +57,7 @@ export function WorkOrdersProvider(props) {
   const [recurring_rules, setRecurringRules] = useState(seed_recurring_rules);
   const [budgets, setBudgets] = useState(seed_budgets);
   const [mileage_rate, setMileageRate] = useState(default_mileage_rate);
+  const [documents, setDocuments] = useState(seed_documents);
   // I wait for the saved data to load before saving anything, so the mock data can't overwrite it
   const [loaded, setLoaded] = useState(false);
   // demo mode runs on sample data and never saves, so real data is never touched
@@ -67,6 +71,7 @@ export function WorkOrdersProvider(props) {
       const saved_orders_text = await AsyncStorage.getItem(orders_key);
       const saved_expenses_text = await AsyncStorage.getItem(expenses_key);
       const saved_extras_text = await AsyncStorage.getItem(extras_key);
+      const saved_documents_text = await AsyncStorage.getItem(documents_key);
       const migrated_expenses = [];
 
       // if the demo started while this was loading, I leave the demo data alone
@@ -102,6 +107,12 @@ export function WorkOrdersProvider(props) {
         setRecurringRules(seed_recurring_rules);
         setBudgets(seed_budgets);
         setMileageRate(default_mileage_rate);
+      }
+
+      if (saved_documents_text !== null) {
+        setDocuments(JSON.parse(saved_documents_text));
+      } else {
+        setDocuments(seed_documents);
       }
     } catch (error) {
       console.log('Could not load saved data', error);
@@ -146,6 +157,16 @@ export function WorkOrdersProvider(props) {
       console.log('Could not save trips and settings', error);
     });
   }, [trips, recurring_rules, budgets, mileage_rate, loaded, demo_mode]);
+
+  // documents get their own saved entry, only the stored file name is saved, never the full path
+  useEffect(() => {
+    if (!loaded || demo_mode) {
+      return;
+    }
+    AsyncStorage.setItem(documents_key, JSON.stringify(documents)).catch((error) => {
+      console.log('Could not save documents', error);
+    });
+  }, [documents, loaded, demo_mode]);
 
   // works out which recurring expenses are due, the id comes from the rule and the date so a repeat run can't double up
   function generateDue(rules) {
@@ -205,6 +226,9 @@ export function WorkOrdersProvider(props) {
     setRecurringRules(seed_recurring_rules);
     setBudgets(seed_budgets);
     setMileageRate(default_mileage_rate);
+    setDocuments(seed_documents);
+    // clears out files left behind if the app was closed in the middle of a demo
+    clearDemoFiles();
     setDemoMode(true);
   }
 
@@ -215,6 +239,8 @@ export function WorkOrdersProvider(props) {
     }
     demo_ref.current = false;
     await loadSavedData();
+    // files added during the demo lived in the cache and go away with it
+    clearDemoFiles();
     setDemoMode(false);
   }
 
@@ -384,6 +410,40 @@ function addWorkOrder(request) {
     setRecurringRules((current_rules) => current_rules.filter((rule) => rule.id !== rule_id));
   }
 
+  // the screen copies the file in first, so this only gets the finished document fields
+  function addDocument(document) {
+    const new_document = {
+      tenant: '',
+      expires_on: null,
+      notes: '',
+      shared_with_tenant: false,
+      sample: false,
+      ...document,
+      id: makeId(),
+      added_at: todayString(),
+    };
+    setDocuments((current_documents) => [...current_documents, new_document]);
+  }
+
+  function updateDocument(document_id, changes) {
+    setDocuments((current_documents) =>
+      current_documents.map((document) =>
+        document.id === document_id ? { ...document, ...changes } : document,
+      ),
+    );
+  }
+
+  // the file goes with it, sample documents don't have one
+  function deleteDocument(document_id) {
+    const removed = documents.find((document) => document.id === document_id);
+    if (removed && !removed.sample) {
+      deleteDocumentFile(removed.stored_name, demo_ref.current);
+    }
+    setDocuments((current_documents) =>
+      current_documents.filter((document) => document.id !== document_id),
+    );
+  }
+
   function getOrder(order_id) {
     return orders_with_expenses.find((order) => order.id === order_id);
   }
@@ -395,6 +455,7 @@ function addWorkOrder(request) {
     recurring_rules,
     budgets,
     mileage_rate,
+    documents,
     properties,
     demo_mode,
     startDemo,
@@ -417,7 +478,10 @@ function addWorkOrder(request) {
     deleteRecurringRule,
     setBudgets,
     setMileageRate,
-    addWorkOrder
+    addWorkOrder,
+    addDocument,
+    updateDocument,
+    deleteDocument,
   };
 
   return <WorkOrdersContext.Provider value={value}>{props.children}</WorkOrdersContext.Provider>;
