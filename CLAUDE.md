@@ -60,21 +60,33 @@ All colors must come from `theme.js`. When touching a file, use theme tokens. Ne
 - `NewWorkOrderScreen` (tenant "Report an Issue") was just added. Check that `addWorkOrder` exists in the context, that `App.js` registers `NewWorkOrder`, `WorkOrderDetail`, `Mileage`, and `YearEndReport`, and that `WorkOrderCard` and `WorkOrderDetailScreen` show `order.description`.
 - Still placeholders: Messages, Checklist. No tenant dashboard or role routing yet (login goes straight to the landlord Dashboard, and the Dashboard has a temporary "New Work Order" button).
 
-## Course assignment (this week), do not get ahead of it
-Audit one real screen on different devices. The chosen screen is `screens/NewWorkOrderScreen.js`.
-- Test portrait and landscape on two device sizes (iPhone SE and iPad in the iOS simulator), screenshot all four BEFORE any fixes, then fix, then screenshot all four AFTER.
-- Fix at least two of: layout with `useWindowDimensions`, notch and home indicator with safe-area insets from `react-native-safe-area-context` (not React Native's SafeAreaView), keyboard covering fields with `KeyboardAvoidingView`.
-- If `Platform.select` or `Platform.OS` is used, the write-up must say so and why.
-- Submit: repo URL or zip, 4 before and 4 after screenshots, short write-up per fix.
-- Before screenshots are done. Fixes on `NewWorkOrderScreen.js` are in progress (safe-area insets, `KeyboardAvoidingView` with a `ScrollView`, `useWindowDimensions` width cap and landscape preview). After screenshots still to take.
+## Course assignment (submitted)
+The device audit of `screens/NewWorkOrderScreen.js` is submitted. The submitted state is tagged `assignment-submission`. `NewWorkOrderScreen.js` is no longer frozen. Leave `README.md`, `ASSIGNMENT_NOTES.md`, and the screenshots alone unless Christian asks.
+
+## Refactor (branch `refactor` only)
+On the `refactor` branch, the "no refactors, no renaming that wasn't requested" rule is lifted for the approved phases. It still applies on `master` and everywhere else. Never merge into `master` unless Christian says so.
+- Goal: professional structure with no change in behavior and no change in how anything looks. Stay in JavaScript, don't change navigation.
+- Comments: keep every comment word for word and move it with its code. When copies are merged into shared code, keep one word-for-word copy there, and list every dropped duplicate in the phase report.
+- Touch targets: use `hitSlop`, never resize. Chips get vertical hitSlop only (about 8 top and bottom).
+- Bugs or UX issues found during the refactor get listed at the end of the phase report, not fixed.
+- Ask before installing any package.
+- One phase at a time. After each: re-check imports and file name capitalization, bundle check (`npx expo export --platform ios` into a temp folder), lint and tests once they exist, list files created, moved, and changed, give simulator test steps, update this file if the structure changed, then stop for review and a commit.
+
+Phases:
+1. Tooling: ESLint via `npx expo lint`, a Prettier config matching the current style, Jest with jest-expo for the pure utils (expenseStats, recurring.addPeriod, formatDate, document helpers). Pure document helpers move to `documentHelpers.js`, and `daysUntil` and `expiryTag` take an optional `today`.
+2. Feature folders: `git mv` only, no code changes except import paths. Target: `features/{home,workOrders,tenant,expenses,mileage,documents}` with `screens/`, `components/`, `hooks/`, `utils/` inside, shared pieces in `components/`, `components/ui/`, `utils/`, `data/`, `theme.js`.
+3. UI primitives in `components/ui/` (Screen, Chip, ChipRow, SegmentedControl, SearchInput, SummaryCard, Tag, BarRow, SectionHeader, EmptyState, FormField, SettingRow, ModalSheet, ReceiptThumb, MoneyText), swapped in one screen at a time. Chips on screens use `COLORS.muted`, chips in cards and modals use `COLORS.background`. Keyboard behavior stays per screen.
+4. Filter, sort, and form hooks (useExpenseFilters, useWorkOrderFilters, useDocumentFilters, form hooks for the big modals).
+5. Split the big screens into thin screens plus row and section components, with `React.memo` rows and `useCallback` handlers.
+6. Split `WorkOrdersContext` into domain providers plus an app mode provider for demo mode, with `usePersistedState`. Keep `useWorkOrders()` as a compatibility hook until every screen moves, then remove it. Jest tests with mocked AsyncStorage for the old-expense migration and for demo data never being saved over real data.
+7. Quality: error boundary at the root, accessibilityRole and accessibilityLabel on every pressable, hitSlop, constants for statuses and priorities, JSDoc on shared component props.
 
 ## Parked for later (needs a backend)
 Bank feed import and matching, receipt scanning that fills in amount, date, and vendor, rent income and profit per property, depreciation schedules for capital improvements, durable receipt storage, document encryption, cloud storage for documents, tenant access to shared documents, e-signatures.
 
 ## Next up
-1. Assignment fixes on `NewWorkOrderScreen.js` after the before screenshots.
-2. Tenant side: tenant home screen, role routing, tenant's own work order list.
-3. Messages and Checklist screens.
+1. Tenant side: tenant home screen, role routing, tenant's own work order list.
+2. Messages and Checklist screens.
 
 ## Working with Christian
 - He is a student learning this. Keep replies short and in bullets, explain the why in a sentence, and don't pad.
