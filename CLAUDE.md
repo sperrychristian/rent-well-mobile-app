@@ -11,15 +11,21 @@ The code so far was written in an earlier chat session and has been run only par
 - AsyncStorage for saving, `expo-image-picker`, `expo-file-system` and `expo-sharing` (CSV export, documents), `expo-document-picker`, `@react-native-community/datetimepicker`, `@expo/vector-icons` (Ionicons)
 - Inter fonts from `@expo-google-fonts/inter`, loaded in `App.js`
 - Run with `npx expo start -c` (clear the cache after adding or renaming files)
-- Checks: `npm run lint` (whole project), `npm test` (runs once, `npm run test:watch` to watch), `npm run format:check`. Format with `npx prettier --write <files>`. Prettier keeps quoted keys as written (`quoteProps: preserve`). Lint has 17 known problems in existing code, listed in the Phase 1 report, left alone during the refactor.
+- Checks: `npm run lint` (whole project), `npm test` (runs once, `npm run test:watch` to watch), `npm run format:check`. Format with `npx prettier --write <files>`. Prettier keeps quoted keys as written (`quoteProps: preserve`). Lint has 16 known problems in existing code, listed in the Phase 1 report, left alone during the refactor.
 
 ## Layout (project root)
 - `App.js`: font loading, `WorkOrdersProvider`, navigator. Header is hidden, every screen draws its own `ScreenTitle`.
 - `theme.js`: `COLORS`, `SPACING`, `FONT_SIZES`, `FONTS`
 - `context/WorkOrdersContext.js`: all shared data and actions (see below)
-- `screens/`: Welcome, Dashboard, WorkOrders, WorkOrderDetail, NewWorkOrder, Expenses, Mileage, YearEndReport, Messages (placeholder), Documents, Checklist (placeholder)
-- `components/`: ScreenTitle (shimmer card title), Card, PrimaryButton, WorkOrderCard, ExpenseDetailsModal, AddExpenseModal (full expense form), TripModal, BudgetsModal, RecurringModal, DateField, DemoBanner, DocumentDetailModal, DocumentFormModal
-- `utils/`: formatDate.js (formatDate, todayString), dateInput.js, recurring.js (addPeriod), expenseStats.js, exportExpenses.js, documentFiles.js (pick, save, delete, open document files), documentHelpers.js (pure helpers: icons, names, sizes, daysUntil and expiryTag with an optional today). Tests live in `utils/__tests__/`.
+- `features/`: one folder per feature, each with `screens/`, and `components/` or `utils/` when it has them. Tests sit next to the module they test (`name.test.js`).
+  - `home/`: WelcomeScreen, DashboardScreen
+  - `workOrders/`: WorkOrdersScreen, WorkOrderDetailScreen, NewWorkOrderScreen (tenant "Report an Issue"), WorkOrderCard
+  - `expenses/`: ExpensesScreen, YearEndReportScreen, AddExpenseModal (full expense form, also used by the work order screens), ExpenseDetailsModal, RecurringModal, BudgetsModal, utils expenseStats.js and exportExpenses.js
+  - `mileage/`: MileageScreen, TripModal (uses expenseStats from expenses)
+  - `documents/`: DocumentsScreen, DocumentDetailModal, DocumentFormModal, utils documentFiles.js (pick, save, delete, open document files) and documentHelpers.js (pure helpers: icons, names, sizes, daysUntil and expiryTag with an optional today)
+  - `messages/`, `checklist/`: placeholder screens
+- `components/` (shared): ScreenTitle (shimmer card title), Card, PrimaryButton, DateField, DemoBanner
+- `utils/` (shared): formatDate.js (formatDate, todayString), dateInput.js, recurring.js (addPeriod, used by the context and documents)
 - `data/`: workOrders.js, expenses.js, expenseOptions.js, expenseExtras.js, documents.js, documentOptions.js (mock and seed data)
 
 ## How the data works
@@ -31,7 +37,7 @@ The code so far was written in an earlier chat session and has been run only par
 - Capital improvements are kept out of the deductible total and category bars on purpose.
 - Order fields: id, title, description, property, tenant, status (Open, In Progress, Resolved), priority (Emergency, Normal, Low), created_at, started_at, resolved_at, notes, contractor, estimate, photo (a `{ uri }` object or a require).
 - Document fields: id, name, category, property, tenant (optional), stored_name, file_name, mime_type, size, added_at, expires_on (optional, Lease and Addendum only), notes, shared_with_tenant (flag only, nothing reads it yet), sample (true only for seed entries with no file).
-- Document files: save only `stored_name`, never a full URI. iOS changes the app container path between launches and updates, so always rebuild the URI with `getDocumentUri` from `utils/documentFiles.js`. Real files live in `documents/` in the document directory, demo files in `demo_documents/` in the cache, which is cleared when a demo starts and exits.
+- Document files: save only `stored_name`, never a full URI. iOS changes the app container path between launches and updates, so always rebuild the URI with `getDocumentUri` from `features/documents/utils/documentFiles.js`. Real files live in `documents/` in the document directory, demo files in `demo_documents/` in the cache, which is cleared when a demo starts and exits.
 
 ## Code conventions (Christian's)
 - Function names in camelCase, variables in snake_case with descriptive names. Components are `function Name(props)` and read `props.something`.
@@ -47,7 +53,7 @@ All colors must come from `theme.js`. When touching a file, use theme tokens. Ne
 - Actions and states: `success` (green), `action` (blue), `accent` (purple), `highlight` (yellow), `warning` (orange), `danger` (red), `secondary` (grey)
 - Text on colored buttons: `text_light`, `text_dark`
 - Surfaces: `surface_light`, `toast_background`, `backdrop` (modal overlay), `photo_backdrop`, `shadow`, `shimmer_edge`, `shimmer_peak`
-- Priority: `priority_emergency`, `priority_low` (Normal uses `secondary`). Status and priority maps live in `WorkOrderCard.js` and point at these tokens.
+- Priority: `priority_emergency`, `priority_low` (Normal uses `secondary`). Status and priority maps live in `features/workOrders/components/WorkOrderCard.js` and point at these tokens.
 - Expense tags: `tag_billed`, `tag_recurring`, `tag_missing_receipt`
 
 ## Gotchas
@@ -62,7 +68,7 @@ All colors must come from `theme.js`. When touching a file, use theme tokens. Ne
 - Still placeholders: Messages, Checklist. No tenant dashboard or role routing yet (login goes straight to the landlord Dashboard, and the Dashboard has a temporary "New Work Order" button).
 
 ## Course assignment (submitted)
-The device audit of `screens/NewWorkOrderScreen.js` is submitted. The submitted state is tagged `assignment-submission`. `NewWorkOrderScreen.js` is no longer frozen. Leave `README.md`, `ASSIGNMENT_NOTES.md`, and the screenshots alone unless Christian asks.
+The device audit of `screens/NewWorkOrderScreen.js` (now `features/workOrders/screens/`) is submitted. The submitted state is tagged `assignment-submission` (local only), and the pushed final state with the fixed README screenshots is tagged `assignment-final`. `NewWorkOrderScreen.js` is no longer frozen. Leave `README.md`, `ASSIGNMENT_NOTES.md`, and the screenshots alone unless Christian asks.
 
 ## Refactor (branch `refactor` only)
 On the `refactor` branch, the "no refactors, no renaming that wasn't requested" rule is lifted for the approved phases. It still applies on `master` and everywhere else. Never merge into `master` unless Christian says so.
@@ -74,8 +80,8 @@ On the `refactor` branch, the "no refactors, no renaming that wasn't requested" 
 - One phase at a time. After each: re-check imports and file name capitalization, bundle check (`npx expo export --platform ios` into a temp folder), lint and tests once they exist, list files created, moved, and changed, give simulator test steps, update this file if the structure changed, then stop for review and a commit.
 
 Phases:
-1. Tooling: ESLint via `npx expo lint`, a Prettier config matching the current style, Jest with jest-expo for the pure utils (expenseStats, recurring.addPeriod, formatDate, document helpers). Pure document helpers move to `documentHelpers.js`, and `daysUntil` and `expiryTag` take an optional `today`.
-2. Feature folders: `git mv` only, no code changes except import paths. Target: `features/{home,workOrders,tenant,expenses,mileage,documents}` with `screens/`, `components/`, `hooks/`, `utils/` inside, shared pieces in `components/`, `components/ui/`, `utils/`, `data/`, `theme.js`.
+1. Done. Tooling: ESLint via `npx expo lint`, a Prettier config matching the current style, Jest with jest-expo for the pure utils (expenseStats, recurring.addPeriod, formatDate, document helpers). Pure document helpers move to `documentHelpers.js`, and `daysUntil` and `expiryTag` take an optional `today`.
+2. Done. Feature folders with `git mv` only, no code changes except import and require paths. Actual map: `features/{home,workOrders,expenses,mileage,documents,messages,checklist}` (NewWorkOrderScreen went into workOrders instead of a separate tenant folder). Shared pieces stay in `components/`, `utils/`, `data/`, `context/`, `theme.js`. `components/ui/` and feature `hooks/` folders get created when Phases 3 and 4 need them.
 3. UI primitives in `components/ui/` (Screen, Chip, ChipRow, SegmentedControl, SearchInput, SummaryCard, Tag, BarRow, SectionHeader, EmptyState, FormField, SettingRow, ModalSheet, ReceiptThumb, MoneyText), swapped in one screen at a time. Chips on screens use `COLORS.muted`, chips in cards and modals use `COLORS.background`. Keyboard behavior stays per screen.
 4. Filter, sort, and form hooks (useExpenseFilters, useWorkOrderFilters, useDocumentFilters, form hooks for the big modals).
 5. Split the big screens into thin screens plus row and section components, with `React.memo` rows and `useCallback` handlers.
