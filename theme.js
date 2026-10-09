@@ -6,7 +6,28 @@ export const COLORS = {
     text: '#171b24',
     muted: '#cdd5e1',
     title: '#293355',
-    title_text: 'white'
+    title_text: 'white',
+    success: '#2E9E5B',
+    action: '#2F6FED',
+    accent: '#7B4FD6',
+    highlight: '#F2C230',
+    warning: '#F0A530',
+    danger: '#D9534F',
+    secondary: '#6B6B6B',
+    text_light: '#FFFFFF',
+    text_dark: '#1A1A1A',
+    surface_light: '#FFFFFF',
+    toast_background: '#1A1A1A',
+    priority_emergency: '#B71C1C',
+    priority_low: '#3F8F9F',
+    tag_billed: '#0E7490',
+    tag_recurring: '#555555',
+    tag_missing_receipt: '#B26A00',
+    backdrop: 'rgba(0,0,0,0.6)',
+    photo_backdrop: 'black',
+    shadow: 'black',
+    shimmer_edge: 'rgba(255,255,255,0)',
+    shimmer_peak: 'rgba(255,255,255,0.25)'
 }
 
 export const SPACING = {

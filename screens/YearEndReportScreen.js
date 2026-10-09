@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   export_button: {
-    backgroundColor: '#2F6FED',
+    backgroundColor: COLORS.action,
     marginHorizontal: 0,
     marginBottom: SPACING.md,
   },
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   missing_text: {
-    color: '#F0A530',
+    color: COLORS.warning,
     fontFamily: FONTS.body,
     fontSize: 13,
     marginTop: 4,

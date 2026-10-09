@@ -279,6 +279,27 @@ export function WorkOrdersProvider(props) {
     updateOrder(order_id, { contractor: contractor, estimate: estimate });
   }
 
+  // a tenant submits a request and it starts out open with no landlord details filled in
+function addWorkOrder(request) {
+  const new_order = {
+    id: makeId(),
+    title: request.title,
+    description: request.description,
+    property: request.property,
+    tenant: request.tenant,
+    status: 'Open',
+    priority: request.priority,
+    created_at: todayString(),
+    started_at: null,
+    resolved_at: null,
+    notes: '',
+    contractor: '',
+    estimate: null,
+    photo: request.photo,
+  };
+  setOrders((current_orders) => [...current_orders, new_order]);
+}
+
   // order_id can be null for an expense that isn't tied to a work order
   function addExpense(order_id, expense) {
     // repeat and split_properties are instructions for the screen, they don't belong on the saved expense
@@ -396,6 +417,7 @@ export function WorkOrdersProvider(props) {
     deleteRecurringRule,
     setBudgets,
     setMileageRate,
+    addWorkOrder
   };
 
   return <WorkOrdersContext.Provider value={value}>{props.children}</WorkOrdersContext.Provider>;

@@ -1,9 +1,9 @@
-import { StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, SPACING } from '../theme';
-import ScreenTitle from '../components/ScreenTitle';
-import PrimaryButton from '../components/PrimaryButton';
-import DemoBanner from '../components/DemoBanner';
+import { StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { COLORS, SPACING } from "../theme";
+import ScreenTitle from "../components/ScreenTitle";
+import PrimaryButton from "../components/PrimaryButton";
+import DemoBanner from "../components/DemoBanner";
 
 function DashboardScreen(props) {
   // need the insets so the demo banner clears the notch and status bar
@@ -22,33 +22,39 @@ function DashboardScreen(props) {
             title="Work Orders"
             icon="construct-outline"
             style={styles.work_order_button}
-            onPress={() => props.navigation.navigate('WorkOrders')}
+            onPress={() => props.navigation.navigate("WorkOrders")}
+          />
+          <PrimaryButton
+            title="New Work Order"
+            icon="add-circle-outline"
+            style={styles.new_order_button}
+            onPress={() => props.navigation.navigate("NewWorkOrder")}
           />
           <PrimaryButton
             title="Messages"
             icon="chatbubble-ellipses-outline"
             style={styles.messages_button}
-            onPress={() => props.navigation.navigate('Messages')}
+            onPress={() => props.navigation.navigate("Messages")}
           />
           <PrimaryButton
             title="Documents"
             icon="document-text-outline"
             style={styles.documents_button}
-            text_color="#1A1A1A"
-            onPress={() => props.navigation.navigate('Documents')}
+            text_color={COLORS.text_dark}
+            onPress={() => props.navigation.navigate("Documents")}
           />
           <PrimaryButton
             title="Checklist"
             icon="checkbox-outline"
             style={styles.checklist_button}
-            onPress={() => props.navigation.navigate('Checklist')}
+            onPress={() => props.navigation.navigate("Checklist")}
           />
           <PrimaryButton
             title="Expenses"
             icon="receipt-outline"
             style={styles.expenses_button}
-            text_color="#1A1A1A"
-            onPress={() => props.navigation.navigate('Expenses')}
+            text_color={COLORS.text_dark}
+            onPress={() => props.navigation.navigate("Expenses")}
           />
         </View>
       </View>
@@ -62,36 +68,39 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    alignItems: 'center',
+    alignItems: "center",
     padding: SPACING.lg,
   },
 
   content: {
     flex: 1,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   options_container: {
-    width: '100%',
+    width: "100%",
     gap: SPACING.md,
-    backgroundColor: COLORS.background
+    backgroundColor: COLORS.background,
   },
 
   work_order_button: {
-    backgroundColor: '#2E9E5B',
+    backgroundColor: COLORS.success,
   },
   messages_button: {
-    backgroundColor: '#2F6FED',
+    backgroundColor: COLORS.action,
   },
   documents_button: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface_light,
   },
   checklist_button: {
-    backgroundColor: '#7B4FD6',
+    backgroundColor: COLORS.accent,
   },
   expenses_button: {
-    backgroundColor: '#F2C230',
+    backgroundColor: COLORS.highlight,
+  },
+  new_order_button: {
+    backgroundColor: COLORS.danger,
   },
 });

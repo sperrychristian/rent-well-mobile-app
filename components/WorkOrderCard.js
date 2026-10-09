@@ -6,16 +6,16 @@ import { formatDate } from '../utils/formatDate';
 
 // I keep one color per status so the badge is readable at a glance
 const status_colors = {
-  'Open': '#D9534F',
-  'In Progress': '#F0A530',
-  'Resolved': '#2E9E5B',
+  'Open': COLORS.danger,
+  'In Progress': COLORS.warning,
+  'Resolved': COLORS.success,
 };
 
 // one color per priority so emergencies stand out in the list
 const priority_colors = {
-  'Emergency': '#B71C1C',
-  'Normal': '#6B6B6B',
-  'Low': '#3F8F9F',
+  'Emergency': COLORS.priority_emergency,
+  'Normal': COLORS.secondary,
+  'Low': COLORS.priority_low,
 };
 
 function WorkOrderCard(props) {
@@ -32,21 +32,22 @@ function WorkOrderCard(props) {
     <Card>
       {/* tapping the top part of the card opens the detail screen */}
       <Pressable onPress={props.onOpenDetail}>
-        <View style={styles.top_row}>
-          <Text style={styles.title}>{order.title}</Text>
-          <View style={[styles.badge, { backgroundColor: status_colors[order.status] }]}>
-            <Text style={styles.badge_text}>{order.status}</Text>
-          </View>
-        </View>
-        <Text style={styles.detail}>{order.property}</Text>
-        <Text style={styles.detail}>{order.tenant} · {formatDate(order.created_at)}</Text>
-        <View style={styles.tag_row}>
-          <View style={[styles.badge, { backgroundColor: priority_colors[priority] }]}>
-            <Text style={styles.badge_text}>{priority}</Text>
-          </View>
-        </View>
-      </Pressable>
-      {/* I only show the landlord note, contractor, and estimate when they've been filled in */}
+  <View style={styles.top_row}>
+    <Text style={styles.title}>{order.title}</Text>
+    <View style={[styles.badge, { backgroundColor: status_colors[order.status] }]}>
+      <Text style={styles.badge_text}>{order.status}</Text>
+    </View>
+  </View>
+  <Text style={styles.detail}>{order.property}</Text>
+  <Text style={styles.detail}>{order.tenant} · {formatDate(order.created_at)}</Text>
+  {order.description ? <Text style={styles.detail} numberOfLines={2}>{order.description}</Text> : null}
+  <View style={styles.tag_row}>
+    <View style={[styles.badge, { backgroundColor: priority_colors[priority] }]}>
+      <Text style={styles.badge_text}>{priority}</Text>
+    </View>
+  </View>
+</Pressable>
+      {/* only show the landlord note, contractor, and estimate when they've been filled in */}
       {order.notes ? (
         <Text style={styles.note} numberOfLines={2}>Note: {order.notes}</Text>
       ) : null}
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   badge_text: {
-    color: '#FFFFFF',
+    color: COLORS.text_light,
     fontFamily: FONTS.body_bold,
     fontSize: 12,
   },
@@ -163,7 +164,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   over_budget: {
-    color: '#D9534F',
+    color: COLORS.danger,
     opacity: 1,
   },
   issue_photo: {
@@ -193,27 +194,27 @@ const styles = StyleSheet.create({
   },
   expense_button: {
     flex: 1,
-    backgroundColor: '#2F6FED',
+    backgroundColor: COLORS.action,
     marginHorizontal: 0,
   },
   start_button: {
     flex: 1,
-    backgroundColor: '#F0A530',
+    backgroundColor: COLORS.warning,
     marginHorizontal: 0,
   },
   resolve_button: {
     flex: 1,
-    backgroundColor: '#2E9E5B',
+    backgroundColor: COLORS.success,
     marginHorizontal: 0,
   },
   message_button: {
     flex: 1,
-    backgroundColor: '#7B4FD6',
+    backgroundColor: COLORS.accent,
     marginHorizontal: 0,
   },
   details_button: {
     flex: 1,
-    backgroundColor: '#6B6B6B',
+    backgroundColor: COLORS.secondary,
     marginHorizontal: 0,
   },
 });

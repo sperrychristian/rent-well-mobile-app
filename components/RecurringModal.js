@@ -66,7 +66,7 @@ export default RecurringModal;
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: COLORS.backdrop,
     justifyContent: 'center',
   },
   scroll_content: {
@@ -105,16 +105,16 @@ const styles = StyleSheet.create({
   pause_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: '#F0A530',
+    backgroundColor: COLORS.warning,
   },
   delete_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: '#D9534F',
+    backgroundColor: COLORS.danger,
   },
   close_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: '#6B6B6B',
+    backgroundColor: COLORS.secondary,
   },
 });

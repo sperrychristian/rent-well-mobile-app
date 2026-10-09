@@ -2,7 +2,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import PrimaryButton from './PrimaryButton';
 import { useWorkOrders } from '../context/WorkOrdersContext';
-import { SPACING, FONTS } from '../theme';
+import { COLORS, SPACING, FONTS } from '../theme';
 
 // shows a strip with an exit button, and only while the demo is running
 function DemoBanner() {
@@ -25,7 +25,7 @@ function DemoBanner() {
       <PrimaryButton
         title="Exit Demo Mode"
         icon="exit-outline"
-        text_color="#FFFFFF"
+        text_color={COLORS.text_light}
         onPress={handleExit}
         style={styles.exit_button}
       />
@@ -38,20 +38,20 @@ export default DemoBanner;
 const styles = StyleSheet.create({
   banner: {
     width: '100%',
-    backgroundColor: '#F0A530',
+    backgroundColor: COLORS.warning,
     borderRadius: 12,
     padding: SPACING.sm,
     marginBottom: SPACING.md,
   },
   text: {
-    color: '#1A1A1A',
+    color: COLORS.text_dark,
     fontFamily: FONTS.body_bold,
     fontSize: 13,
     textAlign: 'center',
     marginBottom: SPACING.sm,
   },
   exit_button: {
-    backgroundColor: '#D9534F',
+    backgroundColor: COLORS.danger,
     marginHorizontal: 0,
   },
 });

@@ -39,7 +39,7 @@ function ScreenTitle (props) {
                 style={[StyleSheet.absoluteFill, { transform: [{ translateX: slide_x }] }]}
             >
                 <LinearGradient
-                    colors={['rgba(255,255,255,0)', 'rgba(255,255,255,0.25)', 'rgba(255,255,255,0)']}
+                    colors={[COLORS.shimmer_edge, COLORS.shimmer_peak, COLORS.shimmer_edge]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={{ flex: 1 }}

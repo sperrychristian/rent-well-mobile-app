@@ -93,7 +93,7 @@ export default BudgetsModal;
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: COLORS.backdrop,
     justifyContent: 'center',
   },
   scroll_content: {
@@ -136,11 +136,11 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: '#6B6B6B',
+    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: '#2E9E5B',
+    backgroundColor: COLORS.success,
   },
 });

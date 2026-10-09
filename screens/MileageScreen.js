@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   add_button: {
-    backgroundColor: '#2E9E5B',
+    backgroundColor: COLORS.success,
     marginHorizontal: 0,
     marginBottom: SPACING.md,
   },
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     padding: SPACING.sm,
   },
   rate_button: {
-    backgroundColor: '#2E9E5B',
+    backgroundColor: COLORS.success,
     marginHorizontal: 0,
   },
   row: {

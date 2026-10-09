@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
         marginVertical: SPACING.md,
         width: '90%',
         elevation: 6,
-        shadowColor: 'black',
+        shadowColor: COLORS.shadow,
         shadowOffset: {width: 0, height: 4},
         shadowOpacity: .3,
         shadowRadius: 6,

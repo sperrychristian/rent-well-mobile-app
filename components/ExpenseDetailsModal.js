@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   },
   full_overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'black',
+    backgroundColor: COLORS.photo_backdrop,
     justifyContent: 'center',
   },
   full_photo: {

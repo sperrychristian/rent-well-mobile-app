@@ -316,7 +316,7 @@ function ExpensesScreen(props) {
         <PrimaryButton
           title="Year-End"
           icon="document-text-outline"
-          text_color="#1A1A1A"
+          text_color={COLORS.text_dark}
           style={styles.report_button}
           onPress={() => props.navigation.navigate('YearEndReport', { year: year })}
         />
@@ -622,32 +622,32 @@ const styles = StyleSheet.create({
   },
   add_button: {
     flex: 1,
-    backgroundColor: '#2E9E5B',
+    backgroundColor: COLORS.success,
     marginHorizontal: 0,
   },
   scan_button: {
     flex: 1,
-    backgroundColor: '#2F6FED',
+    backgroundColor: COLORS.action,
     marginHorizontal: 0,
   },
   mileage_button: {
     flex: 1,
-    backgroundColor: '#7B4FD6',
+    backgroundColor: COLORS.accent,
     marginHorizontal: 0,
   },
   report_button: {
     flex: 1,
-    backgroundColor: '#F2C230',
+    backgroundColor: COLORS.highlight,
     marginHorizontal: 0,
   },
   grey_button: {
     flex: 1,
-    backgroundColor: '#6B6B6B',
+    backgroundColor: COLORS.secondary,
     marginHorizontal: 0,
   },
   export_button: {
     flex: 1,
-    backgroundColor: '#2F6FED',
+    backgroundColor: COLORS.action,
     marginHorizontal: 0,
   },
   section_label: {
@@ -744,7 +744,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   over_budget_text: {
-    color: '#D9534F',
+    color: COLORS.danger,
   },
   bar_track: {
     height: 8,
@@ -758,7 +758,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   over_budget_fill: {
-    backgroundColor: '#D9534F',
+    backgroundColor: COLORS.danger,
   },
   property_row: {
     flexDirection: 'row',
@@ -831,22 +831,22 @@ const styles = StyleSheet.create({
     maxWidth: 220,
   },
   capital_tag: {
-    backgroundColor: '#7B4FD6',
+    backgroundColor: COLORS.accent,
   },
   billed_tag: {
-    backgroundColor: '#0E7490',
+    backgroundColor: COLORS.tag_billed,
   },
   recurring_tag: {
-    backgroundColor: '#555555',
+    backgroundColor: COLORS.tag_recurring,
   },
   order_tag: {
-    backgroundColor: '#2F6FED',
+    backgroundColor: COLORS.action,
   },
   missing_tag: {
-    backgroundColor: '#B26A00',
+    backgroundColor: COLORS.tag_missing_receipt,
   },
   tag_text: {
-    color: '#FFFFFF',
+    color: COLORS.text_light,
     fontFamily: FONTS.body_bold,
     fontSize: 11,
   },
@@ -874,18 +874,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#1A1A1A',
+    backgroundColor: COLORS.toast_background,
     borderRadius: 12,
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
   },
   undo_text: {
-    color: '#FFFFFF',
+    color: COLORS.text_light,
     fontFamily: FONTS.body,
     fontSize: 14,
   },
   undo_action: {
-    color: '#F2C230',
+    color: COLORS.highlight,
     fontFamily: FONTS.body_bold,
     fontSize: 14,
   },

@@ -11,6 +11,7 @@ import { WorkOrdersProvider } from "./context/WorkOrdersContext";
 import WorkOrderDetailScreen from "./screens/WorkOrderDetailScreen";
 import MileageScreen from "./screens/MileageScreen";
 import YearEndReportScreen from "./screens/YearEndReportScreen";
+import NewWorkOrderScreen from './screens/NewWorkOrderScreen';
 
 import {
   useFonts,
@@ -56,6 +57,7 @@ export default function App() {
           <Stack.Screen name="Expenses" component={ExpensesScreen} />
           <Stack.Screen name="Mileage" component={MileageScreen} />
           <Stack.Screen name="YearEndReport" component={YearEndReportScreen} />
+          <Stack.Screen name='NewWorkOrder' component={NewWorkOrderScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </WorkOrdersProvider>
