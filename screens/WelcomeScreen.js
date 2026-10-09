@@ -17,7 +17,13 @@ function WelcomeScreen(props) {
       </Card>
       <View style={styles.button_container}>
         {/* login always starts in real mode, so I leave the demo first if someone swiped back out of it */}
-        <PrimaryButton title="Login" />
+        <PrimaryButton
+          title="Login"
+          onPress={async () => {
+            await exitDemo();
+            props.navigation.navigate('Dashboard');
+          }}
+        />
         <PrimaryButton title="Sign Up" />
       </View>
       {/* the demo needs no account, it starts on fresh sample data and never saves */}
