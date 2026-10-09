@@ -1,8 +1,8 @@
 import { Text, View, Image, Pressable, StyleSheet } from 'react-native';
-import Card from './Card';
-import PrimaryButton from './PrimaryButton';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
-import { formatDate } from '../utils/formatDate';
+import Card from '../../../components/Card';
+import PrimaryButton from '../../../components/PrimaryButton';
+import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { formatDate } from '../../../utils/formatDate';
 
 // I keep one color per status so the badge is readable at a glance
 const status_colors = {

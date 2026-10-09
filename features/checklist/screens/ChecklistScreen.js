@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
-import { COLORS, SPACING } from '../theme';
-import ScreenTitle from '../components/ScreenTitle';
+import { COLORS, SPACING } from '../../../theme';
+import ScreenTitle from '../../../components/ScreenTitle';
 
 function ExpensesScreen() {
   return (

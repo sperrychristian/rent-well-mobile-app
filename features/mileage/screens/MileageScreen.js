@@ -10,14 +10,14 @@ import {
   Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../components/ScreenTitle';
-import Card from '../components/Card';
-import PrimaryButton from '../components/PrimaryButton';
+import ScreenTitle from '../../../components/ScreenTitle';
+import Card from '../../../components/Card';
+import PrimaryButton from '../../../components/PrimaryButton';
 import TripModal from '../components/TripModal';
-import { useWorkOrders } from '../context/WorkOrdersContext';
-import { formatDate } from '../utils/formatDate';
-import { sumMiles, formatMoney } from '../utils/expenseStats';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
+import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { formatDate } from '../../../utils/formatDate';
+import { sumMiles, formatMoney } from '../../expenses/utils/expenseStats';
+import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
 function MileageScreen(props) {
   // need the insets so the title clears the notch and status bar

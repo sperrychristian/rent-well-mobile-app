@@ -11,7 +11,7 @@ import {
 import { seed_documents } from '../data/documents';
 import { todayString } from '../utils/formatDate';
 import { addPeriod } from '../utils/recurring';
-import { deleteDocumentFile, clearDemoFiles } from '../utils/documentFiles';
+import { deleteDocumentFile, clearDemoFiles } from '../features/documents/utils/documentFiles';
 
 const orders_key = 'rent_well_work_orders';
 const expenses_key = 'rent_well_expenses';

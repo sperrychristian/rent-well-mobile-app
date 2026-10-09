@@ -1,9 +1,9 @@
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, SPACING } from '../theme';
-import ScreenTitle from '../components/ScreenTitle';
-import PrimaryButton from '../components/PrimaryButton';
-import DemoBanner from '../components/DemoBanner';
+import { COLORS, SPACING } from '../../../theme';
+import ScreenTitle from '../../../components/ScreenTitle';
+import PrimaryButton from '../../../components/PrimaryButton';
+import DemoBanner from '../../../components/DemoBanner';
 
 function DashboardScreen(props) {
   // need the insets so the demo banner clears the notch and status bar

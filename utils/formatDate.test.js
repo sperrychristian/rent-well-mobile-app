@@ -1,4 +1,4 @@
-import { formatDate, todayString } from '../formatDate';
+import { formatDate, todayString } from './formatDate';
 
 describe('formatDate', () => {
   test('turns date text into a short month and day', () => {

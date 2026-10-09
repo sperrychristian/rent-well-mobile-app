@@ -1,4 +1,4 @@
-import { stringToDate, dateToString } from '../dateInput';
+import { stringToDate, dateToString } from './dateInput';
 
 describe('stringToDate', () => {
   test('makes a Date at local midnight on that day', () => {

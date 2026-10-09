@@ -8,14 +8,14 @@ import {
   Pressable,
   TextInput,
 } from 'react-native';
-import ExpenseDetailsModal from '../components/ExpenseDetailsModal';
-import { COLORS, SPACING, FONTS } from '../theme';
-import ScreenTitle from '../components/ScreenTitle';
+import ExpenseDetailsModal from '../../expenses/components/ExpenseDetailsModal';
+import { COLORS, SPACING, FONTS } from '../../../theme';
+import ScreenTitle from '../../../components/ScreenTitle';
 import WorkOrderCard from '../components/WorkOrderCard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState } from 'react';
-import AddExpenseModal from '../components/AddExpenseModal';
-import { useWorkOrders } from '../context/WorkOrdersContext';
+import AddExpenseModal from '../../expenses/components/AddExpenseModal';
+import { useWorkOrders } from '../../../context/WorkOrdersContext';
 
 // lower number sorts first, so emergencies come out on top
 const priority_rank = { Emergency: 0, Normal: 1, Low: 2 };

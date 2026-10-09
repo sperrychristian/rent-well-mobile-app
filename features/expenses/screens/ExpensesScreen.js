@@ -12,14 +12,14 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../components/ScreenTitle';
-import Card from '../components/Card';
-import PrimaryButton from '../components/PrimaryButton';
+import ScreenTitle from '../../../components/ScreenTitle';
+import Card from '../../../components/Card';
+import PrimaryButton from '../../../components/PrimaryButton';
 import AddExpenseModal from '../components/AddExpenseModal';
 import RecurringModal from '../components/RecurringModal';
 import BudgetsModal from '../components/BudgetsModal';
-import { useWorkOrders } from '../context/WorkOrdersContext';
-import { formatDate } from '../utils/formatDate';
+import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { formatDate } from '../../../utils/formatDate';
 import {
   sumAmounts,
   totalsByCategory,
@@ -31,7 +31,7 @@ import {
   formatMoney,
 } from '../utils/expenseStats';
 import { shareExpensesCsv } from '../utils/exportExpenses';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
+import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
 const month_names = [
   'January',

@@ -1,4 +1,4 @@
-import { addPeriod } from '../recurring';
+import { addPeriod } from './recurring';
 
 describe('addPeriod monthly', () => {
   test('moves to the same day next month', () => {

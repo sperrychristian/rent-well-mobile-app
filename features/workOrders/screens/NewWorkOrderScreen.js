@@ -14,10 +14,10 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../components/ScreenTitle';
-import PrimaryButton from '../components/PrimaryButton';
-import { useWorkOrders } from '../context/WorkOrdersContext';
-import { COLORS, SPACING, FONTS } from '../theme';
+import ScreenTitle from '../../../components/ScreenTitle';
+import PrimaryButton from '../../../components/PrimaryButton';
+import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { COLORS, SPACING, FONTS } from '../../../theme';
 
 const urgency_options = ['Emergency', 'Normal', 'Low'];
 

@@ -11,11 +11,11 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Card from './Card';
-import PrimaryButton from './PrimaryButton';
-import DateField from './DateField';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
-import { todayString } from '../utils/formatDate';
+import Card from '../../../components/Card';
+import PrimaryButton from '../../../components/PrimaryButton';
+import DateField from '../../../components/DateField';
+import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { todayString } from '../../../utils/formatDate';
 
 // props: visible, onSave, onClose, property_names, plus optional trip (edit mode), onDelete, default_property
 function TripModal(props) {

@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../components/ScreenTitle';
-import Card from '../components/Card';
-import PrimaryButton from '../components/PrimaryButton';
-import { useWorkOrders } from '../context/WorkOrdersContext';
-import { formatDate } from '../utils/formatDate';
+import ScreenTitle from '../../../components/ScreenTitle';
+import Card from '../../../components/Card';
+import PrimaryButton from '../../../components/PrimaryButton';
+import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { formatDate } from '../../../utils/formatDate';
 import { buildYearEndData, formatMoney } from '../utils/expenseStats';
 import { shareYearEndCsv } from '../utils/exportExpenses';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
+import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
 function YearEndReportScreen(props) {
   // need the insets so the title clears the notch and status bar

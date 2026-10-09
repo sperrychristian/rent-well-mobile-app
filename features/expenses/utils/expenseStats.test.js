@@ -9,7 +9,7 @@ import {
   splitAmount,
   formatMoney,
   buildYearEndData,
-} from '../expenseStats';
+} from './expenseStats';
 
 // a small mixed set: one capital improvement, one billed to a tenant, one with no vendor
 const expenses = [

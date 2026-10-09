@@ -1,8 +1,8 @@
 import { Modal, View, Text, Image, ScrollView, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Card from './Card';
-import PrimaryButton from './PrimaryButton';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
+import Card from '../../../components/Card';
+import PrimaryButton from '../../../components/PrimaryButton';
+import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 import { getDocumentUri } from '../utils/documentFiles';
 import { isImage, iconFor, expiryTag, daysUntil, formatSize } from '../utils/documentHelpers';
 

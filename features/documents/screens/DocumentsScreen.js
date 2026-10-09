@@ -13,13 +13,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../components/ScreenTitle';
-import Card from '../components/Card';
-import PrimaryButton from '../components/PrimaryButton';
+import ScreenTitle from '../../../components/ScreenTitle';
+import Card from '../../../components/Card';
+import PrimaryButton from '../../../components/PrimaryButton';
 import DocumentDetailModal from '../components/DocumentDetailModal';
 import DocumentFormModal from '../components/DocumentFormModal';
-import { useWorkOrders } from '../context/WorkOrdersContext';
-import { todayString } from '../utils/formatDate';
+import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { todayString } from '../../../utils/formatDate';
 import {
   saveDocumentFile,
   deleteDocumentFile,
@@ -27,8 +27,8 @@ import {
   fileFromPhoto,
 } from '../utils/documentFiles';
 import { iconFor, expiryTag, daysUntil } from '../utils/documentHelpers';
-import { document_categories, expiring_soon_days } from '../data/documentOptions';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
+import { document_categories, expiring_soon_days } from '../../../data/documentOptions';
+import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
 const sort_options = ['Newest', 'Name'];
 

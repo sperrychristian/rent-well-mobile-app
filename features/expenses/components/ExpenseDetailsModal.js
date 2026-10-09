@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Modal, View, Text, Image, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import PrimaryButton from './PrimaryButton';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
+import PrimaryButton from '../../../components/PrimaryButton';
+import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
 function ExpenseDetailsModal(props) {
   const insets = useSafeAreaInsets();

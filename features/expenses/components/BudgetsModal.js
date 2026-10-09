@@ -10,9 +10,9 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Card from './Card';
-import PrimaryButton from './PrimaryButton';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
+import Card from '../../../components/Card';
+import PrimaryButton from '../../../components/PrimaryButton';
+import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
 // props: visible, properties (list of names), budgets (name to amount), onSave, onClose
 function BudgetsModal(props) {

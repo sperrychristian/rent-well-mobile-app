@@ -12,13 +12,13 @@ import {
   Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../components/ScreenTitle';
-import Card from '../components/Card';
-import PrimaryButton from '../components/PrimaryButton';
-import AddExpenseModal from '../components/AddExpenseModal';
-import { useWorkOrders } from '../context/WorkOrdersContext';
-import { formatDate } from '../utils/formatDate';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
+import ScreenTitle from '../../../components/ScreenTitle';
+import Card from '../../../components/Card';
+import PrimaryButton from '../../../components/PrimaryButton';
+import AddExpenseModal from '../../expenses/components/AddExpenseModal';
+import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { formatDate } from '../../../utils/formatDate';
+import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
 const priority_options = ['Emergency', 'Normal', 'Low'];
 

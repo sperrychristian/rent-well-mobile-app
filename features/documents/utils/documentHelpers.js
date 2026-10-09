@@ -1,4 +1,4 @@
-import { expiring_soon_days } from '../data/documentOptions';
+import { expiring_soon_days } from '../../../data/documentOptions';
 
 // .pdf from lease.pdf, or nothing if the name has no extension
 export function extensionOf(file_name) {

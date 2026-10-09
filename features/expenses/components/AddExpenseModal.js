@@ -15,12 +15,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import Card from './Card';
-import PrimaryButton from './PrimaryButton';
-import DateField from './DateField';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
-import { expense_categories, payment_methods } from '../data/expenseOptions';
-import { todayString } from '../utils/formatDate';
+import Card from '../../../components/Card';
+import PrimaryButton from '../../../components/PrimaryButton';
+import DateField from '../../../components/DateField';
+import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { expense_categories, payment_methods } from '../../../data/expenseOptions';
+import { todayString } from '../../../utils/formatDate';
 
 const repeat_options = ['None', 'Monthly', 'Yearly'];
 

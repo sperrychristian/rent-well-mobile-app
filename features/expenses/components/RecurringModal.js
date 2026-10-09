@@ -1,8 +1,8 @@
 import { Modal, View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
-import Card from './Card';
-import PrimaryButton from './PrimaryButton';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
-import { formatDate } from '../utils/formatDate';
+import Card from '../../../components/Card';
+import PrimaryButton from '../../../components/PrimaryButton';
+import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { formatDate } from '../../../utils/formatDate';
 import { formatMoney } from '../utils/expenseStats';
 
 // props: visible, rules, onToggle, onDelete, onClose

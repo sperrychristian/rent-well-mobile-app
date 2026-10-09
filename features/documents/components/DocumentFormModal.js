@@ -13,13 +13,13 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Card from './Card';
-import PrimaryButton from './PrimaryButton';
-import DateField from './DateField';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
-import { document_categories, dated_categories } from '../data/documentOptions';
-import { todayString } from '../utils/formatDate';
-import { addPeriod } from '../utils/recurring';
+import Card from '../../../components/Card';
+import PrimaryButton from '../../../components/PrimaryButton';
+import DateField from '../../../components/DateField';
+import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { document_categories, dated_categories } from '../../../data/documentOptions';
+import { todayString } from '../../../utils/formatDate';
+import { addPeriod } from '../../../utils/recurring';
 import { pickDocument } from '../utils/documentFiles';
 import { nameFromFile, iconFor, formatSize } from '../utils/documentHelpers';
 

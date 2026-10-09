@@ -7,7 +7,7 @@ import {
   daysUntil,
   expiryTag,
   formatSize,
-} from '../documentHelpers';
+} from './documentHelpers';
 
 const word_type = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 

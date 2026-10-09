@@ -1,8 +1,8 @@
 import { StyleSheet, View, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, SPACING, FONTS } from '../theme';
-import ScreenTitle from '../components/ScreenTitle';
-import Card from '../components/Card';
+import { COLORS, SPACING, FONTS } from '../../../theme';
+import ScreenTitle from '../../../components/ScreenTitle';
+import Card from '../../../components/Card';
 
 function MessagesScreen(props) {
   const insets = useSafeAreaInsets();
