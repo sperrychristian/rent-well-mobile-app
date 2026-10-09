@@ -100,7 +100,9 @@ export function WorkOrdersProvider(props) {
         setRecurringRules(saved_extras.recurring_rules || []);
         setBudgets(saved_extras.budgets || {});
         setMileageRate(
-          saved_extras.mileage_rate !== undefined ? saved_extras.mileage_rate : default_mileage_rate,
+          saved_extras.mileage_rate !== undefined
+            ? saved_extras.mileage_rate
+            : default_mileage_rate,
         );
       } else {
         setTrips(seed_trips);
@@ -279,9 +281,7 @@ export function WorkOrdersProvider(props) {
   // one helper that swaps out only the matching order, the status actions use it
   function updateOrder(order_id, changes) {
     setOrders((current_orders) =>
-      current_orders.map((order) =>
-        order.id === order_id ? { ...order, ...changes } : order,
-      ),
+      current_orders.map((order) => (order.id === order_id ? { ...order, ...changes } : order)),
     );
   }
 
@@ -306,25 +306,25 @@ export function WorkOrdersProvider(props) {
   }
 
   // a tenant submits a request and it starts out open with no landlord details filled in
-function addWorkOrder(request) {
-  const new_order = {
-    id: makeId(),
-    title: request.title,
-    description: request.description,
-    property: request.property,
-    tenant: request.tenant,
-    status: 'Open',
-    priority: request.priority,
-    created_at: todayString(),
-    started_at: null,
-    resolved_at: null,
-    notes: '',
-    contractor: '',
-    estimate: null,
-    photo: request.photo,
-  };
-  setOrders((current_orders) => [...current_orders, new_order]);
-}
+  function addWorkOrder(request) {
+    const new_order = {
+      id: makeId(),
+      title: request.title,
+      description: request.description,
+      property: request.property,
+      tenant: request.tenant,
+      status: 'Open',
+      priority: request.priority,
+      created_at: todayString(),
+      started_at: null,
+      resolved_at: null,
+      notes: '',
+      contractor: '',
+      estimate: null,
+      photo: request.photo,
+    };
+    setOrders((current_orders) => [...current_orders, new_order]);
+  }
 
   // order_id can be null for an expense that isn't tied to a work order
   function addExpense(order_id, expense) {

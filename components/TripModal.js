@@ -66,7 +66,10 @@ function TripModal(props) {
         style={styles.backdrop}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScrollView contentContainerStyle={styles.scroll_content} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.scroll_content}
+          keyboardShouldPersistTaps="handled"
+        >
           <Card>
             <Text style={styles.heading}>{props.trip ? 'Edit Trip' : 'Add Trip'}</Text>
 
@@ -75,7 +78,11 @@ function TripModal(props) {
 
             <Text style={styles.label}>Property</Text>
             {property_names.length > 0 && (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chip_row}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.chip_row}
+              >
                 {property_names.map((name) => (
                   <Pressable
                     key={name}

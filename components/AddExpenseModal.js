@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -12,17 +12,17 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
-import Card from "./Card";
-import PrimaryButton from "./PrimaryButton";
-import DateField from "./DateField";
-import { COLORS, SPACING, FONT_SIZES, FONTS } from "../theme";
-import { expense_categories, payment_methods } from "../data/expenseOptions";
-import { todayString } from "../utils/formatDate";
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import Card from './Card';
+import PrimaryButton from './PrimaryButton';
+import DateField from './DateField';
+import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
+import { expense_categories, payment_methods } from '../data/expenseOptions';
+import { todayString } from '../utils/formatDate';
 
-const repeat_options = ["None", "Monthly", "Yearly"];
+const repeat_options = ['None', 'Monthly', 'Yearly'];
 
 // props: visible, onSave, onClose, plus optional expense (edit mode), onDelete, default_property, property_names,
 // initial_receipts (a receipt photo taken first), and allow_extras (shows repeat and split, only the Expenses screen turns it on)
@@ -30,19 +30,19 @@ function AddExpenseModal(props) {
   const expense_id = props.expense ? props.expense.id : null;
   const is_editing = !!props.expense;
 
-  const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState("Repairs");
+  const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState('Repairs');
   const [date_text, setDateText] = useState(todayString());
-  const [property, setProperty] = useState("");
-  const [vendor, setVendor] = useState("");
-  const [payment_method, setPaymentMethod] = useState("Card");
+  const [property, setProperty] = useState('');
+  const [vendor, setVendor] = useState('');
+  const [payment_method, setPaymentMethod] = useState('Card');
   const [is_capital, setIsCapital] = useState(false);
   const [billed_to_tenant, setBilledToTenant] = useState(false);
-  const [recovered_text, setRecoveredText] = useState("");
-  const [repeat, setRepeat] = useState("None");
+  const [recovered_text, setRecoveredText] = useState('');
+  const [repeat, setRepeat] = useState('None');
   const [split_on, setSplitOn] = useState(false);
   const [split_properties, setSplitProperties] = useState([]);
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState('');
   const [receipts, setReceipts] = useState([]);
   // which receipt is open full size, null means none
   const [full_receipt, setFullReceipt] = useState(null);
@@ -53,24 +53,20 @@ function AddExpenseModal(props) {
       return;
     }
     const existing = props.expense;
-    setAmount(existing ? String(existing.amount) : "");
-    setCategory(existing ? existing.category : "Repairs");
+    setAmount(existing ? String(existing.amount) : '');
+    setCategory(existing ? existing.category : 'Repairs');
     setDateText(existing ? existing.date : todayString());
-    setProperty(existing ? existing.property : props.default_property || "");
-    setVendor(existing ? existing.vendor || "" : "");
-    setPaymentMethod(existing ? existing.payment_method || "Card" : "Card");
+    setProperty(existing ? existing.property : props.default_property || '');
+    setVendor(existing ? existing.vendor || '' : '');
+    setPaymentMethod(existing ? existing.payment_method || 'Card' : 'Card');
     setIsCapital(existing ? !!existing.is_capital : false);
     setBilledToTenant(existing ? !!existing.billed_to_tenant : false);
-    setRecoveredText(
-      existing && existing.recovered ? String(existing.recovered) : "",
-    );
-    setRepeat("None");
+    setRecoveredText(existing && existing.recovered ? String(existing.recovered) : '');
+    setRepeat('None');
     setSplitOn(false);
     setSplitProperties([]);
-    setNotes(existing ? existing.notes || "" : "");
-    setReceipts(
-      existing ? existing.receipts || [] : props.initial_receipts || [],
-    );
+    setNotes(existing ? existing.notes || '' : '');
+    setReceipts(existing ? existing.receipts || [] : props.initial_receipts || []);
     setFullReceipt(null);
   }, [props.visible, expense_id]);
 
@@ -78,10 +74,7 @@ function AddExpenseModal(props) {
   async function takePhoto() {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert(
-        "Camera access needed",
-        "Allow camera access in settings to take a photo.",
-      );
+      Alert.alert('Camera access needed', 'Allow camera access in settings to take a photo.');
       return;
     }
     const result = await ImagePicker.launchCameraAsync({ quality: 0.7 });
@@ -93,30 +86,23 @@ function AddExpenseModal(props) {
   // the library lets me pick several receipts at once
   async function choosePhotos() {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
+      mediaTypes: ['images'],
       allowsMultipleSelection: true,
       quality: 0.7,
     });
     if (!result.canceled) {
-      setReceipts((current) => [
-        ...current,
-        ...result.assets.map((asset) => asset.uri),
-      ]);
+      setReceipts((current) => [...current, ...result.assets.map((asset) => asset.uri)]);
     }
   }
 
   function removeReceipt(index) {
-    setReceipts((current) =>
-      current.filter((uri, uri_index) => uri_index !== index),
-    );
+    setReceipts((current) => current.filter((uri, uri_index) => uri_index !== index));
   }
 
   // tapping a property in the split list adds it or takes it back out
   function toggleSplitProperty(name) {
     setSplitProperties((current) =>
-      current.includes(name)
-        ? current.filter((item) => item !== name)
-        : [...current, name],
+      current.includes(name) ? current.filter((item) => item !== name) : [...current, name],
     );
   }
 
@@ -126,34 +112,27 @@ function AddExpenseModal(props) {
 
     const parsed_amount = parseFloat(amount);
     if (isNaN(parsed_amount) || parsed_amount <= 0) {
-      Alert.alert("Enter an amount", "Type a dollar amount greater than zero.");
+      Alert.alert('Enter an amount', 'Type a dollar amount greater than zero.');
       return;
     }
     if (use_split) {
       if (split_properties.length < 2) {
-        Alert.alert(
-          "Pick two or more properties",
-          "A split needs at least two properties.",
-        );
+        Alert.alert('Pick two or more properties', 'A split needs at least two properties.');
         return;
       }
-    } else if (property.trim() === "") {
-      Alert.alert("Add a property", "Pick a property or type one in.");
+    } else if (property.trim() === '') {
+      Alert.alert('Add a property', 'Pick a property or type one in.');
       return;
     }
 
     // recovered only counts when the expense is billed to a tenant, and it can't be more than the expense itself
     let parsed_recovered = 0;
-    if (billed_to_tenant && !use_split && recovered_text.trim() !== "") {
+    if (billed_to_tenant && !use_split && recovered_text.trim() !== '') {
       parsed_recovered = parseFloat(recovered_text);
-      if (
-        isNaN(parsed_recovered) ||
-        parsed_recovered < 0 ||
-        parsed_recovered > parsed_amount
-      ) {
+      if (isNaN(parsed_recovered) || parsed_recovered < 0 || parsed_recovered > parsed_amount) {
         Alert.alert(
-          "Check the recovered amount",
-          "It has to be between zero and the expense amount.",
+          'Check the recovered amount',
+          'It has to be between zero and the expense amount.',
         );
         return;
       }
@@ -163,7 +142,7 @@ function AddExpenseModal(props) {
       amount: parsed_amount,
       category: category,
       date: date_text,
-      property: use_split ? "" : property.trim(),
+      property: use_split ? '' : property.trim(),
       vendor: vendor.trim(),
       payment_method: payment_method,
       is_capital: is_capital,
@@ -171,7 +150,7 @@ function AddExpenseModal(props) {
       recovered: parsed_recovered,
       notes: notes.trim(),
       receipts: receipts,
-      repeat: props.allow_extras && !is_editing && !use_split ? repeat : "None",
+      repeat: props.allow_extras && !is_editing && !use_split ? repeat : 'None',
       split_properties: use_split ? split_properties : null,
     });
   }
@@ -185,17 +164,12 @@ function AddExpenseModal(props) {
   const splitting = show_extras && split_on;
 
   return (
-    <Modal
-      visible={props.visible}
-      transparent
-      animationType="slide"
-      onRequestClose={handleCancel}
-    >
+    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={handleCancel}>
       <View style={styles.root}>
         {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
         <KeyboardAvoidingView
           style={styles.backdrop}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           {/* scroll view keeps Save reachable when the form is taller than the screen or the keyboard is open */}
           <ScrollView
@@ -203,9 +177,7 @@ function AddExpenseModal(props) {
             keyboardShouldPersistTaps="handled"
           >
             <Card>
-              <Text style={styles.heading}>
-                {is_editing ? "Edit Expense" : "Add Expense"}
-              </Text>
+              <Text style={styles.heading}>{is_editing ? 'Edit Expense' : 'Add Expense'}</Text>
 
               <Text style={styles.label}>Amount</Text>
               <TextInput
@@ -227,10 +199,7 @@ function AddExpenseModal(props) {
                   <Pressable
                     key={option}
                     onPress={() => setCategory(option)}
-                    style={[
-                      styles.chip,
-                      category === option && styles.chip_active,
-                    ]}
+                    style={[styles.chip, category === option && styles.chip_active]}
                   >
                     <Text style={styles.chip_text}>{option}</Text>
                   </Pressable>
@@ -241,9 +210,9 @@ function AddExpenseModal(props) {
                 <View style={styles.switch_text}>
                   <Text style={styles.label}>Capital improvement</Text>
                   <Text style={styles.helper}>
-                    Repairs are deducted the year they happen. Improvements like
-                    a new roof or appliance are usually depreciated over several
-                    years. Ask your accountant if you are not sure.
+                    Repairs are deducted the year they happen. Improvements like a new roof or
+                    appliance are usually depreciated over several years. Ask your accountant if you
+                    are not sure.
                   </Text>
                 </View>
                 <Switch value={is_capital} onValueChange={setIsCapital} />
@@ -254,8 +223,7 @@ function AddExpenseModal(props) {
                   <View style={styles.switch_text}>
                     <Text style={styles.label}>Split across properties</Text>
                     <Text style={styles.helper}>
-                      Splits the amount equally. Each property gets its own
-                      expense.
+                      Splits the amount equally. Each property gets its own expense.
                     </Text>
                   </View>
                   <Switch value={split_on} onValueChange={setSplitOn} />
@@ -263,7 +231,7 @@ function AddExpenseModal(props) {
               )}
 
               <Text style={styles.label}>
-                {splitting ? "Properties to split across" : "Property"}
+                {splitting ? 'Properties to split across' : 'Property'}
               </Text>
               {property_names.length > 0 && (
                 <ScrollView
@@ -278,11 +246,7 @@ function AddExpenseModal(props) {
                     return (
                       <Pressable
                         key={name}
-                        onPress={() =>
-                          splitting
-                            ? toggleSplitProperty(name)
-                            : setProperty(name)
-                        }
+                        onPress={() => (splitting ? toggleSplitProperty(name) : setProperty(name))}
                         style={[styles.chip, selected && styles.chip_active]}
                       >
                         <Text style={styles.chip_text}>{name}</Text>
@@ -312,19 +276,16 @@ function AddExpenseModal(props) {
                       <Pressable
                         key={option}
                         onPress={() => setRepeat(option)}
-                        style={[
-                          styles.chip,
-                          repeat === option && styles.chip_active,
-                        ]}
+                        style={[styles.chip, repeat === option && styles.chip_active]}
                       >
                         <Text style={styles.chip_text}>{option}</Text>
                       </Pressable>
                     ))}
                   </View>
-                  {repeat !== "None" && (
+                  {repeat !== 'None' && (
                     <Text style={styles.helper_block}>
-                      This saves today's expense and adds the next ones on their
-                      own. You can pause or delete it under Recurring.
+                      This saves today's expense and adds the next ones on their own. You can pause
+                      or delete it under Recurring.
                     </Text>
                   )}
                 </View>
@@ -345,10 +306,7 @@ function AddExpenseModal(props) {
                   <Pressable
                     key={option}
                     onPress={() => setPaymentMethod(option)}
-                    style={[
-                      styles.chip,
-                      payment_method === option && styles.chip_active,
-                    ]}
+                    style={[styles.chip, payment_method === option && styles.chip_active]}
                   >
                     <Text style={styles.chip_text}>{option}</Text>
                   </Pressable>
@@ -361,14 +319,10 @@ function AddExpenseModal(props) {
                     <View style={styles.switch_text}>
                       <Text style={styles.label}>Billed to tenant</Text>
                       <Text style={styles.helper}>
-                        For damage or extra costs you charge to a tenant or
-                        their deposit.
+                        For damage or extra costs you charge to a tenant or their deposit.
                       </Text>
                     </View>
-                    <Switch
-                      value={billed_to_tenant}
-                      onValueChange={setBilledToTenant}
-                    />
+                    <Switch value={billed_to_tenant} onValueChange={setBilledToTenant} />
                   </View>
                   {billed_to_tenant && (
                     <TextInput
@@ -399,21 +353,14 @@ function AddExpenseModal(props) {
                   {receipts.map((uri, index) => (
                     <View key={uri + index} style={styles.receipt_wrap}>
                       <Pressable onPress={() => setFullReceipt(uri)}>
-                        <Image
-                          source={{ uri: uri }}
-                          style={styles.receipt_thumb}
-                        />
+                        <Image source={{ uri: uri }} style={styles.receipt_thumb} />
                       </Pressable>
                       <Pressable
                         style={styles.remove_button}
                         onPress={() => removeReceipt(index)}
                         accessibilityLabel="Remove receipt"
                       >
-                        <Ionicons
-                          name="close-circle"
-                          size={22}
-                          color={COLORS.danger}
-                        />
+                        <Ionicons name="close-circle" size={22} color={COLORS.danger} />
                       </Pressable>
                     </View>
                   ))}
@@ -435,16 +382,8 @@ function AddExpenseModal(props) {
               </View>
 
               <View style={styles.button_row}>
-                <PrimaryButton
-                  title="Cancel"
-                  onPress={handleCancel}
-                  style={styles.cancel_button}
-                />
-                <PrimaryButton
-                  title="Save"
-                  onPress={handleSave}
-                  style={styles.save_button}
-                />
+                <PrimaryButton title="Cancel" onPress={handleCancel} style={styles.cancel_button} />
+                <PrimaryButton title="Save" onPress={handleSave} style={styles.save_button} />
               </View>
               {/* delete only shows when editing, and the screen offers an undo right after */}
               {is_editing && props.onDelete && (
@@ -462,15 +401,8 @@ function AddExpenseModal(props) {
         </KeyboardAvoidingView>
         {/* full size receipt sits on top of the form, tapping anywhere closes it */}
         {full_receipt && (
-          <Pressable
-            style={styles.full_overlay}
-            onPress={() => setFullReceipt(null)}
-          >
-            <Image
-              source={{ uri: full_receipt }}
-              style={styles.full_photo}
-              resizeMode="contain"
-            />
+          <Pressable style={styles.full_overlay} onPress={() => setFullReceipt(null)}>
+            <Image source={{ uri: full_receipt }} style={styles.full_photo} resizeMode="contain" />
           </Pressable>
         )}
       </View>
@@ -487,11 +419,11 @@ const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
     backgroundColor: COLORS.backdrop,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
   scroll_content: {
     flexGrow: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     paddingVertical: SPACING.lg,
   },
   heading: {
@@ -536,15 +468,15 @@ const styles = StyleSheet.create({
   },
   notes_input: {
     minHeight: 70,
-    textAlignVertical: "top",
+    textAlignVertical: 'top',
   },
   chip_row: {
     gap: SPACING.sm,
     paddingBottom: SPACING.sm,
   },
   wrap_row: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: SPACING.sm,
     marginBottom: SPACING.sm,
   },
@@ -563,16 +495,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   switch_row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: SPACING.sm,
   },
   switch_text: {
     flex: 1,
   },
   receipt_wrap: {
-    position: "relative",
+    position: 'relative',
   },
   receipt_thumb: {
     width: 72,
@@ -580,12 +512,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   remove_button: {
-    position: "absolute",
+    position: 'absolute',
     top: -8,
     right: -8,
   },
   button_row: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: SPACING.sm,
     marginTop: SPACING.sm,
   },
@@ -611,10 +543,10 @@ const styles = StyleSheet.create({
   full_overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: COLORS.photo_backdrop,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
   full_photo: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
   },
 });

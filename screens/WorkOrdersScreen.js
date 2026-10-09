@@ -1,22 +1,37 @@
-import { StyleSheet, View, FlatList, Alert, Text, ScrollView, Pressable, TextInput } from "react-native";
-import ExpenseDetailsModal from "../components/ExpenseDetailsModal";
-import { COLORS, SPACING, FONTS } from "../theme";
-import ScreenTitle from "../components/ScreenTitle";
-import WorkOrderCard from "../components/WorkOrderCard";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useState } from "react";
-import AddExpenseModal from "../components/AddExpenseModal";
-import { useWorkOrders } from "../context/WorkOrdersContext";
+import {
+  StyleSheet,
+  View,
+  FlatList,
+  Alert,
+  Text,
+  ScrollView,
+  Pressable,
+  TextInput,
+} from 'react-native';
+import ExpenseDetailsModal from '../components/ExpenseDetailsModal';
+import { COLORS, SPACING, FONTS } from '../theme';
+import ScreenTitle from '../components/ScreenTitle';
+import WorkOrderCard from '../components/WorkOrderCard';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useState } from 'react';
+import AddExpenseModal from '../components/AddExpenseModal';
+import { useWorkOrders } from '../context/WorkOrdersContext';
 
 // lower number sorts first, so emergencies come out on top
 const priority_rank = { Emergency: 0, Normal: 1, Low: 2 };
-const sort_options = ["Newest", "Oldest", "Priority"];
+const sort_options = ['Newest', 'Oldest', 'Priority'];
 
 function WorkOrdersScreen(props) {
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
   // the orders and the actions live in the shared context now so every screen sees the same data
-  const { orders, startWorkOrder, resolveWorkOrder, addExpense, properties: known_properties } = useWorkOrders();
+  const {
+    orders,
+    startWorkOrder,
+    resolveWorkOrder,
+    addExpense,
+    properties: known_properties,
+  } = useWorkOrders();
   // track whether the toggle is showing resolved orders or active ones
   const [show_resolved, setShowResolved] = useState(false);
   // remember which work order the expense form is open for, null means closed
@@ -24,16 +39,16 @@ function WorkOrdersScreen(props) {
   // remember which work order's expense details are open, null means closed
   const [details_order_id, setDetailsOrderId] = useState(null);
   // track which property chip is selected, All means no property filter
-  const [property_filter, setPropertyFilter] = useState("All");
+  const [property_filter, setPropertyFilter] = useState('All');
   // what's typed in the search box and which sort chip is picked
-  const [search_text, setSearchText] = useState("");
-  const [sort_by, setSortBy] = useState("Newest");
+  const [search_text, setSearchText] = useState('');
+  const [sort_by, setSortBy] = useState('Newest');
 
   // ask first so a stray tap doesn't close out a request
   function confirmResolve(order_id) {
-    Alert.alert("Resolve work order", "Mark this request as resolved?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Resolve", onPress: () => resolveWorkOrder(order_id) },
+    Alert.alert('Resolve work order', 'Mark this request as resolved?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Resolve', onPress: () => resolveWorkOrder(order_id) },
     ]);
   }
 
@@ -44,7 +59,7 @@ function WorkOrdersScreen(props) {
   }
 
   // build the chip list from the orders themselves so new properties show up on their own
-  const property_names = ["All", ...new Set(orders.map((order) => order.property))];
+  const property_names = ['All', ...new Set(orders.map((order) => order.property))];
 
   const search_lower = search_text.trim().toLowerCase();
 
@@ -52,23 +67,22 @@ function WorkOrdersScreen(props) {
   const visible_orders = orders
     .filter(
       (order) =>
-        (show_resolved ? order.status === "Resolved" : order.status !== "Resolved") &&
-        (property_filter === "All" || order.property === property_filter) &&
-        (search_lower === "" ||
+        (show_resolved ? order.status === 'Resolved' : order.status !== 'Resolved') &&
+        (property_filter === 'All' || order.property === property_filter) &&
+        (search_lower === '' ||
           order.title.toLowerCase().includes(search_lower) ||
           order.tenant.toLowerCase().includes(search_lower) ||
           order.property.toLowerCase().includes(search_lower)),
     )
     .sort((a, b) => {
       // priority sort uses the rank first and falls back to newest for ties
-      if (sort_by === "Priority") {
-        const rank_difference =
-          (priority_rank[a.priority] ?? 1) - (priority_rank[b.priority] ?? 1);
+      if (sort_by === 'Priority') {
+        const rank_difference = (priority_rank[a.priority] ?? 1) - (priority_rank[b.priority] ?? 1);
         if (rank_difference !== 0) {
           return rank_difference;
         }
       }
-      if (sort_by === "Oldest") {
+      if (sort_by === 'Oldest') {
         return a.created_at.localeCompare(b.created_at);
       }
       return b.created_at.localeCompare(a.created_at);
@@ -81,8 +95,8 @@ function WorkOrdersScreen(props) {
   const expense_order = orders.find((order) => order.id === expense_order_id);
 
   // I count from all the orders so the numbers don't change when a search or chip is active
-  const active_count = orders.filter((order) => order.status !== "Resolved").length;
-  const resolved_count = orders.filter((order) => order.status === "Resolved").length;
+  const active_count = orders.filter((order) => order.status !== 'Resolved').length;
+  const resolved_count = orders.filter((order) => order.status === 'Resolved').length;
 
   // the controls scroll with the list so they don't eat the screen in landscape
   const list_header = (
@@ -110,7 +124,11 @@ function WorkOrdersScreen(props) {
         </Pressable>
       </View>
       {/* chips scroll sideways so a long list of properties doesn't wrap */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chip_row}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chip_row}
+      >
         {property_names.map((name) => (
           <Pressable
             key={name}
@@ -148,9 +166,7 @@ function WorkOrdersScreen(props) {
         ListHeaderComponent={list_header}
         ListEmptyComponent={
           <Text style={styles.empty_text}>
-            {show_resolved
-              ? "No resolved work orders found"
-              : "No open work orders found"}
+            {show_resolved ? 'No resolved work orders found' : 'No open work orders found'}
           </Text>
         }
         renderItem={({ item }) => (
@@ -160,14 +176,14 @@ function WorkOrdersScreen(props) {
             onViewExpenses={() => setDetailsOrderId(item.id)}
             onStart={() => startWorkOrder(item.id)}
             onResolve={() => confirmResolve(item.id)}
-            onMessage={() => props.navigation.navigate("Messages", { tenant: item.tenant })}
-            onOpenDetail={() => props.navigation.navigate("WorkOrderDetail", { order_id: item.id })}
+            onMessage={() => props.navigation.navigate('Messages', { tenant: item.tenant })}
+            onOpenDetail={() => props.navigation.navigate('WorkOrderDetail', { order_id: item.id })}
           />
         )}
       />
       <AddExpenseModal
         visible={expense_order_id !== null}
-        default_property={expense_order ? expense_order.property : ""}
+        default_property={expense_order ? expense_order.property : ''}
         property_names={known_properties}
         onSave={saveExpense}
         onClose={() => setExpenseOrderId(null)}
@@ -201,7 +217,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   segment: {
-    flexDirection: "row",
+    flexDirection: 'row',
     backgroundColor: COLORS.muted,
     borderRadius: 12,
     padding: 4,
@@ -211,7 +227,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 8,
     borderRadius: 9,
-    alignItems: "center",
+    alignItems: 'center',
   },
   segment_active: {
     backgroundColor: COLORS.primary,
@@ -227,15 +243,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   sort_row: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: SPACING.sm,
     marginBottom: SPACING.sm,
   },
   empty_text: {
     color: COLORS.text,
     fontFamily: FONTS.body,
-    textAlign: "center",
+    textAlign: 'center',
     marginTop: SPACING.lg,
     opacity: 0.7,
   },

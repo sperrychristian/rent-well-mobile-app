@@ -33,7 +33,9 @@ function RecurringModal(props) {
                 </Text>
                 <Text style={styles.detail}>{rule.template.category}</Text>
                 <Text style={styles.detail}>{rule.template.property}</Text>
-                {rule.template.vendor ? <Text style={styles.detail}>{rule.template.vendor}</Text> : null}
+                {rule.template.vendor ? (
+                  <Text style={styles.detail}>{rule.template.vendor}</Text>
+                ) : null}
                 <Text style={styles.detail}>
                   {rule.active ? 'Next: ' + formatDate(rule.next_date) : 'Paused'}
                 </Text>

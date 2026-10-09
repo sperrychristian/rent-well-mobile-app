@@ -197,7 +197,8 @@ function ExpensesScreen(props) {
       (existing) =>
         Math.abs(existing.amount - expense.amount) < 0.005 &&
         existing.date === expense.date &&
-        (existing.vendor || '').trim().toLowerCase() === (expense.vendor || '').trim().toLowerCase(),
+        (existing.vendor || '').trim().toLowerCase() ===
+          (expense.vendor || '').trim().toLowerCase(),
     );
   }
 
@@ -212,7 +213,12 @@ function ExpensesScreen(props) {
       const parts = splitAmount(fields.amount, split_properties.length);
       const group_id = 'split-' + Date.now();
       split_properties.forEach((name, index) => {
-        addExpense(null, { ...fields, property: name, amount: parts[index], split_group: group_id });
+        addExpense(null, {
+          ...fields,
+          property: name,
+          amount: parts[index],
+          split_group: group_id,
+        });
       });
     } else {
       addExpense(null, fields);
@@ -345,7 +351,11 @@ function ExpensesScreen(props) {
       </View>
 
       <Text style={styles.section_label}>Year</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chip_row}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chip_row}
+      >
         {years.map((option) => (
           <Pressable
             key={option}
@@ -358,7 +368,11 @@ function ExpensesScreen(props) {
       </ScrollView>
 
       <Text style={styles.section_label}>Property</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chip_row}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chip_row}
+      >
         {['All', ...properties].map((name) => (
           <Pressable
             key={name}
@@ -378,7 +392,8 @@ function ExpensesScreen(props) {
         </Text>
         {billed_total > 0 && (
           <Text style={styles.detail}>
-            Billed to tenants: {formatMoney(billed_total)} · Recovered: {formatMoney(recovered_total)}
+            Billed to tenants: {formatMoney(billed_total)} · Recovered:{' '}
+            {formatMoney(recovered_total)}
           </Text>
         )}
         <Text style={styles.detail}>{filtered_expenses.length} expenses</Text>
@@ -387,15 +402,20 @@ function ExpensesScreen(props) {
       <Card>
         <Text style={styles.heading}>By category</Text>
         <Text style={styles.helper}>Tap a category to filter the list below.</Text>
-        {category_totals.length === 0 && <Text style={styles.detail}>Nothing for this selection</Text>}
+        {category_totals.length === 0 && (
+          <Text style={styles.detail}>Nothing for this selection</Text>
+        )}
         {category_totals.map((row) => {
-          const percent = deductible_total > 0 ? Math.round((row.total / deductible_total) * 100) : 0;
+          const percent =
+            deductible_total > 0 ? Math.round((row.total / deductible_total) * 100) : 0;
           const dimmed = category_filter !== null && category_filter !== row.category;
           return (
             <Pressable
               key={row.category}
               style={[styles.bar_row, dimmed && styles.dimmed]}
-              onPress={() => setCategoryFilter(category_filter === row.category ? null : row.category)}
+              onPress={() =>
+                setCategoryFilter(category_filter === row.category ? null : row.category)
+              }
             >
               <View style={styles.bar_labels}>
                 <Text style={styles.bar_name}>{row.category}</Text>
@@ -413,7 +433,9 @@ function ExpensesScreen(props) {
 
       <Card>
         <Text style={styles.heading}>Spent by property</Text>
-        {property_totals.length === 0 && <Text style={styles.detail}>Nothing for this selection</Text>}
+        {property_totals.length === 0 && (
+          <Text style={styles.detail}>Nothing for this selection</Text>
+        )}
         {property_totals.map((row) => {
           const budget = budgets[row.property];
           const over_budget = budget !== undefined && row.total > budget;
@@ -446,9 +468,12 @@ function ExpensesScreen(props) {
       <Card>
         <Text style={styles.heading}>Paid by vendor</Text>
         <Text style={styles.helper}>
-          Paying one vendor over the IRS reporting limit can mean filing a 1099. Check the current rules.
+          Paying one vendor over the IRS reporting limit can mean filing a 1099. Check the current
+          rules.
         </Text>
-        {vendor_totals.length === 0 && <Text style={styles.detail}>No vendors recorded for this selection</Text>}
+        {vendor_totals.length === 0 && (
+          <Text style={styles.detail}>No vendors recorded for this selection</Text>
+        )}
         {shown_vendors.map((row) => (
           <View key={row.vendor} style={styles.property_row}>
             <Text style={styles.bar_name}>{row.vendor}</Text>
@@ -486,6 +511,7 @@ function ExpensesScreen(props) {
       </View>
       {category_filter !== null && (
         <Pressable style={styles.filter_chip} onPress={() => setCategoryFilter(null)}>
+          {/* prettier-ignore */}
           <Text style={styles.chip_text}>Category: {category_filter}  ✕</Text>
         </Pressable>
       )}
@@ -545,9 +571,13 @@ function ExpensesScreen(props) {
                   {linked_order && (
                     <Pressable
                       style={[styles.tag, styles.order_tag]}
-                      onPress={() => props.navigation.navigate('WorkOrderDetail', { order_id: linked_order.id })}
+                      onPress={() =>
+                        props.navigation.navigate('WorkOrderDetail', { order_id: linked_order.id })
+                      }
                     >
-                      <Text style={styles.tag_text} numberOfLines={1}>Work order: {linked_order.title}</Text>
+                      <Text style={styles.tag_text} numberOfLines={1}>
+                        Work order: {linked_order.title}
+                      </Text>
                     </Pressable>
                   )}
                   {receipts.length === 0 && (
@@ -560,7 +590,9 @@ function ExpensesScreen(props) {
               {receipts.length > 0 && (
                 <View style={styles.receipt_box}>
                   <Image source={{ uri: receipts[0] }} style={styles.receipt_thumb} />
-                  <Text style={styles.detail}>{receipts.length} receipt{receipts.length > 1 ? 's' : ''}</Text>
+                  <Text style={styles.detail}>
+                    {receipts.length} receipt{receipts.length > 1 ? 's' : ''}
+                  </Text>
                 </View>
               )}
             </Pressable>

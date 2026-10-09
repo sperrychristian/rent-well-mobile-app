@@ -242,7 +242,11 @@ function DocumentsScreen() {
       </View>
 
       <Text style={styles.section_label}>Property</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chip_row}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chip_row}
+      >
         {['All', ...property_names].map((name) => (
           <Pressable
             key={name}
@@ -255,7 +259,11 @@ function DocumentsScreen() {
       </ScrollView>
 
       <Text style={styles.section_label}>Category</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chip_row}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chip_row}
+      >
         {['All', ...document_categories].map((option) => (
           <Pressable
             key={option}
@@ -325,14 +333,18 @@ function DocumentsScreen() {
                 style={styles.row_icon}
               />
               <View style={styles.row_text}>
-                <Text style={styles.row_name} numberOfLines={2}>{item.name}</Text>
+                <Text style={styles.row_name} numberOfLines={2}>
+                  {item.name}
+                </Text>
                 <Text style={styles.row_category}>{item.category}</Text>
                 <Text style={styles.detail}>{item.property}</Text>
                 {item.tenant ? <Text style={styles.detail}>{item.tenant}</Text> : null}
                 <Text style={styles.detail}>Added {item.added_at}</Text>
                 <View style={styles.tag_row}>
                   {tag && (
-                    <View style={[styles.tag, tag.expired ? styles.expired_tag : styles.expiring_tag]}>
+                    <View
+                      style={[styles.tag, tag.expired ? styles.expired_tag : styles.expiring_tag]}
+                    >
                       <Text style={styles.tag_text}>{tag.text}</Text>
                     </View>
                   )}

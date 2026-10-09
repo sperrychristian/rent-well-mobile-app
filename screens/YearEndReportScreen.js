@@ -17,7 +17,8 @@ function YearEndReportScreen(props) {
 
   const current_year = String(new Date().getFullYear());
   // the Expenses screen passes its selected year in, and this falls back to the current year
-  const starting_year = props.route.params && props.route.params.year ? props.route.params.year : current_year;
+  const starting_year =
+    props.route.params && props.route.params.year ? props.route.params.year : current_year;
   const [year, setYear] = useState(starting_year);
 
   const years = [
@@ -56,7 +57,11 @@ function YearEndReportScreen(props) {
         />
 
         <Text style={styles.section_label}>Year</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chip_row}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chip_row}
+        >
           {years.map((option) => (
             <Pressable
               key={option}
@@ -86,11 +91,14 @@ function YearEndReportScreen(props) {
           </Text>
           {data.missing_receipts.slice(0, 5).map((expense) => (
             <Text key={expense.id} style={styles.missing_text}>
-              {formatDate(expense.date)} · {formatMoney(expense.amount)} · {expense.vendor || expense.category}
+              {formatDate(expense.date)} · {formatMoney(expense.amount)} ·{' '}
+              {expense.vendor || expense.category}
             </Text>
           ))}
           {data.missing_receipts.length > 5 && (
-            <Text style={styles.detail}>and {data.missing_receipts.length - 5} more without a receipt</Text>
+            <Text style={styles.detail}>
+              and {data.missing_receipts.length - 5} more without a receipt
+            </Text>
           )}
         </Card>
 
@@ -122,9 +130,12 @@ function YearEndReportScreen(props) {
         <Card>
           <Text style={styles.heading}>Paid by vendor</Text>
           <Text style={styles.helper}>
-            Paying one vendor over the IRS reporting limit can mean filing a 1099. Check the current rules.
+            Paying one vendor over the IRS reporting limit can mean filing a 1099. Check the current
+            rules.
           </Text>
-          {data.vendors.length === 0 && <Text style={styles.detail}>No vendors recorded for {year}</Text>}
+          {data.vendors.length === 0 && (
+            <Text style={styles.detail}>No vendors recorded for {year}</Text>
+          )}
           {data.vendors.map((row) => (
             <View key={row.vendor} style={styles.line_row}>
               <Text style={styles.line_name}>{row.vendor}</Text>
@@ -134,7 +145,8 @@ function YearEndReportScreen(props) {
         </Card>
 
         <Text style={styles.footer_note}>
-          This is a recordkeeping summary, not tax advice. Have an accountant confirm categories and tax treatment.
+          This is a recordkeeping summary, not tax advice. Have an accountant confirm categories and
+          tax treatment.
         </Text>
       </ScrollView>
     </View>

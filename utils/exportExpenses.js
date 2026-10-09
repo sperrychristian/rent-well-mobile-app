@@ -75,8 +75,13 @@ export function buildExpensesCsv(expenses, order_titles) {
   totalsByCategory(expenses).forEach((row) => {
     lines.push(csvField(row.category) + ',' + row.total.toFixed(2));
   });
-  lines.push('Total deductible,' + sumAmounts(expenses.filter((expense) => !expense.is_capital)).toFixed(2));
-  lines.push('Capital improvements (depreciated),' + sumAmounts(expenses.filter((expense) => expense.is_capital)).toFixed(2));
+  lines.push(
+    'Total deductible,' + sumAmounts(expenses.filter((expense) => !expense.is_capital)).toFixed(2),
+  );
+  lines.push(
+    'Capital improvements (depreciated),' +
+      sumAmounts(expenses.filter((expense) => expense.is_capital)).toFixed(2),
+  );
 
   return lines.join('\n');
 }
@@ -99,7 +104,9 @@ export function buildYearEndCsv(year, data, mileage_rate) {
     lines.push('Total deductible,' + item.deductible.toFixed(2));
     lines.push('Capital improvements (depreciated),' + item.capital.toFixed(2));
     lines.push('Miles driven,' + item.miles.toFixed(1));
-    lines.push('Mileage deduction at ' + mileage_rate + ' per mile,' + item.mileage_deduction.toFixed(2));
+    lines.push(
+      'Mileage deduction at ' + mileage_rate + ' per mile,' + item.mileage_deduction.toFixed(2),
+    );
     lines.push('');
   });
 

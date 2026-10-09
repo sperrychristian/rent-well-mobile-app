@@ -13,11 +13,53 @@ import {
 
 // a small mixed set: one capital improvement, one billed to a tenant, one with no vendor
 const expenses = [
-  { amount: 100, category: 'Repairs', property: 'A', vendor: 'Plumber', is_capital: false, date: '2026-03-01', receipts: ['r1'] },
-  { amount: 50, category: 'Supplies', property: 'B', vendor: 'Hardware', is_capital: false, date: '2026-04-01', receipts: [] },
-  { amount: 25, category: 'Repairs', property: 'B', vendor: '', is_capital: false, date: '2026-05-01', receipts: [], billed_to_tenant: true, recovered: 10 },
-  { amount: 1000, category: 'Repairs', property: 'A', vendor: 'Plumber', is_capital: true, date: '2026-06-01', receipts: ['r2'] },
-  { amount: 70, category: 'Utilities', property: 'A', vendor: 'Power Co', is_capital: false, date: '2025-12-31', receipts: [] },
+  {
+    amount: 100,
+    category: 'Repairs',
+    property: 'A',
+    vendor: 'Plumber',
+    is_capital: false,
+    date: '2026-03-01',
+    receipts: ['r1'],
+  },
+  {
+    amount: 50,
+    category: 'Supplies',
+    property: 'B',
+    vendor: 'Hardware',
+    is_capital: false,
+    date: '2026-04-01',
+    receipts: [],
+  },
+  {
+    amount: 25,
+    category: 'Repairs',
+    property: 'B',
+    vendor: '',
+    is_capital: false,
+    date: '2026-05-01',
+    receipts: [],
+    billed_to_tenant: true,
+    recovered: 10,
+  },
+  {
+    amount: 1000,
+    category: 'Repairs',
+    property: 'A',
+    vendor: 'Plumber',
+    is_capital: true,
+    date: '2026-06-01',
+    receipts: ['r2'],
+  },
+  {
+    amount: 70,
+    category: 'Utilities',
+    property: 'A',
+    vendor: 'Power Co',
+    is_capital: false,
+    date: '2025-12-31',
+    receipts: [],
+  },
 ];
 
 describe('sumAmounts and sumMiles', () => {

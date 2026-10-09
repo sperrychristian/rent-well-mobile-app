@@ -69,7 +69,10 @@ export function expiryTag(expires_on, today) {
     return { text: 'Expired', expired: true };
   }
   if (days <= expiring_soon_days) {
-    return { text: days === 0 ? 'Expires today' : 'Expires in ' + days + (days === 1 ? ' day' : ' days'), expired: false };
+    return {
+      text: days === 0 ? 'Expires today' : 'Expires in ' + days + (days === 1 ? ' day' : ' days'),
+      expired: false,
+    };
   }
   return null;
 }

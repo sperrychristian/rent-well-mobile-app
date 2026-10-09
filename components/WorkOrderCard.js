@@ -32,28 +32,34 @@ function WorkOrderCard(props) {
     <Card>
       {/* tapping the top part of the card opens the detail screen */}
       <Pressable onPress={props.onOpenDetail}>
-  <View style={styles.top_row}>
-    <Text style={styles.title}>{order.title}</Text>
-    <View style={[styles.badge, { backgroundColor: status_colors[order.status] }]}>
-      <Text style={styles.badge_text}>{order.status}</Text>
-    </View>
-  </View>
-  <Text style={styles.detail}>{order.property}</Text>
-  <Text style={styles.detail}>{order.tenant} · {formatDate(order.created_at)}</Text>
-  {order.description ? <Text style={styles.detail} numberOfLines={2}>{order.description}</Text> : null}
-  <View style={styles.tag_row}>
-    <View style={[styles.badge, { backgroundColor: priority_colors[priority] }]}>
-      <Text style={styles.badge_text}>{priority}</Text>
-    </View>
-  </View>
-</Pressable>
+        <View style={styles.top_row}>
+          <Text style={styles.title}>{order.title}</Text>
+          <View style={[styles.badge, { backgroundColor: status_colors[order.status] }]}>
+            <Text style={styles.badge_text}>{order.status}</Text>
+          </View>
+        </View>
+        <Text style={styles.detail}>{order.property}</Text>
+        <Text style={styles.detail}>
+          {order.tenant} · {formatDate(order.created_at)}
+        </Text>
+        {order.description ? (
+          <Text style={styles.detail} numberOfLines={2}>
+            {order.description}
+          </Text>
+        ) : null}
+        <View style={styles.tag_row}>
+          <View style={[styles.badge, { backgroundColor: priority_colors[priority] }]}>
+            <Text style={styles.badge_text}>{priority}</Text>
+          </View>
+        </View>
+      </Pressable>
       {/* only show the landlord note, contractor, and estimate when they've been filled in */}
       {order.notes ? (
-        <Text style={styles.note} numberOfLines={2}>Note: {order.notes}</Text>
+        <Text style={styles.note} numberOfLines={2}>
+          Note: {order.notes}
+        </Text>
       ) : null}
-      {order.contractor ? (
-        <Text style={styles.detail}>Contractor: {order.contractor}</Text>
-      ) : null}
+      {order.contractor ? <Text style={styles.detail}>Contractor: {order.contractor}</Text> : null}
       {has_estimate && (
         <Text style={[styles.detail, over_budget && styles.over_budget]}>
           Estimate: ${order.estimate.toFixed(2)} · Actual: ${expense_total.toFixed(2)}

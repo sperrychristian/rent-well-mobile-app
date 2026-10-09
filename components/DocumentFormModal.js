@@ -131,12 +131,7 @@ function DocumentFormModal(props) {
   const is_sample = is_editing && props.document.sample && !new_file;
 
   return (
-    <Modal
-      visible={props.visible}
-      transparent
-      animationType="slide"
-      onRequestClose={props.onClose}
-    >
+    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={props.onClose}>
       <View style={styles.root}>
         {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
         <KeyboardAvoidingView
@@ -156,13 +151,17 @@ function DocumentFormModal(props) {
                 <View style={styles.file_row}>
                   <Ionicons name={iconFor(shown_file.mime_type)} size={22} color={COLORS.text} />
                   <View style={styles.file_text}>
-                    <Text style={styles.file_name} numberOfLines={1}>{shown_file.file_name}</Text>
+                    <Text style={styles.file_name} numberOfLines={1}>
+                      {shown_file.file_name}
+                    </Text>
                     <Text style={styles.helper}>{formatSize(shown_file.size)}</Text>
                   </View>
                 </View>
               )}
               {is_sample && (
-                <Text style={styles.helper_block}>Sample document, pick a file to attach a real one.</Text>
+                <Text style={styles.helper_block}>
+                  Sample document, pick a file to attach a real one.
+                </Text>
               )}
               <PrimaryButton
                 title={shown_file ? 'Replace File' : 'Choose File'}
@@ -258,7 +257,11 @@ function DocumentFormModal(props) {
               </View>
 
               <View style={styles.button_row}>
-                <PrimaryButton title="Cancel" onPress={props.onClose} style={styles.cancel_button} />
+                <PrimaryButton
+                  title="Cancel"
+                  onPress={props.onClose}
+                  style={styles.cancel_button}
+                />
                 <PrimaryButton title="Save" onPress={handleSave} style={styles.save_button} />
               </View>
             </Card>

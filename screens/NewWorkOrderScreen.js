@@ -1,5 +1,17 @@
 import { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, Image, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform, useWindowDimensions } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  Image,
+  Pressable,
+  ScrollView,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  useWindowDimensions,
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenTitle from '../components/ScreenTitle';
@@ -39,7 +51,10 @@ function NewWorkOrderScreen(props) {
   }
 
   async function choosePhoto() {
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.7,
+    });
     if (!result.canceled) {
       setPhotoUri(result.assets[0].uri);
     }
@@ -74,7 +89,10 @@ function NewWorkOrderScreen(props) {
 
   return (
     // iOS doesn't resize the app when the keyboard opens, so it needs padding; Android already moves the content up on its own
-    <KeyboardAvoidingView style={styles.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[
@@ -102,7 +120,12 @@ function NewWorkOrderScreen(props) {
 
           <Text style={styles.label}>Property</Text>
           {properties.length > 0 && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chip_scroll} contentContainerStyle={styles.chip_row}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.chip_scroll}
+              contentContainerStyle={styles.chip_row}
+            >
               {properties.map((name) => (
                 <Pressable
                   key={name}
@@ -154,10 +177,25 @@ function NewWorkOrderScreen(props) {
             ))}
           </View>
 
-          {photo_uri && <Image source={{ uri: photo_uri }} style={[styles.preview, is_landscape && styles.preview_landscape]} />}
+          {photo_uri && (
+            <Image
+              source={{ uri: photo_uri }}
+              style={[styles.preview, is_landscape && styles.preview_landscape]}
+            />
+          )}
           <View style={styles.button_row}>
-            <PrimaryButton title="Camera" icon="camera-outline" onPress={takePhoto} style={styles.photo_button} />
-            <PrimaryButton title="Library" icon="image-outline" onPress={choosePhoto} style={styles.photo_button} />
+            <PrimaryButton
+              title="Camera"
+              icon="camera-outline"
+              onPress={takePhoto}
+              style={styles.photo_button}
+            />
+            <PrimaryButton
+              title="Library"
+              icon="image-outline"
+              onPress={choosePhoto}
+              style={styles.photo_button}
+            />
           </View>
 
           <PrimaryButton

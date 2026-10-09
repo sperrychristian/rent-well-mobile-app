@@ -22,7 +22,8 @@ import { COLORS, SPACING, FONT_SIZES, FONTS } from '../theme';
 function MileageScreen(props) {
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
-  const { trips, addTrip, updateTrip, deleteTrip, mileage_rate, setMileageRate, properties } = useWorkOrders();
+  const { trips, addTrip, updateTrip, deleteTrip, mileage_rate, setMileageRate, properties } =
+    useWorkOrders();
 
   const current_year = String(new Date().getFullYear());
   const [year, setYear] = useState(current_year);
@@ -31,9 +32,9 @@ function MileageScreen(props) {
   const [form_open, setFormOpen] = useState(false);
   const [editing_id, setEditingId] = useState(null);
 
-  const years = [
-    ...new Set([...trips.map((trip) => trip.date.slice(0, 4)), current_year]),
-  ].sort((a, b) => b.localeCompare(a));
+  const years = [...new Set([...trips.map((trip) => trip.date.slice(0, 4)), current_year])].sort(
+    (a, b) => b.localeCompare(a),
+  );
 
   const year_trips = trips
     .filter((trip) => trip.date.slice(0, 4) === year)
@@ -103,7 +104,11 @@ function MileageScreen(props) {
       />
 
       <Text style={styles.section_label}>Year</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chip_row}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chip_row}
+      >
         {years.map((option) => (
           <Pressable
             key={option}
@@ -126,7 +131,8 @@ function MileageScreen(props) {
       <Card>
         <Text style={styles.heading}>Rate per mile</Text>
         <Text style={styles.helper}>
-          Set this to the current IRS standard mileage rate. It changes every year, so check the IRS site. The rate applies to every year in this log.
+          Set this to the current IRS standard mileage rate. It changes every year, so check the IRS
+          site. The rate applies to every year in this log.
         </Text>
         <View style={styles.rate_row}>
           <TextInput

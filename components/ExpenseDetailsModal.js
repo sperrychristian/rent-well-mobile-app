@@ -21,7 +21,12 @@ function ExpenseDetailsModal(props) {
 
   return (
     <Modal visible={props.visible} animationType="slide" onRequestClose={handleClose}>
-      <View style={[styles.container, { paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + SPACING.md }]}>
+      <View
+        style={[
+          styles.container,
+          { paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + SPACING.md },
+        ]}
+      >
         <Text style={styles.heading}>{props.order ? props.order.title : ''}</Text>
         <Text style={styles.total}>Total: ${total.toFixed(2)}</Text>
         <ScrollView contentContainerStyle={styles.list}>
@@ -41,7 +46,11 @@ function ExpenseDetailsModal(props) {
         {/* I draw the full size photo as an overlay in this same modal, tapping anywhere closes it */}
         {full_photo_uri && (
           <Pressable style={styles.full_overlay} onPress={() => setFullPhotoUri(null)}>
-            <Image source={{ uri: full_photo_uri }} style={styles.full_photo} resizeMode="contain" />
+            <Image
+              source={{ uri: full_photo_uri }}
+              style={styles.full_photo}
+              resizeMode="contain"
+            />
           </Pressable>
         )}
       </View>

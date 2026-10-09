@@ -56,7 +56,10 @@ function BudgetsModal(props) {
         style={styles.backdrop}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScrollView contentContainerStyle={styles.scroll_content} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.scroll_content}
+          keyboardShouldPersistTaps="handled"
+        >
           <Card>
             <Text style={styles.heading}>Yearly budgets</Text>
             <Text style={styles.helper}>
