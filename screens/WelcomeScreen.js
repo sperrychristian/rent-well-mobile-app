@@ -19,6 +19,10 @@ function WelcomeScreen(props) {
         {/* login always starts in real mode, so I leave the demo first if someone swiped back out of it */}
         <PrimaryButton
           title="Login"
+          onPress={async () => {
+            await exitDemo();
+            props.navigation.navigate("Dashboard");
+          }}
         />
         <PrimaryButton title="Sign Up" />
       </View>
