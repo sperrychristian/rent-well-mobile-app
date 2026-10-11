@@ -23,20 +23,23 @@ The code so far was written in an earlier chat session and has been run only par
   - `expenses/`: ExpensesScreen, YearEndReportScreen, AddExpenseModal (full expense form, also used by the work order screens), ExpenseDetailsModal, RecurringModal, BudgetsModal, utils expenseStats.js and exportExpenses.js
   - `mileage/`: MileageScreen, TripModal (uses expenseStats from expenses)
   - `documents/`: DocumentsScreen, DocumentDetailModal, DocumentFormModal, utils documentFiles.js (pick, save, delete, open document files) and documentHelpers.js (pure helpers: icons, names, sizes, daysUntil and expiryTag with an optional today)
-  - `messages/`, `checklist/`: placeholder screens
+  - `checklist/`: ChecklistScreen (list), ChecklistDetailScreen (rooms and items), components NewChecklistModal, ChecklistItemModal, SignOffModal, NameModal (add room or item), ProgressBar, utils checklistHelpers.js (pure: template copy, move-out from move-in, progress, worse condition, text summary), checklistPhotos.js (save, delete, rebuild photo URIs), exportChecklist.js (share a .txt summary), data checklistTemplates.js and sampleChecklists.js (demo only)
+  - `messages/`: placeholder screen
 - `components/` (shared): ScreenTitle (shimmer card title), Card, PrimaryButton, DateField, DemoBanner
 - `utils/` (shared): formatDate.js (formatDate, todayString), dateInput.js, recurring.js (addPeriod, used by the context and documents)
 - `data/`: workOrders.js, expenses.js, expenseOptions.js, expenseExtras.js, documents.js, documentOptions.js (mock and seed data)
 
 ## How the data works
-- `WorkOrdersContext` holds orders, expenses, trips, recurring rules, budgets, and the mileage rate. Screens read it with `useWorkOrders()`.
+- `WorkOrdersContext` holds orders, expenses, trips, recurring rules, budgets, the mileage rate, documents, and checklists. Screens read it with `useWorkOrders()`.
 - Orders and expenses are separate lists. An expense links to an order with `work_order_id`. The context builds `order.expenses` (a small legacy shape: id, amount, description, photo_uri) so work order screens keep working.
-- Saved to AsyncStorage under `rent_well_work_orders`, `rent_well_expenses`, `rent_well_extras`, `rent_well_documents`. Nothing saves until the first load finishes.
+- Saved to AsyncStorage under `rent_well_work_orders`, `rent_well_expenses`, `rent_well_extras`, `rent_well_documents`, `rent_well_checklists`. Nothing saves until the first load finishes.
 - Demo mode: `startDemo()` resets everything to seed data and turns saving off, `exitDemo()` restores saved data first and then turns demo off. Any future network call must be skipped while `demo_mode` is true.
 - Expense fields: id, amount, category (IRS Schedule E style), date (YYYY-MM-DD), property, vendor, payment_method, is_capital, billed_to_tenant, recovered, notes, receipts (array of uris), work_order_id, optional recurring_id and split_group.
 - Capital improvements are kept out of the deductible total and category bars on purpose.
 - Order fields: id, title, description, property, tenant, status (Open, In Progress, Resolved), priority (Emergency, Normal, Low), created_at, started_at, resolved_at, notes, contractor, estimate, photo (a `{ uri }` object or a require).
 - Document fields: id, name, category, property, tenant (optional), stored_name, file_name, mime_type, size, added_at, expires_on (optional, Lease and Addendum only), notes, shared_with_tenant (flag only, nothing reads it yet), sample (true only for seed entries with no file).
+- Checklist fields: id, property, type (Move-In, Move-Out), tenant, created_at, move_in_id (set when a move-out was started from a signed move-in), completed, signed_by, signed_on, rooms. Room: id, name, items. Item: id, name, done, condition (Good, Fair, Poor, or null), note, photos (array of stored names), move_in_condition and move_in_note (copied from the move-in, used for the "changed since move-in" flag).
+- Checklists: real data starts empty, the samples only load in demo mode. Signing sets `completed`, which locks rooms and items (the context ignores edits to a completed checklist). Delete still works. Photos follow the document rule: only the stored name is saved, `checklist_photos/` in the document directory, demo photos in `demo_checklist_photos/` in the cache.
 - Document files: save only `stored_name`, never a full URI. iOS changes the app container path between launches and updates, so always rebuild the URI with `getDocumentUri` from `features/documents/utils/documentFiles.js`. Real files live in `documents/` in the document directory, demo files in `demo_documents/` in the cache, which is cleared when a demo starts and exits.
 
 ## Code conventions (Christian's)
@@ -63,9 +66,9 @@ All colors must come from `theme.js`. When touching a file, use theme tokens. Ne
 - `Card` has `width: '90%'` and `alignSelf: 'center'` may be needed depending on the parent.
 
 ## Current status
-- Landlord side done: Work Orders (list, filters, search, sort, detail, expenses per order, notes, contractor and estimate, priority, message button), Expenses (totals, categories, vendors, budgets, recurring, split, billback, receipts, mileage log, year-end report, CSV export, undo delete), Documents (per-property storage, add, scan, search, sort, lease expiry tags, detail with image preview, open and share, edit, delete with file), demo mode.
+- Landlord side done: Work Orders (list, filters, search, sort, detail, expenses per order, notes, contractor and estimate, priority, message button), Expenses (totals, categories, vendors, budgets, recurring, split, billback, receipts, mileage log, year-end report, CSV export, undo delete), Documents (per-property storage, add, scan, search, sort, lease expiry tags, detail with image preview, open and share, edit, delete with file), Checklist (move-in and move-out from built-in templates, done, condition, note, up to 3 photos per item, custom rooms and items, progress per room and overall, move-out from a signed move-in with a "changed since move-in" flag, sign-off that locks it, text summary export), demo mode.
 - `NewWorkOrderScreen` (tenant "Report an Issue") was just added. Check that `addWorkOrder` exists in the context, that `App.js` registers `NewWorkOrder`, `WorkOrderDetail`, `Mileage`, and `YearEndReport`, and that `WorkOrderCard` and `WorkOrderDetailScreen` show `order.description`.
-- Still placeholders: Messages, Checklist. No tenant dashboard or role routing yet (login goes straight to the landlord Dashboard, and the Dashboard has a temporary "New Work Order" button).
+- Still placeholders: Messages. No tenant dashboard or role routing yet (login goes straight to the landlord Dashboard, and the Dashboard has a temporary "New Work Order" button).
 
 ## Course assignment (submitted)
 The device audit of `screens/NewWorkOrderScreen.js` (now `features/workOrders/screens/`) is submitted. The submitted state is tagged `assignment-submission` (local only), and the pushed final state with the fixed README screenshots is tagged `assignment-final`. `NewWorkOrderScreen.js` is no longer frozen. Leave `README.md`, `ASSIGNMENT_NOTES.md`, and the screenshots alone unless Christian asks.
@@ -93,7 +96,7 @@ Bank feed import and matching, receipt scanning that fills in amount, date, and 
 
 ## Next up
 1. Tenant side: tenant home screen, role routing, tenant's own work order list.
-2. Messages and Checklist screens.
+2. Messages screen.
 
 ## Working with Christian
 - He is a student learning this. Keep replies short and in bullets, explain the why in a sentence, and don't pad.
