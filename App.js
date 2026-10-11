@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import WelcomeScreen from './features/home/screens/WelcomeScreen';
 import DashboardScreen from './features/home/screens/DashboardScreen';
 import ChecklistScreen from './features/checklist/screens/ChecklistScreen';
+import ChecklistDetailScreen from './features/checklist/screens/ChecklistDetailScreen';
 import WorkOrdersScreen from './features/workOrders/screens/WorkOrdersScreen';
 import MessagesScreen from './features/messages/screens/MessagesScreen';
 import DocumentsScreen from './features/documents/screens/DocumentsScreen';
@@ -51,6 +52,7 @@ export default function App() {
           <Stack.Screen name="Messages" component={MessagesScreen} />
           <Stack.Screen name="Documents" component={DocumentsScreen} />
           <Stack.Screen name="Checklist" component={ChecklistScreen} />
+          <Stack.Screen name="ChecklistDetail" component={ChecklistDetailScreen} />
           <Stack.Screen name="Expenses" component={ExpensesScreen} />
           <Stack.Screen name="Mileage" component={MileageScreen} />
           <Stack.Screen name="YearEndReport" component={YearEndReportScreen} />
