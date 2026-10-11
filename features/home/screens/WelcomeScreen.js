@@ -21,10 +21,17 @@ function WelcomeScreen(props) {
           title="Login"
           onPress={async () => {
             await exitDemo();
-            props.navigation.navigate('Dashboard');
+            props.navigation.navigate('Login');
           }}
         />
-        <PrimaryButton title="Sign Up" />
+        {/* sign up goes to the landlord form, it links over to the tenant invite form */}
+        <PrimaryButton
+          title="Sign Up"
+          onPress={async () => {
+            await exitDemo();
+            props.navigation.navigate('RegisterOwner');
+          }}
+        />
       </View>
       {/* the demo needs no account, it starts on fresh sample data and never saves */}
       <PrimaryButton

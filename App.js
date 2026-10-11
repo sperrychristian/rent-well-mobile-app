@@ -13,6 +13,16 @@ import WorkOrderDetailScreen from './features/workOrders/screens/WorkOrderDetail
 import MileageScreen from './features/mileage/screens/MileageScreen';
 import YearEndReportScreen from './features/expenses/screens/YearEndReportScreen';
 import NewWorkOrderScreen from './features/workOrders/screens/NewWorkOrderScreen';
+import TenantHomeScreen from './features/home/screens/TenantHomeScreen';
+import LoginScreen from './features/auth/screens/LoginScreen';
+import RegisterOwnerScreen from './features/auth/screens/RegisterOwnerScreen';
+import RegisterTenantScreen from './features/auth/screens/RegisterTenantScreen';
+import MessageThreadScreen from './features/messages/screens/MessageThreadScreen';
+import InviteTenantScreen from './features/invites/screens/InviteTenantScreen';
+import { AuthProvider, useAuth, homeRouteFor } from './features/auth/context/AuthContext';
+import { MessagesProvider } from './features/messages/context/MessagesContext';
+import { navigation_ref } from './services/navigationRef';
+import { setupNotificationHandler } from './services/push';
 
 import {
   useFonts,
@@ -24,6 +34,56 @@ import {
 
 // I make the stack once out here so every screen can be registered on it
 const Stack = createNativeStackNavigator();
+
+// set once at startup so a push that arrives while the app is open still shows a banner
+setupNotificationHandler();
+
+// the local data is saved per account, so it needs the signed-in user's id
+function AccountData(props) {
+  const { user } = useAuth();
+  return (
+    <WorkOrdersProvider user_id={user ? user.id : null}>
+      <MessagesProvider>{props.children}</MessagesProvider>
+    </WorkOrdersProvider>
+  );
+}
+
+// waits for the saved session, then starts on the right home for a signed-in account or on Welcome
+function AppNavigator() {
+  const { status, user } = useAuth();
+  if (status === 'restoring') {
+    return null;
+  }
+  const first_route = user ? homeRouteFor(user) : 'Welcome';
+
+  return (
+    <NavigationContainer ref={navigation_ref}>
+      {/* I'm hiding the default header since my screens have their own title */}
+      <Stack.Navigator initialRouteName={first_route} screenOptions={{ headerShown: false }}>
+        {/* first screen listed is the one that shows on launch */}
+        <Stack.Screen name="Welcome" component={WelcomeScreen} />
+        {/* this name has to match navigate('Dashboard') exactly */}
+        <Stack.Screen name="Dashboard" component={DashboardScreen} />
+        <Stack.Screen name="TenantHome" component={TenantHomeScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="RegisterOwner" component={RegisterOwnerScreen} />
+        <Stack.Screen name="RegisterTenant" component={RegisterTenantScreen} />
+        <Stack.Screen name="WorkOrders" component={WorkOrdersScreen} />
+        <Stack.Screen name="WorkOrderDetail" component={WorkOrderDetailScreen} />
+        <Stack.Screen name="Messages" component={MessagesScreen} />
+        <Stack.Screen name="MessageThread" component={MessageThreadScreen} />
+        <Stack.Screen name="InviteTenant" component={InviteTenantScreen} />
+        <Stack.Screen name="Documents" component={DocumentsScreen} />
+        <Stack.Screen name="Checklist" component={ChecklistScreen} />
+        <Stack.Screen name="ChecklistDetail" component={ChecklistDetailScreen} />
+        <Stack.Screen name="Expenses" component={ExpensesScreen} />
+        <Stack.Screen name="Mileage" component={MileageScreen} />
+        <Stack.Screen name="YearEndReport" component={YearEndReportScreen} />
+        <Stack.Screen name="NewWorkOrder" component={NewWorkOrderScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
 
 export default function App() {
   // load the fonts first and show nothing until they're ready
@@ -39,26 +99,10 @@ export default function App() {
   }
 
   return (
-    <WorkOrdersProvider>
-      <NavigationContainer>
-        {/* I'm hiding the default header since my screens have their own title */}
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          {/* first screen listed is the one that shows on launch */}
-          <Stack.Screen name="Welcome" component={WelcomeScreen} />
-          {/* this name has to match navigate('Dashboard') exactly */}
-          <Stack.Screen name="Dashboard" component={DashboardScreen} />
-          <Stack.Screen name="WorkOrders" component={WorkOrdersScreen} />
-          <Stack.Screen name="WorkOrderDetail" component={WorkOrderDetailScreen} />
-          <Stack.Screen name="Messages" component={MessagesScreen} />
-          <Stack.Screen name="Documents" component={DocumentsScreen} />
-          <Stack.Screen name="Checklist" component={ChecklistScreen} />
-          <Stack.Screen name="ChecklistDetail" component={ChecklistDetailScreen} />
-          <Stack.Screen name="Expenses" component={ExpensesScreen} />
-          <Stack.Screen name="Mileage" component={MileageScreen} />
-          <Stack.Screen name="YearEndReport" component={YearEndReportScreen} />
-          <Stack.Screen name="NewWorkOrder" component={NewWorkOrderScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </WorkOrdersProvider>
+    <AuthProvider>
+      <AccountData>
+        <AppNavigator />
+      </AccountData>
+    </AuthProvider>
   );
 }
