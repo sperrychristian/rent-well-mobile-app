@@ -10,6 +10,7 @@ import {
 } from '../data/expenseExtras';
 import { seed_documents } from '../data/documents';
 import { todayString } from '../utils/formatDate';
+import { storageKey } from '../utils/storageKeys';
 import { addPeriod } from '../utils/recurring';
 import { deleteDocumentFile, clearDemoFiles } from '../features/documents/utils/documentFiles';
 import { sample_checklists } from '../features/checklist/data/sampleChecklists';
@@ -78,26 +79,37 @@ export function WorkOrdersProvider(props) {
   // checklists start empty, the samples only show up in the demo
   const [checklists, setChecklists] = useState([]);
   // I wait for the saved data to load before saving anything, so the mock data can't overwrite it
-  const [loaded, setLoaded] = useState(false);
+  // loaded_user is whose data is in memory (null for the original keys), so switching accounts counts as not loaded yet
+  const [loaded_user, setLoadedUser] = useState(undefined);
+  const current_user = props.user_id || null;
+  const loaded = loaded_user === current_user;
+  // the saves read this, it only changes once the new account's data is actually in state
+  const storage_user_ref = useRef(null);
+  // the newest load wins, an older one that finishes late is ignored
+  const load_count = useRef(0);
   // demo mode runs on sample data and never saves, so real data is never touched
   const [demo_mode, setDemoMode] = useState(false);
   // the ref changes right away, which the async load needs to check, state only updates on the next render
   const demo_ref = useRef(false);
 
   // reads whatever was saved on the device, used on startup and when leaving the demo
-  async function loadSavedData() {
+  // user_id picks which account's keys to read, gives back false if a newer load or the demo took over
+  async function loadSavedData(user_id) {
+    load_count.current++;
+    const this_load = load_count.current;
     try {
-      const saved_orders_text = await AsyncStorage.getItem(orders_key);
-      const saved_expenses_text = await AsyncStorage.getItem(expenses_key);
-      const saved_extras_text = await AsyncStorage.getItem(extras_key);
-      const saved_documents_text = await AsyncStorage.getItem(documents_key);
-      const saved_checklists_text = await AsyncStorage.getItem(checklists_key);
+      const saved_orders_text = await AsyncStorage.getItem(storageKey(orders_key, user_id));
+      const saved_expenses_text = await AsyncStorage.getItem(storageKey(expenses_key, user_id));
+      const saved_extras_text = await AsyncStorage.getItem(storageKey(extras_key, user_id));
+      const saved_documents_text = await AsyncStorage.getItem(storageKey(documents_key, user_id));
+      const saved_checklists_text = await AsyncStorage.getItem(storageKey(checklists_key, user_id));
       const migrated_expenses = [];
 
       // if the demo started while this was loading, I leave the demo data alone
-      if (demo_ref.current) {
-        return;
+      if (demo_ref.current || this_load !== load_count.current) {
+        return false;
       }
+      storage_user_ref.current = user_id;
 
       if (saved_orders_text !== null) {
         const saved_orders = JSON.parse(saved_orders_text);
@@ -140,19 +152,32 @@ export function WorkOrdersProvider(props) {
       setChecklists(saved_checklists_text !== null ? JSON.parse(saved_checklists_text) : []);
     } catch (error) {
       console.log('Could not load saved data', error);
+      if (this_load !== load_count.current) {
+        return false;
+      }
+      storage_user_ref.current = user_id;
     }
+    return true;
   }
 
+  // loads again whenever a different account signs in
   useEffect(() => {
-    loadSavedData().then(() => setLoaded(true));
-  }, []);
+    loadSavedData(current_user).then((applied) => {
+      if (applied) {
+        setLoadedUser(current_user);
+      }
+    });
+  }, [current_user]);
 
   // save every time the orders change, but not until the first load is done and never during the demo
   useEffect(() => {
     if (!loaded || demo_mode) {
       return;
     }
-    AsyncStorage.setItem(orders_key, JSON.stringify(orders)).catch((error) => {
+    AsyncStorage.setItem(
+      storageKey(orders_key, storage_user_ref.current),
+      JSON.stringify(orders),
+    ).catch((error) => {
       console.log('Could not save work orders', error);
     });
   }, [orders, loaded, demo_mode]);
@@ -161,7 +186,10 @@ export function WorkOrdersProvider(props) {
     if (!loaded || demo_mode) {
       return;
     }
-    AsyncStorage.setItem(expenses_key, JSON.stringify(expenses)).catch((error) => {
+    AsyncStorage.setItem(
+      storageKey(expenses_key, storage_user_ref.current),
+      JSON.stringify(expenses),
+    ).catch((error) => {
       console.log('Could not save expenses', error);
     });
   }, [expenses, loaded, demo_mode]);
@@ -177,7 +205,10 @@ export function WorkOrdersProvider(props) {
       budgets: budgets,
       mileage_rate: mileage_rate,
     };
-    AsyncStorage.setItem(extras_key, JSON.stringify(extras)).catch((error) => {
+    AsyncStorage.setItem(
+      storageKey(extras_key, storage_user_ref.current),
+      JSON.stringify(extras),
+    ).catch((error) => {
       console.log('Could not save trips and settings', error);
     });
   }, [trips, recurring_rules, budgets, mileage_rate, loaded, demo_mode]);
@@ -187,7 +218,10 @@ export function WorkOrdersProvider(props) {
     if (!loaded || demo_mode) {
       return;
     }
-    AsyncStorage.setItem(documents_key, JSON.stringify(documents)).catch((error) => {
+    AsyncStorage.setItem(
+      storageKey(documents_key, storage_user_ref.current),
+      JSON.stringify(documents),
+    ).catch((error) => {
       console.log('Could not save documents', error);
     });
   }, [documents, loaded, demo_mode]);
@@ -197,7 +231,10 @@ export function WorkOrdersProvider(props) {
     if (!loaded || demo_mode) {
       return;
     }
-    AsyncStorage.setItem(checklists_key, JSON.stringify(checklists)).catch((error) => {
+    AsyncStorage.setItem(
+      storageKey(checklists_key, storage_user_ref.current),
+      JSON.stringify(checklists),
+    ).catch((error) => {
       console.log('Could not save checklists', error);
     });
   }, [checklists, loaded, demo_mode]);
@@ -274,7 +311,9 @@ export function WorkOrdersProvider(props) {
       return;
     }
     demo_ref.current = false;
-    await loadSavedData();
+    if (await loadSavedData(current_user)) {
+      setLoadedUser(current_user);
+    }
     // files added during the demo lived in the cache and go away with it
     clearDemoFiles();
     clearDemoChecklistPhotos();
