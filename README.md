@@ -38,3 +38,20 @@ Before these three fixes, I made two smaller changes: a first version of the top
 npm install
 npx expo start -c
 ```
+
+## Running against the local backend
+The demo works with no backend. Logging in, signing up, and messages need the API from the `rent-well-api` repo running on your computer.
+
+1. In `rent-well-api`, start Postgres and the server (first time: `npm install`, `cp .env.example .env`, then `npm run migrate` and `npm run seed`):
+   ```bash
+   docker compose up -d
+   npm run dev
+   ```
+   Check it with `curl http://localhost:4000/health`.
+2. In this repo, start the app with `npx expo start -c`.
+   - iOS simulator: works as is (`http://localhost:4000`).
+   - Android emulator: works as is (`http://10.0.2.2:4000`).
+   - Physical phone: open `services/config.js`, set `lan_api_url` to your computer's address, like `'http://192.168.1.20:4000'` (find it with `ipconfig getifaddr en0`). The phone and computer need to be on the same wifi.
+3. Log in with a seed account (password `password1234`): `owner@example.com` (landlord) or `tenant@example.com` (tenant). To try tenant sign up, use invite code `WELCOME2`. Run `npm run seed` in the API repo again to reset the seed data.
+
+Push notifications need a development build with an EAS project id. In Expo Go or the simulator the app skips push and logs why.
