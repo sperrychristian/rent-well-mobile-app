@@ -12,11 +12,28 @@ import { seed_documents } from '../data/documents';
 import { todayString } from '../utils/formatDate';
 import { addPeriod } from '../utils/recurring';
 import { deleteDocumentFile, clearDemoFiles } from '../features/documents/utils/documentFiles';
+import { sample_checklists } from '../features/checklist/data/sampleChecklists';
+import { checklist_templates } from '../features/checklist/data/checklistTemplates';
+import {
+  copyTemplate,
+  buildMoveOutRooms,
+  makeItem,
+  makeRoom,
+  updateItemIn,
+  addItemTo,
+  removeItemFrom,
+  photoNames,
+} from '../features/checklist/utils/checklistHelpers';
+import {
+  deleteChecklistPhoto,
+  clearDemoChecklistPhotos,
+} from '../features/checklist/utils/checklistPhotos';
 
 const orders_key = 'rent_well_work_orders';
 const expenses_key = 'rent_well_expenses';
 const extras_key = 'rent_well_extras';
 const documents_key = 'rent_well_documents';
+const checklists_key = 'rent_well_checklists';
 
 const WorkOrdersContext = createContext(null);
 
@@ -58,6 +75,8 @@ export function WorkOrdersProvider(props) {
   const [budgets, setBudgets] = useState(seed_budgets);
   const [mileage_rate, setMileageRate] = useState(default_mileage_rate);
   const [documents, setDocuments] = useState(seed_documents);
+  // checklists start empty, the samples only show up in the demo
+  const [checklists, setChecklists] = useState([]);
   // I wait for the saved data to load before saving anything, so the mock data can't overwrite it
   const [loaded, setLoaded] = useState(false);
   // demo mode runs on sample data and never saves, so real data is never touched
@@ -72,6 +91,7 @@ export function WorkOrdersProvider(props) {
       const saved_expenses_text = await AsyncStorage.getItem(expenses_key);
       const saved_extras_text = await AsyncStorage.getItem(extras_key);
       const saved_documents_text = await AsyncStorage.getItem(documents_key);
+      const saved_checklists_text = await AsyncStorage.getItem(checklists_key);
       const migrated_expenses = [];
 
       // if the demo started while this was loading, I leave the demo data alone
@@ -116,6 +136,8 @@ export function WorkOrdersProvider(props) {
       } else {
         setDocuments(seed_documents);
       }
+
+      setChecklists(saved_checklists_text !== null ? JSON.parse(saved_checklists_text) : []);
     } catch (error) {
       console.log('Could not load saved data', error);
     }
@@ -169,6 +191,16 @@ export function WorkOrdersProvider(props) {
       console.log('Could not save documents', error);
     });
   }, [documents, loaded, demo_mode]);
+
+  // checklists get their own entry too, photos are saved by stored name only like documents
+  useEffect(() => {
+    if (!loaded || demo_mode) {
+      return;
+    }
+    AsyncStorage.setItem(checklists_key, JSON.stringify(checklists)).catch((error) => {
+      console.log('Could not save checklists', error);
+    });
+  }, [checklists, loaded, demo_mode]);
 
   // works out which recurring expenses are due, the id comes from the rule and the date so a repeat run can't double up
   function generateDue(rules) {
@@ -229,8 +261,10 @@ export function WorkOrdersProvider(props) {
     setBudgets(seed_budgets);
     setMileageRate(default_mileage_rate);
     setDocuments(seed_documents);
+    setChecklists(sample_checklists);
     // clears out files left behind if the app was closed in the middle of a demo
     clearDemoFiles();
+    clearDemoChecklistPhotos();
     setDemoMode(true);
   }
 
@@ -243,6 +277,7 @@ export function WorkOrdersProvider(props) {
     await loadSavedData();
     // files added during the demo lived in the cache and go away with it
     clearDemoFiles();
+    clearDemoChecklistPhotos();
     setDemoMode(false);
   }
 
@@ -444,6 +479,108 @@ export function WorkOrdersProvider(props) {
     );
   }
 
+  // move_in_id is set when a move-out starts from a move-in, so it copies those rooms and keeps their conditions
+  // gives back the new id so the screen can open it right away
+  function addChecklist(fields) {
+    const move_in = fields.move_in_id
+      ? checklists.find((checklist) => checklist.id === fields.move_in_id)
+      : null;
+    const rooms = move_in
+      ? buildMoveOutRooms(move_in.rooms, checklist_templates['Move-Out'], makeId)
+      : copyTemplate(checklist_templates[fields.type], makeId);
+    const new_checklist = {
+      id: makeId(),
+      property: fields.property,
+      type: fields.type,
+      tenant: fields.tenant || '',
+      created_at: todayString(),
+      move_in_id: move_in ? move_in.id : null,
+      completed: false,
+      signed_by: '',
+      signed_on: null,
+      rooms: rooms,
+    };
+    setChecklists((current_checklists) => [...current_checklists, new_checklist]);
+    return new_checklist.id;
+  }
+
+  // every room and item change goes through here, and a signed checklist is locked so it's skipped
+  function editRooms(checklist_id, makeRooms) {
+    setChecklists((current_checklists) =>
+      current_checklists.map((checklist) =>
+        checklist.id === checklist_id && !checklist.completed
+          ? { ...checklist, rooms: makeRooms(checklist.rooms) }
+          : checklist,
+      ),
+    );
+  }
+
+  // finds an open checklist, used before deleting photo files so a locked one never loses them
+  function openChecklist(checklist_id) {
+    return checklists.find((checklist) => checklist.id === checklist_id && !checklist.completed);
+  }
+
+  function updateChecklistItem(checklist_id, room_id, item_id, changes) {
+    editRooms(checklist_id, (rooms) => updateItemIn(rooms, room_id, item_id, changes));
+  }
+
+  function addChecklistItem(checklist_id, room_id, name) {
+    editRooms(checklist_id, (rooms) => addItemTo(rooms, room_id, makeItem(name, makeId)));
+  }
+
+  // the item's photos go with it
+  function deleteChecklistItem(checklist_id, room_id, item_id) {
+    const checklist = openChecklist(checklist_id);
+    if (!checklist) {
+      return;
+    }
+    const room = checklist.rooms.find((current_room) => current_room.id === room_id);
+    const item = room ? room.items.find((current_item) => current_item.id === item_id) : null;
+    if (item) {
+      item.photos.forEach((stored_name) => deleteChecklistPhoto(stored_name, demo_ref.current));
+    }
+    editRooms(checklist_id, (rooms) => removeItemFrom(rooms, room_id, item_id));
+  }
+
+  // a new room starts empty and items get added to it one at a time
+  function addChecklistRoom(checklist_id, name) {
+    editRooms(checklist_id, (rooms) => [...rooms, makeRoom(name, [], makeId)]);
+  }
+
+  function deleteChecklistRoom(checklist_id, room_id) {
+    const checklist = openChecklist(checklist_id);
+    if (!checklist) {
+      return;
+    }
+    const room = checklist.rooms.filter((current_room) => current_room.id === room_id);
+    photoNames(room).forEach((stored_name) => deleteChecklistPhoto(stored_name, demo_ref.current));
+    editRooms(checklist_id, (rooms) => rooms.filter((current_room) => current_room.id !== room_id));
+  }
+
+  // signing marks it complete, which locks every room and item from then on
+  function signChecklist(checklist_id, signed_by, signed_on) {
+    setChecklists((current_checklists) =>
+      current_checklists.map((checklist) =>
+        checklist.id === checklist_id && !checklist.completed
+          ? { ...checklist, completed: true, signed_by: signed_by, signed_on: signed_on }
+          : checklist,
+      ),
+    );
+  }
+
+  // deleting is still allowed on a signed checklist, and all its photos go with it
+  function deleteChecklist(checklist_id) {
+    const removed = checklists.find((checklist) => checklist.id === checklist_id);
+    if (removed) {
+      photoNames(removed.rooms).forEach((stored_name) =>
+        deleteChecklistPhoto(stored_name, demo_ref.current),
+      );
+    }
+    setChecklists((current_checklists) =>
+      current_checklists.filter((checklist) => checklist.id !== checklist_id),
+    );
+  }
+
   function getOrder(order_id) {
     return orders_with_expenses.find((order) => order.id === order_id);
   }
@@ -482,6 +619,15 @@ export function WorkOrdersProvider(props) {
     addDocument,
     updateDocument,
     deleteDocument,
+    checklists,
+    addChecklist,
+    updateChecklistItem,
+    addChecklistItem,
+    deleteChecklistItem,
+    addChecklistRoom,
+    deleteChecklistRoom,
+    signChecklist,
+    deleteChecklist,
   };
 
   return <WorkOrdersContext.Provider value={value}>{props.children}</WorkOrdersContext.Provider>;
