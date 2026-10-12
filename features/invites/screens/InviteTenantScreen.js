@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -18,19 +18,26 @@ import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TextField from '../../../components/TextField';
 import ErrorState from '../../../components/ErrorState';
-import { getProperties, getInvites, createProperty, createInvite } from '../../../services/api';
+import { useTenants } from '../../tenants/context/TenantsContext';
 import { pendingInvites, formatInviteCode, inviteShareText } from '../utils/inviteHelpers';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
 function InviteTenantScreen() {
   const insets = useSafeAreaInsets();
 
+  // properties and invites come from the shared tenants data, so this works the same in the demo and for real
+  const {
+    status: tenants_status,
+    error_message,
+    properties,
+    invites,
+    refresh,
+    addProperty,
+    createInvite,
+  } = useTenants();
   // loading, ready, or error for the first load of properties and invites
-  const [status, setStatus] = useState('loading');
-  const [error_message, setErrorMessage] = useState('');
-  const [properties, setProperties] = useState([]);
-  const [invites, setInvites] = useState([]);
-  const [property_id, setPropertyId] = useState(null);
+  const status = tenants_status;
+  const [picked_property_id, setPropertyId] = useState(null);
   // the add property form shows on its own when there are no properties yet
   const [adding_property, setAddingProperty] = useState(false);
   const [property_name, setPropertyName] = useState('');
@@ -40,37 +47,18 @@ function InviteTenantScreen() {
   const [field_errors, setFieldErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const [created_invite, setCreatedInvite] = useState(null);
-  // goes up on Try Again so the load runs again
-  const [load_count, setLoadCount] = useState(0);
 
-  useEffect(() => {
-    let active = true;
-    Promise.all([getProperties(), getInvites()])
-      .then(([property_list, invite_list]) => {
-        if (!active) {
-          return;
-        }
-        setProperties(property_list);
-        setInvites(invite_list);
-        setPropertyId(property_list.length > 0 ? property_list[0].id : null);
-        setAddingProperty(property_list.length === 0);
-        setStatus('ready');
-      })
-      .catch((error) => {
-        console.log('Could not load properties and invites', error.message);
-        if (active) {
-          setErrorMessage(error.message);
-          setStatus('error');
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, [load_count]);
+  // the first property is picked until another one is tapped
+  const property_id =
+    picked_property_id && properties.some((property) => property.id === picked_property_id)
+      ? picked_property_id
+      : properties.length > 0
+        ? properties[0].id
+        : null;
+  const show_property_form = adding_property || properties.length === 0;
 
   function retry() {
-    setStatus('loading');
-    setLoadCount((current) => current + 1);
+    refresh();
   }
 
   function propertyName(id) {
@@ -92,8 +80,7 @@ function InviteTenantScreen() {
     }
     setBusy(true);
     try {
-      const property = await createProperty(property_name.trim(), property_address.trim());
-      setProperties((current) => [...current, property]);
+      const property = await addProperty(property_name.trim(), property_address.trim());
       setPropertyId(property.id);
       setAddingProperty(false);
       setPropertyName('');
@@ -127,7 +114,6 @@ function InviteTenantScreen() {
         tenant_name: tenant_name.trim(),
         unit_label: unit_label.trim(),
       });
-      setInvites((current) => [invite, ...current]);
       setCreatedInvite(invite);
       setTenantName('');
       setUnitLabel('');
@@ -176,8 +162,8 @@ function InviteTenantScreen() {
         )}
 
         <Card>
-          <Text style={styles.heading}>{adding_property ? 'Add a Property' : 'New Invite'}</Text>
-          {adding_property ? (
+          <Text style={styles.heading}>{show_property_form ? 'Add a Property' : 'New Invite'}</Text>
+          {show_property_form ? (
             <View>
               {properties.length === 0 && (
                 <Text style={styles.helper_block}>
