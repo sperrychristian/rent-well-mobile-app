@@ -4,10 +4,14 @@ import { COLORS, SPACING } from '../../../theme';
 import ScreenTitle from '../../../components/ScreenTitle';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DemoBanner from '../../../components/DemoBanner';
+import UnreadBadge from '../../messages/components/UnreadBadge';
+import LogoutButton from '../../auth/components/LogoutButton';
+import { useMessages } from '../../messages/context/MessagesContext';
 
 function DashboardScreen(props) {
   // need the insets so the demo banner clears the notch and status bar
   const insets = useSafeAreaInsets();
+  const { unread_total } = useMessages();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
@@ -30,12 +34,16 @@ function DashboardScreen(props) {
             style={styles.new_order_button}
             onPress={() => props.navigation.navigate('NewWorkOrder')}
           />
-          <PrimaryButton
-            title="Messages"
-            icon="chatbubble-ellipses-outline"
-            style={styles.messages_button}
-            onPress={() => props.navigation.navigate('Messages')}
-          />
+          {/* the badge sits on the corner of the button and hides itself at zero */}
+          <View>
+            <PrimaryButton
+              title="Messages"
+              icon="chatbubble-ellipses-outline"
+              style={styles.messages_button}
+              onPress={() => props.navigation.navigate('Messages')}
+            />
+            <UnreadBadge count={unread_total} style={styles.unread_badge} />
+          </View>
           <PrimaryButton
             title="Documents"
             icon="document-text-outline"
@@ -56,6 +64,8 @@ function DashboardScreen(props) {
             text_color={COLORS.text_dark}
             onPress={() => props.navigation.navigate('Expenses')}
           />
+          {/* only shows for a signed-in account, not in the demo */}
+          <LogoutButton />
         </View>
       </View>
     </View>
@@ -102,5 +112,10 @@ const styles = StyleSheet.create({
   },
   new_order_button: {
     backgroundColor: COLORS.danger,
+  },
+  unread_badge: {
+    position: 'absolute',
+    top: -8,
+    right: 0,
   },
 });

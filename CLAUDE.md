@@ -10,29 +10,36 @@ The code so far was written in an earlier chat session and has been run only par
 - React Navigation native stack, `react-native-safe-area-context`
 - AsyncStorage for saving, `expo-image-picker`, `expo-file-system` and `expo-sharing` (CSV export, documents), `expo-document-picker`, `@react-native-community/datetimepicker`, `@expo/vector-icons` (Ionicons)
 - Inter fonts from `@expo-google-fonts/inter`, loaded in `App.js`
+- Backend (real mode only): `expo-secure-store` (tokens), `socket.io-client` (realtime), `expo-notifications` (push). The API is the sibling repo `rent-well-api`, contract in `docs/API.md`.
 - Run with `npx expo start -c` (clear the cache after adding or renaming files)
 - Checks: `npm run lint` (whole project), `npm test` (runs once, `npm run test:watch` to watch), `npm run format:check`. Format with `npx prettier --write <files>`. Prettier keeps quoted keys as written (`quoteProps: preserve`). Lint has 16 known problems in existing code, listed in the Phase 1 report, left alone during the refactor.
 
 ## Layout (project root)
-- `App.js`: font loading, `WorkOrdersProvider`, navigator. Header is hidden, every screen draws its own `ScreenTitle`.
+- `App.js`: font loading, then `AuthProvider` > `AccountData` (`WorkOrdersProvider` keyed by the signed-in user id, then `MessagesProvider`) > navigator. It waits for the saved session, then starts on the role's home (`Dashboard` for owners, `TenantHome` for tenants) or on `Welcome`. Header is hidden, every screen draws its own `ScreenTitle`.
+- `services/`: `config.js` (API base URL, with the marked spot for the LAN IP on a physical phone), `apiHelpers.js` (pure: `ApiError`, `parseApiError`, `createSingleFlight`, `buildQuery`), `apiClient.js` (client factory: token attach, 401 refresh and retry, single-flight refresh, session events), `api.js` (the shared client plus one function per endpoint, including the image upload), `tokenStorage.js` (SecureStore), `socket.js`, `push.js`, `navigationRef.js` (navigate from outside screens, used by push taps and session expiry)
 - `theme.js`: `COLORS`, `SPACING`, `FONT_SIZES`, `FONTS`
 - `context/WorkOrdersContext.js`: all shared data and actions (see below)
 - `features/`: one folder per feature, each with `screens/`, and `components/` or `utils/` when it has them. Tests sit next to the module they test (`name.test.js`).
-  - `home/`: WelcomeScreen, DashboardScreen
+  - `home/`: WelcomeScreen, DashboardScreen (owner), TenantHomeScreen (Messages and Report an Issue cards)
+  - `auth/`: AuthContext (`useAuth()`: user, role, login, registerOwner, registerTenant, logout, and `homeRouteFor(user)`), LoginScreen, RegisterOwnerScreen, RegisterTenantScreen, components AuthLayout, SubmitButton, LogoutButton, utils authValidation.js (pure: email, password, name, invite code checks and `normalizeInviteCode`)
+  - `invites/`: InviteTenantScreen (owner: pick or add a property, create an invite, share the code, pending list), utils inviteHelpers.js
   - `workOrders/`: WorkOrdersScreen, WorkOrderDetailScreen, NewWorkOrderScreen (tenant "Report an Issue"), WorkOrderCard
   - `expenses/`: ExpensesScreen, YearEndReportScreen, AddExpenseModal (full expense form, also used by the work order screens), ExpenseDetailsModal, RecurringModal, BudgetsModal, utils expenseStats.js and exportExpenses.js
   - `mileage/`: MileageScreen, TripModal (uses expenseStats from expenses)
   - `documents/`: DocumentsScreen, DocumentDetailModal, DocumentFormModal, utils documentFiles.js (pick, save, delete, open document files) and documentHelpers.js (pure helpers: icons, names, sizes, daysUntil and expiryTag with an optional today)
   - `checklist/`: ChecklistScreen (list), ChecklistDetailScreen (rooms and items), components NewChecklistModal, ChecklistItemModal, SignOffModal, NameModal (add room or item), ProgressBar, utils checklistHelpers.js (pure: template copy, move-out from move-in, progress, worse condition, text summary), checklistPhotos.js (save, delete, rebuild photo URIs), exportChecklist.js (share a .txt summary), data checklistTemplates.js and sampleChecklists.js (demo only)
-  - `messages/`: placeholder screen
-- `components/` (shared): ScreenTitle (shimmer card title), Card, PrimaryButton, DateField, DemoBanner
-- `utils/` (shared): formatDate.js (formatDate, todayString), dateInput.js, recurring.js (addPeriod, used by the context and documents)
+  - `messages/`: MessagesContext (`useMessages()`), MessagesScreen (inbox), MessageThreadScreen, components ConversationRow, MessageBubble, AttachmentImage, ImageViewerModal, UnreadBadge, utils messageHelpers.js (pure: merge and de-dupe, inbox updates from socket events, unread total, seen marker, time labels), data sampleThreads.js (demo only)
+- `components/` (shared): ScreenTitle (shimmer card title), Card, PrimaryButton, DateField, DemoBanner, TextField (label, input, inline error), ErrorState (message and Try Again, for offline or server down)
+- `utils/` (shared): formatDate.js (formatDate, todayString), dateInput.js, recurring.js (addPeriod, used by the context and documents), storageKeys.js (per-account AsyncStorage keys)
 - `data/`: workOrders.js, expenses.js, expenseOptions.js, expenseExtras.js, documents.js, documentOptions.js (mock and seed data)
 
 ## How the data works
+- Two modes, picked at Welcome. Demo is fully local and offline: no network request, no account, sample data, nothing saved. Real mode signs in to the backend for accounts and messages. Work orders, expenses, mileage, documents, and checklists are still local in both modes (they move to the server in later phases).
+- Accounts: `AuthContext` restores the saved session on launch (signs in with the saved user right away so it works offline, then refreshes in the background). Tokens and the user live in SecureStore, never AsyncStorage. Refresh tokens are single use, so `apiClient.js` shares one in-flight refresh across parallel 401s and saves the new refresh token before retrying. A dead refresh token clears the session and sends the user to Login.
+- Messages: `MessagesContext` remounts whenever the mode or user changes. Real mode loads `GET /conversations`, opens one socket (personal room for inbox updates, `conversation:join` while a thread is open, leave on close or background), and registers for push. Demo mode uses `sampleThreads.js` with a fake read receipt and reply. Screens call the same functions in both modes.
 - `WorkOrdersContext` holds orders, expenses, trips, recurring rules, budgets, the mileage rate, documents, and checklists. Screens read it with `useWorkOrders()`.
 - Orders and expenses are separate lists. An expense links to an order with `work_order_id`. The context builds `order.expenses` (a small legacy shape: id, amount, description, photo_uri) so work order screens keep working.
-- Saved to AsyncStorage under `rent_well_work_orders`, `rent_well_expenses`, `rent_well_extras`, `rent_well_documents`, `rent_well_checklists`. Nothing saves until the first load finishes.
+- Saved to AsyncStorage under `rent_well_work_orders`, `rent_well_expenses`, `rent_well_extras`, `rent_well_documents`, `rent_well_checklists`. In real mode each key gets `_<user id>` added (`storageKey` in `utils/storageKeys.js`) so accounts on a shared phone never see each other's data. With no user (demo, or signed out) the original keys are used, so data saved before accounts existed is still there, untouched. Nothing saves until the load for the current user finishes.
 - Demo mode: `startDemo()` resets everything to seed data and turns saving off, `exitDemo()` restores saved data first and then turns demo off. Any future network call must be skipped while `demo_mode` is true.
 - Expense fields: id, amount, category (IRS Schedule E style), date (YYYY-MM-DD), property, vendor, payment_method, is_capital, billed_to_tenant, recovered, notes, receipts (array of uris), work_order_id, optional recurring_id and split_group.
 - Capital improvements are kept out of the deductible total and category bars on purpose.
@@ -68,7 +75,8 @@ All colors must come from `theme.js`. When touching a file, use theme tokens. Ne
 ## Current status
 - Landlord side done: Work Orders (list, filters, search, sort, detail, expenses per order, notes, contractor and estimate, priority, message button), Expenses (totals, categories, vendors, budgets, recurring, split, billback, receipts, mileage log, year-end report, CSV export, undo delete), Documents (per-property storage, add, scan, search, sort, lease expiry tags, detail with image preview, open and share, edit, delete with file), Checklist (move-in and move-out from built-in templates, done, condition, note, up to 3 photos per item, custom rooms and items, progress per room and overall, move-out from a signed move-in with a "changed since move-in" flag, sign-off that locks it, text summary export), demo mode.
 - `NewWorkOrderScreen` (tenant "Report an Issue") was just added. Check that `addWorkOrder` exists in the context, that `App.js` registers `NewWorkOrder`, `WorkOrderDetail`, `Mileage`, and `YearEndReport`, and that `WorkOrderCard` and `WorkOrderDetailScreen` show `order.description`.
-- Still placeholders: Messages. No tenant dashboard or role routing yet (login goes straight to the landlord Dashboard, and the Dashboard has a temporary "New Work Order" button).
+- Backend connected (branch `messages`): login, owner and tenant sign up, role routing, tenant home, log out, owner invites, messages with realtime, photos, seen receipts, unread badges, and push. Demo mode messages use local sample threads.
+- The Dashboard still has a temporary "New Work Order" button. Push needs a development build with an EAS project id, it logs and does nothing in Expo Go or the simulator.
 
 ## Course assignment (submitted)
 The device audit of `screens/NewWorkOrderScreen.js` (now `features/workOrders/screens/`) is submitted. The submitted state is tagged `assignment-submission` (local only), and the pushed final state with the fixed README screenshots is tagged `assignment-final`. `NewWorkOrderScreen.js` is no longer frozen. Leave `README.md`, `ASSIGNMENT_NOTES.md`, and the screenshots alone unless Christian asks.
@@ -95,8 +103,8 @@ Phases:
 Bank feed import and matching, receipt scanning that fills in amount, date, and vendor, rent income and profit per property, depreciation schedules for capital improvements, durable receipt storage, document encryption, cloud storage for documents, tenant access to shared documents, e-signatures.
 
 ## Next up
-1. Tenant side: tenant home screen, role routing, tenant's own work order list.
-2. Messages screen.
+1. Tenant's own work order list, and moving work orders to the backend.
+2. Move expenses, mileage, documents, and checklists to the backend, one at a time.
 
 ## Working with Christian
 - He is a student learning this. Keep replies short and in bullets, explain the why in a sentence, and don't pad.
