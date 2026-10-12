@@ -7,11 +7,14 @@ import DemoBanner from '../../../components/DemoBanner';
 import UnreadBadge from '../../messages/components/UnreadBadge';
 import LogoutButton from '../../auth/components/LogoutButton';
 import { useMessages } from '../../messages/context/MessagesContext';
+import { useWorkOrders } from '../../../context/WorkOrdersContext';
 
 function DashboardScreen(props) {
   // need the insets so the demo banner clears the notch and status bar
   const insets = useSafeAreaInsets();
   const { unread_total } = useMessages();
+  // open_count only exists in real mode, so the badge stays hidden in the demo
+  const { is_remote, open_count } = useWorkOrders();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
@@ -22,18 +25,25 @@ function DashboardScreen(props) {
           <ScreenTitle>Dashboard</ScreenTitle>
         </View>
         <View style={styles.options_container}>
-          <PrimaryButton
-            title="Work Orders"
-            icon="construct-outline"
-            style={styles.work_order_button}
-            onPress={() => props.navigation.navigate('WorkOrders')}
-          />
-          <PrimaryButton
-            title="New Work Order"
-            icon="add-circle-outline"
-            style={styles.new_order_button}
-            onPress={() => props.navigation.navigate('NewWorkOrder')}
-          />
+          {/* counts the orders nobody has started yet */}
+          <View>
+            <PrimaryButton
+              title="Work Orders"
+              icon="construct-outline"
+              style={styles.work_order_button}
+              onPress={() => props.navigation.navigate('WorkOrders')}
+            />
+            <UnreadBadge count={open_count} style={styles.unread_badge} />
+          </View>
+          {/* the temporary tenant form, real mode hides it since only tenants can file requests there */}
+          {!is_remote && (
+            <PrimaryButton
+              title="New Work Order"
+              icon="add-circle-outline"
+              style={styles.new_order_button}
+              onPress={() => props.navigation.navigate('NewWorkOrder')}
+            />
+          )}
           {/* the badge sits on the corner of the button and hides itself at zero */}
           <View>
             <PrimaryButton

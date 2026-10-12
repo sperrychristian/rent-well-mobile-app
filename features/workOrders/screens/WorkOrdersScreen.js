@@ -7,6 +7,8 @@ import {
   ScrollView,
   Pressable,
   TextInput,
+  RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import ExpenseDetailsModal from '../../expenses/components/ExpenseDetailsModal';
 import { COLORS, SPACING, FONTS } from '../../../theme';
@@ -16,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import AddExpenseModal from '../../expenses/components/AddExpenseModal';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import ErrorState from '../../../components/ErrorState';
 
 // lower number sorts first, so emergencies come out on top
 const priority_rank = { Emergency: 0, Normal: 1, Low: 2 };
@@ -31,6 +34,12 @@ function WorkOrdersScreen(props) {
     resolveWorkOrder,
     addExpense,
     properties: known_properties,
+    is_remote,
+    orders_status,
+    orders_error,
+    orders_from_cache,
+    refreshing_orders,
+    refreshOrders,
   } = useWorkOrders();
   // track whether the toggle is showing resolved orders or active ones
   const [show_resolved, setShowResolved] = useState(false);
@@ -44,11 +53,20 @@ function WorkOrdersScreen(props) {
   const [search_text, setSearchText] = useState('');
   const [sort_by, setSortBy] = useState('Newest');
 
+  // in real mode the actions go to the server and can fail, so I show why (the local ones never throw)
+  async function tryAction(action) {
+    try {
+      await action();
+    } catch (error) {
+      Alert.alert('Could not update the work order', error.message);
+    }
+  }
+
   // ask first so a stray tap doesn't close out a request
   function confirmResolve(order_id) {
     Alert.alert('Resolve work order', 'Mark this request as resolved?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Resolve', onPress: () => resolveWorkOrder(order_id) },
+      { text: 'Resolve', onPress: () => tryAction(() => resolveWorkOrder(order_id)) },
     ]);
   }
 
@@ -69,10 +87,11 @@ function WorkOrdersScreen(props) {
       (order) =>
         (show_resolved ? order.status === 'Resolved' : order.status !== 'Resolved') &&
         (property_filter === 'All' || order.property === property_filter) &&
+        // a server order can have no tenant, so every field falls back to empty text
         (search_lower === '' ||
-          order.title.toLowerCase().includes(search_lower) ||
-          order.tenant.toLowerCase().includes(search_lower) ||
-          order.property.toLowerCase().includes(search_lower)),
+          (order.title || '').toLowerCase().includes(search_lower) ||
+          (order.tenant || '').toLowerCase().includes(search_lower) ||
+          (order.property || '').toLowerCase().includes(search_lower)),
     )
     .sort((a, b) => {
       // priority sort uses the rank first and falls back to newest for ties
@@ -82,10 +101,17 @@ function WorkOrdersScreen(props) {
           return rank_difference;
         }
       }
+      // server orders also have the full time, which breaks ties between orders from the same day
       if (sort_by === 'Oldest') {
-        return a.created_at.localeCompare(b.created_at);
+        return (
+          a.created_at.localeCompare(b.created_at) ||
+          (a.created_at_iso || '').localeCompare(b.created_at_iso || '')
+        );
       }
-      return b.created_at.localeCompare(a.created_at);
+      return (
+        b.created_at.localeCompare(a.created_at) ||
+        (b.created_at_iso || '').localeCompare(a.created_at_iso || '')
+      );
     });
 
   // find the order for the details modal, undefined when it's closed
@@ -101,6 +127,14 @@ function WorkOrdersScreen(props) {
   // the controls scroll with the list so they don't eat the screen in landscape
   const list_header = (
     <View>
+      {/* the saved list is showing because the server didn't answer, pulling down tries again */}
+      {is_remote && orders_from_cache && orders_error ? (
+        <View style={styles.offline_banner}>
+          <Text style={styles.offline_text}>
+            {orders_error + ' Showing the last saved list, pull down to try again.'}
+          </Text>
+        </View>
+      ) : null}
       <TextInput
         style={styles.search_input}
         placeholder="Search by issue, tenant, or property"
@@ -158,29 +192,47 @@ function WorkOrdersScreen(props) {
     <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
       <ScreenTitle>Work Orders</ScreenTitle>
       {/* FlatList only renders what's on screen, so it scales when the list gets long */}
-      <FlatList
-        data={visible_orders}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        keyboardShouldPersistTaps="handled"
-        ListHeaderComponent={list_header}
-        ListEmptyComponent={
-          <Text style={styles.empty_text}>
-            {show_resolved ? 'No resolved work orders found' : 'No open work orders found'}
-          </Text>
-        }
-        renderItem={({ item }) => (
-          <WorkOrderCard
-            order={item}
-            onAddExpense={() => setExpenseOrderId(item.id)}
-            onViewExpenses={() => setDetailsOrderId(item.id)}
-            onStart={() => startWorkOrder(item.id)}
-            onResolve={() => confirmResolve(item.id)}
-            onMessage={() => props.navigation.navigate('Messages', { tenant: item.tenant })}
-            onOpenDetail={() => props.navigation.navigate('WorkOrderDetail', { order_id: item.id })}
-          />
-        )}
-      />
+      {/* real mode can still be loading or have failed with nothing saved, so those get their own screens */}
+      {is_remote && orders_status === 'loading' && orders.length === 0 ? (
+        <ActivityIndicator style={styles.spinner} color={COLORS.title} size="large" />
+      ) : is_remote && orders_status === 'error' && orders.length === 0 ? (
+        <ErrorState message={orders_error} onRetry={refreshOrders} />
+      ) : (
+        <FlatList
+          data={visible_orders}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          keyboardShouldPersistTaps="handled"
+          refreshControl={
+            is_remote ? (
+              <RefreshControl
+                refreshing={!!refreshing_orders}
+                onRefresh={refreshOrders}
+                tintColor={COLORS.title}
+              />
+            ) : undefined
+          }
+          ListHeaderComponent={list_header}
+          ListEmptyComponent={
+            <Text style={styles.empty_text}>
+              {show_resolved ? 'No resolved work orders found' : 'No open work orders found'}
+            </Text>
+          }
+          renderItem={({ item }) => (
+            <WorkOrderCard
+              order={item}
+              onAddExpense={() => setExpenseOrderId(item.id)}
+              onViewExpenses={() => setDetailsOrderId(item.id)}
+              onStart={() => tryAction(() => startWorkOrder(item.id))}
+              onResolve={() => confirmResolve(item.id)}
+              onMessage={() => props.navigation.navigate('Messages', { tenant: item.tenant })}
+              onOpenDetail={() =>
+                props.navigation.navigate('WorkOrderDetail', { order_id: item.id })
+              }
+            />
+          )}
+        />
+      )}
       <AddExpenseModal
         visible={expense_order_id !== null}
         default_property={expense_order ? expense_order.property : ''}
@@ -247,6 +299,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.sm,
     marginBottom: SPACING.sm,
+  },
+  spinner: {
+    marginTop: SPACING.lg,
+  },
+  offline_banner: {
+    backgroundColor: COLORS.warning,
+    borderRadius: 8,
+    padding: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  offline_text: {
+    color: COLORS.text_dark,
+    fontFamily: FONTS.body_bold,
+    fontSize: 13,
+    textAlign: 'center',
   },
   empty_text: {
     color: COLORS.text,
