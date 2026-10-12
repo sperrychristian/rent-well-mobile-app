@@ -8,7 +8,7 @@ import WorkOrdersScreen from './features/workOrders/screens/WorkOrdersScreen';
 import MessagesScreen from './features/messages/screens/MessagesScreen';
 import DocumentsScreen from './features/documents/screens/DocumentsScreen';
 import ExpensesScreen from './features/expenses/screens/ExpensesScreen';
-import { WorkOrdersProvider } from './context/WorkOrdersContext';
+import { WorkOrdersProvider, useWorkOrders } from './context/WorkOrdersContext';
 import WorkOrderDetailScreen from './features/workOrders/screens/WorkOrderDetailScreen';
 import MileageScreen from './features/mileage/screens/MileageScreen';
 import YearEndReportScreen from './features/expenses/screens/YearEndReportScreen';
@@ -21,6 +21,9 @@ import MessageThreadScreen from './features/messages/screens/MessageThreadScreen
 import InviteTenantScreen from './features/invites/screens/InviteTenantScreen';
 import { AuthProvider, useAuth, homeRouteFor } from './features/auth/context/AuthContext';
 import { MessagesProvider } from './features/messages/context/MessagesContext';
+import { RemoteWorkOrdersProvider } from './features/workOrders/context/RemoteWorkOrdersProvider';
+import MyRequestsScreen from './features/workOrders/screens/MyRequestsScreen';
+import RequestDetailScreen from './features/workOrders/screens/RequestDetailScreen';
 import { navigation_ref } from './services/navigationRef';
 import { setupNotificationHandler } from './services/push';
 
@@ -43,18 +46,31 @@ function AccountData(props) {
   const { user } = useAuth();
   return (
     <WorkOrdersProvider user_id={user ? user.id : null}>
-      <MessagesProvider>{props.children}</MessagesProvider>
+      {/* in real mode the work orders come from the server, demo and signed out keep the local ones */}
+      <RemoteWorkOrdersProvider>
+        <MessagesProvider>{props.children}</MessagesProvider>
+      </RemoteWorkOrdersProvider>
     </WorkOrdersProvider>
   );
 }
 
 // waits for the saved session, then starts on the right home for a signed-in account or on Welcome
+// the providers above start fresh (and remount this) whenever the mode or account changes,
+// so the first screen has to match the mode: the demo's dashboard, a role's home, or Login after a session ran out
 function AppNavigator() {
-  const { status, user } = useAuth();
+  const { status, user, session_expired } = useAuth();
+  const { demo_mode } = useWorkOrders();
   if (status === 'restoring') {
     return null;
   }
-  const first_route = user ? homeRouteFor(user) : 'Welcome';
+  let first_route = 'Welcome';
+  if (user) {
+    first_route = homeRouteFor(user);
+  } else if (demo_mode) {
+    first_route = 'Dashboard';
+  } else if (session_expired) {
+    first_route = 'Login';
+  }
 
   return (
     <NavigationContainer ref={navigation_ref}>
@@ -65,7 +81,11 @@ function AppNavigator() {
         {/* this name has to match navigate('Dashboard') exactly */}
         <Stack.Screen name="Dashboard" component={DashboardScreen} />
         <Stack.Screen name="TenantHome" component={TenantHomeScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          initialParams={session_expired ? { expired: true } : undefined}
+        />
         <Stack.Screen name="RegisterOwner" component={RegisterOwnerScreen} />
         <Stack.Screen name="RegisterTenant" component={RegisterTenantScreen} />
         <Stack.Screen name="WorkOrders" component={WorkOrdersScreen} />
@@ -80,6 +100,8 @@ function AppNavigator() {
         <Stack.Screen name="Mileage" component={MileageScreen} />
         <Stack.Screen name="YearEndReport" component={YearEndReportScreen} />
         <Stack.Screen name="NewWorkOrder" component={NewWorkOrderScreen} />
+        <Stack.Screen name="MyRequests" component={MyRequestsScreen} />
+        <Stack.Screen name="RequestDetail" component={RequestDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
