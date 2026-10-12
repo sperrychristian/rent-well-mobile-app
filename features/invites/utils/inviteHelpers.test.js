@@ -20,6 +20,16 @@ describe('inviteHelpers', () => {
     expect(pendingInvites([base, { ...base, id: 'i2', usedAt: 'x' }], now)).toHaveLength(1);
   });
 
+  test('the status from the server wins, so revoked and used ones are never pending', () => {
+    expect(isPending({ ...base, status: 'pending' }, now)).toBe(true);
+    expect(isPending({ ...base, status: 'revoked', revokedAt: 'x' }, now)).toBe(false);
+    expect(isPending({ ...base, status: 'used' }, now)).toBe(false);
+    // a pending one that ran out since it was loaded counts as expired
+    expect(
+      isPending({ ...base, status: 'pending', expiresAt: '2026-10-11T11:00:00.000Z' }, now),
+    ).toBe(false);
+  });
+
   test('codes are shown with a dash in the middle', () => {
     expect(formatInviteCode('K7M2QX9P')).toBe('K7M2-QX9P');
     expect(formatInviteCode('ABC')).toBe('ABC');
