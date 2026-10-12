@@ -21,6 +21,7 @@ import ErrorState from '../../../components/ErrorState';
 import MessageBubble from '../components/MessageBubble';
 import ImageViewerModal from '../components/ImageViewerModal';
 import { useMessages } from '../context/MessagesContext';
+import { useTenants } from '../../tenants/context/TenantsContext';
 import { mergeMessages, lastSeenMessageId, messageBodyToSend } from '../utils/messageHelpers';
 import { COLORS, SPACING, FONTS } from '../../../theme';
 
@@ -204,6 +205,8 @@ function MessageThreadScreen(props) {
     conversation ? conversation.otherUserLastReadAt : null,
   );
   const can_send = (draft.trim() !== '' || !!photo) && !sending;
+  // a tenant whose rental ended can still read the thread, but not write (owners can always write)
+  const { is_read_only } = useTenants();
 
   let list;
   if (status === 'error' && messages.length === 0) {
@@ -272,7 +275,15 @@ function MessageThreadScreen(props) {
         )}
         {list}
 
-        {photo && (
+        {is_read_only ? (
+          <View style={[styles.read_only, { marginBottom: insets.bottom + SPACING.sm }]}>
+            <Text style={styles.read_only_text}>
+              Your tenancy has ended, so this conversation is read-only now.
+            </Text>
+          </View>
+        ) : null}
+
+        {!is_read_only && photo && (
           <View style={styles.photo_preview}>
             <Image source={{ uri: photo.uri }} style={styles.photo_thumb} />
             <Text style={styles.photo_text}>Photo ready to send</Text>
@@ -287,42 +298,44 @@ function MessageThreadScreen(props) {
           </View>
         )}
 
-        <View style={[styles.composer, { paddingBottom: insets.bottom + SPACING.sm }]}>
-          <Pressable
-            onPress={pickPhoto}
-            disabled={sending}
-            hitSlop={8}
-            style={styles.icon_button}
-            accessibilityRole="button"
-            accessibilityLabel="Attach a photo"
-          >
-            <Ionicons name="camera-outline" size={26} color={COLORS.title} />
-          </Pressable>
-          <TextInput
-            style={styles.input}
-            placeholder="Message"
-            placeholderTextColor={COLORS.secondary}
-            value={draft}
-            onChangeText={setDraft}
-            multiline
-            maxLength={max_body_length}
-            editable={!sending}
-          />
-          <Pressable
-            onPress={handleSend}
-            disabled={!can_send}
-            hitSlop={8}
-            style={[styles.send_button, !can_send && styles.send_disabled]}
-            accessibilityRole="button"
-            accessibilityLabel="Send message"
-          >
-            {sending ? (
-              <ActivityIndicator color={COLORS.text_light} />
-            ) : (
-              <Ionicons name="send" size={20} color={COLORS.text_light} />
-            )}
-          </Pressable>
-        </View>
+        {!is_read_only && (
+          <View style={[styles.composer, { paddingBottom: insets.bottom + SPACING.sm }]}>
+            <Pressable
+              onPress={pickPhoto}
+              disabled={sending}
+              hitSlop={8}
+              style={styles.icon_button}
+              accessibilityRole="button"
+              accessibilityLabel="Attach a photo"
+            >
+              <Ionicons name="camera-outline" size={26} color={COLORS.title} />
+            </Pressable>
+            <TextInput
+              style={styles.input}
+              placeholder="Message"
+              placeholderTextColor={COLORS.secondary}
+              value={draft}
+              onChangeText={setDraft}
+              multiline
+              maxLength={max_body_length}
+              editable={!sending}
+            />
+            <Pressable
+              onPress={handleSend}
+              disabled={!can_send}
+              hitSlop={8}
+              style={[styles.send_button, !can_send && styles.send_disabled]}
+              accessibilityRole="button"
+              accessibilityLabel="Send message"
+            >
+              {sending ? (
+                <ActivityIndicator color={COLORS.text_light} />
+              ) : (
+                <Ionicons name="send" size={20} color={COLORS.text_light} />
+              )}
+            </Pressable>
+          </View>
+        )}
       </View>
 
       <ImageViewerModal url={viewer_url} onClose={() => setViewerUrl(null)} />
@@ -431,6 +444,18 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.action,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  read_only: {
+    backgroundColor: COLORS.muted,
+    borderRadius: 10,
+    padding: SPACING.sm,
+    marginTop: SPACING.sm,
+  },
+  read_only_text: {
+    color: COLORS.text,
+    fontFamily: FONTS.body_bold,
+    fontSize: 13,
+    textAlign: 'center',
   },
   send_disabled: {
     opacity: 0.4,
