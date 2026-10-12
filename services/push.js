@@ -69,21 +69,31 @@ function conversationFromResponse(response) {
   return data && data.type === 'message:new' && data.conversationId ? data.conversationId : null;
 }
 
-// calls onOpen with the conversation id for taps while running, and once for a tap that launched the app
-export function listenForNotificationTaps(onOpen) {
+// work order pushes are workorder:new (to the owner) and workorder:updated (to the tenant)
+function workOrderFromResponse(response) {
+  const data =
+    response && response.notification ? response.notification.request.content.data : null;
+  const is_work_order =
+    data && (data.type === 'workorder:new' || data.type === 'workorder:updated');
+  return is_work_order && data.workOrderId ? data.workOrderId : null;
+}
+
+// calls onOpen with the id for taps while running, and once for a tap that launched the app
+// idFromResponse picks which kind of push this listener cares about
+function listenForTaps(idFromResponse, onOpen) {
   let subscription = null;
   try {
     subscription = Notifications.addNotificationResponseReceivedListener((response) => {
-      const conversation_id = conversationFromResponse(response);
-      if (conversation_id) {
-        onOpen(conversation_id);
+      const id = idFromResponse(response);
+      if (id) {
+        onOpen(id);
       }
     });
     Notifications.getLastNotificationResponseAsync()
       .then((response) => {
-        const conversation_id = conversationFromResponse(response);
-        if (conversation_id) {
-          onOpen(conversation_id);
+        const id = idFromResponse(response);
+        if (id) {
+          onOpen(id);
           Notifications.clearLastNotificationResponseAsync().catch(() => {});
         }
       })
@@ -96,4 +106,14 @@ export function listenForNotificationTaps(onOpen) {
       subscription.remove();
     }
   };
+}
+
+// calls onOpen with the conversation id for taps while running, and once for a tap that launched the app
+export function listenForNotificationTaps(onOpen) {
+  return listenForTaps(conversationFromResponse, onOpen);
+}
+
+// same thing for work order pushes, onOpen gets the work order id
+export function listenForWorkOrderTaps(onOpen) {
+  return listenForTaps(workOrderFromResponse, onOpen);
 }

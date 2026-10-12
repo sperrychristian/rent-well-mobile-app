@@ -12,6 +12,7 @@ the same commit.
 - [Properties (owner only)](#properties-owner-only)
 - [Invites (owner only)](#invites-owner-only)
 - [Conversations and messages](#conversations-and-messages)
+- [Work orders](#work-orders)
 - [Uploads (image attachments)](#uploads-image-attachments)
 - [Push tokens](#push-tokens)
 - [Socket.IO](#socketio)
@@ -34,7 +35,7 @@ the same commit.
   belongs to someone else returns `404 NOT_FOUND` (the same response as an id that doesn't exist).
   A route that requires a different role returns `403 FORBIDDEN`.
 - **Notation:** in examples, `{ "...Message" }` means "a full [Message](#message) object here"
-  (same for User, Property, Invite, Conversation). It is not literal JSON.
+  (same for User, Property, Invite, Conversation, WorkOrder). It is not literal JSON.
 - **Token lifetimes:** access token 15 minutes, refresh token 30 days. Refresh tokens are
   single use. See [POST /auth/refresh](#post-authrefresh).
 
@@ -186,6 +187,76 @@ exchange the key for a URL with [GET /uploads/url](#get-uploadsurl).
 | `otherUserLastReadAt` | When the other person last read it. Use it for "Seen" receipts on my messages: a message is seen if `createdAt <= otherUserLastReadAt`. |
 
 Sending a message also moves the sender's own `lastReadAt` up to that message.
+
+### WorkOrder
+
+```json
+{
+  "id": "uuid",
+  "title": "Kitchen faucet leaking",
+  "description": "Drips constantly, worse at night.",
+  "priority": "Normal",
+  "status": "In Progress",
+  "ownerNotes": "Plumber coming Thursday at 9am",
+  "contractor": "Wasatch Plumbing",
+  "estimate": 180,
+  "property": { "id": "uuid", "name": "Maple Court", "address": "12 Maple St, Springfield" },
+  "unitLabel": "Unit 2B",
+  "tenantName": "Tara Tenant",
+  "tenant": { "id": "uuid", "name": "Tara Tenant" },
+  "ownerId": "uuid",
+  "createdBy": "uuid",
+  "photos": [
+    {
+      "id": "uuid",
+      "key": "attachments/<uploader id>/<uuid>.jpg",
+      "uploadedBy": "uuid",
+      "createdAt": "2026-10-11T23:12:27.844Z"
+    }
+  ],
+  "createdAt": "2026-10-08T23:12:27.844Z",
+  "startedAt": "2026-10-09T15:02:11.120Z",
+  "resolvedAt": null
+}
+```
+
+| Field         | Type           | Notes                                                                                                                                |
+| ------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `priority`    | string         | Exactly `"Emergency"`, `"Normal"`, or `"Low"` (case sensitive)                                                                       |
+| `status`      | string         | Exactly `"Open"`, `"In Progress"`, or `"Resolved"` (case sensitive, with the space)                                                  |
+| `description` | string         | `""` when empty, never `null`                                                                                                        |
+| `ownerNotes`  | string         | `""` when empty, never `null`. **Visible to the tenant too.**                                                                        |
+| `contractor`  | string         | **Owner only.** `""` when not set. The key is **absent** (not `null`) in every tenant copy: HTTP responses and socket events.        |
+| `estimate`    | number \| null | **Owner only.** Dollars, rounded to cents (e.g. `180`, `95.5`). `null` when not set. Absent for tenants, like `contractor`.          |
+| `unitLabel`   | string \| null |                                                                                                                                      |
+| `tenantName`  | string         | Display name. **Always a string**: `""` for owner-created orders with no tenant, never `null`.                                       |
+| `tenant`      | object \| null | The linked tenant account. `null` for owner-created orders not linked to a tenant.                                                   |
+| `createdBy`   | string \| null | User id of whoever filed it. Compare to `ownerId` to tell "owner logged" from "tenant reported". `null` if that account was deleted. |
+| `photos`      | array          | Oldest first. 0 to 10 entries. Get a viewable URL from [GET /uploads/url](#get-uploadsurl) with `key`.                               |
+| `startedAt`   | string \| null | Set when the status moves to In Progress. `null` while Open.                                                                         |
+| `resolvedAt`  | string \| null | Set when the status moves to Resolved. `null` otherwise.                                                                             |
+
+The dates always match the status: Open has neither date, In Progress has `startedAt` only, and
+Resolved has both.
+
+**Owner vs tenant copies:** owners get every field above. Tenants get the same object **without
+the `contractor` and `estimate` keys**. That applies to every response and to the `workorder:new`
+and `workorder:updated` socket payloads. Check `user.role` rather than testing for the keys.
+
+#### Mapping from the app's current local work order shape
+
+| Local field (`data/workOrders.js`)                       | API field                                                                                                         |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `id`                                                     | `id` (now a UUID string)                                                                                          |
+| `title`, `description`                                   | `title`, `description`                                                                                            |
+| `status`, `priority`                                     | `status`, `priority` (same values)                                                                                |
+| `property` (one display string)                          | `property.name` / `property.address` + `unitLabel`. Build the string, e.g. `` `${property.name}, ${unitLabel}` `` |
+| `tenant`                                                 | `tenantName` (always a string, `""` when none)                                                                    |
+| `notes`                                                  | `ownerNotes`                                                                                                      |
+| `photo` (single `{ uri }`)                               | `photos[]`. Show `photos[0]` via `GET /uploads/url?key=...`                                                       |
+| `created_at`, `started_at`, `resolved_at` (`YYYY-MM-DD`) | `createdAt`, `startedAt`, `resolvedAt` (full ISO timestamps)                                                      |
+| `contractor`, `estimate`                                 | `contractor`, `estimate` (same types: string and number-or-null). **Owner only.** Not present in tenant copies.   |
+| `expenses`                                               | **Not stored by the API yet.** Keep them local for now.                                                           |
 
 ---
 
@@ -548,6 +619,200 @@ Errors: `400 VALIDATION_ERROR` (bad `id`), `401`, `404 NOT_FOUND`.
 
 ---
 
+## Work orders
+
+Auth required, any role. Owners see every work order on their own properties. Tenants see only
+work orders where they are the linked tenant. Anything else is `404 NOT_FOUND`.
+
+### `POST /work-orders`
+
+Creates a work order. The body depends on **who is calling**. Unknown fields are rejected with
+`400 VALIDATION_ERROR`, so each role must send only its own fields.
+
+**As a tenant:**
+
+```json
+{
+  "title": "Water heater not working",
+  "description": "No hot water since this morning",
+  "priority": "Emergency",
+  "photoKeys": ["attachments/<my user id>/<uuid>.jpg"],
+  "tenancyId": "uuid"
+}
+```
+
+| Field         | Required | Rules                                                                                                      |
+| ------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `title`       | yes      | trimmed, 1 to 120 chars                                                                                    |
+| `description` | no       | trimmed, up to 2000 chars, default `""`                                                                    |
+| `priority`    | no       | `"Emergency"`, `"Normal"`, or `"Low"`, default `"Normal"`                                                  |
+| `photoKeys`   | no       | up to **5** keys from [POST /uploads/sign](#post-uploadssign) that **I** uploaded. Duplicates are ignored. |
+| `tenancyId`   | no       | only needed if I have more than one tenancy (ids are in `GET /me` → `user.tenancies`)                      |
+
+The property, unit, owner, and tenant name **always come from my tenancy**. Sending
+`propertyId`, `unitLabel`, `tenantName`, `contractor`, or `estimate` as a tenant is a
+`400 VALIDATION_ERROR`. `tenantName` is
+set to my account name.
+
+**As an owner:**
+
+```json
+{
+  "propertyId": "uuid",
+  "title": "Clean gutters before winter",
+  "description": "",
+  "priority": "Low",
+  "unitLabel": "Exterior",
+  "tenantName": "Tara Tenant",
+  "tenantUserId": "uuid",
+  "contractor": "Gutter Pros",
+  "estimate": 150,
+  "photoKeys": []
+}
+```
+
+| Field                                           | Required | Rules                                                                                                                    |
+| ----------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `propertyId`                                    | yes      | a property **I own**                                                                                                     |
+| `title`, `description`, `priority`, `photoKeys` |          | same rules as for tenants                                                                                                |
+| `tenantUserId`                                  | no       | link a tenant account. They must have a tenancy at `propertyId`. A linked tenant can see the order and gets its updates. |
+| `unitLabel`                                     | no       | trimmed, 1 to 50 chars. Defaults to the linked tenant's unit, else `null`.                                               |
+| `tenantName`                                    | no       | trimmed, 1 to 100 chars. Defaults to the linked tenant's name. Returned as `""` if there's neither.                      |
+| `contractor`                                    | no       | trimmed, up to 120 chars, default `""`                                                                                   |
+| `estimate`                                      | no       | number of dollars, `0` to `9999999999.99`, or `null` (default). Rounded to cents.                                        |
+
+**201**:
+
+```json
+{ "workOrder": { "...WorkOrder" } }
+```
+
+New work orders always start as `"Open"`.
+
+Side effects:
+
+- Emits `workorder:new` to the owner and the linked tenant (see [Socket.IO](#socketio)).
+- **If a tenant filed it**, the owner gets a push (see [Push notification payload](#push-notification-payload)).
+  Owner-created orders send no push.
+
+Errors:
+
+- `400 VALIDATION_ERROR`: bad fields, more than 5 `photoKeys`, or fields not allowed for my role.
+- `400 ATTACHMENT_INVALID`: a photo key isn't mine or was never uploaded. Nothing is created.
+- `400 TENANCY_REQUIRED`: tenant with more than one tenancy who didn't send `tenancyId`.
+- `400 NO_TENANCY`: tenant account with no tenancy.
+- `404 NOT_FOUND`: owner's `propertyId` isn't theirs, `tenantUserId` doesn't live at that
+  property, or a tenant's `tenancyId` isn't theirs.
+- `401`.
+
+### `GET /work-orders`
+
+Lists work orders I can see, **newest first** (by `createdAt`), cursor paginated.
+
+Query parameters:
+
+| Param        | Required | Rules                                                                                                                               |
+| ------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `status`     | no       | one status, or several comma separated: `status=Resolved` or `status=Open,In Progress` (URL-encode the space: `Open,In%20Progress`) |
+| `propertyId` | no       | only this property. For a property that isn't mine the list is just empty.                                                          |
+| `limit`      | no       | integer 1 to 100, default **20**                                                                                                    |
+| `cursor`     | no       | `nextCursor` from the previous page, with the **same** filters                                                                      |
+
+**200**:
+
+```json
+{ "workOrders": [ { "...WorkOrder" } ], "nextCursor": "uuid-or-null" }
+```
+
+`nextCursor` is `null` on the last page. Sorting by priority (Emergency first) is left to the app.
+
+Errors: `400 VALIDATION_ERROR` (unknown status, bad limit/ids), `400 INVALID_CURSOR` (cursor isn't a
+work order I can see), `401`.
+
+### `GET /work-orders/:id`
+
+**200**:
+
+```json
+{ "workOrder": { "...WorkOrder" } }
+```
+
+Errors: `400 VALIDATION_ERROR` (bad id), `401`, `404 NOT_FOUND`.
+
+### `PATCH /work-orders/:id`
+
+Changes a work order. Send only the fields you're changing. At least one field is required, and
+unknown fields are rejected.
+
+| Field          | Who             | Rules                                                                                                                                                          |
+| -------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `status`       | owner only      | `"Open"`, `"In Progress"`, or `"Resolved"`. Must be an allowed move (below).                                                                                   |
+| `priority`     | owner only      | `"Emergency"`, `"Normal"`, or `"Low"`                                                                                                                          |
+| `ownerNotes`   | owner only      | trimmed, up to 2000 chars. `""` clears it.                                                                                                                     |
+| `contractor`   | owner only      | trimmed, up to 120 chars. `""` clears it.                                                                                                                      |
+| `estimate`     | owner only      | number of dollars, `0` to `9999999999.99`, rounded to cents. `null` clears it. Strings like `"180"` are rejected, so send a number.                            |
+| `addPhotoKeys` | owner or tenant | up to 5 keys **I** uploaded, **appended** to the existing photos (max 10 total). Already attached keys are ignored. Tenants: only while the order is `"Open"`. |
+
+Allowed status moves (owners). The server sets the dates; the app never sends them:
+
+| From          | To            | Dates                                               | App action               |
+| ------------- | ------------- | --------------------------------------------------- | ------------------------ |
+| `Open`        | `In Progress` | `startedAt` = now                                   | Start work               |
+| `Open`        | `Resolved`    | `startedAt` = now (if empty) and `resolvedAt` = now | Resolve without starting |
+| `In Progress` | `Resolved`    | `resolvedAt` = now                                  | Resolve                  |
+| `In Progress` | `Open`        | `startedAt` cleared                                 | Undo start               |
+| `Resolved`    | `In Progress` | `resolvedAt` cleared, `startedAt` kept              | Reopen                   |
+| `Resolved`    | `Open`        | both cleared                                        | Reopen fully             |
+| same          | same          | nothing changes, returns 200                        |                          |
+
+Every move between the three statuses is allowed. Resolving straight from Open fills in
+`startedAt` too, so a Resolved order always has both dates.
+
+Examples:
+
+```json
+{ "status": "In Progress" }
+```
+
+```json
+{ "status": "Resolved", "ownerNotes": "Replaced the lock cylinder" }
+```
+
+```json
+{ "contractor": "Wasatch Plumbing", "estimate": 180 }
+```
+
+```json
+{ "addPhotoKeys": ["attachments/<my user id>/<uuid>.jpg"] }
+```
+
+**200**:
+
+```json
+{ "workOrder": { "...WorkOrder" } }
+```
+
+Side effects:
+
+- Emits `workorder:updated` to the owner and the linked tenant.
+- If `status` actually changed and there's a linked tenant, the tenant gets a push.
+
+Errors:
+
+- `400 VALIDATION_ERROR`: empty body, unknown field, bad value.
+- `400 ATTACHMENT_INVALID`: a photo key isn't mine or was never uploaded.
+- `400 PHOTO_LIMIT`: the order would have more than 10 photos.
+- `403 FORBIDDEN`: a tenant sent `status`, `priority`, `ownerNotes`, `contractor`, or `estimate`. Nothing is changed, even if
+  `addPhotoKeys` was also sent.
+- `404 NOT_FOUND`: not a work order I can see. Tenants also get 404 for orders they aren't linked to.
+- `409 INVALID_STATUS_TRANSITION`: reserved for a status move the rules don't allow. With the
+  current rules every move between Open, In Progress, and Resolved is allowed, so the app shouldn't
+  see it, but handle it like any other 409.
+- `409 WORK_ORDER_NOT_OPEN`: a tenant tried to add photos after work started.
+- `401`.
+
+---
+
 ## Uploads (image attachments)
 
 Auth required, any role. Attaching an image takes three steps:
@@ -556,7 +821,8 @@ Auth required, any role. Attaching an image takes three steps:
 2. Upload the raw file bytes: `PUT uploadUrl` with exactly `headers`, and the body is the file
    (not multipart, not JSON). Do **not** send an `Authorization` header. The URL is pre-signed.
    Expect a `200` with an empty body.
-3. `POST /conversations/:id/messages` with `{ body, attachmentKey: key }`.
+3. Attach it: `POST /conversations/:id/messages` with `{ body, attachmentKey: key }`, or
+   `photoKeys` / `addPhotoKeys` on [work orders](#work-orders).
 
 To display an attachment, call `GET /uploads/url?key=...` and load the returned `url` (no auth
 header). URLs expire after 5 minutes, so fetch a new one when needed instead of storing it.
@@ -602,8 +868,12 @@ own XML errors instead. Either way, treat any non-2xx as "upload failed, sign ag
 
 Query: `key` (required), an attachment key.
 
-Returns a short-lived download URL **only if** the key is attached to a message in a conversation
-I'm part of. An uploaded file that isn't attached to a message yet has no download URL.
+Returns a short-lived download URL **only if** the key is attached to something I can see:
+
+- a message in a conversation I'm part of, or
+- a photo on a work order I can see (I'm its owner or its linked tenant).
+
+An uploaded file that isn't attached to anything yet has no download URL.
 
 **200**:
 
@@ -671,8 +941,11 @@ Errors: `400 VALIDATION_ERROR`, `401`.
 
 ### Push notification payload
 
-When a message is sent and the recipient has **no socket joined to that conversation's room**,
-every device registered to the recipient gets:
+Every device registered to the recipient gets the notification. The shapes:
+
+#### New message
+
+Sent when the recipient has **no socket joined to that conversation's room**.
 
 ```json
 {
@@ -686,6 +959,53 @@ every device registered to the recipient gets:
 Use `data.conversationId` to open the thread when the notification is tapped. The sender never
 gets a push for their own message. Tokens Expo reports as `DeviceNotRegistered` are removed
 automatically.
+
+#### New work order (to the owner, only when a tenant files it)
+
+`Normal` / `Low`:
+
+```json
+{
+  "title": "New request: <title>",
+  "body": "<tenantName> at <property name>, <unitLabel>: <description preview, or the title if empty>",
+  "sound": "default",
+  "priority": "default",
+  "data": { "type": "workorder:new", "workOrderId": "uuid", "priority": "Normal" }
+}
+```
+
+`Emergency` gets a stronger message and high delivery priority:
+
+```json
+{
+  "title": "🚨 EMERGENCY: <title>",
+  "body": "<tenantName> at <property name>, <unitLabel> needs help now. Tap to respond.",
+  "sound": "default",
+  "priority": "high",
+  "data": { "type": "workorder:new", "workOrderId": "uuid", "priority": "Emergency" }
+}
+```
+
+(`, <unitLabel>` is left out when there is no unit.)
+
+#### Work order status change (to the linked tenant)
+
+Sent only when `status` actually changes. Notes, priority, and photo changes don't push.
+
+```json
+{
+  "title": "Work started" | "Request resolved" | "Request reopened",
+  "body": "<title> is now <status>.",
+  "sound": "default",
+  "data": { "type": "workorder:updated", "workOrderId": "uuid", "status": "In Progress" }
+}
+```
+
+The title is `"Work started"` for In Progress, `"Request resolved"` for Resolved, and
+`"Request reopened"` for Open.
+
+Use `data.type` to route a tapped notification: `message:new` → the conversation,
+`workorder:new` / `workorder:updated` → the work order detail screen.
 
 ---
 
@@ -772,26 +1092,55 @@ Sent to both participants when someone calls `POST /conversations/:id/read`.
 If `userId` is the other person, update `otherUserLastReadAt` (seen receipts). If it's me (another of
 my devices), set that conversation's `unreadCount` to 0.
 
+#### `workorder:new`
+
+Sent to the owner's and the linked tenant's personal rooms (every connected device of theirs) when
+a work order is created. No room joining is needed. The owner's payload includes `contractor` and
+`estimate`; the tenant's doesn't.
+
+```json
+{ "workOrder": { "...WorkOrder" } }
+```
+
+#### `workorder:updated`
+
+Sent to the owner's and the linked tenant's personal rooms after any successful
+`PATCH /work-orders/:id` (status, priority, notes, contractor, estimate, or photos). The payload is
+the **full** updated work order (the tenant's copy has no `contractor` or `estimate`), so replace the
+local copy by `workOrder.id`.
+
+```json
+{ "workOrder": { "...WorkOrder" } }
+```
+
+The person who made the change gets the event too (on all their devices). Owner-created orders
+with no linked tenant only go to the owner.
+
 ---
 
 ## Error code index
 
-| HTTP | `code`                  | When                                                                  |
-| ---- | ----------------------- | --------------------------------------------------------------------- |
-| 400  | `VALIDATION_ERROR`      | Body, query, or params failed validation. Has `details`.              |
-| 400  | `INVALID_JSON`          | Body isn't valid JSON                                                 |
-| 400  | `INVITE_INVALID`        | Invite code unknown, used, or expired                                 |
-| 400  | `INVALID_CURSOR`        | Pagination cursor isn't in this conversation                          |
-| 400  | `ATTACHMENT_INVALID`    | Attachment key isn't yours or wasn't uploaded                         |
-| 400  | `SIZE_MISMATCH`         | Local upload: byte count differs from the signed `sizeBytes`          |
-| 401  | `UNAUTHORIZED`          | No bearer token, or the account no longer exists                      |
-| 401  | `TOKEN_INVALID`         | Access token expired, malformed, or bad signature. Refresh and retry. |
-| 401  | `INVALID_CREDENTIALS`   | Login failed                                                          |
-| 401  | `REFRESH_TOKEN_INVALID` | Refresh token unknown, expired, revoked, or reused. Sign in again.    |
-| 403  | `FORBIDDEN`             | Wrong role for this route (e.g. a tenant calling `/properties`)       |
-| 403  | `SIGNATURE_INVALID`     | Local upload/download URL expired or tampered with                    |
-| 404  | `NOT_FOUND`             | Unknown route, or the resource doesn't exist or isn't yours           |
-| 409  | `EMAIL_TAKEN`           | An account with that email already exists                             |
-| 413  | `PAYLOAD_TOO_LARGE`     | JSON body over 100 KB, or local upload over the size limit            |
-| 429  | `RATE_LIMITED`          | Too many `/auth/*` requests from this IP                              |
-| 500  | `INTERNAL_ERROR`        | Server bug. The message is always generic.                            |
+| HTTP | `code`                      | When                                                                                                                            |
+| ---- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 400  | `VALIDATION_ERROR`          | Body, query, or params failed validation. Has `details`.                                                                        |
+| 400  | `INVALID_JSON`              | Body isn't valid JSON                                                                                                           |
+| 400  | `INVITE_INVALID`            | Invite code unknown, used, or expired                                                                                           |
+| 400  | `INVALID_CURSOR`            | Pagination cursor isn't in this conversation / one of my work orders                                                            |
+| 400  | `TENANCY_REQUIRED`          | Tenant with several tenancies must send `tenancyId`                                                                             |
+| 400  | `NO_TENANCY`                | Tenant has no tenancy to file a work order against                                                                              |
+| 400  | `PHOTO_LIMIT`               | Work order would have more than 10 photos                                                                                       |
+| 400  | `ATTACHMENT_INVALID`        | Attachment key isn't yours or wasn't uploaded                                                                                   |
+| 400  | `SIZE_MISMATCH`             | Local upload: byte count differs from the signed `sizeBytes`                                                                    |
+| 401  | `UNAUTHORIZED`              | No bearer token, or the account no longer exists                                                                                |
+| 401  | `TOKEN_INVALID`             | Access token expired, malformed, or bad signature. Refresh and retry.                                                           |
+| 401  | `INVALID_CREDENTIALS`       | Login failed                                                                                                                    |
+| 401  | `REFRESH_TOKEN_INVALID`     | Refresh token unknown, expired, revoked, or reused. Sign in again.                                                              |
+| 403  | `FORBIDDEN`                 | Wrong role for this route or field (e.g. a tenant calling `/properties` or changing work order status, contractor, or estimate) |
+| 403  | `SIGNATURE_INVALID`         | Local upload/download URL expired or tampered with                                                                              |
+| 404  | `NOT_FOUND`                 | Unknown route, or the resource doesn't exist or isn't yours                                                                     |
+| 409  | `EMAIL_TAKEN`               | An account with that email already exists                                                                                       |
+| 409  | `INVALID_STATUS_TRANSITION` | Work order status move isn't allowed (none currently; reserved)                                                                 |
+| 409  | `WORK_ORDER_NOT_OPEN`       | Tenant tried to add photos after work started                                                                                   |
+| 413  | `PAYLOAD_TOO_LARGE`         | JSON body over 100 KB, or local upload over the size limit                                                                      |
+| 429  | `RATE_LIMITED`              | Too many `/auth/*` requests from this IP                                                                                        |
+| 500  | `INTERNAL_ERROR`            | Server bug. The message is always generic.                                                                                      |

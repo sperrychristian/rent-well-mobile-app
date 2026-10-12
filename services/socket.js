@@ -9,6 +9,25 @@ let joined_conversation_id = null;
 // stops a bad token from refreshing over and over, it resets once a connect works
 let refreshed_for_connect = false;
 let stop_listening_for_tokens = null;
+// other features (like work orders) listen here, it outlives any one socket so they can sign up before it connects
+// 'connect' listeners also hear every reconnect
+const event_listeners = new Map();
+
+// gives back a function that stops listening
+export function onSocketEvent(event_name, listener) {
+  if (!event_listeners.has(event_name)) {
+    event_listeners.set(event_name, new Set());
+  }
+  event_listeners.get(event_name).add(listener);
+  return () => event_listeners.get(event_name).delete(listener);
+}
+
+function dispatch(event_name, payload) {
+  const listeners = event_listeners.get(event_name);
+  if (listeners) {
+    listeners.forEach((listener) => listener(payload));
+  }
+}
 
 // handlers: onMessageNew, onMessageRead, onConnect (also fires after every reconnect)
 export function connectSocket(handlers) {
@@ -24,6 +43,7 @@ export function connectSocket(handlers) {
       socket.emit('conversation:join', { conversationId: joined_conversation_id });
     }
     handlers.onConnect();
+    dispatch('connect');
   });
 
   // the server turns away an expired token with UNAUTHORIZED, so I refresh once and connect again
@@ -47,6 +67,12 @@ export function connectSocket(handlers) {
 
   socket.on('message:new', (payload) => handlers.onMessageNew(payload.message));
   socket.on('message:read', (payload) => handlers.onMessageRead(payload));
+  // everything else (like workorder:new and workorder:updated) goes to whoever signed up for it
+  socket.onAny((event_name, payload) => {
+    if (event_name !== 'message:new' && event_name !== 'message:read') {
+      dispatch(event_name, payload);
+    }
+  });
 
   // after any refresh the next reconnect should use the newest token
   stop_listening_for_tokens = api_client.onSessionEvent((event_name, payload) => {
