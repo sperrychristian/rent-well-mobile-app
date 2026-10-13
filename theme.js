@@ -31,7 +31,7 @@ export const COLORS = {
   focus: '#F7A93B',
 
   // ----- actions and states (fills, white text on them is AA) -----
-  success: '#1C7F48',
+  success: '#1A7843',
   action: '#2C64D8',
   info: '#2C64D8',
   accent: '#7448CF',

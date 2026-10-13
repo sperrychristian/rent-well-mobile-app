@@ -54,6 +54,13 @@ describe('theme contrast', () => {
     });
   });
 
+  // a plain PrimaryButton that a screen recolors keeps the off-white text color, so that has to pass too
+  test('the off-white text color is AA on every dark fill', () => {
+    fills_with_light_text.forEach((fill) => {
+      expect({ fill, ok: meetsAA(COLORS.text, COLORS[fill]) }).toEqual({ fill, ok: true });
+    });
+  });
+
   test('dark text is AA on every light fill', () => {
     fills_with_dark_text.forEach((fill) => {
       expect({ fill, ok: meetsAA(COLORS.on_cta, COLORS[fill]) }).toEqual({ fill, ok: true });
