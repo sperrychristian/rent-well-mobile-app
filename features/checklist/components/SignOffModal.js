@@ -10,12 +10,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
 import { todayString } from '../../../utils/formatDate';
 import { checklist_disclaimer } from '../utils/checklistHelpers';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
 
 // props: visible, default_name, not_done (how many items aren't checked), onSign, onClose
 // onSign gets the typed name and the date
@@ -73,11 +75,13 @@ function SignOffModal(props) {
 
               <View style={styles.button_row}>
                 <PrimaryButton
+                  variant="secondary"
                   title="Cancel"
                   onPress={props.onClose}
                   style={styles.cancel_button}
                 />
                 <PrimaryButton
+                  variant="primary"
                   title="Sign"
                   icon="create-outline"
                   onPress={handleSign}
@@ -109,30 +113,23 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.md,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
     marginBottom: 6,
   },
   input: {
-    backgroundColor: COLORS.background,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
+    ...list_styles.field_input,
     padding: SPACING.sm,
     marginBottom: SPACING.sm,
   },
   disclaimer: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginVertical: SPACING.sm,
   },
   button_row: {
@@ -143,11 +140,9 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
 });

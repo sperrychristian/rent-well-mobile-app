@@ -1,7 +1,8 @@
 import { Modal, View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../../theme';
 import { formatDate } from '../../../utils/formatDate';
 import { formatMoney } from '../utils/expenseStats';
 
@@ -54,7 +55,12 @@ function RecurringModal(props) {
               </View>
             ))}
             <View style={styles.button_row}>
-              <PrimaryButton title="Close" onPress={props.onClose} style={styles.close_button} />
+              <PrimaryButton
+                variant="secondary"
+                title="Close"
+                onPress={props.onClose}
+                style={styles.close_button}
+              />
             </View>
           </Card>
         </ScrollView>
@@ -77,27 +83,26 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.sm,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
   },
   rule_block: {
-    backgroundColor: COLORS.background,
-    borderRadius: 12,
+    backgroundColor: COLORS.surface_sunken,
+    borderRadius: RADIUS.md,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
     padding: SPACING.md,
     marginTop: SPACING.sm,
   },
   rule_title: {
+    ...TYPE.subheading,
+    fontFamily: TYPE.heading.fontFamily,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: FONT_SIZES.body,
   },
   button_row: {
     flexDirection: 'row',
@@ -107,16 +112,13 @@ const styles = StyleSheet.create({
   pause_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.warning,
   },
   delete_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.danger,
   },
   close_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
 });

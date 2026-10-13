@@ -9,13 +9,15 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
 import TextField from '../../../components/TextField';
 import { todayString } from '../../../utils/formatDate';
 import { checkEndDate, placeLabel } from '../utils/tenantHelpers';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
 
 const max_note_length = 1000;
 
@@ -103,13 +105,14 @@ function EndTenancyModal(props) {
 
               <View style={styles.button_row}>
                 <PrimaryButton
+                  variant="secondary"
                   title="Cancel"
                   onPress={props.onClose}
                   style={styles.cancel_button}
                 />
                 <PrimaryButton
+                  variant="destructive"
                   title={busy ? 'Ending...' : 'End Tenancy'}
-                  text_color={COLORS.text_light}
                   onPress={busy ? undefined : handleEnd}
                   style={styles.end_button}
                 />
@@ -139,33 +142,30 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.xs,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
     marginTop: SPACING.sm,
     marginBottom: 6,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginBottom: SPACING.sm,
   },
   note_input: {
+    ...list_styles.field_input,
     minHeight: 70,
     textAlignVertical: 'top',
   },
   error: {
+    ...TYPE.caption,
+    fontFamily: TYPE.label.fontFamily,
     color: COLORS.danger_text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
     marginBottom: SPACING.sm,
   },
   button_row: {
@@ -176,11 +176,9 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   end_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.danger,
   },
 });

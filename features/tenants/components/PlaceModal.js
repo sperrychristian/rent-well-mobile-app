@@ -10,11 +10,13 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TextField from '../../../components/TextField';
 import { checkPlace, unitSuggestions, placeLabel } from '../utils/tenantHelpers';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
 
 // picks a property and a unit for Move or Assign, then asks before doing it
 // props: visible, title, confirm_word ('Move' or 'Assign'), tenant, moving_tenancy (null for assign),
@@ -131,13 +133,14 @@ function PlaceModal(props) {
 
               <View style={styles.button_row}>
                 <PrimaryButton
+                  variant="secondary"
                   title="Cancel"
                   onPress={props.onClose}
                   style={styles.cancel_button}
                 />
                 <PrimaryButton
+                  variant="primary"
                   title={busy ? 'Saving...' : props.confirm_word}
-                  text_color={COLORS.text_light}
                   onPress={busy || properties.length === 0 ? undefined : handleConfirm}
                   style={styles.save_button}
                 />
@@ -167,29 +170,25 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.xs,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
     marginTop: SPACING.sm,
     marginBottom: 6,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginBottom: SPACING.sm,
   },
   error: {
+    ...TYPE.caption,
+    fontFamily: TYPE.label.fontFamily,
     color: COLORS.danger_text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
     marginBottom: SPACING.sm,
   },
   wrap_row: {
@@ -199,18 +198,15 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   chip: {
+    ...list_styles.chip,
     paddingVertical: 6,
     paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.background,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   button_row: {
     flexDirection: 'row',
@@ -220,11 +216,9 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
 });

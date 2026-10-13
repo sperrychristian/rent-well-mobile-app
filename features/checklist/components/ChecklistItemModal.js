@@ -15,12 +15,14 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { conditions } from '../data/checklistTemplates';
 import { itemGotWorse } from '../utils/checklistHelpers';
 import { getPhotoUri, saveChecklistPhoto, deleteChecklistPhoto } from '../utils/checklistPhotos';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
 
 const max_photos = 3;
 
@@ -188,7 +190,12 @@ function ChecklistItemModal(props) {
 
               <View style={styles.switch_row}>
                 <Text style={[styles.label, styles.switch_text]}>Done</Text>
-                <Switch value={done} onValueChange={setDone} disabled={locked} />
+                <Switch
+                  value={done}
+                  onValueChange={setDone}
+                  trackColor={{ false: COLORS.border_strong, true: COLORS.success }}
+                  disabled={locked}
+                />
               </View>
 
               <Text style={styles.label}>Condition</Text>
@@ -201,11 +208,22 @@ function ChecklistItemModal(props) {
                     hitSlop={{ top: 8, bottom: 8 }}
                     style={[
                       styles.chip,
-                      condition === option && { backgroundColor: condition_colors[option] },
+                      condition === option && {
+                        backgroundColor: condition_colors[option],
+                        borderColor: condition_colors[option],
+                      },
                     ]}
+                    accessibilityRole="button"
+                    accessibilityLabel={option + ' condition'}
+                    accessibilityState={{ selected: condition === option, disabled: locked }}
                   >
                     <Text
-                      style={[styles.chip_text, condition === option && styles.chip_text_active]}
+                      style={[
+                        styles.chip_text,
+                        condition === option && styles.chip_text_active,
+                        // Fair fills orange, so its words go dark to stay readable
+                        condition === option && option === 'Fair' && styles.chip_text_on_light,
+                      ]}
                     >
                       {option}
                     </Text>
@@ -256,12 +274,14 @@ function ChecklistItemModal(props) {
               {!locked && photos.length < max_photos && (
                 <View style={styles.button_row}>
                   <PrimaryButton
+                    variant="secondary"
                     title="Camera"
                     icon="camera-outline"
                     onPress={takePhoto}
                     style={styles.small_button}
                   />
                   <PrimaryButton
+                    variant="secondary"
                     title="Library"
                     icon="image-outline"
                     onPress={choosePhotos}
@@ -273,6 +293,7 @@ function ChecklistItemModal(props) {
               {locked ? (
                 <View style={styles.button_row}>
                   <PrimaryButton
+                    variant="secondary"
                     title="Close"
                     onPress={props.onClose}
                     style={styles.cancel_button}
@@ -282,16 +303,22 @@ function ChecklistItemModal(props) {
                 <View>
                   <View style={styles.button_row}>
                     <PrimaryButton
+                      variant="secondary"
                       title="Cancel"
                       onPress={handleCancel}
                       style={styles.cancel_button}
                     />
-                    <PrimaryButton title="Save" onPress={handleSave} style={styles.save_button} />
+                    <PrimaryButton
+                      variant="primary"
+                      title="Save"
+                      onPress={handleSave}
+                      style={styles.save_button}
+                    />
                   </View>
                   <PrimaryButton
+                    variant="destructive"
                     title="Delete Item"
                     icon="trash-outline"
-                    text_color={COLORS.text_light}
                     onPress={confirmDelete}
                     style={styles.delete_button}
                   />
@@ -334,38 +361,34 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.sm,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
     marginBottom: 6,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
   },
   worse_tag: {
+    backgroundColor: COLORS.danger,
+    borderRadius: RADIUS.pill,
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: 4,
-    backgroundColor: COLORS.danger,
-    borderRadius: 10,
     paddingVertical: 3,
     paddingHorizontal: SPACING.sm,
     marginBottom: SPACING.sm,
   },
   worse_text: {
+    ...TYPE.caption,
+    fontFamily: TYPE.label.fontFamily,
     color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
-    fontSize: 11,
   },
   compare_row: {
     flexDirection: 'row',
@@ -373,15 +396,17 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   compare_box: {
+    backgroundColor: COLORS.surface_sunken,
+    borderRadius: RADIUS.md,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
     flex: 1,
-    backgroundColor: COLORS.background,
-    borderRadius: 8,
     padding: SPACING.sm,
   },
   compare_value: {
+    ...TYPE.subheading,
+    fontFamily: TYPE.heading.fontFamily,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: 2,
   },
   worse_value: {
@@ -394,6 +419,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   switch_text: {
+    ...TYPE.body_small,
+    color: COLORS.text,
     flex: 1,
     marginBottom: 0,
   },
@@ -404,24 +431,18 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   chip: {
+    ...list_styles.chip,
     paddingVertical: 6,
     paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.background,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   chip_text_active: {
     color: COLORS.text_light,
   },
   input: {
-    backgroundColor: COLORS.background,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
+    ...list_styles.field_input,
     padding: SPACING.sm,
     marginBottom: SPACING.sm,
   },
@@ -433,16 +454,16 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   photo_thumb: {
+    borderRadius: RADIUS.md,
     width: 72,
     height: 72,
-    borderRadius: 8,
   },
   remove_button: {
+    backgroundColor: COLORS.surface_raised,
+    borderRadius: RADIUS.pill,
     position: 'absolute',
     top: -8,
     right: -8,
-    backgroundColor: COLORS.surface_light,
-    borderRadius: 11,
   },
   button_row: {
     flexDirection: 'row',
@@ -456,17 +477,14 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
   delete_button: {
     marginHorizontal: 0,
     marginTop: SPACING.sm,
-    backgroundColor: COLORS.danger,
   },
   full_backdrop: {
     ...StyleSheet.absoluteFillObject,
@@ -482,5 +500,8 @@ const styles = StyleSheet.create({
     color: COLORS.text_light,
     fontFamily: FONTS.body,
     marginTop: SPACING.sm,
+  },
+  chip_text_on_light: {
+    color: COLORS.on_light,
   },
 });

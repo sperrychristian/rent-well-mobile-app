@@ -11,11 +11,13 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../theme';
 import { todayString } from '../../../utils/formatDate';
+import { list_styles } from '../../../components/ui/listStyles';
 
 // props: visible, onSave, onClose, property_names, plus optional trip (edit mode), onDelete, default_property
 function TripModal(props) {
@@ -122,12 +124,23 @@ function TripModal(props) {
             />
 
             <View style={styles.button_row}>
-              <PrimaryButton title="Cancel" onPress={props.onClose} style={styles.cancel_button} />
-              <PrimaryButton title="Save" onPress={handleSave} style={styles.save_button} />
+              <PrimaryButton
+                variant="secondary"
+                title="Cancel"
+                onPress={props.onClose}
+                style={styles.cancel_button}
+              />
+              <PrimaryButton
+                variant="primary"
+                title="Save"
+                onPress={handleSave}
+                style={styles.save_button}
+              />
             </View>
             {props.trip && props.onDelete && (
               <View style={styles.button_row}>
                 <PrimaryButton
+                  variant="destructive"
                   title="Delete Trip"
                   icon="trash-outline"
                   onPress={props.onDelete}
@@ -156,22 +169,17 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.md,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
     marginBottom: 6,
   },
   input: {
-    backgroundColor: COLORS.background,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
+    ...list_styles.field_input,
     padding: SPACING.sm,
     marginBottom: SPACING.sm,
   },
@@ -183,18 +191,15 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.sm,
   },
   chip: {
+    ...list_styles.chip,
     paddingVertical: 6,
     paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.background,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   button_row: {
     flexDirection: 'row',
@@ -204,16 +209,13 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
   delete_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.danger,
   },
 });

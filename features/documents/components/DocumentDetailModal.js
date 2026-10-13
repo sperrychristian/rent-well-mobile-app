@@ -1,8 +1,9 @@
 import { Modal, View, Text, Image, ScrollView, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
 import { getDocumentUri } from '../utils/documentFiles';
 import { isImage, iconFor, expiryTag, daysUntil, formatSize } from '../utils/documentHelpers';
 
@@ -49,7 +50,9 @@ function DocumentDetailModal(props) {
             <View style={styles.tag_row}>
               {tag && (
                 <View style={[styles.tag, tag.expired ? styles.expired_tag : styles.expiring_tag]}>
-                  <Text style={styles.tag_text}>{tag.text}</Text>
+                  <Text style={[styles.tag_text, !tag.expired && styles.tag_text_dark]}>
+                    {tag.text}
+                  </Text>
                 </View>
               )}
               {document.shared_with_tenant && (
@@ -94,12 +97,14 @@ function DocumentDetailModal(props) {
 
             <View style={styles.button_row}>
               <PrimaryButton
+                variant="primary"
                 title="Open / Share"
                 icon="share-outline"
                 onPress={props.onOpen}
                 style={styles.open_button}
               />
               <PrimaryButton
+                variant="secondary"
                 title="Edit"
                 icon="create-outline"
                 onPress={props.onEdit}
@@ -108,12 +113,18 @@ function DocumentDetailModal(props) {
             </View>
             <View style={styles.button_row}>
               <PrimaryButton
+                variant="destructive"
                 title="Delete"
                 icon="trash-outline"
                 onPress={props.onDelete}
                 style={styles.delete_button}
               />
-              <PrimaryButton title="Close" onPress={props.onClose} style={styles.close_button} />
+              <PrimaryButton
+                variant="secondary"
+                title="Close"
+                onPress={props.onClose}
+                style={styles.close_button}
+              />
             </View>
           </Card>
         </ScrollView>
@@ -140,10 +151,9 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   heading: {
-    flex: 1,
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
+    flex: 1,
   },
   tag_row: {
     flexDirection: 'row',
@@ -153,9 +163,9 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   tag: {
+    borderRadius: RADIUS.pill,
     paddingVertical: 3,
     paddingHorizontal: SPACING.sm,
-    borderRadius: 10,
   },
   expiring_tag: {
     backgroundColor: COLORS.warning,
@@ -170,27 +180,26 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.secondary,
   },
   tag_text: {
-    color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
+    ...TYPE.caption,
     fontSize: 11,
+    lineHeight: 15,
+    fontFamily: TYPE.label.fontFamily,
+    color: COLORS.text_light,
   },
   preview: {
+    borderRadius: RADIUS.md,
     width: '100%',
     height: 220,
-    borderRadius: 8,
     marginBottom: SPACING.sm,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
     marginTop: SPACING.sm,
   },
   value: {
+    ...TYPE.body,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
   },
   button_row: {
     flexDirection: 'row',
@@ -200,21 +209,21 @@ const styles = StyleSheet.create({
   open_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.action,
   },
   edit_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   delete_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.danger,
   },
   close_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
+  },
+  // the expiring-soon tag is orange, so its words are dark
+  tag_text_dark: {
+    color: COLORS.on_light,
   },
 });

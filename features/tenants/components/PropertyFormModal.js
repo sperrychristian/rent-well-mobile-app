@@ -8,10 +8,11 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TextField from '../../../components/TextField';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../theme';
 
 // adds a property, or edits the name and address of one (property is null for a new one)
 // props: visible, property, onSave (gets name and address, gives back a promise), onClose
@@ -85,13 +86,14 @@ function PropertyFormModal(props) {
               {error ? <Text style={styles.error}>{error}</Text> : null}
               <View style={styles.button_row}>
                 <PrimaryButton
+                  variant="secondary"
                   title="Cancel"
                   onPress={props.onClose}
                   style={styles.cancel_button}
                 />
                 <PrimaryButton
+                  variant="primary"
                   title={busy ? 'Saving...' : 'Save'}
-                  text_color={COLORS.text_light}
                   onPress={busy ? undefined : handleSave}
                   style={styles.save_button}
                 />
@@ -121,22 +123,19 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.md,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginBottom: SPACING.sm,
   },
   error: {
+    ...TYPE.caption,
+    fontFamily: TYPE.label.fontFamily,
     color: COLORS.danger_text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
     marginBottom: SPACING.sm,
   },
   button_row: {
@@ -147,11 +146,9 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
 });

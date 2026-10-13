@@ -1,8 +1,9 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import PrimaryButton from './PrimaryButton';
+import StatusPill from './ui/StatusPill';
 import { useWorkOrders } from '../context/WorkOrdersContext';
-import { COLORS, SPACING, FONTS } from '../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../theme';
 
 // shows a strip with an exit button, and only while the demo is running
 // it also has the switch between the landlord and tenant sides, which keeps the same demo data
@@ -28,25 +29,34 @@ function DemoBanner() {
   }
 
   return (
-    <View style={styles.banner}>
-      <Text style={styles.text}>
-        {(is_tenant ? 'Demo as Sam (tenant)' : 'Demo as the landlord') +
-          ': sample data, nothing is saved'}
-      </Text>
-      <PrimaryButton
-        title={is_tenant ? 'Switch to Landlord view' : 'Switch to Tenant view'}
-        icon="swap-horizontal-outline"
-        text_color={COLORS.text_light}
-        onPress={handleSwitch}
-        style={styles.switch_button}
-      />
-      <PrimaryButton
-        title="Exit Demo Mode"
-        icon="exit-outline"
-        text_color={COLORS.text_light}
-        onPress={handleExit}
-        style={styles.exit_button}
-      />
+    // the design pass: a navy card with an amber edge and a Demo pill, so it reads as part of the app
+    // and not as an error, with the two buttons side by side (they wrap when the text is big)
+    <View style={styles.banner} accessibilityRole="summary">
+      <View style={styles.top_row}>
+        <StatusPill label="Demo" />
+        <Text style={styles.text}>
+          {(is_tenant ? 'Demo as Sam (tenant)' : 'Demo as the landlord') +
+            ': sample data, nothing is saved'}
+        </Text>
+      </View>
+      <View style={styles.button_row}>
+        <PrimaryButton
+          title={is_tenant ? 'Switch to Landlord view' : 'Switch to Tenant view'}
+          icon="swap-horizontal-outline"
+          variant="secondary"
+          size="small"
+          onPress={handleSwitch}
+          style={styles.switch_button}
+        />
+        <PrimaryButton
+          title="Exit Demo Mode"
+          icon="exit-outline"
+          variant="destructive"
+          size="small"
+          onPress={handleExit}
+          style={styles.exit_button}
+        />
+      </View>
     </View>
   );
 }
@@ -56,25 +66,38 @@ export default DemoBanner;
 const styles = StyleSheet.create({
   banner: {
     width: '100%',
-    backgroundColor: COLORS.warning,
-    borderRadius: 12,
-    padding: SPACING.sm,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
+    borderLeftWidth: BORDER.thick + 2,
+    borderLeftColor: COLORS.warning,
+    padding: SPACING.sm + SPACING.xs,
     marginBottom: SPACING.md,
   },
   text: {
-    color: COLORS.text_dark,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    textAlign: 'center',
-    marginBottom: SPACING.sm,
+    ...TYPE.caption,
+    fontFamily: TYPE.label.fontFamily,
+    color: COLORS.text,
+    flex: 1,
   },
   switch_button: {
-    backgroundColor: COLORS.action,
+    flexGrow: 1,
     marginHorizontal: 0,
-    marginBottom: SPACING.sm,
   },
   exit_button: {
-    backgroundColor: COLORS.danger,
+    flexGrow: 1,
     marginHorizontal: 0,
+  },
+  top_row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm + SPACING.xs,
+  },
+  button_row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
   },
 });

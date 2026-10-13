@@ -9,9 +9,11 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
 
 // a small form with one name box, used for adding a room or an item
 // Alert.prompt only works on iOS, so this works on both
@@ -47,8 +49,18 @@ function NameModal(props) {
             onSubmitEditing={handleSave}
           />
           <View style={styles.button_row}>
-            <PrimaryButton title="Cancel" onPress={props.onClose} style={styles.cancel_button} />
-            <PrimaryButton title="Add" onPress={handleSave} style={styles.save_button} />
+            <PrimaryButton
+              variant="secondary"
+              title="Cancel"
+              onPress={props.onClose}
+              style={styles.cancel_button}
+            />
+            <PrimaryButton
+              variant="primary"
+              title="Add"
+              onPress={handleSave}
+              style={styles.save_button}
+            />
           </View>
         </Card>
       </KeyboardAvoidingView>
@@ -65,16 +77,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.md,
   },
   input: {
-    backgroundColor: COLORS.background,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
+    ...list_styles.field_input,
     padding: SPACING.sm,
     marginBottom: SPACING.sm,
   },
@@ -86,11 +94,9 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
 });

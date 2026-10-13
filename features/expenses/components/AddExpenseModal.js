@@ -15,12 +15,14 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
 import { expense_categories, payment_methods } from '../../../data/expenseOptions';
 import { todayString } from '../../../utils/formatDate';
+import { list_styles } from '../../../components/ui/listStyles';
 
 const repeat_options = ['None', 'Monthly', 'Yearly'];
 
@@ -215,7 +217,11 @@ function AddExpenseModal(props) {
                     are not sure.
                   </Text>
                 </View>
-                <Switch value={is_capital} onValueChange={setIsCapital} />
+                <Switch
+                  value={is_capital}
+                  onValueChange={setIsCapital}
+                  trackColor={{ false: COLORS.border_strong, true: COLORS.success }}
+                />
               </View>
 
               {show_extras && (
@@ -226,7 +232,11 @@ function AddExpenseModal(props) {
                       Splits the amount equally. Each property gets its own expense.
                     </Text>
                   </View>
-                  <Switch value={split_on} onValueChange={setSplitOn} />
+                  <Switch
+                    value={split_on}
+                    onValueChange={setSplitOn}
+                    trackColor={{ false: COLORS.border_strong, true: COLORS.success }}
+                  />
                 </View>
               )}
 
@@ -322,7 +332,11 @@ function AddExpenseModal(props) {
                         For damage or extra costs you charge to a tenant or their deposit.
                       </Text>
                     </View>
-                    <Switch value={billed_to_tenant} onValueChange={setBilledToTenant} />
+                    <Switch
+                      value={billed_to_tenant}
+                      onValueChange={setBilledToTenant}
+                      trackColor={{ false: COLORS.border_strong, true: COLORS.success }}
+                    />
                   </View>
                   {billed_to_tenant && (
                     <TextInput
@@ -368,12 +382,14 @@ function AddExpenseModal(props) {
               )}
               <View style={styles.button_row}>
                 <PrimaryButton
+                  variant="secondary"
                   title="Camera"
                   icon="camera-outline"
                   onPress={takePhoto}
                   style={styles.small_button}
                 />
                 <PrimaryButton
+                  variant="secondary"
                   title="Library"
                   icon="image-outline"
                   onPress={choosePhotos}
@@ -382,13 +398,24 @@ function AddExpenseModal(props) {
               </View>
 
               <View style={styles.button_row}>
-                <PrimaryButton title="Cancel" onPress={handleCancel} style={styles.cancel_button} />
-                <PrimaryButton title="Save" onPress={handleSave} style={styles.save_button} />
+                <PrimaryButton
+                  variant="secondary"
+                  title="Cancel"
+                  onPress={handleCancel}
+                  style={styles.cancel_button}
+                />
+                <PrimaryButton
+                  variant="primary"
+                  title="Save"
+                  onPress={handleSave}
+                  style={styles.save_button}
+                />
               </View>
               {/* delete only shows when editing, and the screen offers an undo right after */}
               {is_editing && props.onDelete && (
                 <View style={styles.button_row}>
                   <PrimaryButton
+                    variant="destructive"
                     title="Delete Expense"
                     icon="trash-outline"
                     onPress={props.onDelete}
@@ -427,39 +454,30 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.md,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
     marginBottom: 6,
   },
   label_gap: {
     marginTop: SPACING.sm,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginRight: SPACING.sm,
   },
   helper_block: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginBottom: SPACING.sm,
   },
   input: {
-    backgroundColor: COLORS.background,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
+    ...list_styles.field_input,
     padding: SPACING.sm,
     marginBottom: SPACING.sm,
   },
@@ -481,18 +499,15 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   chip: {
+    ...list_styles.chip,
     paddingVertical: 6,
     paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.background,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   switch_row: {
     flexDirection: 'row',
@@ -501,17 +516,21 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   switch_text: {
+    ...TYPE.body_small,
+    color: COLORS.text,
     flex: 1,
   },
   receipt_wrap: {
     position: 'relative',
   },
   receipt_thumb: {
+    borderRadius: RADIUS.md,
     width: 72,
     height: 72,
-    borderRadius: 8,
   },
   remove_button: {
+    backgroundColor: COLORS.surface_raised,
+    borderRadius: RADIUS.pill,
     position: 'absolute',
     top: -8,
     right: -8,
@@ -528,17 +547,14 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
   delete_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.danger,
   },
   full_overlay: {
     ...StyleSheet.absoluteFillObject,

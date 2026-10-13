@@ -24,7 +24,8 @@ import { getMe } from '../../../services/api';
 import { max_photos_per_upload } from '../utils/workOrderHelpers';
 import { placeLabel } from '../../tenants/utils/tenantHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
-import { COLORS, SPACING, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
 
 const urgency_options = ['Emergency', 'Normal', 'Low'];
 // the server takes photos up to 10 MB
@@ -424,6 +425,8 @@ function NewWorkOrderScreen(props) {
                       onPress={() => setTenancyId(tenancy.id)}
                       hitSlop={{ top: 8, bottom: 8 }}
                       style={[styles.chip, tenancy_id === tenancy.id && styles.chip_active]}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: tenancy_id === tenancy.id }}
                     >
                       <Text style={styles.chip_text}>
                         {tenancy.property.name +
@@ -467,6 +470,9 @@ function NewWorkOrderScreen(props) {
                       key={name}
                       onPress={() => setProperty(name)}
                       style={[styles.chip, property === name && styles.chip_active]}
+                      hitSlop={{ top: 8, bottom: 8 }}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: property === name }}
                     >
                       <Text style={styles.chip_text}>{name}</Text>
                     </Pressable>
@@ -509,6 +515,9 @@ function NewWorkOrderScreen(props) {
                 key={option}
                 onPress={() => setPriority(option)}
                 style={[styles.chip, priority === option && styles.chip_active]}
+                hitSlop={{ top: 8, bottom: 8 }}
+                accessibilityRole="button"
+                accessibilityState={{ selected: priority === option }}
               >
                 <Text style={styles.chip_text}>{option}</Text>
               </Pressable>
@@ -552,12 +561,14 @@ function NewWorkOrderScreen(props) {
               <PrimaryButton
                 title="Camera"
                 icon="camera-outline"
+                variant="secondary"
                 onPress={takePhoto}
                 style={styles.photo_button}
               />
               <PrimaryButton
                 title="Library"
                 icon="image-outline"
+                variant="secondary"
                 onPress={choosePhoto}
                 style={styles.photo_button}
               />
@@ -568,6 +579,8 @@ function NewWorkOrderScreen(props) {
           <PrimaryButton
             title={busy ? 'Sending...' : 'Submit Request'}
             icon="send-outline"
+            variant="primary"
+            loading={busy}
             onPress={busy ? undefined : handleSubmit}
             style={[styles.submit_button, busy && styles.busy]}
           />
@@ -594,16 +607,12 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
     marginBottom: 6,
   },
   input: {
-    backgroundColor: COLORS.muted,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
+    ...list_styles.search_input,
     padding: SPACING.sm,
     marginBottom: SPACING.sm,
   },
@@ -626,23 +635,20 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   chip: {
+    ...list_styles.chip,
     paddingVertical: 6,
     paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.muted,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   preview: {
+    borderRadius: RADIUS.md,
     width: '100%',
     height: 160,
-    borderRadius: 8,
     marginBottom: SPACING.sm,
   },
   preview_landscape: {
@@ -656,43 +662,38 @@ const styles = StyleSheet.create({
   photo_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   submit_button: {
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
-  busy: {
-    opacity: 0.7,
-  },
+  busy: {},
   notice: {
+    ...TYPE.body_small,
+    fontFamily: TYPE.label.fontFamily,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 14,
     textAlign: 'center',
     marginBottom: SPACING.md,
   },
   rental_box: {
-    backgroundColor: COLORS.muted,
-    borderRadius: 8,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.md,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
     padding: SPACING.sm,
     marginBottom: SPACING.md,
   },
   rental_text: {
+    ...TYPE.body,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 15,
   },
   link_text: {
-    color: COLORS.info_text,
-    fontFamily: FONTS.body_bold,
+    ...TYPE.label,
     fontSize: 14,
+    color: COLORS.info_text,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginBottom: SPACING.sm,
   },
   thumb_row: {
@@ -702,15 +703,15 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.sm,
   },
   thumb: {
+    borderRadius: RADIUS.md,
     width: 72,
     height: 72,
-    borderRadius: 8,
   },
   remove_button: {
+    backgroundColor: COLORS.surface_raised,
+    borderRadius: RADIUS.pill,
     position: 'absolute',
     top: -8,
     right: -8,
-    backgroundColor: COLORS.surface_light,
-    borderRadius: 11,
   },
 });
