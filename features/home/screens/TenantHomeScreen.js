@@ -14,10 +14,12 @@ import { placeLabel } from '../../tenants/utils/tenantHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { ordersForTenant, activeCount } from '../../workOrders/utils/workOrderHelpers';
 import FeatureTile from '../../../components/ui/FeatureTile';
-import StatTile from '../../../components/ui/StatTile';
+import KpiTile from '../../../components/ui/KpiTile';
+import QuickAction from '../../../components/ui/QuickAction';
+import SummaryBlock from '../../../components/ui/SummaryBlock';
 import SectionHeader from '../../../components/ui/SectionHeader';
 import FadeInView from '../../../components/ui/FadeInView';
-import { COLORS, SPACING, TYPE, SIZES, OPACITY } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES, OPACITY, RADIUS, BORDER } from '../../../theme';
 
 // the tenant's home: message the landlord or report something that needs fixing
 function TenantHomeScreen(props) {
@@ -29,6 +31,10 @@ function TenantHomeScreen(props) {
   const in_progress = demo_mode
     ? activeCount(ordersForTenant(orders, demo_tenant.name))
     : active_count;
+  // all of their requests, for the summary card's caption (real mode's list only has their own already)
+  const total_requests = demo_mode
+    ? ordersForTenant(orders, demo_tenant.name).length
+    : orders.length;
   const name = demo_mode ? demo_tenant.name : user ? user.name : '';
   // with no active rental the tenant can only read, and this flips back on its own if they're assigned again
   const { is_read_only, my_active_tenancies, my_ended_tenancies } = useTenants();
@@ -111,9 +117,13 @@ function TenantHomeScreen(props) {
       {/* only shows while the demo is running, with the switch to the landlord side */}
       <DemoBanner />
       {/* the hero: the big title, a hello, where they live, and the two numbers they care about */}
+      {/* the fintech pass: a hello, an indigo summary card with their requests in progress, two key numbers,
+          the two things tenants do most, then the rest */}
       <FadeInView index={0}>
-        <ScreenTitle>Home</ScreenTitle>
-        <Text style={styles.greeting}>Hi{name ? ', ' + name : ''}!</Text>
+        <Text style={styles.overline}>Your home</Text>
+        <Text style={styles.greeting} accessibilityRole="header">
+          Hi{name ? ', ' + name : ''}!
+        </Text>
         {/* where they live now, once GET /me has answered */}
         {my_active_tenancies.length > 0 && (
           <View style={styles.place_row}>
@@ -125,36 +135,59 @@ function TenantHomeScreen(props) {
             </Text>
           </View>
         )}
+        <SummaryBlock
+          variant="brand"
+          label="Requests in progress"
+          value={String(in_progress || 0)}
+          caption={
+            total_requests === 0
+              ? 'Nothing reported yet'
+              : 'Out of ' + total_requests + (total_requests === 1 ? ' request' : ' requests')
+          }
+          style={styles.summary}
+        />
         <View style={styles.summary_row}>
-          <StatTile
+          <KpiTile
+            label="Unread"
             value={unread_total || 0}
-            label="Unread messages"
+            caption="Messages"
             icon="chatbubble-ellipses"
-            color={COLORS.info_text}
+            tone="info"
           />
-          <StatTile
-            value={in_progress || 0}
-            label="Requests in progress"
-            icon="time"
-            color={COLORS.warning_text}
+          <KpiTile
+            label="Requests"
+            value={total_requests}
+            caption="All time"
+            icon="list"
+            tone="success"
           />
         </View>
       </FadeInView>
 
       <FadeInView index={1}>
-        <SectionHeader title="Your rental" />
-        <View style={styles.grid}>
-          <FeatureTile
-            title="Messages"
-            detail="Talk with your landlord"
+        <SectionHeader title="Quick actions" />
+        <View style={styles.quick_row}>
+          {/* still saves on this phone only, it moves to the server in a later phase */}
+          <QuickAction
+            label="Report an issue"
+            icon="construct-outline"
+            tone="brand"
+            accessibilityLabel="Report an issue"
+            onPress={() => props.navigation.navigate('NewWorkOrder')}
+          />
+          <QuickAction
+            label="Message landlord"
             icon="chatbubble-ellipses-outline"
-            fill={COLORS.action}
+            tone="info"
             badge_count={unread_total}
             badge_label={unread_total + ' unread messages'}
             accessibilityLabel={'Messages' + (unread_total ? ', ' + unread_total + ' unread' : '')}
-            style={styles.tile}
             onPress={() => props.navigation.navigate('Messages')}
           />
+        </View>
+
+        <SectionHeader title="Your rental" />
+        <View style={styles.grid}>
           <FeatureTile
             title="My Requests"
             detail={
@@ -163,27 +196,16 @@ function TenantHomeScreen(props) {
                 : 'See what you reported and where it is at'
             }
             icon="list-outline"
-            fill={COLORS.success}
+            tone="success"
             accessibilityLabel="My requests"
             style={styles.tile}
             onPress={() => props.navigation.navigate('MyRequests')}
-          />
-          {/* still saves on this phone only, it moves to the server in a later phase */}
-          <FeatureTile
-            title="Report an Issue"
-            detail="Something broken or not working"
-            icon="construct-outline"
-            fill={COLORS.cta}
-            icon_color={COLORS.on_cta}
-            accessibilityLabel="Report an issue"
-            style={styles.tile}
-            onPress={() => props.navigation.navigate('NewWorkOrder')}
           />
           <FeatureTile
             title="Payments and Rent"
             detail="Coming soon: pay rent and see past payments"
             icon="card-outline"
-            fill={COLORS.priority_low}
+            tone="neutral"
             accessibilityLabel="Payments and rent"
             style={styles.tile}
             onPress={() => props.navigation.navigate('Payments')}
@@ -227,7 +249,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   greeting: {
-    ...TYPE.heading,
+    ...TYPE.title,
     color: COLORS.text,
     marginBottom: SPACING.xs,
   },
@@ -277,5 +299,22 @@ const styles = StyleSheet.create({
   },
   logout_button: {
     marginHorizontal: 0,
+  },
+  overline: {
+    ...TYPE.overline,
+    color: COLORS.text_muted,
+  },
+  summary: {
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.sm + SPACING.xs,
+  },
+  quick_row: {
+    flexDirection: 'row',
+    gap: SPACING.xs,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
+    padding: SPACING.sm,
   },
 });

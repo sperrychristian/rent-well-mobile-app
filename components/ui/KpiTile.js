@@ -3,19 +3,18 @@ import IconCircle from './IconCircle';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER, NUMBERS } from '../../theme';
 
 // one key number: a small uppercase label, the value big, and a short caption under it
+// the icon sits on top and the label goes under the value, so the numbers line up even when a label wraps
 // props: label, value (a number or already formatted text), caption, icon, tone (for the icon circle),
 //   onPress (optional, makes the whole tile tappable), accessibilityHint, style
 function KpiTile(props) {
   const content = (
     <>
-      <View style={styles.top_row}>
-        <Text style={styles.label} numberOfLines={2}>
-          {props.label}
-        </Text>
-        {props.icon ? <IconCircle icon={props.icon} tone={props.tone} size={28} /> : null}
-      </View>
+      {props.icon ? <IconCircle icon={props.icon} tone={props.tone} size={32} /> : null}
       <Text style={[styles.value, NUMBERS]} numberOfLines={1} adjustsFontSizeToFit>
         {props.value}
+      </Text>
+      <Text style={styles.label} numberOfLines={2}>
+        {props.label}
       </Text>
       {props.caption ? (
         <Text style={styles.caption} numberOfLines={2}>
@@ -62,22 +61,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface_raised,
     borderColor: COLORS.border_strong,
   },
-  top_row: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: SPACING.xs,
-  },
   label: {
-    ...TYPE.overline,
-    fontSize: 11,
-    lineHeight: 15,
-    color: COLORS.text_muted,
-    flexShrink: 1,
+    ...TYPE.label,
+    color: COLORS.text,
   },
   value: {
     ...TYPE.title,
     color: COLORS.text,
+    marginTop: SPACING.xs,
   },
   caption: {
     ...TYPE.caption,
