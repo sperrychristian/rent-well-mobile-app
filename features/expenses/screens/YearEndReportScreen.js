@@ -7,7 +7,7 @@ import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { formatDate } from '../../../utils/formatDate';
 import { buildYearEndData } from '../utils/expenseStats';
 import { shareYearEndCsv } from '../utils/exportExpenses';
-import { COLORS, SPACING, TYPE, BORDER, NUMBERS } from '../../../theme';
+import { COLORS, SPACING, TYPE, BORDER, NUMBERS, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { formatCurrency } from '../../../utils/formatCurrency';
 
@@ -164,6 +164,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
     padding: SPACING.md,
+    // the fintech pass: capped and centered on a tablet so lines stay a readable length
+    width: '100%',
+    maxWidth: SIZES.content_max_width + 160,
+    alignSelf: 'center',
   },
   export_button: {
     marginHorizontal: 0,

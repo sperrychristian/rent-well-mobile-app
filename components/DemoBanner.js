@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import PrimaryButton from './PrimaryButton';
 import StatusPill from './ui/StatusPill';
 import { useWorkOrders } from '../context/WorkOrdersContext';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../theme';
 
 // shows a strip with an exit button, and only while the demo is running
 // it also has the switch between the landlord and tenant sides, which keeps the same demo data
@@ -76,6 +76,9 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.sm + SPACING.xs,
     marginBottom: SPACING.md,
+    // same width cap as the screens under it on a tablet
+    maxWidth: SIZES.content_max_width + 160,
+    alignSelf: 'center',
   },
   text: {
     ...TYPE.caption,

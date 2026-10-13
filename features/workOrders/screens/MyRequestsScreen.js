@@ -7,7 +7,7 @@ import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { ordersForTenant } from '../utils/workOrderHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { formatDate } from '../../../utils/formatDate';
-import { COLORS, SPACING, TYPE } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusPill from '../../../components/ui/StatusPill';
 import EmptyState from '../../../components/ui/EmptyState';
@@ -133,6 +133,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
     padding: SPACING.md,
+    // the fintech pass: capped and centered on a tablet so lines stay a readable length
+    width: '100%',
+    maxWidth: SIZES.content_max_width + 160,
+    alignSelf: 'center',
   },
   report_button: {
     marginHorizontal: 0,

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, FlatList, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, SPACING, TYPE } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DemoBanner from '../../../components/DemoBanner';
@@ -128,6 +128,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
     alignItems: 'center',
     padding: SPACING.md,
+    // the fintech pass: capped and centered on a tablet so lines stay a readable length
+    width: '100%',
+    maxWidth: SIZES.content_max_width + 160,
+    alignSelf: 'center',
   },
   body_text: {
     ...TYPE.body,

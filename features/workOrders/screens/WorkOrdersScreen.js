@@ -10,7 +10,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import ExpenseDetailsModal from '../../expenses/components/ExpenseDetailsModal';
-import { COLORS, SPACING, FONTS } from '../../../theme';
+import { COLORS, SPACING, FONTS, SIZES } from '../../../theme';
 import WorkOrderCard from '../components/WorkOrderCard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState } from 'react';
@@ -312,6 +312,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
     padding: SPACING.md,
+    // the fintech pass: capped and centered on a tablet so lines stay a readable length
+    width: '100%',
+    maxWidth: SIZES.content_max_width + 160,
+    alignSelf: 'center',
   },
   list: {
     gap: SPACING.sm,

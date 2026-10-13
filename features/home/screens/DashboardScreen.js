@@ -180,6 +180,8 @@ function DashboardScreen(props) {
               style={styles.tile}
               onPress={() => props.navigation.navigate('Checklist')}
             />
+            {/* an empty half next to the odd third tile, so it stays the same size instead of stretching */}
+            <View style={styles.tile} importantForAccessibility="no-hide-descendants" />
           </View>
           {/* only shows for a signed-in account, not in the demo */}
           <LogoutButton style={styles.logout_button} />

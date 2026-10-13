@@ -7,7 +7,7 @@ import TripModal from '../components/TripModal';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { formatDate } from '../../../utils/formatDate';
 import { sumMiles } from '../../expenses/utils/expenseStats';
-import { COLORS, SPACING, TYPE, OPACITY, NUMBERS } from '../../../theme';
+import { COLORS, SPACING, TYPE, OPACITY, NUMBERS, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import { formatCurrency } from '../../../utils/formatCurrency';
@@ -210,6 +210,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
     padding: SPACING.md,
+    // the fintech pass: capped and centered on a tablet so lines stay a readable length
+    width: '100%',
+    maxWidth: SIZES.content_max_width + 160,
+    alignSelf: 'center',
   },
   add_button: {
     marginHorizontal: 0,
