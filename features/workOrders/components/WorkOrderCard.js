@@ -1,18 +1,19 @@
 import { Text, View, Image, Pressable, StyleSheet } from 'react-native';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
+import RemoteImage from '../../../components/RemoteImage';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 import { formatDate } from '../../../utils/formatDate';
 
 // I keep one color per status so the badge is readable at a glance
-const status_colors = {
+export const status_colors = {
   'Open': COLORS.danger,
   'In Progress': COLORS.warning,
   'Resolved': COLORS.success,
 };
 
 // one color per priority so emergencies stand out in the list
-const priority_colors = {
+export const priority_colors = {
   'Emergency': COLORS.priority_emergency,
   'Normal': COLORS.secondary,
   'Low': COLORS.priority_low,
@@ -39,8 +40,9 @@ function WorkOrderCard(props) {
           </View>
         </View>
         <Text style={styles.detail}>{order.property}</Text>
+        {/* an owner-made order can have no tenant, so the name can be empty */}
         <Text style={styles.detail}>
-          {order.tenant} · {formatDate(order.created_at)}
+          {order.tenant || 'No tenant'} · {formatDate(order.created_at)}
         </Text>
         {order.description ? (
           <Text style={styles.detail} numberOfLines={2}>
@@ -67,6 +69,15 @@ function WorkOrderCard(props) {
       )}
       {/* I only show the issue photo if the work order has one */}
       {order.photo && <Image source={order.photo} style={styles.issue_photo} />}
+      {/* server orders have a list of photos instead, the card shows the first one */}
+      {order.photos && order.photos.length > 0 && (
+        <View>
+          <RemoteImage attachment_key={order.photos[0]} style={styles.issue_photo} />
+          {order.photos.length > 1 && (
+            <Text style={styles.detail}>+{order.photos.length - 1} more in Details</Text>
+          )}
+        </View>
+      )}
       {/* I only show the expense summary once at least one expense exists, tapping it opens the details */}
       {expenses.length > 0 && (
         <Pressable style={styles.expense_section} onPress={props.onViewExpenses}>

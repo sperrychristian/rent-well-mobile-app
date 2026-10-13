@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
@@ -10,19 +10,72 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import AddExpenseModal from '../../expenses/components/AddExpenseModal';
+import RemoteImage from '../../../components/RemoteImage';
+import ErrorState from '../../../components/ErrorState';
+import ImageViewerModal from '../../messages/components/ImageViewerModal';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { formatDate } from '../../../utils/formatDate';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
 const priority_options = ['Emergency', 'Normal', 'Low'];
 
+// in real mode a push tap can open an order that isn't in the list yet, so this asks the server for it first
+// the content only shows once the order is here, so its text boxes start with the real notes and contractor
 function WorkOrderDetailScreen(props) {
+  const insets = useSafeAreaInsets();
+  const { getOrder, is_remote, ensureOrder } = useWorkOrders();
+  const order_id = props.route.params.order_id;
+  const order = getOrder(order_id);
+  const [load_error, setLoadError] = useState('');
+  // goes up on Try Again so the effect asks again
+  const [attempt, setAttempt] = useState(0);
+
+  const has_order = !!order;
+  // the context hands out a new function every render, so the effect reads the latest one from here
+  const ensure = useRef(ensureOrder);
+  useEffect(() => {
+    ensure.current = ensureOrder;
+  });
+
+  useEffect(() => {
+    if (has_order || !is_remote) {
+      return;
+    }
+    ensure.current(order_id).catch((error) => {
+      console.log('Could not load the work order', error.message);
+      setLoadError(error.message);
+    });
+  }, [order_id, attempt, is_remote, has_order]);
+
+  if (!order && is_remote) {
+    return (
+      <View style={[styles.flex, styles.center, { paddingTop: insets.top + SPACING.md }]}>
+        {load_error ? (
+          <ErrorState
+            message={load_error}
+            onRetry={() => {
+              setLoadError('');
+              setAttempt((current) => current + 1);
+            }}
+          />
+        ) : (
+          <ActivityIndicator color={COLORS.title} size="large" />
+        )}
+      </View>
+    );
+  }
+
+  return <WorkOrderDetailContent {...props} key={order_id} />;
+}
+
+function WorkOrderDetailContent(props) {
   const insets = useSafeAreaInsets();
   const {
     getOrder,
@@ -45,6 +98,8 @@ function WorkOrderDetailScreen(props) {
     order && order.estimate !== null && order.estimate !== undefined ? String(order.estimate) : '',
   );
   const [show_expense_form, setShowExpenseForm] = useState(false);
+  // the photo open full size, null when the viewer is closed
+  const [viewer_url, setViewerUrl] = useState(null);
 
   // if the order can't be found I show a simple message instead of crashing
   if (!order) {
@@ -61,13 +116,25 @@ function WorkOrderDetailScreen(props) {
   const has_estimate = order.estimate !== null && order.estimate !== undefined;
   const difference = has_estimate ? expense_total - order.estimate : 0;
 
-  function saveNotes() {
-    setNotes(order_id, notes_text.trim());
-    Alert.alert('Saved', 'Notes updated.');
+  // in real mode the changes go to the server and can fail, so I show why (the local ones never throw)
+  async function tryAction(action) {
+    try {
+      await action();
+      return true;
+    } catch (error) {
+      Alert.alert('Could not update the work order', error.message);
+      return false;
+    }
+  }
+
+  async function saveNotes() {
+    if (await tryAction(() => setNotes(order_id, notes_text.trim()))) {
+      Alert.alert('Saved', 'Notes updated.');
+    }
   }
 
   // I check the estimate before saving so a bad number never gets stored
-  function saveContractor() {
+  async function saveContractor() {
     let parsed_estimate = null;
     if (estimate_text.trim() !== '') {
       parsed_estimate = parseFloat(estimate_text);
@@ -76,15 +143,18 @@ function WorkOrderDetailScreen(props) {
         return;
       }
     }
-    setContractorInfo(order_id, contractor_text.trim(), parsed_estimate);
-    Alert.alert('Saved', 'Contractor and estimate updated.');
+    if (
+      await tryAction(() => setContractorInfo(order_id, contractor_text.trim(), parsed_estimate))
+    ) {
+      Alert.alert('Saved', 'Contractor and estimate updated.');
+    }
   }
 
   // ask first so a stray tap doesn't close out a request
   function confirmResolve() {
     Alert.alert('Resolve work order', 'Mark this request as resolved?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Resolve', onPress: () => resolveWorkOrder(order_id) },
+      { text: 'Resolve', onPress: () => tryAction(() => resolveWorkOrder(order_id)) },
     ]);
   }
 
@@ -114,11 +184,24 @@ function WorkOrderDetailScreen(props) {
         <Card>
           <Text style={styles.heading}>{order.title}</Text>
           <Text style={styles.detail}>{order.property}</Text>
-          <Text style={styles.detail}>{order.tenant}</Text>
+          <Text style={styles.detail}>{order.tenant || 'No tenant'}</Text>
           <Text style={styles.detail}>Status: {order.status}</Text>
           {order.description ? <Text style={styles.detail}>{order.description}</Text> : null}
           {/* I only show the issue photo if the work order has one */}
           {order.photo && <Image source={order.photo} style={styles.photo} />}
+          {/* server orders can have up to 10 photos, tapping one opens it full size */}
+          {order.photos && order.photos.length > 0 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photo_row}>
+              {order.photos.map((key) => (
+                <RemoteImage
+                  key={key}
+                  attachment_key={key}
+                  style={styles.photo_thumb}
+                  onPress={setViewerUrl}
+                />
+              ))}
+            </ScrollView>
+          )}
         </Card>
 
         <Card>
@@ -138,7 +221,7 @@ function WorkOrderDetailScreen(props) {
             {priority_options.map((option) => (
               <Pressable
                 key={option}
-                onPress={() => setPriority(order_id, option)}
+                onPress={() => tryAction(() => setPriority(order_id, option))}
                 style={[styles.chip, (order.priority || 'Normal') === option && styles.chip_active]}
               >
                 <Text style={styles.chip_text}>{option}</Text>
@@ -229,7 +312,7 @@ function WorkOrderDetailScreen(props) {
                 title="Start Work"
                 icon="play-circle-outline"
                 style={styles.start_button}
-                onPress={() => startWorkOrder(order_id)}
+                onPress={() => tryAction(() => startWorkOrder(order_id))}
               />
             )}
             {order.status === 'In Progress' && (
@@ -264,6 +347,7 @@ function WorkOrderDetailScreen(props) {
         onSave={saveExpense}
         onClose={() => setShowExpenseForm(false)}
       />
+      <ImageViewerModal url={viewer_url} onClose={() => setViewerUrl(null)} />
     </KeyboardAvoidingView>
   );
 }
@@ -274,6 +358,17 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  center: {
+    justifyContent: 'center',
+  },
+  photo_row: {
+    marginTop: SPACING.sm,
+  },
+  photo_thumb: {
+    width: 120,
+    height: 120,
+    marginRight: SPACING.sm,
   },
   content: {
     alignItems: 'center',

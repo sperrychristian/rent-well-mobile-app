@@ -7,6 +7,7 @@ import UnreadBadge from '../../messages/components/UnreadBadge';
 import LogoutButton from '../../auth/components/LogoutButton';
 import { useAuth } from '../../auth/context/AuthContext';
 import { useMessages } from '../../messages/context/MessagesContext';
+import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
 // the tenant's home: message the landlord or report something that needs fixing
@@ -14,6 +15,7 @@ function TenantHomeScreen(props) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { unread_total } = useMessages();
+  const { active_count } = useWorkOrders();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
@@ -34,6 +36,28 @@ function TenantHomeScreen(props) {
               <Text style={styles.card_detail}>Talk with your landlord</Text>
             </View>
             <UnreadBadge count={unread_total} />
+            <Ionicons name="chevron-forward" size={20} color={COLORS.text} />
+          </View>
+        </Card>
+      </Pressable>
+
+      <Pressable
+        onPress={() => props.navigation.navigate('MyRequests')}
+        accessibilityRole="button"
+        accessibilityLabel="My requests"
+        style={({ pressed }) => [styles.card_press, pressed && styles.pressed]}
+      >
+        <Card>
+          <View style={styles.card_row}>
+            <Ionicons name="list-outline" size={32} color={COLORS.success} />
+            <View style={styles.card_text}>
+              <Text style={styles.card_title}>My Requests</Text>
+              <Text style={styles.card_detail}>
+                {active_count
+                  ? active_count + (active_count === 1 ? ' request' : ' requests') + ' in progress'
+                  : 'See what you reported and where it is at'}
+              </Text>
+            </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.text} />
           </View>
         </Card>

@@ -130,6 +130,91 @@ export function markConversationRead(conversation_id) {
   );
 }
 
+// ----- work orders -----
+
+// one page, newest first, filters is { status, property_id, cursor, limit }
+// status can be one status or a list, the server takes them comma separated
+export async function getWorkOrders(filters) {
+  const settings = filters || {};
+  const status = Array.isArray(settings.status) ? settings.status.join(',') : settings.status;
+  const data = await api_client.request('GET', '/work-orders', {
+    query: {
+      status: status,
+      propertyId: settings.property_id,
+      cursor: settings.cursor,
+      limit: settings.limit || 100,
+    },
+  });
+  return { work_orders: data.workOrders, next_cursor: data.nextCursor };
+}
+
+// a small landlord has a handful of orders, so I just follow the cursor to the end (with a cap so it can't run forever)
+export async function getAllWorkOrders(filters) {
+  const all = [];
+  let cursor = null;
+  for (let page = 0; page < 20; page++) {
+    const result = await getWorkOrders({ ...filters, cursor: cursor });
+    all.push(...result.work_orders);
+    cursor = result.next_cursor;
+    if (!cursor) {
+      break;
+    }
+  }
+  return all;
+}
+
+export async function getWorkOrder(work_order_id) {
+  const data = await api_client.request('GET', '/work-orders/' + encodeURIComponent(work_order_id));
+  return data.workOrder;
+}
+
+// the tenant version, property, unit, and name come from the tenancy so they're never sent
+// fields: title, description, priority, photo_keys, tenancy_id (only when the tenant has more than one)
+export async function createTenantWorkOrder(fields) {
+  const body = { title: fields.title, description: fields.description, priority: fields.priority };
+  if (fields.photo_keys && fields.photo_keys.length > 0) {
+    body.photoKeys = fields.photo_keys;
+  }
+  if (fields.tenancy_id) {
+    body.tenancyId = fields.tenancy_id;
+  }
+  const data = await api_client.request('POST', '/work-orders', { body: body });
+  return data.workOrder;
+}
+
+// changes is already in the server's shape, only the fields being changed get sent
+async function patchWorkOrder(work_order_id, changes) {
+  const data = await api_client.request(
+    'PATCH',
+    '/work-orders/' + encodeURIComponent(work_order_id),
+    { body: changes },
+  );
+  return data.workOrder;
+}
+
+// owner only, the server fills in the started and resolved dates
+export function updateWorkOrderStatus(work_order_id, status) {
+  return patchWorkOrder(work_order_id, { status: status });
+}
+
+export function updateWorkOrderPriority(work_order_id, priority) {
+  return patchWorkOrder(work_order_id, { priority: priority });
+}
+
+export function updateWorkOrderNotes(work_order_id, notes) {
+  return patchWorkOrder(work_order_id, { ownerNotes: notes });
+}
+
+// estimate is a number or null, the server turns away strings
+export function updateWorkOrderContractor(work_order_id, contractor, estimate) {
+  return patchWorkOrder(work_order_id, { contractor: contractor, estimate: estimate });
+}
+
+// owner or tenant, the keys come from uploadImage and get added after the photos already there
+export function addWorkOrderPhotos(work_order_id, photo_keys) {
+  return patchWorkOrder(work_order_id, { addPhotoKeys: photo_keys });
+}
+
 // ----- uploads -----
 
 const allowed_image_types = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];

@@ -40,7 +40,7 @@ npx expo start -c
 ```
 
 ## Running against the local backend
-The demo works with no backend. Logging in, signing up, and messages need the API from the `rent-well-api` repo running on your computer.
+The demo works with no backend. Logging in, signing up, messages, and work orders need the API from the `rent-well-api` repo running on your computer.
 
 1. In `rent-well-api`, start Postgres and the server (first time: `npm install`, `cp .env.example .env`, then `npm run migrate` and `npm run seed`):
    ```bash
@@ -53,5 +53,12 @@ The demo works with no backend. Logging in, signing up, and messages need the AP
    - Android emulator: works as is (`http://10.0.2.2:4000`).
    - Physical phone: open `services/config.js`, set `lan_api_url` to your computer's address, like `'http://192.168.1.20:4000'` (find it with `ipconfig getifaddr en0`). The phone and computer need to be on the same wifi.
 3. Log in with a seed account (password `password1234`): `owner@example.com` (landlord) or `tenant@example.com` (tenant). To try tenant sign up, use invite code `WELCOME2`. Run `npm run seed` in the API repo again to reset the seed data.
+
+What to try once you're signed in:
+- As the landlord: Work Orders loads from the server. Pull down to refresh, start or resolve an order, and edit priority, notes, contractor, and estimate on its detail screen. The Dashboard badge counts orders nobody has started.
+- As the tenant: My Requests on the home screen lists your requests, and Report an Issue sends one with up to 5 photos. Changes the landlord makes show up live.
+- Expenses on work orders still save on the phone only.
+
+If the server stops, the work order list keeps showing the last copy it loaded with a note at the top, and pulling down tries again.
 
 Push notifications need a development build with an EAS project id. In Expo Go or the simulator the app skips push and logs why.

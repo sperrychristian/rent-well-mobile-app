@@ -29,6 +29,7 @@ import {
   deleteChecklistPhoto,
   clearDemoChecklistPhotos,
 } from '../features/checklist/utils/checklistPhotos';
+import { RemoteWorkOrdersContext } from '../features/workOrders/context/remoteWorkOrdersContext';
 
 const orders_key = 'rent_well_work_orders';
 const expenses_key = 'rent_well_expenses';
@@ -673,6 +674,9 @@ export function WorkOrdersProvider(props) {
 }
 
 // screens call this to get the shared orders, expenses, and actions
+// in real mode the work order provider hands back the same shape with the orders coming from the server
 export function useWorkOrders() {
-  return useContext(WorkOrdersContext);
+  const local = useContext(WorkOrdersContext);
+  const remote = useContext(RemoteWorkOrdersContext);
+  return remote || local;
 }

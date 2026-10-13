@@ -14,6 +14,11 @@ const friendly_messages = {
   ATTACHMENT_INVALID: "The photo didn't upload. Try attaching it again.",
   PAYLOAD_TOO_LARGE: 'That file is too large.',
   INVALID_CURSOR: "Couldn't load older messages. Pull to refresh and try again.",
+  WORK_ORDER_NOT_OPEN: 'Photos can only be added while the request is still open.',
+  PHOTO_LIMIT: 'A request can have up to 10 photos.',
+  NO_TENANCY: "Your account isn't linked to a rental yet. Ask your landlord for an invite.",
+  TENANCY_REQUIRED: 'Pick which rental this request is for.',
+  INVALID_STATUS_TRANSITION: "That status change isn't allowed.",
   INTERNAL_ERROR: 'Something went wrong on the server. Try again in a moment.',
   NETWORK_ERROR: "Can't reach the server. Check your connection and try again.",
 };

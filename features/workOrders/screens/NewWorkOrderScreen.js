@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -11,18 +11,26 @@ import {
   KeyboardAvoidingView,
   Platform,
   useWindowDimensions,
+  ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenTitle from '../../../components/ScreenTitle';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { getMe } from '../../../services/api';
+import { max_photos_per_upload } from '../utils/workOrderHelpers';
 import { COLORS, SPACING, FONTS } from '../../../theme';
 
 const urgency_options = ['Emergency', 'Normal', 'Low'];
+// the server takes photos up to 10 MB
+const max_photo_bytes = 10485760;
 
 function NewWorkOrderScreen(props) {
-  const { addWorkOrder, properties } = useWorkOrders();
+  const { addWorkOrder, properties, is_remote, role } = useWorkOrders();
+  // in real mode a tenant's property, unit, and name come from their account, so those boxes go away
+  const tenant_remote = is_remote && role === 'tenant';
   // the header is hidden, so I push the content below the status bar and notch myself
   const insets = useSafeAreaInsets();
   // I check the screen shape so the photo can shrink when it's wider than it is tall
@@ -36,6 +44,61 @@ function NewWorkOrderScreen(props) {
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('Normal');
   const [photo_uri, setPhotoUri] = useState(null);
+  // real mode takes up to 5 photos, each one is { uri, mime_type }
+  const [photos, setPhotos] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [progress_text, setProgressText] = useState('');
+  // the tenant's rentals from GET /me, almost always just one
+  const [tenancies, setTenancies] = useState([]);
+  const [tenancy_id, setTenancyId] = useState(null);
+  // loading, ready, or error for the rental lookup
+  const [me_status, setMeStatus] = useState('loading');
+  const [me_attempt, setMeAttempt] = useState(0);
+
+  useEffect(() => {
+    if (!tenant_remote) {
+      return undefined;
+    }
+    let active = true;
+    getMe()
+      .then((me) => {
+        if (!active) {
+          return;
+        }
+        const list = me.tenancies || [];
+        setTenancies(list);
+        setTenancyId(list.length > 0 ? list[0].id : null);
+        setMeStatus('ready');
+      })
+      .catch((error) => {
+        console.log('Could not load the rental', error.message);
+        if (active) {
+          setMeStatus('error');
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [tenant_remote, me_attempt]);
+
+  // real mode keeps a list of photos, anything over 10 MB gets turned away
+  function keepPhotos(assets) {
+    const room = max_photos_per_upload - photos.length;
+    const fitting = assets.filter((asset) => !asset.fileSize || asset.fileSize <= max_photo_bytes);
+    if (fitting.length < assets.length) {
+      Alert.alert('Photo too large', 'Photos have to be under 10 MB.');
+    }
+    setPhotos((current) => [
+      ...current,
+      ...fitting
+        .slice(0, room)
+        .map((asset) => ({ uri: asset.uri, mime_type: asset.mimeType || 'image/jpeg' })),
+    ]);
+  }
+
+  function removePhoto(index) {
+    setPhotos((current) => current.filter((photo, photo_index) => photo_index !== index));
+  }
 
   // I have to ask for camera permission before the camera can open
   async function takePhoto() {
@@ -46,22 +109,79 @@ function NewWorkOrderScreen(props) {
     }
     const result = await ImagePicker.launchCameraAsync({ quality: 0.7 });
     if (!result.canceled) {
-      setPhotoUri(result.assets[0].uri);
+      if (tenant_remote) {
+        keepPhotos(result.assets);
+      } else {
+        setPhotoUri(result.assets[0].uri);
+      }
     }
   }
 
   async function choosePhoto() {
+    // real mode can pick several at once, up to what's left of the 5
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       quality: 0.7,
+      allowsMultipleSelection: tenant_remote,
+      selectionLimit: tenant_remote ? max_photos_per_upload - photos.length : 1,
     });
     if (!result.canceled) {
-      setPhotoUri(result.assets[0].uri);
+      if (tenant_remote) {
+        keepPhotos(result.assets);
+      } else {
+        setPhotoUri(result.assets[0].uri);
+      }
     }
+  }
+
+  // real mode: the photos upload first, then the request goes to the landlord
+  async function submitToServer() {
+    if (title.trim() === '') {
+      Alert.alert('Describe the issue', 'Add a short title, like Kitchen faucet leaking.');
+      return;
+    }
+    if (title.trim().length > 120) {
+      Alert.alert('Shorten the title', 'Keep the title under 120 characters.');
+      return;
+    }
+    if (tenancies.length === 0) {
+      Alert.alert(
+        'No rental found',
+        "Your account isn't linked to a rental yet. Ask your landlord for an invite.",
+      );
+      return;
+    }
+    setBusy(true);
+    try {
+      await addWorkOrder(
+        {
+          title: title.trim(),
+          description: description.trim(),
+          priority: priority,
+          photos: photos,
+          // only needed when there's more than one rental to pick from
+          tenancy_id: tenancies.length > 1 ? tenancy_id : undefined,
+        },
+        (number, total) => setProgressText('Uploading photo ' + number + ' of ' + total + '...'),
+      );
+      Alert.alert('Request submitted', 'Your landlord has been notified.', [
+        { text: 'OK', onPress: () => props.navigation.replace('MyRequests') },
+      ]);
+    } catch (error) {
+      console.log('Could not submit the request', error.message);
+      // everything stays filled in so it can be sent again
+      Alert.alert('Request not sent', error.message);
+    }
+    setProgressText('');
+    setBusy(false);
   }
 
   // I check the required pieces first so an empty request never gets submitted
   function handleSubmit() {
+    if (tenant_remote) {
+      submitToServer();
+      return;
+    }
     if (tenant_name.trim() === '') {
       Alert.alert('Add your name', 'Type your name so the landlord knows who sent it.');
       return;
@@ -109,41 +229,92 @@ function NewWorkOrderScreen(props) {
         <View style={styles.form}>
           <ScreenTitle>Report an Issue</ScreenTitle>
 
-          <Text style={styles.label}>Your name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Your name"
-            placeholderTextColor={COLORS.text}
-            value={tenant_name}
-            onChangeText={setTenantName}
-          />
+          {/* an owner signed in for real can't file a tenant request, the dashboard hides the button but this is a backup */}
+          {is_remote && !tenant_remote ? (
+            <Text style={styles.notice}>
+              {"Report an Issue is for tenants. Your tenants' requests show up in Work Orders."}
+            </Text>
+          ) : null}
 
-          <Text style={styles.label}>Property</Text>
-          {properties.length > 0 && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.chip_scroll}
-              contentContainerStyle={styles.chip_row}
-            >
-              {properties.map((name) => (
-                <Pressable
-                  key={name}
-                  onPress={() => setProperty(name)}
-                  style={[styles.chip, property === name && styles.chip_active]}
-                >
-                  <Text style={styles.chip_text}>{name}</Text>
+          {tenant_remote ? (
+            <View style={styles.rental_box}>
+              <Text style={styles.label}>Reporting for</Text>
+              {me_status === 'loading' && <ActivityIndicator color={COLORS.title} />}
+              {me_status === 'error' && (
+                <Pressable onPress={() => setMeAttempt((current) => current + 1)} hitSlop={8}>
+                  <Text style={styles.link_text}>
+                    {"Couldn't load your rental. Tap to try again."}
+                  </Text>
                 </Pressable>
-              ))}
-            </ScrollView>
+              )}
+              {me_status === 'ready' && tenancies.length === 0 && (
+                <Text style={styles.rental_text}>
+                  No rental linked yet. Ask your landlord for an invite.
+                </Text>
+              )}
+              {me_status === 'ready' && tenancies.length === 1 && (
+                <Text style={styles.rental_text}>
+                  {tenancies[0].property.name +
+                    (tenancies[0].unitLabel ? ', ' + tenancies[0].unitLabel : '')}
+                </Text>
+              )}
+              {me_status === 'ready' && tenancies.length > 1 && (
+                <View style={styles.chip_wrap}>
+                  {tenancies.map((tenancy) => (
+                    <Pressable
+                      key={tenancy.id}
+                      onPress={() => setTenancyId(tenancy.id)}
+                      hitSlop={{ top: 8, bottom: 8 }}
+                      style={[styles.chip, tenancy_id === tenancy.id && styles.chip_active]}
+                    >
+                      <Text style={styles.chip_text}>
+                        {tenancy.property.name +
+                          (tenancy.unitLabel ? ', ' + tenancy.unitLabel : '')}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+            </View>
+          ) : (
+            <View>
+              <Text style={styles.label}>Your name</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Your name"
+                placeholderTextColor={COLORS.text}
+                value={tenant_name}
+                onChangeText={setTenantName}
+              />
+
+              <Text style={styles.label}>Property</Text>
+              {properties.length > 0 && (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.chip_scroll}
+                  contentContainerStyle={styles.chip_row}
+                >
+                  {properties.map((name) => (
+                    <Pressable
+                      key={name}
+                      onPress={() => setProperty(name)}
+                      style={[styles.chip, property === name && styles.chip_active]}
+                    >
+                      <Text style={styles.chip_text}>{name}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              )}
+              <TextInput
+                style={styles.input}
+                placeholder="Pick one above or type your address"
+                placeholderTextColor={COLORS.text}
+                value={property}
+                onChangeText={setProperty}
+              />
+            </View>
           )}
-          <TextInput
-            style={styles.input}
-            placeholder="Pick one above or type your address"
-            placeholderTextColor={COLORS.text}
-            value={property}
-            onChangeText={setProperty}
-          />
 
           <Text style={styles.label}>What's wrong?</Text>
           <TextInput
@@ -183,26 +354,55 @@ function NewWorkOrderScreen(props) {
               style={[styles.preview, is_landscape && styles.preview_landscape]}
             />
           )}
-          <View style={styles.button_row}>
-            <PrimaryButton
-              title="Camera"
-              icon="camera-outline"
-              onPress={takePhoto}
-              style={styles.photo_button}
-            />
-            <PrimaryButton
-              title="Library"
-              icon="image-outline"
-              onPress={choosePhoto}
-              style={styles.photo_button}
-            />
-          </View>
+          {tenant_remote && photos.length > 0 && (
+            <ScrollView
+              horizontal
+              style={styles.chip_scroll}
+              contentContainerStyle={styles.thumb_row}
+            >
+              {photos.map((photo, index) => (
+                <View key={photo.uri + index}>
+                  <Image source={{ uri: photo.uri }} style={styles.thumb} />
+                  <Pressable
+                    style={styles.remove_button}
+                    onPress={() => removePhoto(index)}
+                    hitSlop={8}
+                    accessibilityLabel="Remove photo"
+                  >
+                    <Ionicons name="close-circle" size={22} color={COLORS.danger} />
+                  </Pressable>
+                </View>
+              ))}
+            </ScrollView>
+          )}
+          {tenant_remote && (
+            <Text style={styles.helper}>
+              {photos.length + ' of ' + max_photos_per_upload + ' photos'}
+            </Text>
+          )}
+          {(!tenant_remote || photos.length < max_photos_per_upload) && (
+            <View style={styles.button_row}>
+              <PrimaryButton
+                title="Camera"
+                icon="camera-outline"
+                onPress={takePhoto}
+                style={styles.photo_button}
+              />
+              <PrimaryButton
+                title="Library"
+                icon="image-outline"
+                onPress={choosePhoto}
+                style={styles.photo_button}
+              />
+            </View>
+          )}
 
+          {busy && progress_text !== '' && <Text style={styles.helper}>{progress_text}</Text>}
           <PrimaryButton
-            title="Submit Request"
+            title={busy ? 'Sending...' : 'Submit Request'}
             icon="send-outline"
-            onPress={handleSubmit}
-            style={styles.submit_button}
+            onPress={busy || (is_remote && !tenant_remote) ? undefined : handleSubmit}
+            style={[styles.submit_button, busy && styles.busy]}
           />
         </View>
       </ScrollView>
@@ -294,5 +494,56 @@ const styles = StyleSheet.create({
   submit_button: {
     marginHorizontal: 0,
     backgroundColor: COLORS.success,
+  },
+  busy: {
+    opacity: 0.7,
+  },
+  notice: {
+    color: COLORS.text,
+    fontFamily: FONTS.body_bold,
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: SPACING.md,
+  },
+  rental_box: {
+    backgroundColor: COLORS.muted,
+    borderRadius: 8,
+    padding: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  rental_text: {
+    color: COLORS.text,
+    fontFamily: FONTS.body,
+    fontSize: 15,
+  },
+  link_text: {
+    color: COLORS.action,
+    fontFamily: FONTS.body_bold,
+    fontSize: 14,
+  },
+  helper: {
+    color: COLORS.text,
+    fontFamily: FONTS.body,
+    fontSize: 12,
+    opacity: 0.7,
+    marginBottom: SPACING.sm,
+  },
+  thumb_row: {
+    gap: SPACING.sm,
+    paddingTop: SPACING.sm,
+    paddingRight: SPACING.sm,
+    paddingBottom: SPACING.sm,
+  },
+  thumb: {
+    width: 72,
+    height: 72,
+    borderRadius: 8,
+  },
+  remove_button: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: COLORS.surface_light,
+    borderRadius: 11,
   },
 });
