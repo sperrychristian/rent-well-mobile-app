@@ -31,6 +31,7 @@ function DemoBanner() {
   return (
     // the design pass: a navy card with an amber edge and a Demo pill, so it reads as part of the app
     // and not as an error, with the two buttons side by side (they wrap when the text is big)
+    // the fintech pass: a slim strip on the soft indigo tint, calm instead of a warning, Exit stays red
     <View style={styles.banner} accessibilityRole="summary">
       <View style={styles.top_row}>
         <StatusPill label="Demo" />
@@ -40,8 +41,10 @@ function DemoBanner() {
         </Text>
       </View>
       <View style={styles.button_row}>
+        {/* the short label keeps both buttons on one row, the screen reader still hears which side it goes to */}
         <PrimaryButton
-          title={is_tenant ? 'Switch to Landlord view' : 'Switch to Tenant view'}
+          title="Switch view"
+          accessibilityLabel={is_tenant ? 'Switch to Landlord view' : 'Switch to Tenant view'}
           icon="swap-horizontal-outline"
           variant="secondary"
           size="small"
@@ -66,18 +69,16 @@ export default DemoBanner;
 const styles = StyleSheet.create({
   banner: {
     width: '100%',
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.brand_tint,
+    borderRadius: RADIUS.md,
     borderWidth: BORDER.hairline,
     borderColor: COLORS.border,
-    borderLeftWidth: BORDER.thick + 2,
-    borderLeftColor: COLORS.warning,
-    padding: SPACING.sm + SPACING.xs,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.sm + SPACING.xs,
     marginBottom: SPACING.md,
   },
   text: {
     ...TYPE.caption,
-    fontFamily: TYPE.label.fontFamily,
     color: COLORS.text,
     flex: 1,
   },
@@ -93,7 +94,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    marginBottom: SPACING.sm + SPACING.xs,
+    marginBottom: SPACING.sm,
   },
   button_row: {
     flexDirection: 'row',

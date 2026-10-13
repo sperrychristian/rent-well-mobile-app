@@ -1,14 +1,5 @@
 import { useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  FlatList,
-  Pressable,
-  ScrollView,
-  TextInput,
-  Alert,
-} from 'react-native';
+import { StyleSheet, View, Text, FlatList, Pressable, ScrollView, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
@@ -21,6 +12,7 @@ import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import IconCircle from '../../../components/ui/IconCircle';
+import CurrencyInput from '../../../components/ui/CurrencyInput';
 
 function MileageScreen(props) {
   // need the insets so the title clears the notch and status bar
@@ -142,13 +134,10 @@ function MileageScreen(props) {
           site. The rate applies to every year in this log.
         </Text>
         <View style={styles.rate_row}>
-          <TextInput
+          <CurrencyInput
             style={styles.rate_input}
             accessibilityLabel="Rate per mile"
-            keyboardAppearance="dark"
             placeholder="0.70"
-            placeholderTextColor={COLORS.text_muted}
-            keyboardType="decimal-pad"
             value={rate_text}
             onChangeText={setRateText}
           />

@@ -326,7 +326,7 @@ function MessageThreadScreen(props) {
             <TextInput
               style={styles.input}
               placeholder="Message"
-              keyboardAppearance="dark"
+              keyboardAppearance="light"
               accessibilityLabel="Message"
               placeholderTextColor={COLORS.text_muted}
               value={draft}
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
     transform: [{ scaleY: -1 }],
   },
   demo_strip: {
-    backgroundColor: COLORS.warning,
+    backgroundColor: COLORS.warning_tint,
     borderRadius: RADIUS.md,
     paddingVertical: SPACING.xs + SPACING.xxs,
     paddingHorizontal: SPACING.sm,
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   demo_text: {
     ...TYPE.caption,
     fontFamily: TYPE.label.fontFamily,
-    color: COLORS.on_light,
+    color: COLORS.warning_text,
     textAlign: 'center',
   },
   photo_preview: {
@@ -457,23 +457,23 @@ const styles = StyleSheet.create({
   input: {
     ...TYPE.input,
     fontSize: 15,
+    backgroundColor: COLORS.surface,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border_strong,
+    color: COLORS.text,
+    borderRadius: RADIUS.xl + SPACING.xxs,
     flex: 1,
     minHeight: SIZES.touch,
     maxHeight: 120,
-    backgroundColor: COLORS.surface,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
-    color: COLORS.text,
-    borderRadius: RADIUS.xl + 2,
     paddingHorizontal: SPACING.md,
     paddingTop: SPACING.sm + SPACING.xxs + 1,
     paddingBottom: SPACING.sm + SPACING.xxs + 1,
   },
   send_button: {
+    backgroundColor: COLORS.cta,
+    borderRadius: RADIUS.pill,
     width: SIZES.touch,
     height: SIZES.touch,
-    borderRadius: RADIUS.pill,
-    backgroundColor: COLORS.action,
     alignItems: 'center',
     justifyContent: 'center',
   },

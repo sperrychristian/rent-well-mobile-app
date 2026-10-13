@@ -27,7 +27,13 @@ import { list_styles } from '../../../components/ui/listStyles';
 const max_photos = 3;
 
 // one color per condition so they're easy to spot
+// (the fintech pass: soft tints, the picked chip also gets its condition's darker border and ink text)
 const condition_colors = {
+  Good: COLORS.success_tint,
+  Fair: COLORS.warning_tint,
+  Poor: COLORS.danger_tint,
+};
+const condition_borders = {
   Good: COLORS.success,
   Fair: COLORS.warning,
   Poor: COLORS.danger,
@@ -210,7 +216,7 @@ function ChecklistItemModal(props) {
                       styles.chip,
                       condition === option && {
                         backgroundColor: condition_colors[option],
-                        borderColor: condition_colors[option],
+                        borderColor: condition_borders[option],
                       },
                     ]}
                     accessibilityRole="button"
@@ -439,7 +445,7 @@ const styles = StyleSheet.create({
     ...list_styles.chip_text,
   },
   chip_text_active: {
-    color: COLORS.text_light,
+    color: COLORS.text,
   },
   input: {
     ...list_styles.field_input,

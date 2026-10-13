@@ -5,6 +5,7 @@ import { formatMessageTime, photo_only_body } from '../utils/messageHelpers';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../../theme';
 
 // one message, mine on the right in blue and theirs on the left
+// (the fintech pass: mine is the indigo brand color, theirs is a light gray)
 // props: message, is_mine, show_seen, onOpenImage
 // the design pass added day_label (a Today, Yesterday, or date divider above the first message of a day)
 // and show_time (false hides the time on all but the newest of a quick run from one person)
@@ -63,13 +64,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.sm + SPACING.xs,
   },
   bubble_mine: {
-    backgroundColor: COLORS.action,
+    backgroundColor: COLORS.cta,
     borderBottomRightRadius: SPACING.xs,
   },
   bubble_theirs: {
-    backgroundColor: COLORS.surface_raised,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
+    backgroundColor: COLORS.neutral_tint,
     borderBottomLeftRadius: SPACING.xs,
   },
   body: {

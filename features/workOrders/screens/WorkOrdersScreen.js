@@ -180,7 +180,7 @@ function WorkOrdersScreen(props) {
       <TextInput
         style={styles.search_input}
         accessibilityLabel="Search work orders"
-        keyboardAppearance="dark"
+        keyboardAppearance="light"
         placeholder="Search by issue, tenant, or property"
         placeholderTextColor={COLORS.text_muted}
         value={search_text}

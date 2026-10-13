@@ -302,7 +302,7 @@ function DocumentsScreen() {
       <TextInput
         style={styles.search_input}
         accessibilityLabel="Search documents"
-        keyboardAppearance="dark"
+        keyboardAppearance="light"
         placeholder="Search name, tenant, property, or notes"
         placeholderTextColor={COLORS.text_muted}
         value={search_text}

@@ -28,6 +28,7 @@ import { COLORS, SPACING, TYPE, RADIUS, SIZES, NUMBERS, BORDER } from '../../../
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusPill from '../../../components/ui/StatusPill';
 import { formatCurrency } from '../../../utils/formatCurrency';
+import CurrencyInput from '../../../components/ui/CurrencyInput';
 
 const priority_options = ['Emergency', 'Normal', 'Low'];
 
@@ -272,11 +273,9 @@ function WorkOrderDetailContent(props) {
             value={contractor_text}
             onChangeText={setContractorText}
           />
-          <TextInput
+          <CurrencyInput
             style={styles.input}
             placeholder="Estimate (e.g. 250.00)"
-            placeholderTextColor={COLORS.text_muted}
-            keyboardType="decimal-pad"
             value={estimate_text}
             onChangeText={setEstimateText}
           />

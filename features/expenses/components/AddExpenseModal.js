@@ -23,6 +23,7 @@ import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
 import { expense_categories, payment_methods } from '../../../data/expenseOptions';
 import { todayString } from '../../../utils/formatDate';
 import { list_styles } from '../../../components/ui/listStyles';
+import CurrencyInput from '../../../components/ui/CurrencyInput';
 
 const repeat_options = ['None', 'Monthly', 'Yearly'];
 
@@ -182,11 +183,9 @@ function AddExpenseModal(props) {
               <Text style={styles.heading}>{is_editing ? 'Edit Expense' : 'Add Expense'}</Text>
 
               <Text style={styles.label}>Amount</Text>
-              <TextInput
+              <CurrencyInput
                 style={styles.input}
                 placeholder="e.g. 45.00"
-                placeholderTextColor={COLORS.text_muted}
-                keyboardType="decimal-pad"
                 value={amount}
                 onChangeText={setAmount}
               />
@@ -339,11 +338,9 @@ function AddExpenseModal(props) {
                     />
                   </View>
                   {billed_to_tenant && (
-                    <TextInput
+                    <CurrencyInput
                       style={styles.input}
                       placeholder="Amount recovered so far (e.g. 50.00)"
-                      placeholderTextColor={COLORS.text_muted}
-                      keyboardType="decimal-pad"
                       value={recovered_text}
                       onChangeText={setRecoveredText}
                     />

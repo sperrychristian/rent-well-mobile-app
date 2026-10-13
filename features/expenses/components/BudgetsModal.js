@@ -3,7 +3,6 @@ import {
   Modal,
   View,
   Text,
-  TextInput,
   ScrollView,
   StyleSheet,
   Alert,
@@ -15,6 +14,7 @@ import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { COLORS, SPACING, TYPE } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
+import CurrencyInput from '../../../components/ui/CurrencyInput';
 
 // props: visible, properties (list of names), budgets (name to amount), onSave, onClose
 function BudgetsModal(props) {
@@ -70,11 +70,9 @@ function BudgetsModal(props) {
             {props.properties.map((name) => (
               <View key={name}>
                 <Text style={styles.label}>{name}</Text>
-                <TextInput
+                <CurrencyInput
                   style={styles.input}
                   placeholder="No budget"
-                  placeholderTextColor={COLORS.text_muted}
-                  keyboardType="decimal-pad"
                   value={budget_texts[name] || ''}
                   onChangeText={(text) =>
                     setBudgetTexts((current) => ({ ...current, [name]: text }))
