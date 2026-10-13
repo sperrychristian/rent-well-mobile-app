@@ -8,8 +8,8 @@ import { useAuth } from '../../auth/context/AuthContext';
 import { useAppRole } from '../../auth/hooks/useAppRole';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { formatMoney } from '../../expenses/utils/expenseStats';
 import { COLORS, SPACING, TYPE } from '../../../theme';
+import { formatCurrency } from '../../../utils/formatCurrency';
 
 // stub for the assignment: the future home for account details, notification settings, the mileage rate,
 // and Log Out (the old Log Out buttons on the homes still work, this is just the spot it moves to later)
@@ -59,7 +59,7 @@ function SettingsScreen(props) {
       {shows_mileage && (
         <Card>
           <Text style={styles.heading}>Mileage rate</Text>
-          <Text style={styles.body}>{formatMoney(mileage_rate)} per mile</Text>
+          <Text style={styles.body}>{formatCurrency(mileage_rate)} per mile</Text>
           <Text style={styles.detail}>You change it in the Mileage Log for now.</Text>
           <PrimaryButton
             title="Open Mileage Log"

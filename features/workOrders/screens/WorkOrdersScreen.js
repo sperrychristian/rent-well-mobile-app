@@ -23,6 +23,7 @@ import { openConversationFor } from '../../messages/utils/openConversation';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
+import SegmentedControl from '../../../components/ui/SegmentedControl';
 
 // lower number sorts first, so emergencies come out on top
 const priority_rank = { Emergency: 0, Normal: 1, Low: 2 };
@@ -186,24 +187,17 @@ function WorkOrdersScreen(props) {
         onChangeText={setSearchText}
         autoCorrect={false}
       />
-      <View style={styles.segment}>
-        <Pressable
-          onPress={() => setShowResolved(false)}
-          style={[styles.segment_option, !show_resolved && styles.segment_active]}
-          accessibilityRole="button"
-          accessibilityState={{ selected: !show_resolved }}
-        >
-          <Text style={styles.segment_text}>Active ({active_count})</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setShowResolved(true)}
-          style={[styles.segment_option, show_resolved && styles.segment_active]}
-          accessibilityRole="button"
-          accessibilityState={{ selected: show_resolved }}
-        >
-          <Text style={styles.segment_text}>Resolved ({resolved_count})</Text>
-        </Pressable>
-      </View>
+      {/* the fintech pass: the shared segmented control, the counts sit next to each tab's name */}
+      <SegmentedControl
+        label="Show work orders"
+        value={show_resolved}
+        onChange={setShowResolved}
+        options={[
+          { value: false, label: 'Active', count: active_count },
+          { value: true, label: 'Resolved', count: resolved_count },
+        ]}
+        style={styles.segment}
+      />
       {/* chips scroll sideways so a long list of properties doesn't wrap */}
       <ScrollView
         horizontal
@@ -326,16 +320,7 @@ const styles = StyleSheet.create({
     ...list_styles.search_input,
   },
   segment: {
-    ...list_styles.segment,
-  },
-  segment_option: {
-    ...list_styles.segment_option,
-  },
-  segment_active: {
-    ...list_styles.segment_active,
-  },
-  segment_text: {
-    ...list_styles.segment_text,
+    marginBottom: SPACING.sm + SPACING.xs,
   },
   toggle_label: {
     ...list_styles.label,

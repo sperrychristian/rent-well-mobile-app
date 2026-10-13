@@ -6,6 +6,7 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
 import { getDocumentUri } from '../utils/documentFiles';
 import { isImage, iconFor, expiryTag, daysUntil, formatSize } from '../utils/documentHelpers';
+import StatusPill from '../../../components/ui/StatusPill';
 
 // props: visible, document, in_demo, onOpen, onEdit, onDelete, onClose, and onDismiss (iOS calls it once the modal is fully gone)
 function DocumentDetailModal(props) {
@@ -48,23 +49,18 @@ function DocumentDetailModal(props) {
             </View>
 
             <View style={styles.tag_row}>
+              {/* the fintech pass: soft tinted pills, red when it's expired and amber when it's close */}
               {tag && (
-                <View style={[styles.tag, tag.expired ? styles.expired_tag : styles.expiring_tag]}>
-                  <Text style={[styles.tag_text, !tag.expired && styles.tag_text_dark]}>
-                    {tag.text}
-                  </Text>
-                </View>
+                <StatusPill
+                  label={tag.text}
+                  tone={tag.expired ? 'danger' : 'warning'}
+                  icon={tag.expired ? 'alert-circle' : 'time'}
+                />
               )}
               {document.shared_with_tenant && (
-                <View style={[styles.tag, styles.shared_tag]}>
-                  <Text style={styles.tag_text}>Shared with tenant</Text>
-                </View>
+                <StatusPill label="Shared with tenant" tone="info" icon="people" />
               )}
-              {document.sample && (
-                <View style={[styles.tag, styles.sample_tag]}>
-                  <Text style={styles.tag_text}>Sample</Text>
-                </View>
-              )}
+              {document.sample && <StatusPill label="Sample" tone="neutral" icon="document" />}
             </View>
 
             {preview_uri && (
@@ -162,30 +158,6 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
     marginBottom: SPACING.sm,
   },
-  tag: {
-    borderRadius: RADIUS.pill,
-    paddingVertical: 3,
-    paddingHorizontal: SPACING.sm,
-  },
-  expiring_tag: {
-    backgroundColor: COLORS.warning,
-  },
-  expired_tag: {
-    backgroundColor: COLORS.danger,
-  },
-  shared_tag: {
-    backgroundColor: COLORS.action,
-  },
-  sample_tag: {
-    backgroundColor: COLORS.secondary,
-  },
-  tag_text: {
-    ...TYPE.caption,
-    fontSize: 11,
-    lineHeight: 15,
-    fontFamily: TYPE.label.fontFamily,
-    color: COLORS.text_light,
-  },
   preview: {
     borderRadius: RADIUS.md,
     width: '100%',
@@ -221,9 +193,5 @@ const styles = StyleSheet.create({
   close_button: {
     flex: 1,
     marginHorizontal: 0,
-  },
-  // the expiring-soon tag is orange, so its words are dark
-  tag_text_dark: {
-    color: COLORS.on_light,
   },
 });

@@ -30,6 +30,7 @@ import { document_categories, expiring_soon_days } from '../../../data/documentO
 import { COLORS, SPACING, TYPE, RADIUS, SIZES, OPACITY } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
+import StatusPill from '../../../components/ui/StatusPill';
 
 const sort_options = ['Newest', 'Name'];
 
@@ -351,7 +352,7 @@ function DocumentsScreen() {
               accessibilityLabel={item.name + ', ' + item.category}
             >
               <View style={styles.row_icon}>
-                <Ionicons name={iconFor(item.mime_type)} size={24} color={COLORS.info_text} />
+                <Ionicons name={iconFor(item.mime_type)} size={22} color={COLORS.cta} />
               </View>
               <View style={styles.row_text}>
                 <Text style={styles.row_name} numberOfLines={2}>
@@ -362,19 +363,16 @@ function DocumentsScreen() {
                 {item.tenant ? <Text style={styles.detail}>{item.tenant}</Text> : null}
                 <Text style={styles.detail}>Added {item.added_at}</Text>
                 <View style={styles.tag_row}>
+                  {/* the fintech pass: soft tinted pills, red when it's expired and amber when it's close */}
                   {tag && (
-                    <View
-                      style={[styles.tag, tag.expired ? styles.expired_tag : styles.expiring_tag]}
-                    >
-                      <Text style={[styles.tag_text, !tag.expired && styles.tag_text_dark]}>
-                        {tag.text}
-                      </Text>
-                    </View>
+                    <StatusPill
+                      label={tag.text}
+                      tone={tag.expired ? 'danger' : 'warning'}
+                      icon={tag.expired ? 'alert-circle' : 'time'}
+                    />
                   )}
                   {item.shared_with_tenant && (
-                    <View style={[styles.tag, styles.shared_tag]}>
-                      <Text style={styles.tag_text}>Shared with tenant</Text>
-                    </View>
+                    <StatusPill label="Shared with tenant" tone="info" icon="people" />
                   )}
                 </View>
               </View>
@@ -480,10 +478,10 @@ const styles = StyleSheet.create({
     gap: SPACING.sm + SPACING.xs,
   },
   row_icon: {
+    backgroundColor: COLORS.brand_tint,
+    borderRadius: RADIUS.pill,
     width: SIZES.avatar,
     height: SIZES.avatar,
-    borderRadius: RADIUS.md,
-    backgroundColor: COLORS.surface_raised,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -506,33 +504,8 @@ const styles = StyleSheet.create({
     gap: 6,
     marginTop: 6,
   },
-  tag: {
-    borderRadius: RADIUS.pill,
-    paddingVertical: 3,
-    paddingHorizontal: SPACING.sm,
-  },
-  expiring_tag: {
-    backgroundColor: COLORS.warning,
-  },
-  expired_tag: {
-    backgroundColor: COLORS.danger,
-  },
-  shared_tag: {
-    backgroundColor: COLORS.action,
-  },
-  tag_text: {
-    ...TYPE.caption,
-    fontSize: 11,
-    lineHeight: 15,
-    fontFamily: TYPE.label.fontFamily,
-    color: COLORS.text_light,
-  },
   empty_text: {
     ...list_styles.empty_text,
-  },
-  // the expiring-soon tag is orange, so its words are dark
-  tag_text_dark: {
-    color: COLORS.on_light,
   },
   pressed: {
     opacity: OPACITY.pressed,

@@ -5,6 +5,7 @@ import RemoteImage from '../../../components/RemoteImage';
 import StatusPill from '../../../components/ui/StatusPill';
 import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
 import { formatDate } from '../../../utils/formatDate';
+import { formatCurrency } from '../../../utils/formatCurrency';
 
 // I keep one color per status so the badge is readable at a glance
 export const status_colors = {
@@ -66,7 +67,7 @@ function WorkOrderCard(props) {
       {order.contractor ? <Text style={styles.detail}>Contractor: {order.contractor}</Text> : null}
       {has_estimate && (
         <Text style={[styles.detail, over_budget && styles.over_budget]}>
-          Estimate: ${order.estimate.toFixed(2)} · Actual: ${expense_total.toFixed(2)}
+          Estimate: {formatCurrency(order.estimate)} · Actual: {formatCurrency(expense_total)}
         </Text>
       )}
       {/* I only show the issue photo if the work order has one */}
@@ -89,7 +90,7 @@ function WorkOrderCard(props) {
           accessibilityLabel={'Expenses, ' + expenses.length + ', tap to view'}
         >
           <Text style={styles.detail}>
-            Expenses: ${expense_total.toFixed(2)} ({expenses.length}) · Tap to view
+            Expenses: {formatCurrency(expense_total)} ({expenses.length}) · Tap to view
           </Text>
           <View style={styles.thumb_row}>
             {expenses

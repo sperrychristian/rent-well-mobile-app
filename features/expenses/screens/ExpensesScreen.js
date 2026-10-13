@@ -27,12 +27,13 @@ import {
   sumBilled,
   sumRecovered,
   splitAmount,
-  formatMoney,
 } from '../utils/expenseStats';
 import { shareExpensesCsv } from '../utils/exportExpenses';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SHADOWS, SIZES } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SHADOWS, SIZES, NUMBERS } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
+import { formatCurrency } from '../../../utils/formatCurrency';
+import IconCircle from '../../../components/ui/IconCircle';
 
 const month_names = [
   'January',
@@ -399,14 +400,14 @@ function ExpensesScreen(props) {
 
       <Card>
         <Text style={styles.summary_label}>Deductible expenses in {year}</Text>
-        <Text style={styles.summary_total}>{formatMoney(deductible_total)}</Text>
+        <Text style={styles.summary_total}>{formatCurrency(deductible_total)}</Text>
         <Text style={styles.detail}>
-          Capital improvements (depreciated): {formatMoney(capital_total)}
+          Capital improvements (depreciated): {formatCurrency(capital_total)}
         </Text>
         {billed_total > 0 && (
           <Text style={styles.detail}>
-            Billed to tenants: {formatMoney(billed_total)} · Recovered:{' '}
-            {formatMoney(recovered_total)}
+            Billed to tenants: {formatCurrency(billed_total)} · Recovered:{' '}
+            {formatCurrency(recovered_total)}
           </Text>
         )}
         <Text style={styles.detail}>{filtered_expenses.length} expenses</Text>
@@ -433,7 +434,7 @@ function ExpensesScreen(props) {
               <View style={styles.bar_labels}>
                 <Text style={styles.bar_name}>{row.category}</Text>
                 <Text style={styles.bar_amount}>
-                  {formatMoney(row.total)} · {percent}%
+                  {formatCurrency(row.total)} · {percent}%
                 </Text>
               </View>
               <View style={styles.bar_track}>
@@ -458,8 +459,8 @@ function ExpensesScreen(props) {
               <View style={styles.bar_labels}>
                 <Text style={styles.bar_name}>{row.property}</Text>
                 <Text style={[styles.bar_amount, over_budget && styles.over_budget_text]}>
-                  {formatMoney(row.total)}
-                  {budget !== undefined ? ' of ' + formatMoney(budget) : ''}
+                  {formatCurrency(row.total)}
+                  {budget !== undefined ? ' of ' + formatCurrency(budget) : ''}
                 </Text>
               </View>
               {budget !== undefined && (
@@ -490,7 +491,7 @@ function ExpensesScreen(props) {
         {shown_vendors.map((row) => (
           <View key={row.vendor} style={styles.property_row}>
             <Text style={styles.bar_name}>{row.vendor}</Text>
-            <Text style={styles.bar_amount}>{formatMoney(row.total)}</Text>
+            <Text style={styles.bar_amount}>{formatCurrency(row.total)}</Text>
           </View>
         ))}
         {vendor_totals.length > 5 && (
@@ -563,55 +564,73 @@ function ExpensesScreen(props) {
           const linked_order = orders.find((order) => order.id === expense.work_order_id);
           const receipts = expense.receipts || [];
           return (
-            <Pressable style={styles.row} onPress={() => openEditForm(expense.id)}>
+            <Pressable
+              style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+              onPress={() => openEditForm(expense.id)}
+              accessibilityRole="button"
+              accessibilityLabel={
+                expense.category + ', ' + formatCurrency(expense.amount) + ', ' + expense.date
+              }
+              accessibilityHint="Opens the expense to edit it"
+            >
+              {/* the fintech pass: a tinted icon on the left, the category and the amount on one line */}
+              <IconCircle
+                icon={expense.is_capital ? 'trending-up-outline' : 'receipt-outline'}
+                tone={expense.is_capital ? 'accent' : 'neutral'}
+              />
               <View style={styles.row_text}>
                 <View style={styles.row_top}>
-                  <Text style={styles.row_amount}>{formatMoney(expense.amount)}</Text>
-                  <Text style={styles.detail}>{formatDate(expense.date)}</Text>
+                  <Text style={styles.row_category}>{expense.category}</Text>
+                  <Text style={styles.row_amount}>{formatCurrency(expense.amount)}</Text>
                 </View>
-                <Text style={styles.row_category}>{expense.category}</Text>
+                <Text style={styles.detail}>{formatDate(expense.date)}</Text>
                 <Text style={styles.detail}>{expense.property}</Text>
                 {expense.vendor ? <Text style={styles.detail}>{expense.vendor}</Text> : null}
                 <View style={styles.tag_row}>
                   {expense.is_capital && (
                     <View style={[styles.tag, styles.capital_tag]}>
-                      <Text style={styles.tag_text}>Capital improvement</Text>
+                      <Text style={[styles.tag_text, styles.capital_text]}>
+                        Capital improvement
+                      </Text>
                     </View>
                   )}
                   {expense.billed_to_tenant && (
                     <View style={[styles.tag, styles.billed_tag]}>
-                      <Text style={styles.tag_text}>
-                        Billed to tenant · {formatMoney(expense.recovered || 0)} back
+                      <Text style={[styles.tag_text, styles.billed_text]}>
+                        Billed to tenant · {formatCurrency(expense.recovered || 0)} back
                       </Text>
                     </View>
                   )}
                   {expense.recurring_id && (
                     <View style={[styles.tag, styles.recurring_tag]}>
-                      <Text style={styles.tag_text}>Recurring</Text>
+                      <Text style={[styles.tag_text, styles.recurring_text]}>Recurring</Text>
                     </View>
                   )}
                   {expense.split_group && (
                     <View style={[styles.tag, styles.recurring_tag]}>
-                      <Text style={styles.tag_text}>Split</Text>
+                      <Text style={[styles.tag_text, styles.recurring_text]}>Split</Text>
                     </View>
                   )}
                   {linked_order && (
                     <Pressable
                       style={[styles.tag, styles.order_tag]}
+                      hitSlop={{ top: 12, bottom: 12 }}
+                      accessibilityRole="link"
+                      accessibilityLabel={'Open work order ' + linked_order.title}
                       onPress={() =>
                         props.navigation.navigate('WorkOrderDetail', {
                           workOrderId: linked_order.id,
                         })
                       }
                     >
-                      <Text style={styles.tag_text} numberOfLines={1}>
+                      <Text style={[styles.tag_text, styles.order_text]} numberOfLines={1}>
                         Work order: {linked_order.title}
                       </Text>
                     </Pressable>
                   )}
                   {receipts.length === 0 && (
                     <View style={[styles.tag, styles.missing_tag]}>
-                      <Text style={styles.tag_text}>No receipt</Text>
+                      <Text style={[styles.tag_text, styles.missing_text]}>No receipt</Text>
                     </View>
                   )}
                 </View>
@@ -756,7 +775,8 @@ const styles = StyleSheet.create({
   },
   summary_total: {
     ...TYPE.display,
-    color: COLORS.cta,
+    ...NUMBERS,
+    color: COLORS.text,
     marginVertical: SPACING.xs,
   },
   bar_row: {
@@ -777,6 +797,7 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
   },
   bar_amount: {
+    ...NUMBERS,
     ...TYPE.body_small,
     fontFamily: TYPE.label.fontFamily,
     color: COLORS.text,
@@ -785,9 +806,8 @@ const styles = StyleSheet.create({
     color: COLORS.danger_text,
   },
   bar_track: {
+    backgroundColor: COLORS.neutral_tint,
     height: SPACING.sm,
-    borderRadius: RADIUS.pill,
-    backgroundColor: COLORS.surface_sunken,
     overflow: 'hidden',
   },
   bar_fill: {
@@ -827,6 +847,7 @@ const styles = StyleSheet.create({
   row: {
     ...list_styles.row,
     flexDirection: 'row',
+    gap: SPACING.sm + SPACING.xs,
   },
   row_text: {
     flex: 1,
@@ -834,18 +855,19 @@ const styles = StyleSheet.create({
   row_top: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginRight: SPACING.sm,
+    alignItems: 'baseline',
+    gap: SPACING.sm,
   },
   row_amount: {
-    ...TYPE.heading,
+    ...TYPE.subheading,
+    ...NUMBERS,
     color: COLORS.text,
+    textAlign: 'right',
   },
   row_category: {
-    ...TYPE.body_small,
-    fontFamily: TYPE.label.fontFamily,
-    color: COLORS.text_muted,
-    marginTop: SPACING.xxs,
+    ...TYPE.subheading,
+    color: COLORS.text,
+    flexShrink: 1,
   },
   tag_row: {
     flexDirection: 'row',
@@ -860,26 +882,25 @@ const styles = StyleSheet.create({
     maxWidth: 220,
   },
   capital_tag: {
-    backgroundColor: COLORS.accent,
+    backgroundColor: COLORS.accent_tint,
   },
   billed_tag: {
-    backgroundColor: COLORS.tag_billed,
+    backgroundColor: COLORS.info_tint,
   },
   recurring_tag: {
-    backgroundColor: COLORS.tag_recurring,
+    backgroundColor: COLORS.neutral_tint,
   },
   order_tag: {
-    backgroundColor: COLORS.action,
+    backgroundColor: COLORS.brand_tint,
   },
   missing_tag: {
-    backgroundColor: COLORS.tag_missing_receipt,
+    backgroundColor: COLORS.warning_tint,
   },
   tag_text: {
     ...TYPE.caption,
     fontSize: 11,
     lineHeight: 15,
     fontFamily: TYPE.label.fontFamily,
-    color: COLORS.text_light,
   },
   receipt_box: {
     alignItems: 'center',
@@ -916,12 +937,30 @@ const styles = StyleSheet.create({
   undo_action: {
     ...TYPE.label,
     fontSize: 14,
-    color: COLORS.cta,
+    color: COLORS.brand_tint,
   },
   undo_button: {
     minHeight: SIZES.touch,
     minWidth: SIZES.touch,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  capital_text: {
+    color: COLORS.accent_text,
+  },
+  billed_text: {
+    color: COLORS.info_text,
+  },
+  recurring_text: {
+    color: COLORS.text_muted,
+  },
+  order_text: {
+    color: COLORS.cta,
+  },
+  missing_text: {
+    color: COLORS.warning_text,
+  },
+  pressed: {
+    backgroundColor: COLORS.surface_raised,
   },
 });

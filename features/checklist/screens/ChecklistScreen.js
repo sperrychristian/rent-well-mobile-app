@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, View, Text, FlatList, Pressable, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, FlatList, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PrimaryButton from '../../../components/PrimaryButton';
@@ -11,6 +11,7 @@ import { COLORS, SPACING, TYPE, RADIUS, SIZES, OPACITY } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import StatusPill from '../../../components/ui/StatusPill';
+import SegmentedControl from '../../../components/ui/SegmentedControl';
 
 const status_filters = ['All', 'In progress', 'Complete'];
 
@@ -64,24 +65,14 @@ function ChecklistScreen(props) {
         style={styles.new_button}
         onPress={openNewForm}
       />
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.chip_row}
-      >
-        {status_filters.map((option) => (
-          <Pressable
-            key={option}
-            onPress={() => setStatusFilter(option)}
-            hitSlop={{ top: 8, bottom: 8 }}
-            style={[styles.chip, status_filter === option && styles.chip_active]}
-            accessibilityRole="button"
-            accessibilityState={{ selected: status_filter === option }}
-          >
-            <Text style={styles.chip_text}>{option}</Text>
-          </Pressable>
-        ))}
-      </ScrollView>
+      {/* the status filter acts like tabs, so it's the shared segmented control now */}
+      <SegmentedControl
+        label="Show checklists"
+        value={status_filter}
+        onChange={setStatusFilter}
+        options={status_filters.map((option) => ({ value: option, label: option }))}
+        style={styles.segment}
+      />
     </View>
   );
 
@@ -205,10 +196,10 @@ const styles = StyleSheet.create({
     gap: SPACING.sm + SPACING.xs,
   },
   row_icon: {
+    backgroundColor: COLORS.brand_tint,
+    borderRadius: RADIUS.pill,
     width: SIZES.avatar,
     height: SIZES.avatar,
-    borderRadius: RADIUS.md,
-    backgroundColor: COLORS.surface_raised,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -252,5 +243,8 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: OPACITY.pressed,
+  },
+  segment: {
+    marginBottom: SPACING.sm + SPACING.xs,
   },
 });

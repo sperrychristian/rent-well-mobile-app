@@ -24,9 +24,10 @@ import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { useMessages } from '../../messages/context/MessagesContext';
 import { openConversationFor } from '../../messages/utils/openConversation';
 import { formatDate } from '../../../utils/formatDate';
-import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES, NUMBERS, BORDER } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusPill from '../../../components/ui/StatusPill';
+import { formatCurrency } from '../../../utils/formatCurrency';
 
 const priority_options = ['Emergency', 'Normal', 'Low'];
 
@@ -187,7 +188,8 @@ function WorkOrderDetailContent(props) {
         keyboardShouldPersistTaps="handled"
       >
         <Card>
-          <Text style={styles.heading}>{order.title}</Text>
+          {/* the summary up top: the issue itself big, then where, who, and its status */}
+          <Text style={[styles.heading, styles.title_big]}>{order.title}</Text>
           <Text style={styles.detail}>{order.property}</Text>
           <Text style={styles.detail}>{order.tenant || 'No tenant'}</Text>
           <View style={styles.pill_row}>
@@ -289,16 +291,24 @@ function WorkOrderDetailContent(props) {
 
         <Card>
           <Text style={styles.heading}>Costs</Text>
+          {/* the fintech pass: the actual cost is the big figure, the estimate sits under it */}
+          <Text style={styles.figure_label}>Actual</Text>
+          <Text style={styles.figure}>{formatCurrency(expense_total)}</Text>
           <Text style={styles.detail}>
-            Estimate: {has_estimate ? '$' + order.estimate.toFixed(2) : 'Not set'}
+            Estimate: {has_estimate ? formatCurrency(order.estimate) : 'Not set'}
           </Text>
-          <Text style={styles.detail}>Actual: ${expense_total.toFixed(2)}</Text>
           {/* I only compare the two once there's an estimate to compare against */}
           {has_estimate && (
-            <Text style={[styles.detail, difference > 0 && styles.over_budget]}>
+            <Text
+              style={[
+                styles.detail,
+                styles.difference,
+                difference > 0 ? styles.over_budget : styles.under_budget,
+              ]}
+            >
               {difference > 0
-                ? '$' + difference.toFixed(2) + ' over estimate'
-                : '$' + Math.abs(difference).toFixed(2) + ' under estimate'}
+                ? formatCurrency(difference) + ' over estimate'
+                : formatCurrency(Math.abs(difference)) + ' under estimate'}
             </Text>
           )}
         </Card>
@@ -309,7 +319,7 @@ function WorkOrderDetailContent(props) {
           {expenses.map((expense) => (
             <View key={expense.id} style={styles.expense_row}>
               <View style={styles.expense_text}>
-                <Text style={styles.amount}>${expense.amount.toFixed(2)}</Text>
+                <Text style={styles.amount}>{formatCurrency(expense.amount)}</Text>
                 <Text style={styles.detail}>{expense.description || 'No description'}</Text>
               </View>
               {expense.photo_uri && (
@@ -451,6 +461,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   amount: {
+    ...NUMBERS,
     ...TYPE.subheading,
     fontFamily: TYPE.heading.fontFamily,
     color: COLORS.text,
@@ -461,6 +472,10 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.sm,
   },
   button_area: {
+    paddingTop: SPACING.sm,
+    marginTop: SPACING.sm,
+    borderTopWidth: BORDER.hairline,
+    borderTopColor: COLORS.border,
     width: '90%',
     maxWidth: SIZES.content_max_width,
   },
@@ -496,5 +511,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: SPACING.sm,
     marginTop: SPACING.sm,
+  },
+  title_big: {
+    ...TYPE.title,
+    color: COLORS.text,
+  },
+  figure_label: {
+    ...TYPE.overline,
+    color: COLORS.text_muted,
+  },
+  figure: {
+    ...TYPE.display,
+    ...NUMBERS,
+    color: COLORS.text,
+    marginBottom: SPACING.xs,
+  },
+  difference: {
+    ...NUMBERS,
+    fontFamily: TYPE.label.fontFamily,
+    marginTop: SPACING.xs,
+  },
+  // under the estimate is good news, green, and the words say which way it went too
+  under_budget: {
+    color: COLORS.success_text,
   },
 });

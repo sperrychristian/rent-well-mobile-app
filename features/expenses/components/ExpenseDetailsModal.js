@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Modal, View, Text, Image, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, NUMBERS } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
+import { formatCurrency } from '../../../utils/formatCurrency';
 
 function ExpenseDetailsModal(props) {
   const insets = useSafeAreaInsets();
@@ -29,11 +30,11 @@ function ExpenseDetailsModal(props) {
         ]}
       >
         <Text style={styles.heading}>{props.order ? props.order.title : ''}</Text>
-        <Text style={styles.total}>Total: ${total.toFixed(2)}</Text>
+        <Text style={styles.total}>Total: {formatCurrency(total)}</Text>
         <ScrollView contentContainerStyle={styles.list}>
           {expenses.map((expense) => (
             <View key={expense.id} style={styles.row}>
-              <Text style={styles.amount}>${expense.amount.toFixed(2)}</Text>
+              <Text style={styles.amount}>{formatCurrency(expense.amount)}</Text>
               <Text style={styles.description}>{expense.description || 'No description'}</Text>
               {expense.photo_uri && (
                 <Pressable
@@ -87,7 +88,8 @@ const styles = StyleSheet.create({
   },
   total: {
     ...TYPE.subheading,
-    color: COLORS.cta,
+    ...NUMBERS,
+    color: COLORS.text_muted,
     marginBottom: SPACING.md,
   },
   list: {
@@ -98,6 +100,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   amount: {
+    ...NUMBERS,
     ...TYPE.heading,
     color: COLORS.text,
   },

@@ -15,10 +15,12 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import TripModal from '../components/TripModal';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { formatDate } from '../../../utils/formatDate';
-import { sumMiles, formatMoney } from '../../expenses/utils/expenseStats';
-import { COLORS, SPACING, TYPE, OPACITY } from '../../../theme';
+import { sumMiles } from '../../expenses/utils/expenseStats';
+import { COLORS, SPACING, TYPE, OPACITY, NUMBERS } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
+import { formatCurrency } from '../../../utils/formatCurrency';
+import IconCircle from '../../../components/ui/IconCircle';
 
 function MileageScreen(props) {
   // need the insets so the title clears the notch and status bar
@@ -127,7 +129,7 @@ function MileageScreen(props) {
 
       <Card>
         <Text style={styles.summary_label}>Mileage deduction in {year}</Text>
-        <Text style={styles.summary_total}>{formatMoney(total_miles * mileage_rate)}</Text>
+        <Text style={styles.summary_total}>{formatCurrency(total_miles * mileage_rate)}</Text>
         <Text style={styles.detail}>
           {total_miles.toFixed(1)} miles over {year_trips.length} trips
         </Text>
@@ -183,13 +185,17 @@ function MileageScreen(props) {
             accessibilityRole="button"
             accessibilityLabel={item.miles.toFixed(1) + ' miles on ' + item.date + ', edit trip'}
           >
-            <View style={styles.row_top}>
-              <Text style={styles.row_miles}>{item.miles.toFixed(1)} miles</Text>
-              <Text style={styles.detail}>{formatDate(item.date)}</Text>
+            {/* the fintech pass: a tinted car on the left, miles and the deduction on one line */}
+            <IconCircle icon="car-outline" tone="info" />
+            <View style={styles.row_body}>
+              <View style={styles.row_top}>
+                <Text style={styles.row_miles}>{item.miles.toFixed(1)} miles</Text>
+                <Text style={styles.row_money}>{formatCurrency(item.miles * mileage_rate)}</Text>
+              </View>
+              <Text style={styles.detail}>{formatDate(item.date) + ' · deduction'}</Text>
+              <Text style={styles.detail}>{item.property}</Text>
+              {item.purpose ? <Text style={styles.detail}>{item.purpose}</Text> : null}
             </View>
-            <Text style={styles.detail}>{formatMoney(item.miles * mileage_rate)} deduction</Text>
-            <Text style={styles.detail}>{item.property}</Text>
-            {item.purpose ? <Text style={styles.detail}>{item.purpose}</Text> : null}
           </Pressable>
         )}
       />
@@ -251,7 +257,8 @@ const styles = StyleSheet.create({
   },
   summary_total: {
     ...TYPE.display,
-    color: COLORS.cta,
+    ...NUMBERS,
+    color: COLORS.text,
     marginVertical: SPACING.xs,
   },
   rate_row: {
@@ -269,14 +276,18 @@ const styles = StyleSheet.create({
   },
   row: {
     ...list_styles.row,
+    flexDirection: 'row',
+    gap: SPACING.sm + SPACING.xs,
   },
   row_top: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'baseline',
+    gap: SPACING.sm,
   },
   row_miles: {
-    ...TYPE.heading,
+    ...TYPE.subheading,
+    ...NUMBERS,
     color: COLORS.text,
   },
   empty_text: {
@@ -284,5 +295,14 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: OPACITY.pressed,
+  },
+  row_body: {
+    flex: 1,
+  },
+  row_money: {
+    ...TYPE.subheading,
+    ...NUMBERS,
+    color: COLORS.text,
+    textAlign: 'right',
   },
 });

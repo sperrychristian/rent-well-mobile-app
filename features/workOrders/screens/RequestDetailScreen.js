@@ -142,7 +142,7 @@ function RequestDetailScreen(props) {
       >
         <Card>
           <View style={styles.top_line}>
-            <Text style={styles.heading}>{order.title}</Text>
+            <Text style={[styles.heading, styles.title_big]}>{order.title}</Text>
             <StatusPill label={order.status} />
           </View>
           <Text style={styles.detail}>{order.property}</Text>
@@ -302,5 +302,10 @@ const styles = StyleSheet.create({
   photo_button: {
     flex: 1,
     marginHorizontal: 0,
+  },
+  // the request itself is the big thing at the top
+  title_big: {
+    ...TYPE.title,
+    color: COLORS.text,
   },
 });

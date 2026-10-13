@@ -5,10 +5,11 @@ import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { formatDate } from '../../../utils/formatDate';
-import { buildYearEndData, formatMoney } from '../utils/expenseStats';
+import { buildYearEndData } from '../utils/expenseStats';
 import { shareYearEndCsv } from '../utils/exportExpenses';
-import { COLORS, SPACING, TYPE, BORDER } from '../../../theme';
+import { COLORS, SPACING, TYPE, BORDER, NUMBERS } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
+import { formatCurrency } from '../../../utils/formatCurrency';
 
 function YearEndReportScreen(props) {
   // need the insets so the title clears the notch and status bar
@@ -78,12 +79,12 @@ function YearEndReportScreen(props) {
 
         <Card>
           <Text style={styles.summary_label}>Deductible expenses in {year}</Text>
-          <Text style={styles.summary_total}>{formatMoney(data.deductible)}</Text>
+          <Text style={styles.summary_total}>{formatCurrency(data.deductible)}</Text>
           <Text style={styles.detail}>
-            Capital improvements (depreciated): {formatMoney(data.capital)}
+            Capital improvements (depreciated): {formatCurrency(data.capital)}
           </Text>
           <Text style={styles.detail}>
-            Mileage: {data.miles.toFixed(1)} miles, {formatMoney(data.mileage_deduction)}
+            Mileage: {data.miles.toFixed(1)} miles, {formatCurrency(data.mileage_deduction)}
           </Text>
         </Card>
 
@@ -94,7 +95,7 @@ function YearEndReportScreen(props) {
           </Text>
           {data.missing_receipts.slice(0, 5).map((expense) => (
             <Text key={expense.id} style={styles.missing_text}>
-              {formatDate(expense.date)} · {formatMoney(expense.amount)} ·{' '}
+              {formatDate(expense.date)} · {formatCurrency(expense.amount)} ·{' '}
               {expense.vendor || expense.category}
             </Text>
           ))}
@@ -111,21 +112,21 @@ function YearEndReportScreen(props) {
             {item.categories.map((row) => (
               <View key={row.category} style={styles.line_row}>
                 <Text style={styles.line_name}>{row.category}</Text>
-                <Text style={styles.line_amount}>{formatMoney(row.total)}</Text>
+                <Text style={styles.line_amount}>{formatCurrency(row.total)}</Text>
               </View>
             ))}
             <View style={styles.divider} />
             <View style={styles.line_row}>
               <Text style={styles.line_name}>Total deductible</Text>
-              <Text style={styles.line_amount}>{formatMoney(item.deductible)}</Text>
+              <Text style={styles.line_amount}>{formatCurrency(item.deductible)}</Text>
             </View>
             <View style={styles.line_row}>
               <Text style={styles.line_name}>Capital improvements</Text>
-              <Text style={styles.line_amount}>{formatMoney(item.capital)}</Text>
+              <Text style={styles.line_amount}>{formatCurrency(item.capital)}</Text>
             </View>
             <View style={styles.line_row}>
               <Text style={styles.line_name}>Mileage ({item.miles.toFixed(1)} mi)</Text>
-              <Text style={styles.line_amount}>{formatMoney(item.mileage_deduction)}</Text>
+              <Text style={styles.line_amount}>{formatCurrency(item.mileage_deduction)}</Text>
             </View>
           </Card>
         ))}
@@ -142,7 +143,7 @@ function YearEndReportScreen(props) {
           {data.vendors.map((row) => (
             <View key={row.vendor} style={styles.line_row}>
               <Text style={styles.line_name}>{row.vendor}</Text>
-              <Text style={styles.line_amount}>{formatMoney(row.total)}</Text>
+              <Text style={styles.line_amount}>{formatCurrency(row.total)}</Text>
             </View>
           ))}
         </Card>
@@ -208,7 +209,8 @@ const styles = StyleSheet.create({
   },
   summary_total: {
     ...TYPE.display,
-    color: COLORS.cta,
+    ...NUMBERS,
+    color: COLORS.text,
     marginVertical: SPACING.xs,
   },
   line_row: {
@@ -223,6 +225,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   line_amount: {
+    ...NUMBERS,
     ...TYPE.body_small,
     fontFamily: TYPE.label.fontFamily,
     color: COLORS.text,

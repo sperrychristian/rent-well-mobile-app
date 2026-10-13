@@ -4,7 +4,7 @@ import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../../theme';
 import { formatDate } from '../../../utils/formatDate';
-import { formatMoney } from '../utils/expenseStats';
+import { formatCurrency } from '../../../utils/formatCurrency';
 
 // props: visible, rules, onToggle, onDelete, onClose
 function RecurringModal(props) {
@@ -30,7 +30,7 @@ function RecurringModal(props) {
             {props.rules.map((rule) => (
               <View key={rule.id} style={styles.rule_block}>
                 <Text style={styles.rule_title}>
-                  {formatMoney(rule.template.amount)} · {rule.frequency}
+                  {formatCurrency(rule.template.amount)} · {rule.frequency}
                 </Text>
                 <Text style={styles.detail}>{rule.template.category}</Text>
                 <Text style={styles.detail}>{rule.template.property}</Text>
