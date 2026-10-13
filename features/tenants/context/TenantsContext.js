@@ -37,6 +37,7 @@ import {
   demoEnd,
   makeInviteCode,
 } from '../utils/demoTenants';
+import { demo_tenant } from '../data/sampleTenants';
 
 const TenantsContext = createContext(null);
 
@@ -63,7 +64,9 @@ export function TenantsProvider(props) {
   const { user } = useAuth();
   const local = useWorkOrders();
   const mode = local.demo_mode ? 'demo' : user ? 'real' : 'off';
-  const role = mode === 'demo' ? 'owner' : user ? user.role : null;
+  // the demo can be on either side now, the tenant side reads Sam's rentals from the same demo data
+  const role = mode === 'demo' ? local.demo_role : user ? user.role : null;
+  const is_demo_tenant = mode === 'demo' && role === 'tenant';
   // whose data this is, the server data is tagged with it so a different login never sees the last one's
   const session_key = mode + ':' + (user ? user.id : '');
   const is_real_owner = mode === 'real' && role === 'owner';
@@ -369,6 +372,10 @@ export function TenantsProvider(props) {
   // a tenant with no active rental only gets to read, but only once that's confirmed, so the home doesn't flash
   const me_ready = is_real_tenant && me.key === session_key && me.status === 'ready';
   const is_read_only = me_ready && me.active.length === 0;
+  // the demo tenant is Sam, so ending or moving Sam on the landlord side shows up here after switching
+  const demo_me = is_demo_tenant
+    ? view.tenants.find((tenant) => tenant.id === demo_tenant.id) || null
+    : null;
 
   const value = {
     mode,
@@ -393,9 +400,9 @@ export function TenantsProvider(props) {
     moveTenancy,
     endTenancy,
     // the tenant side
-    is_read_only,
-    my_active_tenancies: me_ready ? me.active : [],
-    my_ended_tenancies: me_ready ? me.ended : [],
+    is_read_only: demo_me ? demo_me.active_tenancies.length === 0 : is_read_only,
+    my_active_tenancies: demo_me ? demo_me.active_tenancies : me_ready ? me.active : [],
+    my_ended_tenancies: demo_me ? demo_me.ended_tenancies : me_ready ? me.ended : [],
     reloadMe: () => (is_real_tenant ? loadMe(session_key) : Promise.resolve()),
   };
 

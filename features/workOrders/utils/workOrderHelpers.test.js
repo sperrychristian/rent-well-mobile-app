@@ -9,6 +9,7 @@ import {
   photosLeft,
   openCount,
   activeCount,
+  ordersForTenant,
   legacyExpensesFor,
 } from './workOrderHelpers';
 
@@ -210,5 +211,23 @@ describe('legacyExpensesFor', () => {
       { id: 'e1', amount: 40, description: 'Washer', photo_uri: 'r.jpg' },
       { id: 'e2', amount: 10, description: 'Ace', photo_uri: null },
     ]);
+  });
+});
+
+describe('ordersForTenant', () => {
+  test('keeps only the named tenant, ignoring case and extra spaces', () => {
+    const orders = [
+      { id: '1', tenant: 'Sam Rivera' },
+      { id: '2', tenant: 'Jordan Lee' },
+      { id: '3', tenant: ' sam rivera ' },
+      { id: '4', tenant: '' },
+      { id: '5' },
+    ];
+    expect(ordersForTenant(orders, 'Sam Rivera').map((order) => order.id)).toEqual(['1', '3']);
+  });
+
+  test('a blank name matches nothing, so orders with no tenant never show up', () => {
+    expect(ordersForTenant([{ id: '4', tenant: '' }], '')).toEqual([]);
+    expect(ordersForTenant([{ id: '4', tenant: '' }], null)).toEqual([]);
   });
 });

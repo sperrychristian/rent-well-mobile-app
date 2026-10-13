@@ -13,6 +13,8 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import ErrorState from '../../../components/ErrorState';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { status_colors, priority_colors } from '../components/WorkOrderCard';
+import { ordersForTenant } from '../utils/workOrderHelpers';
+import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { formatDate } from '../../../utils/formatDate';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
@@ -27,10 +29,14 @@ function MyRequestsScreen(props) {
     orders_from_cache,
     refreshing_orders,
     refreshOrders,
+    demo_mode,
   } = useWorkOrders();
+  // the demo shares one list with the landlord side, so the tenant only gets Sam's requests out of it
+  // and they change status live when the landlord side starts or resolves them
+  const my_orders = demo_mode ? ordersForTenant(orders, demo_tenant.name) : orders;
 
   // the list is already newest first from the server, the local one gets sorted here
-  const sorted_orders = [...orders].sort(
+  const sorted_orders = [...my_orders].sort(
     (a, b) =>
       b.created_at.localeCompare(a.created_at) ||
       (b.created_at_iso || '').localeCompare(a.created_at_iso || ''),

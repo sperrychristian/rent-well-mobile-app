@@ -3,7 +3,13 @@ import { StyleSheet, View, Text, FlatList, RefreshControl, ActivityIndicator } f
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ErrorState from '../../../components/ErrorState';
 import { getAllWorkOrders } from '../../../services/api';
-import { fromApiWorkOrder, mergeWorkOrders } from '../../workOrders/utils/workOrderHelpers';
+import {
+  fromApiWorkOrder,
+  mergeWorkOrders,
+  ordersForTenant,
+} from '../../workOrders/utils/workOrderHelpers';
+import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { demo_tenant } from '../data/sampleTenants';
 import { formatDate } from '../../../utils/formatDate';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
@@ -24,8 +30,13 @@ function PastRequestsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   // goes up on Try Again or a pull down so the load runs again
   const [load_count, setLoadCount] = useState(0);
+  // the demo never calls the server, a demo tenant whose rental ended reads Sam's requests from the demo list
+  const { demo_mode, orders: local_orders } = useWorkOrders();
 
   useEffect(() => {
+    if (demo_mode) {
+      return undefined;
+    }
     let active = true;
     getAllWorkOrders()
       .then((api_orders) => {
@@ -50,7 +61,25 @@ function PastRequestsScreen() {
     return () => {
       active = false;
     };
-  }, [load_count]);
+  }, [load_count, demo_mode]);
+
+  // one row, used by the server list and the demo list
+  function renderRow({ item }) {
+    return (
+      <View style={styles.row}>
+        <View style={styles.top_line}>
+          <Text style={styles.title}>{item.title}</Text>
+          <View style={[styles.badge, { backgroundColor: status_colors[item.status] }]}>
+            <Text style={styles.badge_text}>{item.status}</Text>
+          </View>
+        </View>
+        <Text style={styles.detail}>
+          {item.property} · {formatDate(item.created_at)}
+        </Text>
+        {item.notes ? <Text style={styles.note}>Landlord: {item.notes}</Text> : null}
+      </View>
+    );
+  }
 
   function reload() {
     setRefreshing(true);
@@ -58,7 +87,17 @@ function PastRequestsScreen() {
   }
 
   let body;
-  if (status === 'loading' && orders.length === 0) {
+  if (demo_mode) {
+    body = (
+      <FlatList
+        data={ordersForTenant(local_orders, demo_tenant.name)}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
+        ListEmptyComponent={<Text style={styles.empty_text}>No requests.</Text>}
+        renderItem={renderRow}
+      />
+    );
+  } else if (status === 'loading' && orders.length === 0) {
     body = <ActivityIndicator style={styles.spinner} color={COLORS.title} size="large" />;
   } else if (status === 'error' && orders.length === 0) {
     body = <ErrorState message={error_message} onRetry={reload} />;
@@ -72,20 +111,7 @@ function PastRequestsScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={reload} tintColor={COLORS.title} />
         }
         ListEmptyComponent={<Text style={styles.empty_text}>No requests.</Text>}
-        renderItem={({ item }) => (
-          <View style={styles.row}>
-            <View style={styles.top_line}>
-              <Text style={styles.title}>{item.title}</Text>
-              <View style={[styles.badge, { backgroundColor: status_colors[item.status] }]}>
-                <Text style={styles.badge_text}>{item.status}</Text>
-              </View>
-            </View>
-            <Text style={styles.detail}>
-              {item.property} · {formatDate(item.created_at)}
-            </Text>
-            {item.notes ? <Text style={styles.note}>Landlord: {item.notes}</Text> : null}
-          </View>
-        )}
+        renderItem={renderRow}
       />
     );
   }

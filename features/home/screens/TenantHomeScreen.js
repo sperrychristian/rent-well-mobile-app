@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
+import DemoBanner from '../../../components/DemoBanner';
 import UnreadBadge from '../../messages/components/UnreadBadge';
 import LogoutButton from '../../auth/components/LogoutButton';
 import { useAuth } from '../../auth/context/AuthContext';
@@ -10,6 +11,8 @@ import { useMessages } from '../../messages/context/MessagesContext';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { useTenants } from '../../tenants/context/TenantsContext';
 import { placeLabel } from '../../tenants/utils/tenantHelpers';
+import { demo_tenant } from '../../tenants/data/sampleTenants';
+import { ordersForTenant, activeCount } from '../../workOrders/utils/workOrderHelpers';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
 // the tenant's home: message the landlord or report something that needs fixing
@@ -17,7 +20,12 @@ function TenantHomeScreen(props) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { unread_total } = useMessages();
-  const { active_count } = useWorkOrders();
+  const { active_count, demo_mode, orders } = useWorkOrders();
+  // the demo has no server count, so it counts Sam's requests in the shared demo list
+  const in_progress = demo_mode
+    ? activeCount(ordersForTenant(orders, demo_tenant.name))
+    : active_count;
+  const name = demo_mode ? demo_tenant.name : user ? user.name : '';
   // with no active rental the tenant can only read, and this flips back on its own if they're assigned again
   const { is_read_only, my_active_tenancies, my_ended_tenancies } = useTenants();
 
@@ -25,6 +33,8 @@ function TenantHomeScreen(props) {
     const last = my_ended_tenancies[0];
     return (
       <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
+        {/* only shows while the demo is running, with the switch to the landlord side */}
+        <DemoBanner />
         <ScreenTitle>No Active Rental</ScreenTitle>
         <Card>
           <View style={styles.card_row}>
@@ -94,8 +104,10 @@ function TenantHomeScreen(props) {
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
+      {/* only shows while the demo is running, with the switch to the landlord side */}
+      <DemoBanner />
       <ScreenTitle>Home</ScreenTitle>
-      <Text style={styles.greeting}>Hi{user ? ', ' + user.name : ''}!</Text>
+      <Text style={styles.greeting}>Hi{name ? ', ' + name : ''}!</Text>
       {/* where they live now, once GET /me has answered */}
       {my_active_tenancies.length > 0 && (
         <Text style={styles.place}>
@@ -136,8 +148,8 @@ function TenantHomeScreen(props) {
             <View style={styles.card_text}>
               <Text style={styles.card_title}>My Requests</Text>
               <Text style={styles.card_detail}>
-                {active_count
-                  ? active_count + (active_count === 1 ? ' request' : ' requests') + ' in progress'
+                {in_progress
+                  ? in_progress + (in_progress === 1 ? ' request' : ' requests') + ' in progress'
                   : 'See what you reported and where it is at'}
               </Text>
             </View>

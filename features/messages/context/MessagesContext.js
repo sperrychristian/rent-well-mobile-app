@@ -23,7 +23,14 @@ import {
   sortConversations,
   totalUnread,
 } from '../utils/messageHelpers';
-import { buildSampleThreads, demo_user_id, demo_replies } from '../data/sampleThreads';
+import {
+  buildSampleThreads,
+  demo_user_id,
+  demo_replies,
+  demo_landlord,
+  demo_landlord_replies,
+} from '../data/sampleThreads';
+import { demo_tenant } from '../../tenants/data/sampleTenants';
 
 const MessagesContext = createContext(null);
 const page_size = 30;
@@ -32,11 +39,18 @@ const page_size = 30;
 // demo is fully local and never touches the network, real uses the backend, off is signed out
 export function MessagesProvider(props) {
   const { user } = useAuth();
-  const { demo_mode } = useWorkOrders();
+  const { demo_mode, demo_role } = useWorkOrders();
   const mode = demo_mode ? 'demo' : user ? 'real' : 'off';
   const my_user_id = mode === 'demo' ? demo_user_id : user ? user.id : null;
+  // switching demo sides keeps the same key, so the landlord and the demo tenant share one set of threads
+  // and demo_role only changes whose side of them the screens see
   return (
-    <MessagesStore key={mode + ':' + my_user_id} mode={mode} my_user_id={my_user_id}>
+    <MessagesStore
+      key={mode + ':' + my_user_id}
+      mode={mode}
+      my_user_id={my_user_id}
+      demo_role={demo_role}
+    >
       {props.children}
     </MessagesStore>
   );
@@ -55,6 +69,12 @@ function MessagesStore(props) {
   const mode = props.mode;
   const my_user_id = props.my_user_id;
   const is_demo = mode === 'demo';
+  // the demo keeps its threads from the landlord's side (my_user_id), the tenant side is a view of Sam's thread
+  const viewer_is_tenant = is_demo && props.demo_role === 'tenant';
+  // who is looking: the landlord (or the real account), or the demo tenant
+  const viewer_id = viewer_is_tenant ? demo_tenant.id : my_user_id;
+  // the demo's fake replies land after a delay, so they read who is looking from here instead of an old render
+  const viewer_ref = useRef(viewer_id);
 
   // the demo starts on fresh sample threads, real mode starts empty and loads from the server
   const [demo_start] = useState(() => (is_demo ? buildSampleThreads() : null));
@@ -79,6 +99,10 @@ function MessagesStore(props) {
   useEffect(() => {
     conversations_ref.current = conversations;
   }, [conversations]);
+
+  useEffect(() => {
+    viewer_ref.current = viewer_id;
+  }, [viewer_id]);
 
   function emit(event) {
     listeners.current.forEach((listener) => listener(event));
@@ -116,10 +140,29 @@ function MessagesStore(props) {
     const known = conversations_ref.current.some(
       (conversation) => conversation.id === message.conversationId,
     );
-    setConversations(
-      (current) =>
-        applyNewMessage(current, message, my_user_id, open_conversation.current).conversations,
-    );
+    // the open thread only keeps the landlord's unread at 0 while the landlord is the one looking at it
+    const open_for_me = viewer_ref.current === my_user_id ? open_conversation.current : null;
+    setConversations((current) => {
+      const updated = applyNewMessage(current, message, my_user_id, open_for_me).conversations;
+      if (!is_demo) {
+        return updated;
+      }
+      // the demo also keeps the tenant's side: a message from the tenant moves their own read time up,
+      // and one from the landlord counts as unread for the tenant unless the tenant has the thread open
+      const tenant_looking =
+        viewer_ref.current !== my_user_id && open_conversation.current === message.conversationId;
+      return updated.map((conversation) => {
+        if (conversation.id !== message.conversationId) {
+          return conversation;
+        }
+        if (message.senderId !== my_user_id) {
+          return { ...conversation, otherUserLastReadAt: message.createdAt };
+        }
+        return tenant_looking
+          ? conversation
+          : { ...conversation, otherUnreadCount: (conversation.otherUnreadCount || 0) + 1 };
+      });
+    });
     // a thread I haven't seen yet (like a new tenant who just signed up) means the list needs a reload
     if (!known) {
       loadConversations(true);
@@ -128,7 +171,18 @@ function MessagesStore(props) {
   }
 
   function handleRead(read_event) {
-    setConversations((current) => applyRead(current, read_event, my_user_id));
+    setConversations((current) => {
+      const updated = applyRead(current, read_event, my_user_id);
+      if (!is_demo || read_event.userId === my_user_id) {
+        return updated;
+      }
+      // the demo tenant read it, so nothing is unread on their side anymore
+      return updated.map((conversation) =>
+        conversation.id === read_event.conversationId
+          ? { ...conversation, otherUnreadCount: 0 }
+          : conversation,
+      );
+    });
     emit({ type: 'message:read', read: read_event });
   }
 
@@ -203,15 +257,18 @@ function MessagesStore(props) {
   }
 
   // in the demo the tenant reads the message and answers a moment later
+  // on the tenant side it's the other way around, the landlord reads it and answers
   function scheduleDemoReply(conversation_id) {
     const conversation = conversations_ref.current.find((item) => item.id === conversation_id);
     if (!conversation) {
       return;
     }
+    const replier_id = viewer_is_tenant ? my_user_id : conversation.otherUser.id;
+    const replies = viewer_is_tenant ? demo_landlord_replies : demo_replies;
     const read_timer = setTimeout(() => {
       handleRead({
         conversationId: conversation_id,
-        userId: conversation.otherUser.id,
+        userId: replier_id,
         readAt: new Date().toISOString(),
       });
     }, 1200);
@@ -219,8 +276,8 @@ function MessagesStore(props) {
       const reply = {
         id: 'demo-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
         conversationId: conversation_id,
-        senderId: conversation.otherUser.id,
-        body: demo_replies[Math.floor(Math.random() * demo_replies.length)],
+        senderId: replier_id,
+        body: replies[Math.floor(Math.random() * replies.length)],
         attachmentKey: null,
         createdAt: new Date().toISOString(),
       };
@@ -240,7 +297,7 @@ function MessagesStore(props) {
       const message = {
         id: 'demo-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
         conversationId: conversation_id,
-        senderId: demo_user_id,
+        senderId: viewer_id,
         body: body,
         attachmentKey: photo ? photo.uri : null,
         createdAt: new Date().toISOString(),
@@ -263,6 +320,16 @@ function MessagesStore(props) {
 
   // clears my unread right away, then tells the server (which tells my other phones)
   function markRead(conversation_id) {
+    // the demo has no server, so reading is a read event from whichever side is looking:
+    // the landlord's clears their unread, the tenant's moves the Seen marker the landlord sees
+    if (is_demo) {
+      handleRead({
+        conversationId: conversation_id,
+        userId: viewer_id,
+        readAt: new Date().toISOString(),
+      });
+      return;
+    }
     setConversations((current) =>
       current.map((conversation) =>
         conversation.id === conversation_id && conversation.unreadCount !== 0
@@ -270,9 +337,6 @@ function MessagesStore(props) {
           : conversation,
       ),
     );
-    if (is_demo) {
-      return;
-    }
     markConversationRead(conversation_id).catch((error) => {
       console.log('Could not mark the conversation read', error.message);
     });
@@ -312,18 +376,37 @@ function MessagesStore(props) {
     }
   }
 
+  // Sam's thread from Sam's side: the landlord is the other person, and the two read times and unreads trade places
+  function tenantSide(conversation) {
+    return {
+      ...conversation,
+      otherUser: demo_landlord,
+      unreadCount: conversation.otherUnreadCount || 0,
+      otherUnreadCount: conversation.unreadCount,
+      lastReadAt: conversation.otherUserLastReadAt,
+      otherUserLastReadAt: conversation.lastReadAt,
+    };
+  }
+
+  // the demo tenant only sees their own thread with the landlord, everyone else sees the list as it is
+  const visible_conversations = viewer_is_tenant
+    ? conversations
+        .filter((conversation) => conversation.otherUser.id === viewer_id)
+        .map(tenantSide)
+    : conversations;
+
   function getConversation(conversation_id) {
-    return conversations.find((conversation) => conversation.id === conversation_id);
+    return visible_conversations.find((conversation) => conversation.id === conversation_id);
   }
 
   const value = {
     mode,
     is_demo,
-    my_user_id,
-    conversations,
+    my_user_id: viewer_id,
+    conversations: visible_conversations,
     status,
     error_message,
-    unread_total: totalUnread(conversations),
+    unread_total: totalUnread(visible_conversations),
     reloadConversations: () => loadConversations(false),
     getConversation,
     fetchMessages,

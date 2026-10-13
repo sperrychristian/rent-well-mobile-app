@@ -1,7 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import HeaderIconButton from '../components/HeaderIconButton';
-import { useAuth } from '../features/auth/context/AuthContext';
-import { useWorkOrders } from '../context/WorkOrdersContext';
+import { useAppRole } from '../features/auth/hooks/useAppRole';
 import { useTenants } from '../features/tenants/context/TenantsContext';
 
 // the buttons on the right of the header, each one is its own small component so it can check the role
@@ -22,7 +21,8 @@ export function SettingsHeaderButton() {
 // owners (real or the demo) add a work order from the list, tenants never see the owner list anyway
 export function AddWorkOrderHeaderButton() {
   const navigation = useNavigation();
-  const { role } = useAuth();
+  // the role is the demo's side while the demo runs
+  const role = useAppRole();
   if (role === 'tenant') {
     return null;
   }
@@ -38,9 +38,9 @@ export function AddWorkOrderHeaderButton() {
 // invites are for owners, the demo counts as one, so a tenant opening Messages gets nothing here
 export function InviteHeaderButton() {
   const navigation = useNavigation();
-  const { role } = useAuth();
-  const { demo_mode } = useWorkOrders();
-  if (!demo_mode && role !== 'owner') {
+  // the tenant side of the demo is a tenant here, so only owners and the landlord demo get it
+  const role = useAppRole();
+  if (role !== 'owner') {
     return null;
   }
   return (

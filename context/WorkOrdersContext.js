@@ -95,6 +95,8 @@ export function WorkOrdersProvider(props) {
   const [demo_mode, setDemoMode] = useState(false);
   // the ref changes right away, which the async load needs to check, state only updates on the next render
   const demo_ref = useRef(false);
+  // which side of the demo is showing, owner (landlord) or tenant, both read and change the same demo data
+  const [demo_role, setDemoRole] = useState('owner');
 
   // reads whatever was saved on the device, used on startup and when leaving the demo
   // user_id picks which account's keys to read, gives back false if a newer load or the demo took over
@@ -293,8 +295,10 @@ export function WorkOrdersProvider(props) {
   }, [loaded]);
 
   // every demo starts from the same fresh sample data, and nothing in it gets saved
-  function startDemo() {
+  // role picks which side it opens on, owner (landlord) or tenant, the landlord when it's left out
+  function startDemo(role) {
     demo_ref.current = true;
+    setDemoRole(role === 'tenant' ? 'tenant' : 'owner');
     setOrders(default_orders);
     setExpenses(seed_expenses);
     setTrips(seed_trips);
@@ -310,6 +314,14 @@ export function WorkOrdersProvider(props) {
     setDemoMode(true);
   }
 
+  // flips the demo to the other side without touching its data, App.js rebuilds the screens on that role's home
+  function switchDemoRole(role) {
+    if (!demo_ref.current) {
+      return;
+    }
+    setDemoRole(role === 'tenant' ? 'tenant' : 'owner');
+  }
+
   // I put the real data back first and only then turn demo mode off, so demo data can't get saved over it
   async function exitDemo() {
     if (!demo_ref.current) {
@@ -323,6 +335,7 @@ export function WorkOrdersProvider(props) {
     clearDemoFiles();
     clearDemoChecklistPhotos();
     setDemoTenantData(null);
+    setDemoRole('owner');
     setDemoMode(false);
   }
 
@@ -640,8 +653,10 @@ export function WorkOrdersProvider(props) {
     documents,
     properties,
     demo_mode,
+    demo_role,
     startDemo,
     exitDemo,
+    switchDemoRole,
     getOrder,
     startWorkOrder,
     resolveWorkOrder,

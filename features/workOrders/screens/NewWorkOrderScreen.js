@@ -22,6 +22,8 @@ import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { useTenants } from '../../tenants/context/TenantsContext';
 import { getMe } from '../../../services/api';
 import { max_photos_per_upload } from '../utils/workOrderHelpers';
+import { placeLabel } from '../../tenants/utils/tenantHelpers';
+import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { COLORS, SPACING, FONTS } from '../../../theme';
 
 const urgency_options = ['Emergency', 'Normal', 'Low'];
@@ -29,14 +31,20 @@ const urgency_options = ['Emergency', 'Normal', 'Low'];
 const max_photo_bytes = 10485760;
 
 function NewWorkOrderScreen(props) {
-  const { addWorkOrder, properties, is_remote, role } = useWorkOrders();
+  const { addWorkOrder, properties, is_remote, role, demo_mode, demo_role } = useWorkOrders();
   // in real mode a tenant's property, unit, and name come from their account, so those boxes go away
   const tenant_remote = is_remote && role === 'tenant';
   // a real owner picks the property (and optionally the tenant) from their own list, the Work Orders Add button opens this
   const owner_remote = is_remote && role === 'owner';
   // both real versions keep a list of up to 5 photos that get uploaded
   const remote_form = tenant_remote || owner_remote;
-  const { properties: owner_properties } = useTenants();
+  const { properties: owner_properties, my_active_tenancies } = useTenants();
+  // the tenant demo is Sam, so the name and place fill in from Sam's rental in the demo data, like real mode does
+  const tenant_demo = demo_mode && demo_role === 'tenant';
+  const demo_place =
+    my_active_tenancies.length > 0
+      ? placeLabel(my_active_tenancies[0].property_name, my_active_tenancies[0].unit_label)
+      : null;
   // the header is hidden, so I push the content below the status bar and notch myself
   const insets = useSafeAreaInsets();
   // the header sits above this screen now, so the keyboard lift has to count its height too
@@ -240,6 +248,30 @@ function NewWorkOrderScreen(props) {
     setBusy(false);
   }
 
+  // the demo tenant's version: it goes in the demo's shared list, so the landlord side sees it as Open
+  // after switching, and the photo stays on the phone like the rest of the demo
+  function submitDemoRequest() {
+    if (title.trim() === '') {
+      Alert.alert('Describe the issue', 'Add a short title, like Kitchen faucet leaking.');
+      return;
+    }
+    if (!demo_place) {
+      Alert.alert('No rental found', "Sam doesn't have an active rental in the demo right now.");
+      return;
+    }
+    addWorkOrder({
+      title: title.trim(),
+      description: description.trim(),
+      property: demo_place,
+      tenant: demo_tenant.name,
+      priority: priority,
+      photo: photo_uri ? { uri: photo_uri } : null,
+    });
+    Alert.alert('Request submitted', 'Switch to the Landlord view to see it in Work Orders.', [
+      { text: 'OK', onPress: () => props.navigation.replace('MyRequests') },
+    ]);
+  }
+
   // I check the required pieces first so an empty request never gets submitted
   function handleSubmit() {
     if (tenant_remote) {
@@ -248,6 +280,10 @@ function NewWorkOrderScreen(props) {
     }
     if (owner_remote) {
       submitOwnerOrder();
+      return;
+    }
+    if (tenant_demo) {
+      submitDemoRequest();
       return;
     }
     if (tenant_name.trim() === '') {
@@ -397,6 +433,15 @@ function NewWorkOrderScreen(props) {
                   ))}
                 </View>
               )}
+            </View>
+          ) : tenant_demo ? (
+            <View style={styles.rental_box}>
+              <Text style={styles.label}>Reporting for</Text>
+              <Text style={styles.rental_text}>
+                {demo_place
+                  ? demo_tenant.name + ', ' + demo_place
+                  : 'No active rental in the demo right now.'}
+              </Text>
             </View>
           ) : (
             <View>

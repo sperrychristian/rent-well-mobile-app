@@ -118,6 +118,15 @@ export function activeCount(orders) {
   return orders.filter((order) => order.status !== 'Resolved').length;
 }
 
+// the demo tenant's own requests out of the shared local list, matched by name like the demo's tenant detail
+export function ordersForTenant(orders, tenant_name) {
+  const name = (tenant_name || '').trim().toLowerCase();
+  if (name === '') {
+    return [];
+  }
+  return orders.filter((order) => (order.tenant || '').trim().toLowerCase() === name);
+}
+
 // expenses stay on the phone for now, this builds the small order.expenses list the work order screens read
 export function legacyExpensesFor(expenses, order_id) {
   return expenses

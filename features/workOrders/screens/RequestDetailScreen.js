@@ -1,5 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
@@ -68,6 +77,9 @@ function RequestDetailScreen(props) {
   }
 
   const room = photosLeft(order);
+  // the demo keeps its one photo on the phone as order.photo, the server's photos are upload keys in order.photos
+  const local_photo = !is_remote && order.photo ? order.photo : null;
+  const photo_total = local_photo ? 1 : (order.photos || []).length;
   const can_add = is_remote && canTenantAddPhotos(order) && room > 0;
 
   // the photos go up one at a time, then get added to the request
@@ -165,8 +177,16 @@ function RequestDetailScreen(props) {
         </Card>
 
         <Card>
-          <Text style={styles.heading}>Photos ({(order.photos || []).length})</Text>
-          {order.photos && order.photos.length > 0 ? (
+          <Text style={styles.heading}>Photos ({photo_total})</Text>
+          {local_photo ? (
+            <Pressable
+              onPress={() => local_photo.uri && setViewerUrl(local_photo.uri)}
+              accessibilityRole="imagebutton"
+              accessibilityLabel="Open photo"
+            >
+              <Image source={local_photo} style={[styles.photo_thumb, styles.local_photo]} />
+            </Pressable>
+          ) : order.photos && order.photos.length > 0 ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {order.photos.map((key) => (
                 <RemoteImage
@@ -276,6 +296,9 @@ const styles = StyleSheet.create({
     width: 110,
     height: 110,
     marginRight: SPACING.sm,
+  },
+  local_photo: {
+    borderRadius: 8,
   },
   busy_row: {
     flexDirection: 'row',

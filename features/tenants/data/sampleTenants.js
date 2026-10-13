@@ -15,6 +15,17 @@ function timestampFromToday(days) {
   return daysFromToday(days) + 'T12:00:00.000Z';
 }
 
+// who you are in the demo as a tenant: Sam already shows up on the sample work orders, checklists,
+// documents, and message threads, so everything the landlord side has for Sam lines up with this
+export const demo_tenant = {
+  id: 'demo-tenant-sam',
+  name: 'Sam Rivera',
+  email: 'sam@example.com',
+  property_name: '123 Maple St',
+  unit_label: 'Unit 2',
+  conversation_id: 'demo-convo-sam',
+};
+
 // a fresh copy every time the demo starts, so changes from the last demo never carry over
 export function buildSampleTenantData() {
   return {

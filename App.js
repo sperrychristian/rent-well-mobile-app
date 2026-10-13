@@ -1,6 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import WelcomeScreen from './features/home/screens/WelcomeScreen';
+import DemoChooserScreen from './features/home/screens/DemoChooserScreen';
 import DashboardScreen from './features/home/screens/DashboardScreen';
 import ChecklistScreen from './features/checklist/screens/ChecklistScreen';
 import ChecklistDetailScreen from './features/checklist/screens/ChecklistDetailScreen';
@@ -79,7 +80,7 @@ function AccountData(props) {
 // so the first screen has to match the mode: the demo's dashboard, a role's home, or Login after a session ran out
 function AppNavigator() {
   const { status, user, session_expired } = useAuth();
-  const { demo_mode } = useWorkOrders();
+  const { demo_mode, demo_role } = useWorkOrders();
   if (status === 'restoring') {
     return null;
   }
@@ -87,16 +88,24 @@ function AppNavigator() {
   if (user) {
     first_route = homeRouteFor(user);
   } else if (demo_mode) {
-    first_route = 'Dashboard';
+    // the demo opens on the home of the side picked in the chooser (or switched to from the banner)
+    first_route = homeRouteFor({ role: demo_role });
   } else if (session_expired) {
     first_route = 'Login';
   }
+  // the demo only registers its own side's screens, so the tenant demo can't open an owner screen even by name
+  // (and the landlord demo can't open a tenant one), signed in and signed out keep every screen like before
+  const shows_owner = !demo_mode || demo_role === 'owner';
+  const shows_tenant = !demo_mode || demo_role === 'tenant';
+  // a new key starts the navigator over, so switching demo sides rebuilds the stack on that side's home
+  const navigator_key = demo_mode ? 'demo-' + demo_role : 'app';
 
   return (
-    <NavigationContainer ref={navigation_ref}>
+    <NavigationContainer key={navigator_key} ref={navigation_ref}>
       {/* I'm hiding the default header since my screens have their own title */}
       {/* that changed for the navigation assignment: every screen gets a header with one shared style now, */}
       {/* the titles come from navigation/navigationMap.js, and the ScreenTitle card stays as the big title */}
+      {/* later the card came off every screen but the two homes, since it only repeated the header */}
       <Stack.Navigator initialRouteName={first_route} screenOptions={shared_screen_options}>
         {/* first screen listed is the one that shows on launch */}
         {/* (initialRouteName above picks the real first screen from the saved session and the mode) */}
@@ -112,96 +121,121 @@ function AppNavigator() {
           component={RegisterTenantScreen}
           options={optionsFor('RegisterTenant')}
         />
-
-        {/* this name has to match navigate('Dashboard') exactly */}
         <Stack.Screen
-          name="Dashboard"
-          component={DashboardScreen}
-          options={optionsFor('Dashboard', { headerRight: () => <SettingsHeaderButton /> })}
-        />
-        <Stack.Screen
-          name="WorkOrders"
-          component={WorkOrdersScreen}
-          options={optionsFor('WorkOrders', { headerRight: () => <AddWorkOrderHeaderButton /> })}
-        />
-        <Stack.Screen
-          name="WorkOrderDetail"
-          component={WorkOrderDetailScreen}
-          options={optionsFor('WorkOrderDetail')}
-        />
-        <Stack.Screen
-          name="Tenants"
-          component={TenantsScreen}
-          options={optionsFor('Tenants', { headerRight: () => <InviteHeaderButton /> })}
-        />
-        <Stack.Screen
-          name="TenantDetail"
-          component={TenantDetailScreen}
-          options={optionsFor('TenantDetail')}
-        />
-        <Stack.Screen
-          name="TenantLease"
-          component={TenantLeaseScreen}
-          options={optionsFor('TenantLease')}
-        />
-        <Stack.Screen
-          name="Properties"
-          component={PropertiesScreen}
-          options={optionsFor('Properties')}
-        />
-        <Stack.Screen
-          name="PropertyDetail"
-          component={PropertyDetailScreen}
-          options={optionsFor('PropertyDetail')}
-        />
-        <Stack.Screen
-          name="InviteTenant"
-          component={InviteTenantScreen}
-          options={optionsFor('InviteTenant')}
-        />
-        <Stack.Screen
-          name="Documents"
-          component={DocumentsScreen}
-          options={optionsFor('Documents')}
-        />
-        <Stack.Screen
-          name="Checklist"
-          component={ChecklistScreen}
-          options={optionsFor('Checklist')}
-        />
-        <Stack.Screen
-          name="ChecklistDetail"
-          component={ChecklistDetailScreen}
-          options={optionsFor('ChecklistDetail')}
-        />
-        <Stack.Screen name="Expenses" component={ExpensesScreen} options={optionsFor('Expenses')} />
-        <Stack.Screen name="Mileage" component={MileageScreen} options={optionsFor('Mileage')} />
-        <Stack.Screen
-          name="YearEndReport"
-          component={YearEndReportScreen}
-          options={optionsFor('YearEndReport')}
+          name="DemoChooser"
+          component={DemoChooserScreen}
+          options={optionsFor('DemoChooser')}
         />
 
-        <Stack.Screen
-          name="TenantHome"
-          component={TenantHomeScreen}
-          options={optionsFor('TenantHome', { headerRight: () => <SettingsHeaderButton /> })}
-        />
-        <Stack.Screen
-          name="MyRequests"
-          component={MyRequestsScreen}
-          options={optionsFor('MyRequests', { headerRight: () => <AddRequestHeaderButton /> })}
-        />
-        <Stack.Screen
-          name="RequestDetail"
-          component={RequestDetailScreen}
-          options={optionsFor('RequestDetail')}
-        />
-        <Stack.Screen
-          name="PastRequests"
-          component={PastRequestsScreen}
-          options={optionsFor('PastRequests')}
-        />
+        {/* owner screens, left out in the tenant demo */}
+        {shows_owner && (
+          <Stack.Group>
+            {/* this name has to match navigate('Dashboard') exactly */}
+            <Stack.Screen
+              name="Dashboard"
+              component={DashboardScreen}
+              options={optionsFor('Dashboard', { headerRight: () => <SettingsHeaderButton /> })}
+            />
+            <Stack.Screen
+              name="WorkOrders"
+              component={WorkOrdersScreen}
+              options={optionsFor('WorkOrders', {
+                headerRight: () => <AddWorkOrderHeaderButton />,
+              })}
+            />
+            <Stack.Screen
+              name="WorkOrderDetail"
+              component={WorkOrderDetailScreen}
+              options={optionsFor('WorkOrderDetail')}
+            />
+            <Stack.Screen
+              name="Tenants"
+              component={TenantsScreen}
+              options={optionsFor('Tenants', { headerRight: () => <InviteHeaderButton /> })}
+            />
+            <Stack.Screen
+              name="TenantDetail"
+              component={TenantDetailScreen}
+              options={optionsFor('TenantDetail')}
+            />
+            <Stack.Screen
+              name="TenantLease"
+              component={TenantLeaseScreen}
+              options={optionsFor('TenantLease')}
+            />
+            <Stack.Screen
+              name="Properties"
+              component={PropertiesScreen}
+              options={optionsFor('Properties')}
+            />
+            <Stack.Screen
+              name="PropertyDetail"
+              component={PropertyDetailScreen}
+              options={optionsFor('PropertyDetail')}
+            />
+            <Stack.Screen
+              name="InviteTenant"
+              component={InviteTenantScreen}
+              options={optionsFor('InviteTenant')}
+            />
+            <Stack.Screen
+              name="Documents"
+              component={DocumentsScreen}
+              options={optionsFor('Documents')}
+            />
+            <Stack.Screen
+              name="Checklist"
+              component={ChecklistScreen}
+              options={optionsFor('Checklist')}
+            />
+            <Stack.Screen
+              name="ChecklistDetail"
+              component={ChecklistDetailScreen}
+              options={optionsFor('ChecklistDetail')}
+            />
+            <Stack.Screen
+              name="Expenses"
+              component={ExpensesScreen}
+              options={optionsFor('Expenses')}
+            />
+            <Stack.Screen
+              name="Mileage"
+              component={MileageScreen}
+              options={optionsFor('Mileage')}
+            />
+            <Stack.Screen
+              name="YearEndReport"
+              component={YearEndReportScreen}
+              options={optionsFor('YearEndReport')}
+            />
+          </Stack.Group>
+        )}
+
+        {/* tenant screens, left out in the landlord demo */}
+        {shows_tenant && (
+          <Stack.Group>
+            <Stack.Screen
+              name="TenantHome"
+              component={TenantHomeScreen}
+              options={optionsFor('TenantHome', { headerRight: () => <SettingsHeaderButton /> })}
+            />
+            <Stack.Screen
+              name="MyRequests"
+              component={MyRequestsScreen}
+              options={optionsFor('MyRequests', { headerRight: () => <AddRequestHeaderButton /> })}
+            />
+            <Stack.Screen
+              name="RequestDetail"
+              component={RequestDetailScreen}
+              options={optionsFor('RequestDetail')}
+            />
+            <Stack.Screen
+              name="PastRequests"
+              component={PastRequestsScreen}
+              options={optionsFor('PastRequests')}
+            />
+          </Stack.Group>
+        )}
 
         <Stack.Screen
           name="NewWorkOrder"

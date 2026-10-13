@@ -2,7 +2,7 @@ import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { useAuth } from '../../auth/context/AuthContext';
+import { useAppRole } from '../../auth/hooks/useAppRole';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
 // a few made-up payment ids so the detail screen has something to open, the real ones will come from the server
@@ -21,7 +21,8 @@ const sample_payments = {
 // the demo has no account, so it gets the owner version like the rest of the demo
 function PaymentsScreen(props) {
   const insets = useSafeAreaInsets();
-  const { role } = useAuth();
+  // the demo picks a side now, so the tenant demo gets the tenant version
+  const role = useAppRole();
   const is_tenant = role === 'tenant';
   const payments = is_tenant ? sample_payments.tenant : sample_payments.owner;
 

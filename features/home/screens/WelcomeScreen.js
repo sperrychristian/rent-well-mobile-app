@@ -5,7 +5,7 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 
 function WelcomeScreen(props) {
-  const { startDemo, exitDemo } = useWorkOrders();
+  const { exitDemo } = useWorkOrders();
 
   return (
     <View style={styles.container}>
@@ -32,14 +32,12 @@ function WelcomeScreen(props) {
         />
       </View>
       {/* the demo needs no account, it starts on fresh sample data and never saves */}
+      {/* the chooser picks landlord or tenant first, and starting the demo there opens that side's home */}
       <PrimaryButton
         title="Try the Demo"
         icon="play-circle-outline"
         style={styles.demo_button}
-        onPress={() => {
-          startDemo();
-          props.navigation.navigate('Dashboard');
-        }}
+        onPress={() => props.navigation.navigate('DemoChooser')}
       />
     </View>
   );

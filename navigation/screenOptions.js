@@ -4,6 +4,7 @@ import { headerTitle } from './navigationMap';
 // one header style for every screen, all from theme.js
 // the header blends into the screen background so the ScreenTitle card stays the big title
 // and the header is the slim bar with the back arrow, the plain title, and any buttons
+// (the card is only on the Dashboard and the tenant home now, everywhere else the header title is the only title)
 export const shared_screen_options = {
   headerShown: true,
   headerStyle: { backgroundColor: COLORS.background },
