@@ -14,7 +14,10 @@ function PaymentDetailScreen(props) {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
+      contentContainerStyle={{
+        paddingHorizontal: SPACING.md,
+        paddingBottom: insets.bottom + SPACING.lg,
+      }}
     >
       <Card>
         <Text style={styles.label}>Payment ID</Text>
@@ -63,7 +66,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   back_button: {
-    width: '90%',
+    width: '100%',
     maxWidth: SIZES.content_max_width,
     alignSelf: 'center',
     marginHorizontal: 0,

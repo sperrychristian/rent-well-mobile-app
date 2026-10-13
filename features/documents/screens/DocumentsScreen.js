@@ -27,7 +27,7 @@ import {
 } from '../utils/documentFiles';
 import { iconFor, expiryTag, daysUntil } from '../utils/documentHelpers';
 import { document_categories, expiring_soon_days } from '../../../data/documentOptions';
-import { COLORS, SPACING, TYPE, RADIUS, SIZES, OPACITY } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES, OPACITY, NUMBERS } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import StatusPill from '../../../components/ui/StatusPill';
@@ -450,7 +450,8 @@ const styles = StyleSheet.create({
   },
   summary_total: {
     ...TYPE.display,
-    color: COLORS.cta,
+    ...NUMBERS,
+    color: COLORS.text,
     marginVertical: 4,
   },
   detail: {

@@ -18,7 +18,11 @@ function TenantLeaseScreen(props) {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingTop: SPACING.md, paddingBottom: insets.bottom + SPACING.lg }}
+      contentContainerStyle={{
+        paddingTop: SPACING.md,
+        paddingHorizontal: SPACING.md,
+        paddingBottom: insets.bottom + SPACING.lg,
+      }}
     >
       <Text style={styles.name_line}>{tenant ? tenant.name : 'Tenant'}</Text>
       <Card>
@@ -84,7 +88,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
   },
   documents_button: {
-    width: '90%',
+    width: '100%',
     maxWidth: SIZES.content_max_width,
     alignSelf: 'center',
     marginHorizontal: 0,

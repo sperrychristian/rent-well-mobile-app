@@ -30,7 +30,10 @@ function PaymentsScreen(props) {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
+      contentContainerStyle={{
+        paddingHorizontal: SPACING.md,
+        paddingBottom: insets.bottom + SPACING.lg,
+      }}
     >
       <Card>
         {/* the pixel card stands in until real payments exist */}

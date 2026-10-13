@@ -137,6 +137,7 @@ function RequestDetailScreen(props) {
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={{
+          paddingHorizontal: SPACING.md,
           paddingBottom: insets.bottom + SPACING.lg,
         }}
       >

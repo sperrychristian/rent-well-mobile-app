@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
     borderTopWidth: BORDER.hairline,
     borderTopColor: COLORS.border,
-    width: '90%',
+    width: '100%',
     maxWidth: SIZES.content_max_width,
   },
   button_row: {

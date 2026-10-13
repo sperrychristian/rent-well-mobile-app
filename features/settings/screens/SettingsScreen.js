@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   logout_button: {
-    width: '90%',
+    width: '100%',
     alignSelf: 'center',
     marginHorizontal: 0,
   },

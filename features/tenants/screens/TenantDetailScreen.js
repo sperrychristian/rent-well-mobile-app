@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
   },
   actions: {
-    width: '90%',
+    width: '100%',
     maxWidth: SIZES.content_max_width,
     alignSelf: 'center',
     gap: SPACING.sm,
@@ -463,7 +463,7 @@ const styles = StyleSheet.create({
   },
   helper: {
     ...TYPE.caption,
-    width: '90%',
+    width: '100%',
     alignSelf: 'center',
     color: COLORS.text_muted,
     marginTop: SPACING.sm,

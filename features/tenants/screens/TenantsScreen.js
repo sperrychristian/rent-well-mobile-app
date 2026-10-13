@@ -22,7 +22,7 @@ import {
   formatInviteCode,
   inviteShareText,
 } from '../../invites/utils/inviteHelpers';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, OPACITY } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, OPACITY, NUMBERS } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import Avatar from '../../../components/ui/Avatar';
 import EmptyState from '../../../components/ui/EmptyState';
@@ -155,7 +155,10 @@ function TenantsScreen(props) {
         accessibilityRole="button"
         accessibilityLabel={
           tenant.name +
-          (tenancy ? ', ' + placeLabel(tenancy.property_name, tenancy.unit_label) : '')
+          (tenancy ? ', ' + placeLabel(tenancy.property_name, tenancy.unit_label) : '') +
+          (tenant.open_work_order_count > 0
+            ? ', ' + tenant.open_work_order_count + ' open work orders'
+            : '')
         }
       >
         <Avatar name={tenant.name} size={36} />
@@ -177,7 +180,7 @@ function TenantsScreen(props) {
         </View>
         {tenant.open_work_order_count > 0 && (
           <View style={styles.count_tag}>
-            <Ionicons name="construct-outline" size={12} color={COLORS.on_light} />
+            <Ionicons name="construct-outline" size={12} color={COLORS.warning_text} />
             <Text style={styles.count_text}>{tenant.open_work_order_count}</Text>
           </View>
         )}
@@ -424,19 +427,20 @@ const styles = StyleSheet.create({
     ...list_styles.detail,
   },
   count_tag: {
+    backgroundColor: COLORS.warning_tint,
+    borderRadius: RADIUS.pill,
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.xxs,
-    backgroundColor: COLORS.warning,
-    borderRadius: RADIUS.pill,
     paddingVertical: SPACING.xxs,
     paddingHorizontal: SPACING.sm,
   },
   count_text: {
     ...TYPE.label,
+    ...NUMBERS,
     fontSize: 12,
     lineHeight: 16,
-    color: COLORS.on_light,
+    color: COLORS.warning_text,
   },
   group_title: {
     ...TYPE.label,

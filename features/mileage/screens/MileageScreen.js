@@ -192,7 +192,10 @@ function MileageScreen(props) {
                 <Text style={styles.row_miles}>{item.miles.toFixed(1)} miles</Text>
                 <Text style={styles.row_money}>{formatCurrency(item.miles * mileage_rate)}</Text>
               </View>
-              <Text style={styles.detail}>{formatDate(item.date) + ' · deduction'}</Text>
+              <View style={styles.row_top}>
+                <Text style={styles.detail}>{formatDate(item.date)}</Text>
+                <Text style={styles.detail}>deduction</Text>
+              </View>
               <Text style={styles.detail}>{item.property}</Text>
               {item.purpose ? <Text style={styles.detail}>{item.purpose}</Text> : null}
             </View>
