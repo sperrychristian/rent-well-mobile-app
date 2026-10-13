@@ -65,7 +65,8 @@ function NewWorkOrderScreen(props) {
         if (!active) {
           return;
         }
-        const list = me.tenancies || [];
+        // the server renamed tenancies to activeTenancies, only active ones can file a request
+        const list = me.activeTenancies || me.tenancies || [];
         setTenancies(list);
         setTenancyId(list.length > 0 ? list[0].id : null);
         setMeStatus('ready');
