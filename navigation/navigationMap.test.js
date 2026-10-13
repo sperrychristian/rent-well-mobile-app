@@ -3,7 +3,9 @@ import path from 'path';
 import {
   navigation_map,
   initial_routes,
+  situations,
   reachableFrom,
+  reachableIn,
   headerTitle,
   shortId,
 } from './navigationMap';
@@ -70,11 +72,94 @@ describe('every screen is reachable', () => {
     ).toEqual([]);
   });
 
+  test('the demo landlord reaches every owner and shared screen and no tenant screen', () => {
+    const reached = reachableIn('demo_owner');
+    expect(situations.demo_owner.start).toBe('Dashboard');
+    expect(screensFor('owner').filter((route_name) => !reached.has(route_name))).toEqual([]);
+    expect(
+      [...reached].filter((route_name) => navigation_map[route_name].role === 'tenant'),
+    ).toEqual([]);
+  });
+
+  test('the demo tenant reaches every tenant and shared screen and no owner screen', () => {
+    const reached = reachableIn('demo_tenant');
+    expect(situations.demo_tenant.start).toBe('TenantHome');
+    expect(screensFor('tenant').filter((route_name) => !reached.has(route_name))).toEqual([]);
+    expect(
+      [...reached].filter((route_name) => navigation_map[route_name].role === 'owner'),
+    ).toEqual([]);
+  });
+
+  test('reachable_in on every screen matches what each situation really reaches', () => {
+    Object.keys(situations).forEach((situation_name) => {
+      const reached = [...reachableIn(situation_name)].sort();
+      const marked = mapped
+        .filter((route_name) => navigation_map[route_name].reachable_in.includes(situation_name))
+        .sort();
+      expect({ situation_name, screens: reached }).toEqual({ situation_name, screens: marked });
+    });
+  });
+
+  test('every screen is marked reachable in at least one situation', () => {
+    mapped.forEach((route_name) => {
+      expect(navigation_map[route_name].reachable_in.length).toBeGreaterThan(0);
+    });
+  });
+
+  test('Try the Demo opens the chooser, and each choice starts on that side of the demo', () => {
+    const welcome_edges = navigation_map.Welcome.edges.map((edge) => edge.to);
+    expect(welcome_edges).toContain('DemoChooser');
+    const chooser_edges = navigation_map.DemoChooser.edges;
+    expect(chooser_edges.map((edge) => edge.to).sort()).toEqual(
+      [initial_routes.demo_owner, initial_routes.demo_tenant].sort(),
+    );
+    chooser_edges.forEach((edge) => {
+      expect(edge.via).toBe('reset');
+      expect(edge.demo).toBe(true);
+    });
+  });
+
+  test('the demo banner switch goes between the two demo homes', () => {
+    const switchTo = (route_name) =>
+      navigation_map[route_name].edges.filter((edge) => edge.demo).map((edge) => edge.to);
+    expect(switchTo(initial_routes.demo_owner)).toEqual([initial_routes.demo_tenant]);
+    expect(switchTo(initial_routes.demo_tenant)).toEqual([initial_routes.demo_owner]);
+  });
+
   test('the auth screens are reachable from Welcome without signing in', () => {
     const reached = reachableFrom(initial_routes.signed_out, { skip_resets: true });
     mapped
       .filter((route_name) => navigation_map[route_name].role === 'auth')
       .forEach((route_name) => expect(reached.has(route_name)).toBe(true));
+  });
+});
+
+describe('App.js guards the demo sides', () => {
+  // the screens registered inside one of App.js's role groups
+  function groupScreens(flag) {
+    const start = app_source.indexOf('{' + flag + ' && (');
+    expect(start).toBeGreaterThan(-1);
+    const end = app_source.indexOf('</Stack.Group>', start);
+    return [...app_source.slice(start, end).matchAll(/<Stack\.Screen\s+name="(\w+)"/g)]
+      .map((match) => match[1])
+      .sort();
+  }
+  const withRole = (role) =>
+    mapped.filter((route_name) => navigation_map[route_name].role === role).sort();
+
+  test('every owner-only screen sits in the group the tenant demo leaves out', () => {
+    expect(groupScreens('shows_owner')).toEqual(withRole('owner'));
+    expect(app_source).toMatch(/const shows_owner = !demo_mode \|\| demo_role === 'owner';/);
+  });
+
+  test('every tenant-only screen sits in the group the landlord demo leaves out', () => {
+    expect(groupScreens('shows_tenant')).toEqual(withRole('tenant'));
+    expect(app_source).toMatch(/const shows_tenant = !demo_mode \|\| demo_role === 'tenant';/);
+  });
+
+  test('the navigator is keyed on the demo side, so a switch rebuilds the stack', () => {
+    expect(app_source).toMatch(/<NavigationContainer key=\{navigator_key\}/);
+    expect(app_source).toMatch(/const navigator_key = demo_mode \? 'demo-' \+ demo_role : 'app';/);
   });
 });
 

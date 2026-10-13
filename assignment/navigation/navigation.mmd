@@ -6,6 +6,7 @@ flowchart LR
   classDef stub stroke-dasharray: 6 4;
   subgraph signed_out [Signed out]
     Welcome["Welcome to Rent Well"]
+    DemoChooser["Pick a Demo Role"]
     Login["Log In to Rent Well"]
     RegisterOwner["Landlord Sign Up"]
     RegisterTenant["Tenant Sign Up"]
@@ -37,7 +38,9 @@ flowchart LR
   Settings["Settings and Profile (stub)<br/>DRAWER owner"]
   Welcome --> Login
   Welcome --> RegisterOwner
-  Welcome -.-> Dashboard
+  Welcome --> DemoChooser
+  DemoChooser -.->|Demo as Landlord| Dashboard
+  DemoChooser -.->|Demo as Tenant| TenantHome
   Login -.-> Dashboard
   Login -.-> TenantHome
   Login --> RegisterOwner
@@ -57,6 +60,7 @@ flowchart LR
   Dashboard --> Checklist
   Dashboard --> Expenses
   Dashboard -.-> Welcome
+  Dashboard -.->|Switch to Tenant view| TenantHome
   WorkOrders -->|header: Add| NewWorkOrder
   WorkOrders -->|workOrderId| WorkOrderDetail
   WorkOrders -->|conversationId| MessageThread
@@ -85,6 +89,7 @@ flowchart LR
   TenantHome --> Payments
   TenantHome --> PastRequests
   TenantHome -.-> Welcome
+  TenantHome -.->|Switch to Landlord view| Dashboard
   MyRequests -->|header: Add| NewWorkOrder
   MyRequests -->|workOrderId| RequestDetail
   NewWorkOrder --> MyRequests
@@ -94,6 +99,7 @@ flowchart LR
   Settings --> Mileage
   Settings -.-> Welcome
   class Welcome auth;
+  class DemoChooser auth;
   class Login auth;
   class RegisterOwner auth;
   class RegisterTenant auth;

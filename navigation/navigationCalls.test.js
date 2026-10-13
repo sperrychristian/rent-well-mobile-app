@@ -112,4 +112,43 @@ describe('navigation calls in the source', () => {
       .filter((call) => call.route && !registered.has(call.route));
     expect(unknown).toEqual([]);
   });
+
+  // resets clear the history (log in, log out, exit demo), they take a list of routes instead of params
+  test('every reset goes to a registered screen and passes no params', () => {
+    const app_source = fs.readFileSync(path.join(root, 'App.js'), 'utf8');
+    const registered = new Set(
+      [...app_source.matchAll(/<Stack\.Screen\s+name="(\w+)"/g)].map((match) => match[1]),
+    );
+    const reset_pattern = /(?:\bnavigation(?:_ref)?\.reset|\bresetTo)\(/g;
+    const resets = files.flatMap((file) => {
+      const source = fs.readFileSync(file, 'utf8');
+      const found = [];
+      let match;
+      while ((match = reset_pattern.exec(source)) !== null) {
+        found.push({
+          file: path.relative(root, file),
+          text: source.slice(match.index, match.index + 200),
+        });
+      }
+      return found;
+    });
+    expect(resets.length).toBeGreaterThan(3);
+    const problems = [];
+    resets.forEach((reset) => {
+      const call = reset.text.slice(0, reset.text.indexOf(')') + 1);
+      if (/params\s*:/.test(reset.text.split('\n')[0])) {
+        problems.push(reset.file + ': a reset passes params: ' + call);
+      }
+      // a plain name like 'Welcome' has to be registered, a computed one (homeRouteFor) is checked by its own test
+      const names = [
+        ...reset.text.split('\n')[0].matchAll(/name:\s*'(\w+)'|resetTo\('(\w+)'/g),
+      ].map((found) => found[1] || found[2]);
+      names.forEach((name) => {
+        if (!registered.has(name)) {
+          problems.push(reset.file + ': reset to an unknown screen: ' + name);
+        }
+      });
+    });
+    expect(problems).toEqual([]);
+  });
 });

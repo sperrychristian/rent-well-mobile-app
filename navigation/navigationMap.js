@@ -8,7 +8,19 @@ export const initial_routes = {
   owner: 'Dashboard',
   tenant: 'TenantHome',
   // the demo is an owner without an account, it opens on the same dashboard
-  demo: 'Dashboard',
+  // now the demo picks a side in the chooser, the landlord side opens on the dashboard and the tenant side on the tenant home
+  demo_owner: 'Dashboard',
+  demo_tenant: 'TenantHome',
+};
+
+// the five ways the app can be running: where each one starts and whose edges it follows
+// the demo sides follow the same edges as the real roles, App.js only registers that side's screens in the demo
+export const situations = {
+  signed_out: { start: initial_routes.signed_out, role: null },
+  owner: { start: initial_routes.owner, role: 'owner' },
+  tenant: { start: initial_routes.tenant, role: 'tenant' },
+  demo_owner: { start: initial_routes.demo_owner, role: 'owner' },
+  demo_tenant: { start: initial_routes.demo_tenant, role: 'tenant' },
 };
 
 // role is who the screen is for: auth (signed out), owner, tenant, or shared (both)
@@ -19,11 +31,15 @@ export const initial_routes = {
 //   header, after submit, or reset when the history gets cleared), label (what you tap),
 //   and roles when only owners or only tenants see it
 // future marks screens that should become a tab or a drawer item once the app moves past a plain stack
+// reachable_in lists the situations (above) that can open the screen without logging in, out, or leaving the demo,
+//   the tests check it against the edges
+// demo: true on an edge means only the demo has it (starting a demo side, or switching sides from the demo banner)
 export const navigation_map = {
   // ----- signed out -----
   Welcome: {
     title: 'Welcome to Rent Well',
     role: 'auth',
+    reachable_in: ['signed_out'],
     feature: 'home',
     file: 'features/home/screens/WelcomeScreen.js',
     status: 'built',
@@ -31,13 +47,29 @@ export const navigation_map = {
     edges: [
       { to: 'Login', param: null, via: 'button', label: 'Login' },
       { to: 'RegisterOwner', param: null, via: 'button', label: 'Sign Up' },
-      { to: 'Dashboard', param: null, via: 'reset', label: 'Try the Demo' },
+      { to: 'DemoChooser', param: null, via: 'button', label: 'Try the Demo' },
+    ],
+    future: [],
+  },
+  DemoChooser: {
+    title: 'Pick a Demo Role',
+    role: 'auth',
+    reachable_in: ['signed_out'],
+    feature: 'home',
+    file: 'features/home/screens/DemoChooserScreen.js',
+    status: 'built',
+    params: [],
+    // each card starts the demo on that side, which rebuilds the stack on its home
+    edges: [
+      { to: 'Dashboard', param: null, via: 'reset', label: 'Demo as Landlord', demo: true },
+      { to: 'TenantHome', param: null, via: 'reset', label: 'Demo as Tenant', demo: true },
     ],
     future: [],
   },
   Login: {
     title: 'Log In to Rent Well',
     role: 'auth',
+    reachable_in: ['signed_out'],
     feature: 'auth',
     file: 'features/auth/screens/LoginScreen.js',
     status: 'built',
@@ -53,6 +85,7 @@ export const navigation_map = {
   RegisterOwner: {
     title: 'Landlord Sign Up',
     role: 'auth',
+    reachable_in: ['signed_out'],
     feature: 'auth',
     file: 'features/auth/screens/RegisterOwnerScreen.js',
     status: 'built',
@@ -67,6 +100,7 @@ export const navigation_map = {
   RegisterTenant: {
     title: 'Tenant Sign Up',
     role: 'auth',
+    reachable_in: ['signed_out'],
     feature: 'auth',
     file: 'features/auth/screens/RegisterTenantScreen.js',
     status: 'built',
@@ -82,6 +116,7 @@ export const navigation_map = {
   Dashboard: {
     title: 'Landlord Dashboard',
     role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
     feature: 'home',
     file: 'features/home/screens/DashboardScreen.js',
     status: 'built',
@@ -97,12 +132,21 @@ export const navigation_map = {
       { to: 'Checklist', param: null, via: 'button', label: 'Checklist' },
       { to: 'Expenses', param: null, via: 'button', label: 'Expenses' },
       { to: 'Welcome', param: null, via: 'reset', label: 'Log Out or Exit Demo' },
+      // the demo banner's switch, it keeps the demo data and starts the stack over on the tenant home
+      {
+        to: 'TenantHome',
+        param: null,
+        via: 'reset',
+        label: 'Switch to Tenant view',
+        demo: true,
+      },
     ],
     future: [{ role: 'owner', kind: 'tab' }],
   },
   WorkOrders: {
     title: 'All Work Orders',
     role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
     feature: 'workOrders',
     file: 'features/workOrders/screens/WorkOrdersScreen.js',
     status: 'built',
@@ -119,6 +163,7 @@ export const navigation_map = {
     title: 'Work Order',
     title_param: 'workOrderId',
     role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
     feature: 'workOrders',
     file: 'features/workOrders/screens/WorkOrderDetailScreen.js',
     status: 'built',
@@ -131,6 +176,7 @@ export const navigation_map = {
   Tenants: {
     title: 'Your Tenants',
     role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
     feature: 'tenants',
     file: 'features/tenants/screens/TenantsScreen.js',
     status: 'built',
@@ -146,6 +192,7 @@ export const navigation_map = {
   TenantDetail: {
     title: 'Tenant Profile',
     role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
     feature: 'tenants',
     file: 'features/tenants/screens/TenantDetailScreen.js',
     status: 'built',
@@ -162,6 +209,7 @@ export const navigation_map = {
   TenantLease: {
     title: 'Lease and Documents',
     role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
     feature: 'tenants',
     file: 'features/tenants/screens/TenantLeaseScreen.js',
     status: 'stub',
@@ -172,6 +220,7 @@ export const navigation_map = {
   Properties: {
     title: 'Your Properties',
     role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
     feature: 'tenants',
     file: 'features/tenants/screens/PropertiesScreen.js',
     status: 'built',
@@ -182,6 +231,7 @@ export const navigation_map = {
   PropertyDetail: {
     title: 'Property Overview',
     role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
     feature: 'tenants',
     file: 'features/tenants/screens/PropertyDetailScreen.js',
     status: 'stub',
@@ -195,6 +245,7 @@ export const navigation_map = {
   InviteTenant: {
     title: 'Invite a New Tenant',
     role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
     feature: 'invites',
     file: 'features/invites/screens/InviteTenantScreen.js',
     status: 'built',
@@ -205,6 +256,7 @@ export const navigation_map = {
   Documents: {
     title: 'Document Storage',
     role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
     feature: 'documents',
     file: 'features/documents/screens/DocumentsScreen.js',
     status: 'built',
@@ -215,6 +267,7 @@ export const navigation_map = {
   Checklist: {
     title: 'Condition Checklists',
     role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
     feature: 'checklist',
     file: 'features/checklist/screens/ChecklistScreen.js',
     status: 'built',
@@ -233,6 +286,7 @@ export const navigation_map = {
     title: 'Checklist',
     title_param: 'checklistId',
     role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
     feature: 'checklist',
     file: 'features/checklist/screens/ChecklistDetailScreen.js',
     status: 'built',
@@ -246,6 +300,7 @@ export const navigation_map = {
   Expenses: {
     title: 'Property Expenses',
     role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
     feature: 'expenses',
     file: 'features/expenses/screens/ExpensesScreen.js',
     status: 'built',
@@ -260,6 +315,7 @@ export const navigation_map = {
   Mileage: {
     title: 'Mileage Log',
     role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
     feature: 'mileage',
     file: 'features/mileage/screens/MileageScreen.js',
     status: 'built',
@@ -271,6 +327,7 @@ export const navigation_map = {
     title: 'Year-End Tax Report',
     title_param: 'yearId',
     role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
     feature: 'expenses',
     file: 'features/expenses/screens/YearEndReportScreen.js',
     status: 'built',
@@ -284,6 +341,7 @@ export const navigation_map = {
   TenantHome: {
     title: 'My Home',
     role: 'tenant',
+    reachable_in: ['tenant', 'demo_tenant'],
     feature: 'home',
     file: 'features/home/screens/TenantHomeScreen.js',
     status: 'built',
@@ -295,13 +353,21 @@ export const navigation_map = {
       { to: 'NewWorkOrder', param: null, via: 'card', label: 'Report an Issue' },
       { to: 'Payments', param: null, via: 'card', label: 'Payments and Rent' },
       { to: 'PastRequests', param: null, via: 'card', label: 'Past Requests (no rental)' },
-      { to: 'Welcome', param: null, via: 'reset', label: 'Log Out' },
+      { to: 'Welcome', param: null, via: 'reset', label: 'Log Out or Exit Demo' },
+      {
+        to: 'Dashboard',
+        param: null,
+        via: 'reset',
+        label: 'Switch to Landlord view',
+        demo: true,
+      },
     ],
     future: [{ role: 'tenant', kind: 'tab' }],
   },
   MyRequests: {
     title: 'My Repair Requests',
     role: 'tenant',
+    reachable_in: ['tenant', 'demo_tenant'],
     feature: 'workOrders',
     file: 'features/workOrders/screens/MyRequestsScreen.js',
     status: 'built',
@@ -316,6 +382,7 @@ export const navigation_map = {
     title: 'Request',
     title_param: 'workOrderId',
     role: 'tenant',
+    reachable_in: ['tenant', 'demo_tenant'],
     feature: 'workOrders',
     file: 'features/workOrders/screens/RequestDetailScreen.js',
     status: 'built',
@@ -326,6 +393,7 @@ export const navigation_map = {
   PastRequests: {
     title: 'Past Repair Requests',
     role: 'tenant',
+    reachable_in: ['tenant', 'demo_tenant'],
     feature: 'tenants',
     file: 'features/tenants/screens/PastRequestsScreen.js',
     status: 'built',
@@ -339,6 +407,7 @@ export const navigation_map = {
     // owners add work orders here and tenants report issues, so the header says it plainly for both
     title: 'Add a Work Order',
     role: 'shared',
+    reachable_in: ['owner', 'tenant', 'demo_owner', 'demo_tenant'],
     feature: 'workOrders',
     file: 'features/workOrders/screens/NewWorkOrderScreen.js',
     status: 'built',
@@ -357,6 +426,7 @@ export const navigation_map = {
   Messages: {
     title: 'Message Inbox',
     role: 'shared',
+    reachable_in: ['owner', 'tenant', 'demo_owner', 'demo_tenant'],
     feature: 'messages',
     file: 'features/messages/screens/MessagesScreen.js',
     status: 'built',
@@ -373,6 +443,7 @@ export const navigation_map = {
   MessageThread: {
     title: 'Conversation',
     role: 'shared',
+    reachable_in: ['owner', 'tenant', 'demo_owner', 'demo_tenant'],
     feature: 'messages',
     file: 'features/messages/screens/MessageThreadScreen.js',
     status: 'built',
@@ -383,6 +454,7 @@ export const navigation_map = {
   Payments: {
     title: 'Payments and Rent',
     role: 'shared',
+    reachable_in: ['owner', 'tenant', 'demo_owner', 'demo_tenant'],
     feature: 'payments',
     file: 'features/payments/screens/PaymentsScreen.js',
     status: 'stub',
@@ -394,6 +466,7 @@ export const navigation_map = {
     title: 'Payment Record',
     title_param: 'paymentId',
     role: 'shared',
+    reachable_in: ['owner', 'tenant', 'demo_owner', 'demo_tenant'],
     feature: 'payments',
     file: 'features/payments/screens/PaymentDetailScreen.js',
     status: 'stub',
@@ -404,6 +477,7 @@ export const navigation_map = {
   Settings: {
     title: 'Settings and Profile',
     role: 'shared',
+    reachable_in: ['owner', 'tenant', 'demo_owner', 'demo_tenant'],
     feature: 'settings',
     file: 'features/settings/screens/SettingsScreen.js',
     status: 'stub',
@@ -430,6 +504,12 @@ export function headerTitle(route_name, params) {
   }
   const value = screen.title_param && params ? params[screen.title_param] : null;
   return value ? screen.title + ' #' + shortId(value) : screen.title;
+}
+
+// the screens one situation can open without logging in or out (or leaving the demo), from its start
+export function reachableIn(situation_name) {
+  const situation = situations[situation_name];
+  return reachableFrom(situation.start, { skip_resets: true, role: situation.role });
 }
 
 // every screen reachable from a start by following edges

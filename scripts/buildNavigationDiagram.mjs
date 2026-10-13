@@ -50,6 +50,8 @@ const edge_styles = {
   param: { color: COLORS.title, dash: '', width: 3 },
   header: { color: COLORS.warning, dash: '', width: 3 },
   reset: { color: COLORS.primary, dash: '10 8', width: 2.2 },
+  // the demo's own ways in and the banner's switch between sides, they reset the history too
+  demo: { color: COLORS.tag_billed, dash: '10 8', width: 3 },
 };
 
 const text_color = COLORS.text_dark;
@@ -67,6 +69,9 @@ const all_edges = route_names.flatMap((from) =>
 );
 
 function edgeKind(edge) {
+  if (edge.demo) {
+    return 'demo';
+  }
   if (edge.via === 'reset') {
     return 'reset';
   }
@@ -78,6 +83,10 @@ function edgeKind(edge) {
 
 // the text on an arrow: the param name when one is passed, and "header" for header buttons
 function edgeLabel(edge) {
+  // the demo arrows say which side they start or switch to, since two of them run between the same homes
+  if (edge.demo) {
+    return edge.label;
+  }
   if (edge.via === 'header') {
     return 'header: ' + edge.label;
   }
@@ -93,10 +102,10 @@ function startTags(route_name) {
     tags.push('START: signed out');
   }
   if (route_name === initial_routes.owner) {
-    tags.push('START: owner + demo');
+    tags.push(route_name === initial_routes.demo_owner ? 'START: owner + demo' : 'START: owner');
   }
   if (route_name === initial_routes.tenant) {
-    tags.push('START: tenant');
+    tags.push(route_name === initial_routes.demo_tenant ? 'START: tenant + demo' : 'START: tenant');
   }
   return tags;
 }
@@ -159,7 +168,7 @@ async function layout(direction) {
 async function bestLayout() {
   const area_width = page_width - 100;
   // the title and the legend share the band across the top, the graph gets the rest
-  const area_height = page_height - 190;
+  const area_height = page_height - 220;
   let best = null;
   for (const direction of ['RIGHT', 'DOWN']) {
     const result = await layout(direction);
@@ -307,7 +316,7 @@ async function buildSvg() {
   });
 
   const offset_x = (page_width - result.width * scale) / 2;
-  const offset_y = 165;
+  const offset_y = 195;
   const parts = [];
   parts.push(
     '<svg xmlns="http://www.w3.org/2000/svg" width="' +
@@ -351,6 +360,15 @@ async function buildSvg() {
   );
   parts.push(
     '<text x="50" y="144" font-size="20" fill="' +
+      text_color +
+      '">' +
+      escapeXml(
+        'The demo landlord and demo tenant reach the same screens as the real owner and tenant.',
+      ) +
+      '</text>',
+  );
+  parts.push(
+    '<text x="50" y="172" font-size="20" fill="' +
       text_color +
       '">' +
       escapeXml(
@@ -558,7 +576,7 @@ async function buildSvg() {
 function buildLegend() {
   // a two-row strip at the top right, next to the title, so it never sits on the graph
   const parts = [];
-  const left = 1560;
+  const left = 1180;
   const row_one = 34;
   const row_two = 94;
   parts.push(
@@ -655,6 +673,7 @@ function buildLegend() {
   arrow('param', 'Passes an id (label = param)');
   arrow('header', 'Header button');
   arrow('reset', 'Log in/out (resets history)');
+  arrow('demo', 'Demo start or switch side');
   const tab = tagPill(x, row_two, 'TAB owner/tenant', COLORS.highlight, COLORS.text_dark);
   parts.push(tab.svg);
   x += tab.width + 10;
@@ -732,7 +751,7 @@ function buildMermaid() {
     });
   all_edges.forEach((edge) => {
     const label = edgeLabel(edge);
-    const arrow = edge.via === 'reset' ? '-.->' : '-->';
+    const arrow = edge.via === 'reset' || edge.demo ? '-.->' : '-->';
     lines.push('  ' + edge.from + ' ' + arrow + (label ? '|' + label + '|' : '') + ' ' + edge.to);
   });
   route_names.forEach((route_name) => {
