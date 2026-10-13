@@ -14,12 +14,15 @@ import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { COLORS, SPACING, TYPE } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // a small form with one name box, used for adding a room or an item
 // Alert.prompt only works on iOS, so this works on both
 // props: visible, title, placeholder, onSave, onClose
 // the screen gives it a new key each time it opens, so the box starts empty without an effect
 function NameModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const [name, setName] = useState('');
 
   function handleSave() {
@@ -31,7 +34,12 @@ function NameModal(props) {
   }
 
   return (
-    <Modal visible={props.visible} transparent animationType="fade" onRequestClose={props.onClose}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'fade'}
+      onRequestClose={props.onClose}
+    >
       {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
       <KeyboardAvoidingView
         style={styles.backdrop}

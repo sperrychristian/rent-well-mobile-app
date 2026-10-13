@@ -18,6 +18,7 @@ import { todayString } from '../../../utils/formatDate';
 import { checkEndDate, placeLabel } from '../utils/tenantHelpers';
 import { COLORS, SPACING, TYPE } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 const max_note_length = 1000;
 
@@ -25,6 +26,8 @@ const max_note_length = 1000;
 // props: visible, tenant, tenancy, onConfirm (gets ended_at and move_out_note, gives back a promise), onClose
 // the screen gives it a new key each time it opens, so it starts on today without an effect
 function EndTenancyModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const [ended_at, setEndedAt] = useState(todayString());
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
@@ -70,7 +73,12 @@ function EndTenancyModal(props) {
   }
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={props.onClose}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={props.onClose}
+    >
       <View style={styles.root}>
         {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
         <KeyboardAvoidingView

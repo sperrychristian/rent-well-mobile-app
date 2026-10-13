@@ -18,9 +18,12 @@ import DateField from '../../../components/DateField';
 import { COLORS, SPACING, TYPE } from '../../../theme';
 import { todayString } from '../../../utils/formatDate';
 import { list_styles } from '../../../components/ui/listStyles';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // props: visible, onSave, onClose, property_names, plus optional trip (edit mode), onDelete, default_property
 function TripModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const trip_id = props.trip ? props.trip.id : null;
 
   const [date_text, setDateText] = useState(todayString());
@@ -62,7 +65,12 @@ function TripModal(props) {
   const property_names = props.property_names || [];
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={props.onClose}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={props.onClose}
+    >
       {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
       <KeyboardAvoidingView
         style={styles.backdrop}
@@ -89,7 +97,10 @@ function TripModal(props) {
                   <Pressable
                     key={name}
                     onPress={() => setProperty(name)}
+                    hitSlop={{ top: 8, bottom: 8 }}
                     style={[styles.chip, property === name && styles.chip_active]}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: property === name }}
                   >
                     <Text style={styles.chip_text}>{name}</Text>
                   </Pressable>

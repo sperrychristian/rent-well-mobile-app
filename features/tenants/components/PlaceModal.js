@@ -17,12 +17,15 @@ import TextField from '../../../components/TextField';
 import { checkPlace, unitSuggestions, placeLabel } from '../utils/tenantHelpers';
 import { COLORS, SPACING, TYPE } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // picks a property and a unit for Move or Assign, then asks before doing it
 // props: visible, title, confirm_word ('Move' or 'Assign'), tenant, moving_tenancy (null for assign),
 // properties, invites, onConfirm (gets property_id and unit_label, gives back a promise), onClose
 // the screen gives it a new key each time it opens, so it starts fresh without an effect
 function PlaceModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const properties = props.properties || [];
   const [property_id, setPropertyId] = useState(properties.length > 0 ? properties[0].id : null);
   const [unit_label, setUnitLabel] = useState('');
@@ -66,7 +69,12 @@ function PlaceModal(props) {
   }
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={props.onClose}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={props.onClose}
+    >
       <View style={styles.root}>
         {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
         <KeyboardAvoidingView

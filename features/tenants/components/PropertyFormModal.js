@@ -13,11 +13,14 @@ import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TextField from '../../../components/TextField';
 import { COLORS, SPACING, TYPE } from '../../../theme';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // adds a property, or edits the name and address of one (property is null for a new one)
 // props: visible, property, onSave (gets name and address, gives back a promise), onClose
 // the screen gives it a new key each time it opens, so the boxes start fresh without an effect
 function PropertyFormModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const existing = props.property;
   const [name, setName] = useState(existing ? existing.name : '');
   const [address, setAddress] = useState(existing ? existing.address : '');
@@ -51,7 +54,12 @@ function PropertyFormModal(props) {
   }
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={props.onClose}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={props.onClose}
+    >
       <View style={styles.root}>
         {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
         <KeyboardAvoidingView

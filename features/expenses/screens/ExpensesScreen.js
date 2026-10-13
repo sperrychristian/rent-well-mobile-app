@@ -427,6 +427,12 @@ function ExpensesScreen(props) {
             <Pressable
               key={row.category}
               style={[styles.bar_row, dimmed && styles.dimmed]}
+              hitSlop={{ top: 6, bottom: 6 }}
+              accessibilityRole="button"
+              accessibilityLabel={
+                row.category + ', ' + formatCurrency(row.total) + ', ' + percent + ' percent'
+              }
+              accessibilityState={{ selected: category_filter === row.category }}
               onPress={() =>
                 setCategoryFilter(category_filter === row.category ? null : row.category)
               }
@@ -495,7 +501,11 @@ function ExpensesScreen(props) {
           </View>
         ))}
         {vendor_totals.length > 5 && (
-          <Pressable onPress={() => setShowAllVendors(!show_all_vendors)}>
+          <Pressable
+            onPress={() => setShowAllVendors(!show_all_vendors)}
+            hitSlop={{ top: 12, bottom: 12 }}
+            accessibilityRole="button"
+          >
             <Text style={styles.link_text}>
               {show_all_vendors ? 'Show fewer' : 'Show all ' + vendor_totals.length}
             </Text>

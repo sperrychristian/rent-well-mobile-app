@@ -86,6 +86,7 @@ function WorkOrderCard(props) {
         <Pressable
           style={styles.expense_section}
           onPress={props.onViewExpenses}
+          hitSlop={{ top: 8, bottom: 8 }}
           accessibilityRole="button"
           accessibilityLabel={'Expenses, ' + expenses.length + ', tap to view'}
         >

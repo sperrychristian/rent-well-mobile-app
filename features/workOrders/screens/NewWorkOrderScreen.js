@@ -400,7 +400,11 @@ function NewWorkOrderScreen(props) {
               <Text style={styles.label}>Reporting for</Text>
               {me_status === 'loading' && <ActivityIndicator color={COLORS.title} />}
               {me_status === 'error' && (
-                <Pressable onPress={() => setMeAttempt((current) => current + 1)} hitSlop={8}>
+                <Pressable
+                  onPress={() => setMeAttempt((current) => current + 1)}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                >
                   <Text style={styles.link_text}>
                     {"Couldn't load your rental. Tap to try again."}
                   </Text>
@@ -542,8 +546,9 @@ function NewWorkOrderScreen(props) {
                   <Pressable
                     style={styles.remove_button}
                     onPress={() => removePhoto(index)}
-                    hitSlop={8}
+                    hitSlop={12}
                     accessibilityLabel="Remove photo"
+                    accessibilityRole="button"
                   >
                     <Ionicons name="close-circle" size={22} color={COLORS.danger_text} />
                   </Pressable>

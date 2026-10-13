@@ -24,11 +24,14 @@ import { addPeriod } from '../../../utils/recurring';
 import { pickDocument } from '../utils/documentFiles';
 import { nameFromFile, iconFor, formatSize } from '../utils/documentHelpers';
 import { list_styles } from '../../../components/ui/listStyles';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // props: visible, onSave, onClose, plus optional document (edit mode), initial_file (a scan taken first),
 // default_name, default_category, default_property, and property_names
 // onSave gets the document fields and the newly picked file, which is null when the file didn't change
 function DocumentFormModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const document_id = props.document ? props.document.id : null;
   const is_editing = !!props.document;
 
@@ -133,7 +136,12 @@ function DocumentFormModal(props) {
   const is_sample = is_editing && props.document.sample && !new_file;
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={props.onClose}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={props.onClose}
+    >
       <View style={styles.root}>
         {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
         <KeyboardAvoidingView
@@ -189,7 +197,10 @@ function DocumentFormModal(props) {
                   <Pressable
                     key={option}
                     onPress={() => chooseCategory(option)}
+                    hitSlop={{ top: 8, bottom: 8 }}
                     style={[styles.chip, category === option && styles.chip_active]}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: category === option }}
                   >
                     <Text style={styles.chip_text}>{option}</Text>
                   </Pressable>
@@ -208,7 +219,10 @@ function DocumentFormModal(props) {
                     <Pressable
                       key={option}
                       onPress={() => setProperty(option)}
+                      hitSlop={{ top: 8, bottom: 8 }}
                       style={[styles.chip, property === option && styles.chip_active]}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: property === option }}
                     >
                       <Text style={styles.chip_text}>{option}</Text>
                     </Pressable>

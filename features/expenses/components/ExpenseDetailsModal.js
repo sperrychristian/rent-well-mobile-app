@@ -5,8 +5,11 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import { COLORS, SPACING, TYPE, RADIUS, NUMBERS } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { formatCurrency } from '../../../utils/formatCurrency';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 function ExpenseDetailsModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const insets = useSafeAreaInsets();
   // remember which photo is open full size, null means none
   const [full_photo_uri, setFullPhotoUri] = useState(null);
@@ -22,7 +25,11 @@ function ExpenseDetailsModal(props) {
   }
 
   return (
-    <Modal visible={props.visible} animationType="slide" onRequestClose={handleClose}>
+    <Modal
+      visible={props.visible}
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={handleClose}
+    >
       <View
         style={[
           styles.container,

@@ -24,12 +24,15 @@ import { expense_categories, payment_methods } from '../../../data/expenseOption
 import { todayString } from '../../../utils/formatDate';
 import { list_styles } from '../../../components/ui/listStyles';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 const repeat_options = ['None', 'Monthly', 'Yearly'];
 
 // props: visible, onSave, onClose, plus optional expense (edit mode), onDelete, default_property, property_names,
 // initial_receipts (a receipt photo taken first), and allow_extras (shows repeat and split, only the Expenses screen turns it on)
 function AddExpenseModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const expense_id = props.expense ? props.expense.id : null;
   const is_editing = !!props.expense;
 
@@ -167,7 +170,12 @@ function AddExpenseModal(props) {
   const splitting = show_extras && split_on;
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={handleCancel}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={handleCancel}
+    >
       <View style={styles.root}>
         {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
         <KeyboardAvoidingView
@@ -200,7 +208,10 @@ function AddExpenseModal(props) {
                   <Pressable
                     key={option}
                     onPress={() => setCategory(option)}
+                    hitSlop={{ top: 8, bottom: 8 }}
                     style={[styles.chip, category === option && styles.chip_active]}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: category === option }}
                   >
                     <Text style={styles.chip_text}>{option}</Text>
                   </Pressable>
@@ -256,7 +267,10 @@ function AddExpenseModal(props) {
                       <Pressable
                         key={name}
                         onPress={() => (splitting ? toggleSplitProperty(name) : setProperty(name))}
+                        hitSlop={{ top: 8, bottom: 8 }}
                         style={[styles.chip, selected && styles.chip_active]}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: selected }}
                       >
                         <Text style={styles.chip_text}>{name}</Text>
                       </Pressable>
@@ -285,7 +299,10 @@ function AddExpenseModal(props) {
                       <Pressable
                         key={option}
                         onPress={() => setRepeat(option)}
+                        hitSlop={{ top: 8, bottom: 8 }}
                         style={[styles.chip, repeat === option && styles.chip_active]}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: repeat === option }}
                       >
                         <Text style={styles.chip_text}>{option}</Text>
                       </Pressable>
@@ -315,7 +332,10 @@ function AddExpenseModal(props) {
                   <Pressable
                     key={option}
                     onPress={() => setPaymentMethod(option)}
+                    hitSlop={{ top: 8, bottom: 8 }}
                     style={[styles.chip, payment_method === option && styles.chip_active]}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: payment_method === option }}
                   >
                     <Text style={styles.chip_text}>{option}</Text>
                   </Pressable>
@@ -363,12 +383,18 @@ function AddExpenseModal(props) {
                 <View style={styles.wrap_row}>
                   {receipts.map((uri, index) => (
                     <View key={uri + index} style={styles.receipt_wrap}>
-                      <Pressable onPress={() => setFullReceipt(uri)}>
+                      <Pressable
+                        onPress={() => setFullReceipt(uri)}
+                        accessibilityRole="imagebutton"
+                        accessibilityLabel="Open photo"
+                      >
                         <Image source={{ uri: uri }} style={styles.receipt_thumb} />
                       </Pressable>
                       <Pressable
                         style={styles.remove_button}
                         onPress={() => removeReceipt(index)}
+                        hitSlop={12}
+                        accessibilityRole="button"
                         accessibilityLabel="Remove receipt"
                       >
                         <Ionicons name="close-circle" size={22} color={COLORS.danger_text} />
@@ -425,7 +451,12 @@ function AddExpenseModal(props) {
         </KeyboardAvoidingView>
         {/* full size receipt sits on top of the form, tapping anywhere closes it */}
         {full_receipt && (
-          <Pressable style={styles.full_overlay} onPress={() => setFullReceipt(null)}>
+          <Pressable
+            style={styles.full_overlay}
+            onPress={() => setFullReceipt(null)}
+            accessibilityRole="button"
+            accessibilityLabel="Close photo"
+          >
             <Image source={{ uri: full_receipt }} style={styles.full_photo} resizeMode="contain" />
           </Pressable>
         )}

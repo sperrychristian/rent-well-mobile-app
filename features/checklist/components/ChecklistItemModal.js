@@ -23,6 +23,7 @@ import { itemGotWorse } from '../utils/checklistHelpers';
 import { getPhotoUri, saveChecklistPhoto, deleteChecklistPhoto } from '../utils/checklistPhotos';
 import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 const max_photos = 3;
 
@@ -42,6 +43,8 @@ const condition_borders = {
 // props: visible, item, locked, in_demo, onSave, onDelete, onClose
 // onSave gets the changed fields, a locked (signed) checklist only shows the item and can't change it
 function ChecklistItemModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   // the screen gives it a new key each time it opens, so these start from the item without an effect
   const [done, setDone] = useState(props.item ? props.item.done : false);
   const [condition, setCondition] = useState(props.item ? props.item.condition : null);
@@ -150,7 +153,7 @@ function ChecklistItemModal(props) {
     <Modal
       visible={props.visible}
       transparent
-      animationType="slide"
+      animationType={reduce_motion ? 'none' : 'slide'}
       onRequestClose={locked ? props.onClose : handleCancel}
     >
       <View style={styles.root}>
@@ -258,6 +261,7 @@ function ChecklistItemModal(props) {
                       <Pressable
                         onPress={() => setFullPhoto(stored_name)}
                         accessibilityLabel="View photo"
+                        accessibilityRole="button"
                       >
                         <Image
                           source={{ uri: getPhotoUri(stored_name, props.in_demo) }}
@@ -268,6 +272,8 @@ function ChecklistItemModal(props) {
                         <Pressable
                           style={styles.remove_button}
                           onPress={() => removePhoto(stored_name)}
+                          hitSlop={12}
+                          accessibilityRole="button"
                           accessibilityLabel="Remove photo"
                         >
                           <Ionicons name="close-circle" size={22} color={COLORS.danger_text} />
@@ -336,7 +342,12 @@ function ChecklistItemModal(props) {
 
         {/* the full size photo sits on top of the form instead of opening a second modal */}
         {full_photo && (
-          <Pressable style={styles.full_backdrop} onPress={() => setFullPhoto(null)}>
+          <Pressable
+            style={styles.full_backdrop}
+            onPress={() => setFullPhoto(null)}
+            accessibilityRole="button"
+            accessibilityLabel="Close photo"
+          >
             <Image
               source={{ uri: getPhotoUri(full_photo, props.in_demo) }}
               style={styles.full_image}

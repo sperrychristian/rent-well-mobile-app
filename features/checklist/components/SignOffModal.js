@@ -18,11 +18,14 @@ import { todayString } from '../../../utils/formatDate';
 import { checklist_disclaimer } from '../utils/checklistHelpers';
 import { COLORS, SPACING, TYPE } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // props: visible, default_name, not_done (how many items aren't checked), onSign, onClose
 // onSign gets the typed name and the date
 // the screen gives it a new key each time it opens, so the name and date start fresh without an effect
 function SignOffModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const [signed_by, setSignedBy] = useState(props.default_name || '');
   const [signed_on, setSignedOn] = useState(todayString());
 
@@ -45,7 +48,12 @@ function SignOffModal(props) {
   }
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={props.onClose}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={props.onClose}
+    >
       <View style={styles.root}>
         {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
         <KeyboardAvoidingView

@@ -17,11 +17,14 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import { checklist_types } from '../data/checklistTemplates';
 import { COLORS, SPACING, TYPE } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // props: visible, property_names, move_ins (signed move-in checklists), onCreate, onClose
 // onCreate gets property, type, tenant, and move_in_id (null for a blank template)
 // the screen gives it a new key each time it opens, so it starts as a blank form without an effect
 function NewChecklistModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const [type, setType] = useState('Move-In');
   const [property, setProperty] = useState('');
   const [tenant, setTenant] = useState('');
@@ -63,7 +66,12 @@ function NewChecklistModal(props) {
   const move_ins = props.move_ins || [];
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={props.onClose}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={props.onClose}
+    >
       <View style={styles.root}>
         {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
         <KeyboardAvoidingView
@@ -85,6 +93,8 @@ function NewChecklistModal(props) {
                     onPress={() => chooseType(option)}
                     hitSlop={{ top: 8, bottom: 8 }}
                     style={[styles.chip, type === option && styles.chip_active]}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: type === option }}
                   >
                     <Text style={styles.chip_text}>{option}</Text>
                   </Pressable>
@@ -100,6 +110,8 @@ function NewChecklistModal(props) {
                       onPress={() => chooseMoveIn(null)}
                       hitSlop={{ top: 8, bottom: 8 }}
                       style={[styles.chip, move_in_id === null && styles.chip_active]}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: move_in_id === null }}
                     >
                       <Text style={styles.chip_text}>Blank template</Text>
                     </Pressable>
@@ -109,6 +121,8 @@ function NewChecklistModal(props) {
                         onPress={() => chooseMoveIn(move_in)}
                         hitSlop={{ top: 8, bottom: 8 }}
                         style={[styles.chip, move_in_id === move_in.id && styles.chip_active]}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: move_in_id === move_in.id }}
                       >
                         <Text style={styles.chip_text}>
                           {'Move-in, ' +
@@ -142,6 +156,8 @@ function NewChecklistModal(props) {
                       onPress={() => setProperty(option)}
                       hitSlop={{ top: 8, bottom: 8 }}
                       style={[styles.chip, property === option && styles.chip_active]}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: property === option }}
                     >
                       <Text style={styles.chip_text}>{option}</Text>
                     </Pressable>

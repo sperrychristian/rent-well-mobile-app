@@ -15,9 +15,12 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import { COLORS, SPACING, TYPE } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // props: visible, properties (list of names), budgets (name to amount), onSave, onClose
 function BudgetsModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   // one text box per property, kept as text until I tap save
   const [budget_texts, setBudgetTexts] = useState({});
 
@@ -52,7 +55,12 @@ function BudgetsModal(props) {
   }
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={props.onClose}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={props.onClose}
+    >
       {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
       <KeyboardAvoidingView
         style={styles.backdrop}

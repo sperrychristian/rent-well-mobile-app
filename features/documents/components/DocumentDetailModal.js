@@ -7,9 +7,12 @@ import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
 import { getDocumentUri } from '../utils/documentFiles';
 import { isImage, iconFor, expiryTag, daysUntil, formatSize } from '../utils/documentHelpers';
 import StatusPill from '../../../components/ui/StatusPill';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // props: visible, document, in_demo, onOpen, onEdit, onDelete, onClose, and onDismiss (iOS calls it once the modal is fully gone)
 function DocumentDetailModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const document = props.document;
 
   // the screen keeps the document around while the modal slides away, so this only guards the very first render
@@ -36,7 +39,7 @@ function DocumentDetailModal(props) {
     <Modal
       visible={props.visible}
       transparent
-      animationType="slide"
+      animationType={reduce_motion ? 'none' : 'slide'}
       onRequestClose={props.onClose}
       onDismiss={props.onDismiss}
     >

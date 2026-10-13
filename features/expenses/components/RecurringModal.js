@@ -5,9 +5,12 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../../theme';
 import { formatDate } from '../../../utils/formatDate';
 import { formatCurrency } from '../../../utils/formatCurrency';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // props: visible, rules, onToggle, onDelete, onClose
 function RecurringModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   // ask first so a stray tap doesn't remove a rule, expenses it already made stay
   function confirmDelete(rule) {
     Alert.alert('Delete recurring expense', 'Expenses it already added stay in your list.', [
@@ -17,7 +20,12 @@ function RecurringModal(props) {
   }
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={props.onClose}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={props.onClose}
+    >
       <View style={styles.backdrop}>
         <ScrollView contentContainerStyle={styles.scroll_content}>
           <Card>
