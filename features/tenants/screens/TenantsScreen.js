@@ -22,7 +22,11 @@ import {
   formatInviteCode,
   inviteShareText,
 } from '../../invites/utils/inviteHelpers';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, OPACITY } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import Avatar from '../../../components/ui/Avatar';
+import EmptyState from '../../../components/ui/EmptyState';
+import SkeletonList from '../../../components/ui/Skeleton';
 
 // every tenant by property and unit, the invites still waiting, and the past tenants folded away
 function TenantsScreen(props) {
@@ -154,6 +158,7 @@ function TenantsScreen(props) {
           (tenancy ? ', ' + placeLabel(tenancy.property_name, tenancy.unit_label) : '')
         }
       >
+        <Avatar name={tenant.name} size={36} />
         <View style={styles.row_text}>
           <Text style={styles.row_name}>{tenant.name}</Text>
           {tenancy ? (
@@ -172,18 +177,18 @@ function TenantsScreen(props) {
         </View>
         {tenant.open_work_order_count > 0 && (
           <View style={styles.count_tag}>
-            <Ionicons name="construct-outline" size={12} color={COLORS.text_light} />
+            <Ionicons name="construct-outline" size={12} color={COLORS.on_light} />
             <Text style={styles.count_text}>{tenant.open_work_order_count}</Text>
           </View>
         )}
-        <Ionicons name="chevron-forward" size={18} color={COLORS.text} />
+        <Ionicons name="chevron-forward" size={18} color={COLORS.text_muted} />
       </Pressable>
     );
   }
 
   let body;
   if (status === 'loading' && tenants.length === 0 && properties.length === 0) {
-    body = <ActivityIndicator style={styles.spinner} color={COLORS.title} size="large" />;
+    body = <SkeletonList rows={4} />;
   } else if (status === 'error' && tenants.length === 0 && properties.length === 0) {
     body = <ErrorState message={error_message} onRetry={refresh} />;
   } else {
@@ -212,9 +217,11 @@ function TenantsScreen(props) {
         ) : null}
 
         {sections.length === 0 && (
-          <Text style={styles.empty_text}>
-            No properties or tenants yet. Add a property, then invite your first tenant.
-          </Text>
+          <EmptyState
+            illustration="empty_tenants"
+            title="No properties or tenants yet"
+            message="Add a property, then invite your first tenant."
+          />
         )}
 
         {sections.map((section) => (
@@ -289,7 +296,7 @@ function TenantsScreen(props) {
           <Ionicons
             name={show_past ? 'chevron-up' : 'chevron-down'}
             size={18}
-            color={COLORS.text}
+            color={COLORS.text_muted}
           />
         </Pressable>
         {show_past &&
@@ -310,14 +317,14 @@ function TenantsScreen(props) {
         <PrimaryButton
           title="Invite a Tenant"
           icon="person-add-outline"
-          text_color={COLORS.text_light}
+          variant="primary"
           onPress={() => props.navigation.navigate('InviteTenant')}
           style={styles.invite_button}
         />
         <PrimaryButton
           title="Properties"
           icon="home-outline"
-          text_color={COLORS.text_light}
+          variant="secondary"
           onPress={() => props.navigation.navigate('Properties')}
           style={styles.properties_button}
         />
@@ -352,109 +359,101 @@ const styles = StyleSheet.create({
   invite_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
   properties_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.action,
   },
   spinner: {
     marginTop: SPACING.lg,
   },
   offline_banner: {
-    backgroundColor: COLORS.warning,
-    borderRadius: 8,
-    padding: SPACING.sm,
-    marginBottom: SPACING.sm,
+    ...list_styles.offline_banner,
   },
   offline_text: {
-    color: COLORS.text_dark,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    textAlign: 'center',
+    ...list_styles.offline_text,
   },
   section: {
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
     padding: SPACING.md,
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.sm + SPACING.xs,
   },
   section_title: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.xs,
   },
   vacant: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.7,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
   },
   unit: {
     marginTop: SPACING.xs,
   },
   unit_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    opacity: 0.8,
-    marginTop: SPACING.xs,
+    ...TYPE.label,
+    color: COLORS.text_muted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginTop: SPACING.sm,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
-    backgroundColor: COLORS.background,
-    borderRadius: 10,
-    padding: SPACING.sm,
-    marginTop: SPACING.xs,
+    gap: SPACING.sm + SPACING.xs,
+    minHeight: SIZES.touch + SPACING.sm,
+    backgroundColor: COLORS.surface_raised,
+    borderRadius: RADIUS.md,
+    padding: SPACING.sm + SPACING.xs,
+    marginTop: SPACING.xs + SPACING.xxs,
   },
   pressed: {
-    opacity: 0.7,
+    opacity: OPACITY.pressed,
   },
   row_text: {
     flex: 1,
   },
   row_name: {
+    ...TYPE.subheading,
     color: COLORS.text,
-    fontFamily: FONTS.subheading,
-    fontSize: 15,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 13,
-    opacity: 0.8,
+    ...list_styles.detail,
   },
   count_tag: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
+    gap: SPACING.xxs,
     backgroundColor: COLORS.warning,
-    borderRadius: 10,
-    paddingVertical: 2,
-    paddingHorizontal: 6,
+    borderRadius: RADIUS.pill,
+    paddingVertical: SPACING.xxs,
+    paddingHorizontal: SPACING.sm,
   },
   count_text: {
-    color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
+    ...TYPE.label,
     fontSize: 12,
+    lineHeight: 16,
+    color: COLORS.on_light,
   },
   group_title: {
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
-    marginTop: SPACING.md,
+    ...TYPE.label,
+    color: COLORS.text_muted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginTop: SPACING.lg,
     marginBottom: SPACING.sm,
   },
   invite_row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
   },
@@ -462,44 +461,40 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   small_button: {
-    backgroundColor: COLORS.action,
-    borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.sm,
+    backgroundColor: COLORS.surface_raised,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border_strong,
+    borderRadius: RADIUS.md,
+    minHeight: SIZES.button_small,
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.sm + SPACING.xs,
     alignItems: 'center',
   },
   revoke_button: {
     backgroundColor: COLORS.danger,
+    borderColor: COLORS.danger,
   },
   small_button_text: {
+    ...TYPE.label,
     color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
   },
   only_chip: {
+    ...list_styles.chip,
+    ...list_styles.chip_active,
     alignSelf: 'flex-start',
-    backgroundColor: COLORS.primary,
-    borderRadius: 16,
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.md,
     marginBottom: SPACING.sm,
   },
   past_header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    minHeight: SIZES.touch,
   },
   empty_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    textAlign: 'center',
-    marginTop: SPACING.lg,
-    opacity: 0.7,
+    ...list_styles.empty_text,
   },
   empty_small: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.7,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
   },
 });

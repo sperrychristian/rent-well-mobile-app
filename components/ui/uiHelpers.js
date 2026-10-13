@@ -24,6 +24,9 @@ const tones = {
   'Signed': { fill: COLORS.success, text: COLORS.text_light, icon: 'create' },
   'In progress': { fill: COLORS.warning, text: COLORS.on_light, icon: 'time' },
   'Move-In': { fill: COLORS.info, text: COLORS.text_light, icon: 'enter' },
+  'Good': { fill: COLORS.success, text: COLORS.text_light, icon: 'happy' },
+  'Fair': { fill: COLORS.warning, text: COLORS.on_light, icon: 'remove-circle' },
+  'Poor': { fill: COLORS.danger, text: COLORS.text_light, icon: 'sad' },
   'Move-Out': { fill: COLORS.accent, text: COLORS.text_light, icon: 'exit' },
   // money and documents
   'Paid': { fill: COLORS.success, text: COLORS.text_light, icon: 'checkmark-circle' },

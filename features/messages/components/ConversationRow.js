@@ -3,7 +3,8 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import UnreadBadge from './UnreadBadge';
 import { formatMessageTime } from '../utils/messageHelpers';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER, OPACITY, SIZES } from '../../../theme';
+import Avatar from '../../../components/ui/Avatar';
 
 // one thread in the inbox: who, the last message, when, and how many are unread
 // props: conversation, my_user_id, onPress
@@ -11,7 +12,6 @@ function ConversationRow(props) {
   const conversation = props.conversation;
   const last = conversation.lastMessage;
   const unread = conversation.unreadCount > 0;
-  const initial = conversation.otherUser.name.trim().charAt(0).toUpperCase() || '?';
   let preview = 'No messages yet';
   if (last) {
     preview = (last.senderId === props.my_user_id ? 'You: ' : '') + last.body;
@@ -19,7 +19,7 @@ function ConversationRow(props) {
 
   return (
     <Pressable
-      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.row, unread && styles.row_unread, pressed && styles.pressed]}
       onPress={props.onPress}
       accessibilityRole="button"
       accessibilityLabel={
@@ -28,9 +28,8 @@ function ConversationRow(props) {
         (unread ? ', ' + conversation.unreadCount + ' unread' : '')
       }
     >
-      <View style={styles.avatar}>
-        <Text style={styles.avatar_text}>{initial}</Text>
-      </View>
+      {/* the shared avatar, first and last initials in a color picked from the name */}
+      <Avatar name={conversation.otherUser.name} size={SIZES.touch} style={styles.avatar} />
       <View style={styles.text_column}>
         <View style={styles.top_line}>
           <Text style={[styles.name, unread && styles.bold]} numberOfLines={1}>
@@ -42,7 +41,12 @@ function ConversationRow(props) {
         </View>
         <View style={styles.bottom_line}>
           {last && last.attachmentKey ? (
-            <Ionicons name="camera-outline" size={14} color={COLORS.text} style={styles.camera} />
+            <Ionicons
+              name="camera-outline"
+              size={14}
+              color={COLORS.text_muted}
+              style={styles.camera}
+            />
           ) : null}
           <Text style={[styles.preview, unread && styles.preview_unread]} numberOfLines={1}>
             {preview}
@@ -60,27 +64,18 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
-    padding: SPACING.md,
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
+    padding: SPACING.md - SPACING.xs,
     marginBottom: SPACING.sm,
   },
   pressed: {
-    opacity: 0.7,
+    opacity: OPACITY.pressed,
   },
   avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: SPACING.sm,
-  },
-  avatar_text: {
-    color: COLORS.text_light,
-    fontFamily: FONTS.heading,
-    fontSize: 18,
+    marginRight: SPACING.sm + SPACING.xs,
   },
   text_column: {
     flex: 1,
@@ -88,22 +83,19 @@ const styles = StyleSheet.create({
   top_line: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 2,
+    marginBottom: SPACING.xxs,
   },
   name: {
+    ...TYPE.subheading,
     flex: 1,
     color: COLORS.text,
-    fontFamily: FONTS.subheading,
-    fontSize: FONT_SIZES.body,
   },
   bold: {
     fontFamily: FONTS.heading,
   },
   time: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginLeft: SPACING.sm,
   },
   bottom_line: {
@@ -115,14 +107,17 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   preview: {
+    ...TYPE.body_small,
     flex: 1,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    color: COLORS.text_muted,
   },
   preview_unread: {
     fontFamily: FONTS.body_bold,
-    opacity: 1,
+    color: COLORS.text,
+  },
+  // an unread thread gets an amber edge, the bold text and the badge say it too
+  row_unread: {
+    borderLeftWidth: BORDER.thick + 1,
+    borderLeftColor: COLORS.cta,
   },
 });

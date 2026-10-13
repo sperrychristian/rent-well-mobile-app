@@ -1,22 +1,17 @@
-import {
-  StyleSheet,
-  View,
-  Text,
-  FlatList,
-  Pressable,
-  RefreshControl,
-  ActivityIndicator,
-} from 'react-native';
+import { StyleSheet, View, Text, FlatList, Pressable, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PrimaryButton from '../../../components/PrimaryButton';
 import ErrorState from '../../../components/ErrorState';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { status_colors, priority_colors } from '../components/WorkOrderCard';
 import { ordersForTenant } from '../utils/workOrderHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { formatDate } from '../../../utils/formatDate';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, FONTS, TYPE } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import StatusPill from '../../../components/ui/StatusPill';
+import EmptyState from '../../../components/ui/EmptyState';
+import SkeletonList from '../../../components/ui/Skeleton';
 
 // the tenant's own requests, newest first, they update live when the landlord changes something
 function MyRequestsScreen(props) {
@@ -44,7 +39,8 @@ function MyRequestsScreen(props) {
 
   let body;
   if (is_remote && orders_status === 'loading' && orders.length === 0) {
-    body = <ActivityIndicator style={styles.spinner} color={COLORS.title} size="large" />;
+    // placeholder rows while the first load is out
+    body = <SkeletonList rows={3} />;
   } else if (is_remote && orders_status === 'error' && orders.length === 0) {
     body = <ErrorState message={orders_error} onRetry={refreshOrders} />;
   } else {
@@ -72,9 +68,11 @@ function MyRequestsScreen(props) {
           ) : null
         }
         ListEmptyComponent={
-          <Text style={styles.empty_text}>
-            No requests yet. Tap Report an Issue when something needs fixing.
-          </Text>
+          <EmptyState
+            illustration="empty_work_orders"
+            title="No requests yet"
+            message="Tap Report an Issue when something needs fixing."
+          />
         }
         renderItem={({ item }) => (
           <Pressable
@@ -87,9 +85,7 @@ function MyRequestsScreen(props) {
               <Text style={styles.title} numberOfLines={2}>
                 {item.title}
               </Text>
-              <View style={[styles.badge, { backgroundColor: status_colors[item.status] }]}>
-                <Text style={styles.badge_text}>{item.status}</Text>
-              </View>
+              <StatusPill label={item.status} />
             </View>
             <Text style={styles.detail}>
               {item.property} · {formatDate(item.created_at)}
@@ -100,14 +96,7 @@ function MyRequestsScreen(props) {
               </Text>
             ) : null}
             <View style={styles.bottom_line}>
-              <View
-                style={[
-                  styles.badge,
-                  { backgroundColor: priority_colors[item.priority] || COLORS.secondary },
-                ]}
-              >
-                <Text style={styles.badge_text}>{item.priority}</Text>
-              </View>
+              <StatusPill label={item.priority} />
               {item.photos && item.photos.length > 0 && (
                 <View style={styles.photo_count}>
                   <Ionicons name="camera-outline" size={14} color={COLORS.text} />
@@ -115,7 +104,7 @@ function MyRequestsScreen(props) {
                 </View>
               )}
               <View style={styles.spacer} />
-              <Ionicons name="chevron-forward" size={18} color={COLORS.text} />
+              <Ionicons name="chevron-forward" size={18} color={COLORS.text_muted} />
             </View>
           </Pressable>
         )}
@@ -128,7 +117,7 @@ function MyRequestsScreen(props) {
       <PrimaryButton
         title="Report an Issue"
         icon="add-circle-outline"
-        text_color={COLORS.text_light}
+        variant="primary"
         onPress={() => props.navigation.navigate('NewWorkOrder')}
         style={styles.report_button}
       />
@@ -148,28 +137,18 @@ const styles = StyleSheet.create({
   report_button: {
     marginHorizontal: 0,
     marginBottom: SPACING.md,
-    backgroundColor: COLORS.danger,
   },
   spinner: {
     marginTop: SPACING.lg,
   },
   offline_banner: {
-    backgroundColor: COLORS.warning,
-    borderRadius: 8,
-    padding: SPACING.sm,
-    marginBottom: SPACING.sm,
+    ...list_styles.offline_banner,
   },
   offline_text: {
-    color: COLORS.text_dark,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    textAlign: 'center',
+    ...list_styles.offline_text,
   },
   row: {
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
+    ...list_styles.row,
   },
   pressed: {
     opacity: 0.7,
@@ -181,10 +160,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   title: {
+    ...list_styles.title,
     flex: 1,
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
   },
   badge: {
     paddingVertical: 4,
@@ -197,17 +174,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...list_styles.detail,
   },
   note: {
+    ...TYPE.body_small,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
     fontStyle: 'italic',
-    marginTop: 4,
+    marginTop: SPACING.xs,
   },
   bottom_line: {
     flexDirection: 'row',
@@ -218,16 +191,12 @@ const styles = StyleSheet.create({
   photo_count: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: SPACING.xxs,
   },
   spacer: {
     flex: 1,
   },
   empty_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    textAlign: 'center',
-    marginTop: SPACING.lg,
-    opacity: 0.7,
+    ...list_styles.empty_text,
   },
 });

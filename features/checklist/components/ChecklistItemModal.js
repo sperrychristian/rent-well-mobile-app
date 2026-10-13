@@ -217,7 +217,7 @@ function ChecklistItemModal(props) {
               <TextInput
                 style={[styles.input, styles.notes_input]}
                 placeholder="Damage, reading, key count, anything worth noting"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 multiline
                 editable={!locked}
                 value={note}
@@ -246,7 +246,7 @@ function ChecklistItemModal(props) {
                           onPress={() => removePhoto(stored_name)}
                           accessibilityLabel="Remove photo"
                         >
-                          <Ionicons name="close-circle" size={22} color={COLORS.danger} />
+                          <Ionicons name="close-circle" size={22} color={COLORS.danger_text} />
                         </Pressable>
                       )}
                     </View>
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   worse_value: {
-    color: COLORS.danger,
+    color: COLORS.danger_text,
   },
   switch_row: {
     flexDirection: 'row',

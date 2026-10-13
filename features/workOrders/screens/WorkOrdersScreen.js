@@ -8,7 +8,6 @@ import {
   Pressable,
   TextInput,
   RefreshControl,
-  ActivityIndicator,
 } from 'react-native';
 import ExpenseDetailsModal from '../../expenses/components/ExpenseDetailsModal';
 import { COLORS, SPACING, FONTS } from '../../../theme';
@@ -21,6 +20,9 @@ import ErrorState from '../../../components/ErrorState';
 import { useTenants } from '../../tenants/context/TenantsContext';
 import { useMessages } from '../../messages/context/MessagesContext';
 import { openConversationFor } from '../../messages/utils/openConversation';
+import { list_styles } from '../../../components/ui/listStyles';
+import EmptyState from '../../../components/ui/EmptyState';
+import SkeletonList from '../../../components/ui/Skeleton';
 
 // lower number sorts first, so emergencies come out on top
 const priority_rank = { Emergency: 0, Normal: 1, Low: 2 };
@@ -176,8 +178,10 @@ function WorkOrdersScreen(props) {
       ) : null}
       <TextInput
         style={styles.search_input}
+        accessibilityLabel="Search work orders"
+        keyboardAppearance="dark"
         placeholder="Search by issue, tenant, or property"
-        placeholderTextColor={COLORS.text}
+        placeholderTextColor={COLORS.text_muted}
         value={search_text}
         onChangeText={setSearchText}
         autoCorrect={false}
@@ -186,12 +190,16 @@ function WorkOrdersScreen(props) {
         <Pressable
           onPress={() => setShowResolved(false)}
           style={[styles.segment_option, !show_resolved && styles.segment_active]}
+          accessibilityRole="button"
+          accessibilityState={{ selected: !show_resolved }}
         >
           <Text style={styles.segment_text}>Active ({active_count})</Text>
         </Pressable>
         <Pressable
           onPress={() => setShowResolved(true)}
           style={[styles.segment_option, show_resolved && styles.segment_active]}
+          accessibilityRole="button"
+          accessibilityState={{ selected: show_resolved }}
         >
           <Text style={styles.segment_text}>Resolved ({resolved_count})</Text>
         </Pressable>
@@ -207,6 +215,9 @@ function WorkOrdersScreen(props) {
             key={name}
             onPress={() => setPropertyFilter(name)}
             style={[styles.chip, property_filter === name && styles.chip_active]}
+            hitSlop={{ top: 8, bottom: 8 }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: property_filter === name }}
           >
             <Text style={styles.chip_text}>{name}</Text>
           </Pressable>
@@ -219,6 +230,10 @@ function WorkOrdersScreen(props) {
             key={option}
             onPress={() => setSortBy(option)}
             style={[styles.chip, sort_by === option && styles.chip_active]}
+            hitSlop={{ top: 8, bottom: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel={'Sort by ' + option}
+            accessibilityState={{ selected: sort_by === option }}
           >
             <Text style={styles.chip_text}>{option}</Text>
           </Pressable>
@@ -232,7 +247,8 @@ function WorkOrdersScreen(props) {
       {/* FlatList only renders what's on screen, so it scales when the list gets long */}
       {/* real mode can still be loading or have failed with nothing saved, so those get their own screens */}
       {is_remote && orders_status === 'loading' && orders.length === 0 ? (
-        <ActivityIndicator style={styles.spinner} color={COLORS.title} size="large" />
+        // grey placeholder cards while the first load is out, instead of a lone spinner
+        <SkeletonList rows={4} />
       ) : is_remote && orders_status === 'error' && orders.length === 0 ? (
         <ErrorState message={orders_error} onRetry={refreshOrders} />
       ) : (
@@ -252,9 +268,15 @@ function WorkOrdersScreen(props) {
           }
           ListHeaderComponent={list_header}
           ListEmptyComponent={
-            <Text style={styles.empty_text}>
-              {show_resolved ? 'No resolved work orders found' : 'No open work orders found'}
-            </Text>
+            <EmptyState
+              illustration="empty_work_orders"
+              title={show_resolved ? 'No resolved work orders found' : 'No open work orders found'}
+              message={
+                search_text || property_filter !== 'All'
+                  ? 'Try a different search or property.'
+                  : 'New requests show up here as soon as they come in.'
+              }
+            />
           }
           renderItem={({ item }) => (
             <WorkOrderCard
@@ -301,38 +323,22 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   search_input: {
-    backgroundColor: COLORS.muted,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
-    padding: SPACING.sm,
-    marginBottom: SPACING.sm,
+    ...list_styles.search_input,
   },
   segment: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: SPACING.sm,
+    ...list_styles.segment,
   },
   segment_option: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 9,
-    alignItems: 'center',
+    ...list_styles.segment_option,
   },
   segment_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.segment_active,
   },
   segment_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 14,
+    ...list_styles.segment_text,
   },
   toggle_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
+    ...list_styles.label,
   },
   sort_row: {
     flexDirection: 'row',
@@ -344,16 +350,10 @@ const styles = StyleSheet.create({
     marginTop: SPACING.lg,
   },
   offline_banner: {
-    backgroundColor: COLORS.warning,
-    borderRadius: 8,
-    padding: SPACING.sm,
-    marginBottom: SPACING.sm,
+    ...list_styles.offline_banner,
   },
   offline_text: {
-    color: COLORS.text_dark,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    textAlign: 'center',
+    ...list_styles.offline_text,
   },
   empty_text: {
     color: COLORS.text,
@@ -363,25 +363,19 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   chip_row: {
-    gap: SPACING.sm,
-    paddingBottom: SPACING.sm,
+    ...list_styles.chip_row,
   },
   chip: {
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.muted,
+    ...list_styles.chip,
   },
   only_chip: {
     alignSelf: 'flex-start',
     marginBottom: SPACING.sm,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
 });

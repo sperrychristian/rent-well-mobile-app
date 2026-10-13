@@ -9,7 +9,7 @@ import { useAppRole } from '../../auth/hooks/useAppRole';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { formatMoney } from '../../expenses/utils/expenseStats';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../theme';
 
 // stub for the assignment: the future home for account details, notification settings, the mileage rate,
 // and Log Out (the old Log Out buttons on the homes still work, this is just the spot it moves to later)
@@ -64,7 +64,7 @@ function SettingsScreen(props) {
           <PrimaryButton
             title="Open Mileage Log"
             icon="car-outline"
-            text_color={COLORS.text_light}
+            variant="secondary"
             onPress={() => props.navigation.navigate('Mileage')}
             style={styles.mileage_button}
           />
@@ -94,26 +94,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.sm,
   },
   body: {
+    ...TYPE.body,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 15,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
   },
   mileage_button: {
     marginHorizontal: 0,
     marginTop: SPACING.sm,
-    backgroundColor: COLORS.action,
   },
   logout_button: {
     width: '90%',

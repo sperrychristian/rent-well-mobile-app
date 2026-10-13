@@ -4,7 +4,7 @@ import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { useTenants } from '../context/TenantsContext';
 import { placeLabel } from '../utils/tenantHelpers';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 
 // stub for the assignment: it gets only the tenant's id, shows their name when the tenants data has them,
 // and the id otherwise, then links to the Documents screen where leases live today
@@ -48,7 +48,7 @@ function TenantLeaseScreen(props) {
       <PrimaryButton
         title="Open Documents"
         icon="document-text-outline"
-        text_color={COLORS.text_dark}
+        variant="secondary"
         onPress={() => props.navigation.navigate('Documents')}
         style={styles.documents_button}
       />
@@ -61,9 +61,8 @@ export default TenantLeaseScreen;
 const styles = StyleSheet.create({
   // the header has the screen's title now, so the name gets its own plain line instead of the big card
   name_line: {
+    ...TYPE.title,
     color: COLORS.title,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     textAlign: 'center',
   },
   container: {
@@ -71,27 +70,23 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.sm,
   },
   body: {
+    ...TYPE.body,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 15,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
     marginTop: SPACING.xs,
   },
   documents_button: {
     width: '90%',
+    maxWidth: SIZES.content_max_width,
     alignSelf: 'center',
     marginHorizontal: 0,
-    backgroundColor: COLORS.surface_light,
   },
 });

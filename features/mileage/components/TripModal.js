@@ -97,7 +97,7 @@ function TripModal(props) {
             <TextInput
               style={[styles.input, styles.input_after_chips]}
               placeholder="Pick one above or type a property"
-              placeholderTextColor={COLORS.text}
+              placeholderTextColor={COLORS.text_muted}
               value={property}
               onChangeText={setProperty}
             />
@@ -106,7 +106,7 @@ function TripModal(props) {
             <TextInput
               style={styles.input}
               placeholder="Round trip, e.g. 14.5"
-              placeholderTextColor={COLORS.text}
+              placeholderTextColor={COLORS.text_muted}
               keyboardType="decimal-pad"
               value={miles}
               onChangeText={setMiles}
@@ -116,7 +116,7 @@ function TripModal(props) {
             <TextInput
               style={styles.input}
               placeholder="Why did you go?"
-              placeholderTextColor={COLORS.text}
+              placeholderTextColor={COLORS.text_muted}
               value={purpose}
               onChangeText={setPurpose}
             />

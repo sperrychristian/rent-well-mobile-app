@@ -77,9 +77,13 @@ describe('theme tokens', () => {
   });
 
   test('the type scale has a line height bigger than the size so larger fonts do not clip', () => {
-    Object.entries(TYPE).forEach(([name, style]) => {
-      expect({ name, ok: style.lineHeight > style.fontSize }).toEqual({ name, ok: true });
-    });
+    Object.entries(TYPE)
+      .filter(([name]) => name !== 'input')
+      .forEach(([name, style]) => {
+        expect({ name, ok: style.lineHeight > style.fontSize }).toEqual({ name, ok: true });
+      });
+    // text boxes leave it out on purpose (iOS centers single-line input text badly with one)
+    expect(TYPE.input.lineHeight).toBeUndefined();
   });
 
   test('the spacing and radius steps go up in order', () => {

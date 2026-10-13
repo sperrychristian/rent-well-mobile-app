@@ -22,8 +22,14 @@ import MessageBubble from '../components/MessageBubble';
 import ImageViewerModal from '../components/ImageViewerModal';
 import { useMessages } from '../context/MessagesContext';
 import { useTenants } from '../../tenants/context/TenantsContext';
-import { mergeMessages, lastSeenMessageId, messageBodyToSend } from '../utils/messageHelpers';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import {
+  mergeMessages,
+  lastSeenMessageId,
+  messageBodyToSend,
+  dayDividerLabel,
+  showsTime,
+} from '../utils/messageHelpers';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, OPACITY } from '../../../theme';
 
 // the server takes photos up to 10 MB and message text up to 2000 characters
 const max_photo_bytes = 10485760;
@@ -250,12 +256,14 @@ function MessageThreadScreen(props) {
           // the list is flipped, so the empty text gets flipped back
           <Text style={[styles.empty_text, styles.flip]}>No messages yet. Say hello!</Text>
         }
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <MessageBubble
             message={item}
             is_mine={item.senderId === my_user_id}
             show_seen={item.id === seen_id}
             onOpenImage={setViewerUrl}
+            day_label={dayDividerLabel(messages, index)}
+            show_time={showsTime(messages, index)}
           />
         )}
       />
@@ -298,7 +306,7 @@ function MessageThreadScreen(props) {
               accessibilityRole="button"
               accessibilityLabel="Remove photo"
             >
-              <Ionicons name="close-circle" size={24} color={COLORS.danger} />
+              <Ionicons name="close-circle" size={24} color={COLORS.danger_text} />
             </Pressable>
           </View>
         )}
@@ -318,7 +326,9 @@ function MessageThreadScreen(props) {
             <TextInput
               style={styles.input}
               placeholder="Message"
-              placeholderTextColor={COLORS.secondary}
+              keyboardAppearance="dark"
+              accessibilityLabel="Message"
+              placeholderTextColor={COLORS.text_muted}
               value={draft}
               onChangeText={setDraft}
               multiline
@@ -353,9 +363,9 @@ export default MessageThreadScreen;
 const styles = StyleSheet.create({
   // the header has the screen's title now, so the name gets its own plain line instead of the big card
   name_line: {
+    ...TYPE.subheading,
+    fontFamily: TYPE.heading.fontFamily,
     color: COLORS.title,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     textAlign: 'center',
     marginBottom: SPACING.sm,
   },
@@ -380,97 +390,108 @@ const styles = StyleSheet.create({
   },
   older: {
     padding: SPACING.md,
+    minHeight: SIZES.touch,
     alignItems: 'center',
   },
   older_text: {
-    color: COLORS.action,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...TYPE.label,
+    color: COLORS.info_text,
   },
   empty_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
     textAlign: 'center',
     marginTop: SPACING.lg,
-    opacity: 0.7,
   },
   flip: {
     transform: [{ scaleY: -1 }],
   },
   demo_strip: {
     backgroundColor: COLORS.warning,
-    borderRadius: 8,
-    padding: SPACING.xs,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.xs + SPACING.xxs,
+    paddingHorizontal: SPACING.sm,
     marginBottom: SPACING.sm,
   },
   demo_text: {
-    color: COLORS.text_dark,
-    fontFamily: FONTS.body_bold,
-    fontSize: 12,
+    ...TYPE.caption,
+    fontFamily: TYPE.label.fontFamily,
+    color: COLORS.on_light,
     textAlign: 'center',
   },
   photo_preview: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    backgroundColor: COLORS.muted,
-    borderRadius: 10,
+    backgroundColor: COLORS.surface,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
+    borderRadius: RADIUS.md,
     padding: SPACING.sm,
     marginBottom: SPACING.xs,
   },
   photo_thumb: {
     width: 48,
     height: 48,
-    borderRadius: 6,
+    borderRadius: RADIUS.sm,
   },
   photo_text: {
+    ...TYPE.body_small,
     flex: 1,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
   },
   composer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: SPACING.sm,
     paddingTop: SPACING.sm,
+    borderTopWidth: BORDER.hairline,
+    borderTopColor: COLORS.border,
   },
   icon_button: {
-    paddingBottom: 8,
+    width: SIZES.touch,
+    height: SIZES.touch,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   input: {
-    flex: 1,
-    maxHeight: 120,
-    backgroundColor: COLORS.surface_light,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
+    ...TYPE.input,
     fontSize: 15,
-    borderRadius: 20,
+    flex: 1,
+    minHeight: SIZES.touch,
+    maxHeight: 120,
+    backgroundColor: COLORS.surface,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
+    color: COLORS.text,
+    borderRadius: RADIUS.xl + 2,
     paddingHorizontal: SPACING.md,
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingTop: SPACING.sm + SPACING.xxs + 1,
+    paddingBottom: SPACING.sm + SPACING.xxs + 1,
   },
   send_button: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: SIZES.touch,
+    height: SIZES.touch,
+    borderRadius: RADIUS.pill,
     backgroundColor: COLORS.action,
     alignItems: 'center',
     justifyContent: 'center',
   },
   read_only: {
-    backgroundColor: COLORS.muted,
-    borderRadius: 10,
-    padding: SPACING.sm,
+    backgroundColor: COLORS.surface,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
+    borderRadius: RADIUS.md,
+    padding: SPACING.sm + SPACING.xs,
     marginTop: SPACING.sm,
   },
   read_only_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...TYPE.body_small,
+    fontFamily: TYPE.label.fontFamily,
+    color: COLORS.text_muted,
     textAlign: 'center',
   },
   send_disabled: {
-    opacity: 0.4,
+    opacity: OPACITY.disabled,
   },
 });

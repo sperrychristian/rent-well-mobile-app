@@ -30,7 +30,9 @@ import {
   formatMoney,
 } from '../utils/expenseStats';
 import { shareExpensesCsv } from '../utils/exportExpenses';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SHADOWS, SIZES } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import EmptyState from '../../../components/ui/EmptyState';
 
 const month_names = [
   'January',
@@ -301,12 +303,14 @@ function ExpensesScreen(props) {
         <PrimaryButton
           title="Add Expense"
           icon="add-circle-outline"
+          variant="primary"
           style={styles.add_button}
           onPress={openNewForm}
         />
         <PrimaryButton
           title="Scan Receipt"
           icon="camera-outline"
+          variant="secondary"
           style={styles.scan_button}
           onPress={scanReceipt}
         />
@@ -315,13 +319,14 @@ function ExpensesScreen(props) {
         <PrimaryButton
           title="Mileage"
           icon="car-outline"
+          variant="secondary"
           style={styles.mileage_button}
           onPress={() => props.navigation.navigate('Mileage')}
         />
         <PrimaryButton
           title="Year-End"
           icon="document-text-outline"
-          text_color={COLORS.text_dark}
+          variant="secondary"
           style={styles.report_button}
           onPress={() => props.navigation.navigate('YearEndReport', { yearId: year })}
         />
@@ -330,12 +335,14 @@ function ExpensesScreen(props) {
         <PrimaryButton
           title="Recurring"
           icon="repeat-outline"
+          variant="secondary"
           style={styles.grey_button}
           onPress={() => setRecurringOpen(true)}
         />
         <PrimaryButton
           title="Budgets"
           icon="wallet-outline"
+          variant="secondary"
           style={styles.grey_button}
           onPress={() => setBudgetsOpen(true)}
         />
@@ -344,6 +351,7 @@ function ExpensesScreen(props) {
         <PrimaryButton
           title="Export CSV"
           icon="share-outline"
+          variant="secondary"
           style={styles.export_button}
           onPress={exportCsv}
         />
@@ -360,6 +368,9 @@ function ExpensesScreen(props) {
             key={option}
             onPress={() => setYear(option)}
             style={[styles.chip, year === option && styles.chip_active]}
+            hitSlop={{ top: 8, bottom: 8 }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: year === option }}
           >
             <Text style={styles.chip_text}>{option}</Text>
           </Pressable>
@@ -377,6 +388,9 @@ function ExpensesScreen(props) {
             key={name}
             onPress={() => setPropertyFilter(name)}
             style={[styles.chip, property_filter === name && styles.chip_active]}
+            hitSlop={{ top: 8, bottom: 8 }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: property_filter === name }}
           >
             <Text style={styles.chip_text}>{name}</Text>
           </Pressable>
@@ -491,7 +505,7 @@ function ExpensesScreen(props) {
       <TextInput
         style={styles.search_input}
         placeholder="Search notes, vendor, category, or property"
-        placeholderTextColor={COLORS.text}
+        placeholderTextColor={COLORS.text_muted}
         value={search_text}
         onChangeText={setSearchText}
         autoCorrect={false}
@@ -503,13 +517,22 @@ function ExpensesScreen(props) {
             key={option}
             onPress={() => setSortBy(option)}
             style={[styles.chip, sort_by === option && styles.chip_active]}
+            hitSlop={{ top: 8, bottom: 8 }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: sort_by === option }}
           >
             <Text style={styles.chip_text}>{option}</Text>
           </Pressable>
         ))}
       </View>
       {category_filter !== null && (
-        <Pressable style={styles.filter_chip} onPress={() => setCategoryFilter(null)}>
+        <Pressable
+          style={styles.filter_chip}
+          onPress={() => setCategoryFilter(null)}
+          hitSlop={{ top: 8, bottom: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel={'Clear the ' + category_filter + ' filter'}
+        >
           {/* prettier-ignore */}
           <Text style={styles.chip_text}>Category: {category_filter}  ✕</Text>
         </Pressable>
@@ -525,7 +548,13 @@ function ExpensesScreen(props) {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg + 56 }}
         ListHeaderComponent={list_header}
-        ListEmptyComponent={<Text style={styles.empty_text}>No expenses match</Text>}
+        ListEmptyComponent={
+          <EmptyState
+            illustration="empty_expenses"
+            title="No expenses match"
+            message="Change the year or filters, or add an expense above."
+          />
+        }
         renderItem={({ item }) => {
           if (item.type === 'header') {
             return <Text style={styles.month_header}>{item.title}</Text>;
@@ -604,7 +633,12 @@ function ExpensesScreen(props) {
       {deleted_expense && (
         <View style={[styles.undo_bar, { bottom: insets.bottom + SPACING.md }]}>
           <Text style={styles.undo_text}>Expense deleted</Text>
-          <Pressable onPress={undoDelete}>
+          <Pressable
+            onPress={undoDelete}
+            style={styles.undo_button}
+            accessibilityRole="button"
+            accessibilityLabel="Undo delete"
+          >
             <Text style={styles.undo_action}>Undo</Text>
           </Pressable>
         </View>
@@ -654,103 +688,76 @@ const styles = StyleSheet.create({
   },
   add_button: {
     flex: 1,
-    backgroundColor: COLORS.success,
     marginHorizontal: 0,
   },
   scan_button: {
     flex: 1,
-    backgroundColor: COLORS.action,
     marginHorizontal: 0,
   },
   mileage_button: {
     flex: 1,
-    backgroundColor: COLORS.accent,
     marginHorizontal: 0,
   },
   report_button: {
     flex: 1,
-    backgroundColor: COLORS.highlight,
     marginHorizontal: 0,
   },
   grey_button: {
     flex: 1,
-    backgroundColor: COLORS.secondary,
     marginHorizontal: 0,
   },
   export_button: {
     flex: 1,
-    backgroundColor: COLORS.action,
     marginHorizontal: 0,
   },
   section_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    marginBottom: 6,
+    ...TYPE.label,
+    color: COLORS.text_muted,
+    marginBottom: SPACING.xs + SPACING.xxs,
   },
   chip_row: {
-    gap: SPACING.sm,
-    paddingBottom: SPACING.sm,
+    ...list_styles.chip_row,
   },
   chip: {
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.muted,
+    ...list_styles.chip,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   filter_chip: {
+    ...list_styles.chip,
+    ...list_styles.chip_active,
     alignSelf: 'flex-start',
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.primary,
     marginBottom: SPACING.sm,
   },
   heading: {
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
-    marginBottom: SPACING.sm,
+    ...list_styles.heading,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...list_styles.detail,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginBottom: SPACING.sm,
   },
   link_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    marginTop: 4,
+    ...TYPE.label,
+    color: COLORS.info_text,
+    marginTop: SPACING.xs,
     textDecorationLine: 'underline',
   },
   summary_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
   },
   summary_total: {
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: 32,
-    marginVertical: 4,
+    ...TYPE.display,
+    color: COLORS.cta,
+    marginVertical: SPACING.xs,
   },
   bar_row: {
     marginBottom: SPACING.sm,
@@ -761,33 +768,32 @@ const styles = StyleSheet.create({
   bar_labels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    marginBottom: SPACING.xs,
   },
   bar_name: {
+    ...TYPE.body_small,
     flex: 1,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
     marginRight: SPACING.sm,
   },
   bar_amount: {
+    ...TYPE.body_small,
+    fontFamily: TYPE.label.fontFamily,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 14,
   },
   over_budget_text: {
-    color: COLORS.danger,
+    color: COLORS.danger_text,
   },
   bar_track: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.background,
+    height: SPACING.sm,
+    borderRadius: RADIUS.pill,
+    backgroundColor: COLORS.surface_sunken,
     overflow: 'hidden',
   },
   bar_fill: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.primary,
+    height: SPACING.sm,
+    borderRadius: RADIUS.pill,
+    backgroundColor: COLORS.cta,
   },
   over_budget_fill: {
     backgroundColor: COLORS.danger,
@@ -795,14 +801,10 @@ const styles = StyleSheet.create({
   property_row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 6,
+    marginBottom: SPACING.xs + SPACING.xxs,
   },
   search_input: {
-    backgroundColor: COLORS.muted,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
-    padding: SPACING.sm,
+    ...list_styles.search_input,
     marginVertical: SPACING.sm,
   },
   sort_row: {
@@ -812,23 +814,19 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   sort_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
+    ...list_styles.label,
   },
   month_header: {
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
+    ...TYPE.label,
+    color: COLORS.text_muted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
     marginTop: SPACING.md,
     marginBottom: SPACING.sm,
   },
   row: {
+    ...list_styles.row,
     flexDirection: 'row',
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
   },
   row_text: {
     flex: 1,
@@ -840,26 +838,25 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
   },
   row_amount: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
   },
   row_category: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 14,
-    marginTop: 2,
+    ...TYPE.body_small,
+    fontFamily: TYPE.label.fontFamily,
+    color: COLORS.text_muted,
+    marginTop: SPACING.xxs,
   },
   tag_row: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
-    marginTop: 6,
+    gap: SPACING.xs + SPACING.xxs,
+    marginTop: SPACING.xs + SPACING.xxs,
   },
   tag: {
-    paddingVertical: 3,
+    paddingVertical: SPACING.xxs,
     paddingHorizontal: SPACING.sm,
-    borderRadius: 10,
+    borderRadius: RADIUS.pill,
     maxWidth: 220,
   },
   capital_tag: {
@@ -878,26 +875,24 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.tag_missing_receipt,
   },
   tag_text: {
-    color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
+    ...TYPE.caption,
     fontSize: 11,
+    lineHeight: 15,
+    fontFamily: TYPE.label.fontFamily,
+    color: COLORS.text_light,
   },
   receipt_box: {
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: SPACING.xs,
   },
   receipt_thumb: {
     width: 56,
     height: 56,
-    borderRadius: 8,
+    borderRadius: RADIUS.md,
   },
   empty_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    textAlign: 'center',
-    marginTop: SPACING.lg,
-    opacity: 0.7,
+    ...list_styles.empty_text,
   },
   undo_bar: {
     position: 'absolute',
@@ -907,18 +902,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: COLORS.toast_background,
-    borderRadius: 12,
-    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.lg,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border_strong,
+    paddingVertical: SPACING.xs,
     paddingHorizontal: SPACING.md,
+    ...SHADOWS.high,
   },
   undo_text: {
+    ...TYPE.body_small,
     color: COLORS.text_light,
-    fontFamily: FONTS.body,
-    fontSize: 14,
   },
   undo_action: {
-    color: COLORS.highlight,
-    fontFamily: FONTS.body_bold,
+    ...TYPE.label,
     fontSize: 14,
+    color: COLORS.cta,
+  },
+  undo_button: {
+    minHeight: SIZES.touch,
+    minWidth: SIZES.touch,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

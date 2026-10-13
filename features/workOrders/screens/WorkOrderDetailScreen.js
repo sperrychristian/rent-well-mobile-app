@@ -24,7 +24,9 @@ import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { useMessages } from '../../messages/context/MessagesContext';
 import { openConversationFor } from '../../messages/utils/openConversation';
 import { formatDate } from '../../../utils/formatDate';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import StatusPill from '../../../components/ui/StatusPill';
 
 const priority_options = ['Emergency', 'Normal', 'Low'];
 
@@ -188,7 +190,10 @@ function WorkOrderDetailContent(props) {
           <Text style={styles.heading}>{order.title}</Text>
           <Text style={styles.detail}>{order.property}</Text>
           <Text style={styles.detail}>{order.tenant || 'No tenant'}</Text>
-          <Text style={styles.detail}>Status: {order.status}</Text>
+          <View style={styles.pill_row}>
+            <StatusPill label={order.status} />
+            <StatusPill label={order.priority || 'Normal'} />
+          </View>
           {order.description ? <Text style={styles.detail}>{order.description}</Text> : null}
           {/* I only show the issue photo if the work order has one */}
           {order.photo && <Image source={order.photo} style={styles.photo} />}
@@ -226,6 +231,10 @@ function WorkOrderDetailContent(props) {
                 key={option}
                 onPress={() => tryAction(() => setPriority(order_id, option))}
                 style={[styles.chip, (order.priority || 'Normal') === option && styles.chip_active]}
+                hitSlop={{ top: 8, bottom: 8 }}
+                accessibilityRole="button"
+                accessibilityLabel={option + ' priority'}
+                accessibilityState={{ selected: (order.priority || 'Normal') === option }}
               >
                 <Text style={styles.chip_text}>{option}</Text>
               </Pressable>
@@ -238,12 +247,18 @@ function WorkOrderDetailContent(props) {
           <TextInput
             style={[styles.input, styles.notes_input]}
             placeholder="Notes about this request"
-            placeholderTextColor={COLORS.text}
+            placeholderTextColor={COLORS.text_muted}
             multiline
             value={notes_text}
             onChangeText={setNotesText}
           />
-          <PrimaryButton title="Save Notes" style={styles.save_button} onPress={saveNotes} />
+          <PrimaryButton
+            title="Save Notes"
+            icon="save-outline"
+            variant="secondary"
+            style={styles.save_button}
+            onPress={saveNotes}
+          />
         </Card>
 
         <Card>
@@ -251,20 +266,22 @@ function WorkOrderDetailContent(props) {
           <TextInput
             style={styles.input}
             placeholder="Who is doing the work?"
-            placeholderTextColor={COLORS.text}
+            placeholderTextColor={COLORS.text_muted}
             value={contractor_text}
             onChangeText={setContractorText}
           />
           <TextInput
             style={styles.input}
             placeholder="Estimate (e.g. 250.00)"
-            placeholderTextColor={COLORS.text}
+            placeholderTextColor={COLORS.text_muted}
             keyboardType="decimal-pad"
             value={estimate_text}
             onChangeText={setEstimateText}
           />
           <PrimaryButton
             title="Save Contractor"
+            icon="save-outline"
+            variant="secondary"
             style={styles.save_button}
             onPress={saveContractor}
           />
@@ -307,6 +324,7 @@ function WorkOrderDetailContent(props) {
             <PrimaryButton
               title="Add Expense"
               icon="cash-outline"
+              variant="secondary"
               style={styles.expense_button}
               onPress={() => setShowExpenseForm(true)}
             />
@@ -314,6 +332,7 @@ function WorkOrderDetailContent(props) {
               <PrimaryButton
                 title="Start Work"
                 icon="play-circle-outline"
+                variant="primary"
                 style={styles.start_button}
                 onPress={() => tryAction(() => startWorkOrder(order_id))}
               />
@@ -322,6 +341,7 @@ function WorkOrderDetailContent(props) {
               <PrimaryButton
                 title="Mark Resolved"
                 icon="checkmark-circle-outline"
+                text_color={COLORS.text_light}
                 style={styles.resolve_button}
                 onPress={confirmResolve}
               />
@@ -331,6 +351,7 @@ function WorkOrderDetailContent(props) {
             <PrimaryButton
               title="Message Tenant"
               icon="chatbubble-ellipses-outline"
+              variant="secondary"
               style={styles.message_button}
               onPress={() =>
                 openConversationFor(props.navigation, conversations, order.tenant, order.tenant_id)
@@ -339,6 +360,7 @@ function WorkOrderDetailContent(props) {
             <PrimaryButton
               title="Back"
               icon="arrow-back-outline"
+              variant="tertiary"
               style={styles.back_button}
               onPress={() => props.navigation.goBack()}
             />
@@ -380,25 +402,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
   },
   heading: {
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
-    marginBottom: SPACING.sm,
+    ...list_styles.heading,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...list_styles.detail,
   },
   over_budget: {
-    color: COLORS.danger,
+    color: COLORS.danger_text,
     opacity: 1,
   },
   photo: {
     width: '100%',
     height: 160,
-    borderRadius: 8,
+    borderRadius: RADIUS.md,
     marginTop: SPACING.sm,
   },
   chip_row: {
@@ -407,33 +423,22 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   chip: {
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.background,
+    ...list_styles.chip,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   input: {
-    backgroundColor: COLORS.background,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
-    padding: SPACING.sm,
-    marginBottom: SPACING.sm,
+    ...list_styles.field_input,
   },
   notes_input: {
     minHeight: 80,
     textAlignVertical: 'top',
   },
   save_button: {
-    backgroundColor: COLORS.success,
     marginHorizontal: 0,
   },
   expense_row: {
@@ -446,17 +451,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   amount: {
+    ...TYPE.subheading,
+    fontFamily: TYPE.heading.fontFamily,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: FONT_SIZES.body,
   },
   thumb: {
     width: 48,
     height: 48,
-    borderRadius: 6,
+    borderRadius: RADIUS.sm,
   },
   button_area: {
     width: '90%',
+    maxWidth: SIZES.content_max_width,
   },
   button_row: {
     flexDirection: 'row',
@@ -465,27 +471,30 @@ const styles = StyleSheet.create({
   },
   expense_button: {
     flex: 1,
-    backgroundColor: COLORS.action,
     marginHorizontal: 0,
   },
   start_button: {
     flex: 1,
-    backgroundColor: COLORS.warning,
     marginHorizontal: 0,
   },
   resolve_button: {
     flex: 1,
     backgroundColor: COLORS.success,
+    borderColor: COLORS.success,
     marginHorizontal: 0,
   },
   message_button: {
     flex: 1,
-    backgroundColor: COLORS.accent,
     marginHorizontal: 0,
   },
   back_button: {
     flex: 1,
-    backgroundColor: COLORS.secondary,
     marginHorizontal: 0,
+  },
+  // status and priority side by side, each pill says its words so it is never color only
+  pill_row: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
   },
 });

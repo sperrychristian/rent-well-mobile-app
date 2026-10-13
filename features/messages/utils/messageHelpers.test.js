@@ -6,6 +6,8 @@ import {
   totalUnread,
   lastSeenMessageId,
   formatMessageTime,
+  dayDividerLabel,
+  showsTime,
   messageBodyToSend,
   findConversationFor,
 } from './messageHelpers';
@@ -216,5 +218,55 @@ describe('findConversationFor', () => {
     expect(findConversationFor(conversations, '', null)).toBeNull();
     expect(findConversationFor(conversations, 'Priya Shah', null)).toBeNull();
     expect(findConversationFor([], 'Tara Tenant', 'u1')).toBeNull();
+  });
+});
+
+describe('dayDividerLabel', () => {
+  const now = new Date(2026, 9, 11, 16, 0);
+  const at = (day, hour, minute) => new Date(2026, 9, day, hour, minute).toISOString();
+  // newest first, like the thread keeps them
+  const messages = [
+    { id: 'd', senderId: 'a', createdAt: at(11, 15, 0) },
+    { id: 'c', senderId: 'b', createdAt: at(11, 9, 0) },
+    { id: 'b', senderId: 'a', createdAt: at(10, 20, 0) },
+    { id: 'a', senderId: 'a', createdAt: at(8, 8, 0) },
+  ];
+
+  test('labels only the first (oldest) message of each day', () => {
+    expect(dayDividerLabel(messages, 0, now)).toBeNull();
+    expect(dayDividerLabel(messages, 1, now)).toBe('Today');
+    expect(dayDividerLabel(messages, 2, now)).toBe('Yesterday');
+    expect(dayDividerLabel(messages, 3, now)).toBe('2026-10-08');
+  });
+
+  test('handles a missing message or time', () => {
+    expect(dayDividerLabel(messages, 9, now)).toBeNull();
+    expect(dayDividerLabel([{ id: 'x' }], 0, now)).toBeNull();
+  });
+});
+
+describe('showsTime', () => {
+  const at = (hour, minute) => new Date(2026, 9, 11, hour, minute).toISOString();
+
+  test('a quick run from one sender shows the time once, on the newest', () => {
+    const messages = [
+      { id: '3', senderId: 'a', createdAt: at(10, 4) },
+      { id: '2', senderId: 'a', createdAt: at(10, 2) },
+      { id: '1', senderId: 'a', createdAt: at(10, 0) },
+    ];
+    expect(showsTime(messages, 0)).toBe(true);
+    expect(showsTime(messages, 1)).toBe(false);
+    expect(showsTime(messages, 2)).toBe(false);
+  });
+
+  test('a new sender or a gap over 5 minutes starts a new run', () => {
+    const messages = [
+      { id: '3', senderId: 'b', createdAt: at(10, 30) },
+      { id: '2', senderId: 'a', createdAt: at(10, 20) },
+      { id: '1', senderId: 'a', createdAt: at(10, 0) },
+    ];
+    expect(showsTime(messages, 1)).toBe(true);
+    expect(showsTime(messages, 2)).toBe(true);
+    expect(showsTime([], 0)).toBe(true);
   });
 });

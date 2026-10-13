@@ -149,7 +149,7 @@ function NewChecklistModal(props) {
               <TextInput
                 style={styles.input}
                 placeholder="Pick one above or type an address"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={property}
                 onChangeText={setProperty}
               />
@@ -158,7 +158,7 @@ function NewChecklistModal(props) {
               <TextInput
                 style={styles.input}
                 placeholder="Tenant name"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={tenant}
                 onChangeText={setTenant}
               />

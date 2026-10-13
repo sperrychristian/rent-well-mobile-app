@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, FlatList, RefreshControl, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, FlatList, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ErrorState from '../../../components/ErrorState';
 import { getAllWorkOrders } from '../../../services/api';
@@ -11,14 +11,11 @@ import {
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { demo_tenant } from '../data/sampleTenants';
 import { formatDate } from '../../../utils/formatDate';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
-
-// one color per status, the same ones the work order cards use
-const status_colors = {
-  'Open': COLORS.danger,
-  'In Progress': COLORS.warning,
-  'Resolved': COLORS.success,
-};
+import { COLORS, SPACING, FONTS, TYPE } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import StatusPill from '../../../components/ui/StatusPill';
+import EmptyState from '../../../components/ui/EmptyState';
+import SkeletonList from '../../../components/ui/Skeleton';
 
 // a former tenant's requests, read only, straight from the server (reading still works after a tenancy ends)
 function PastRequestsScreen() {
@@ -69,9 +66,7 @@ function PastRequestsScreen() {
       <View style={styles.row}>
         <View style={styles.top_line}>
           <Text style={styles.title}>{item.title}</Text>
-          <View style={[styles.badge, { backgroundColor: status_colors[item.status] }]}>
-            <Text style={styles.badge_text}>{item.status}</Text>
-          </View>
+          <StatusPill label={item.status} />
         </View>
         <Text style={styles.detail}>
           {item.property} · {formatDate(item.created_at)}
@@ -93,12 +88,12 @@ function PastRequestsScreen() {
         data={ordersForTenant(local_orders, demo_tenant.name)}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
-        ListEmptyComponent={<Text style={styles.empty_text}>No requests.</Text>}
+        ListEmptyComponent={<EmptyState illustration="empty_work_orders" title="No requests." />}
         renderItem={renderRow}
       />
     );
   } else if (status === 'loading' && orders.length === 0) {
-    body = <ActivityIndicator style={styles.spinner} color={COLORS.title} size="large" />;
+    body = <SkeletonList rows={3} />;
   } else if (status === 'error' && orders.length === 0) {
     body = <ErrorState message={error_message} onRetry={reload} />;
   } else {
@@ -110,7 +105,7 @@ function PastRequestsScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={reload} tintColor={COLORS.title} />
         }
-        ListEmptyComponent={<Text style={styles.empty_text}>No requests.</Text>}
+        ListEmptyComponent={<EmptyState illustration="empty_work_orders" title="No requests." />}
         renderItem={renderRow}
       />
     );
@@ -133,10 +128,8 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 13,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     textAlign: 'center',
     marginBottom: SPACING.sm,
   },
@@ -144,10 +137,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.lg,
   },
   row: {
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
+    ...list_styles.row,
   },
   top_line: {
     flexDirection: 'row',
@@ -156,10 +146,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   title: {
+    ...list_styles.title,
     flex: 1,
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
   },
   badge: {
     paddingVertical: 4,
@@ -172,10 +160,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...list_styles.detail,
   },
   note: {
     color: COLORS.text,
@@ -185,10 +170,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   empty_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    textAlign: 'center',
-    marginTop: SPACING.lg,
-    opacity: 0.7,
+    ...list_styles.empty_text,
   },
 });

@@ -20,7 +20,8 @@ import TextField from '../../../components/TextField';
 import ErrorState from '../../../components/ErrorState';
 import { useTenants } from '../../tenants/context/TenantsContext';
 import { pendingInvites, formatInviteCode, inviteShareText } from '../utils/inviteHelpers';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
 
 function InviteTenantScreen() {
   const insets = useSafeAreaInsets();
@@ -156,7 +157,7 @@ function InviteTenantScreen() {
             <PrimaryButton
               title="Share Code"
               icon="share-outline"
-              text_color={COLORS.text_light}
+              variant="primary"
               onPress={() => shareInvite(created_invite)}
               style={styles.share_button}
             />
@@ -190,6 +191,7 @@ function InviteTenantScreen() {
                 {properties.length > 0 && (
                   <PrimaryButton
                     title="Cancel"
+                    variant="secondary"
                     onPress={() => {
                       setAddingProperty(false);
                       setFieldErrors({});
@@ -199,7 +201,8 @@ function InviteTenantScreen() {
                 )}
                 <PrimaryButton
                   title={busy ? 'Saving...' : 'Add Property'}
-                  text_color={COLORS.text_light}
+                  variant="primary"
+                  loading={busy}
                   onPress={busy ? undefined : handleAddProperty}
                   style={styles.save_button}
                 />
@@ -253,7 +256,8 @@ function InviteTenantScreen() {
               <PrimaryButton
                 title={busy ? 'Creating...' : 'Create Invite'}
                 icon="person-add-outline"
-                text_color={COLORS.text_light}
+                variant="primary"
+                loading={busy}
                 onPress={busy ? undefined : handleCreateInvite}
                 style={styles.create_button}
               />
@@ -278,11 +282,12 @@ function InviteTenantScreen() {
               </View>
               <Pressable
                 onPress={() => shareInvite(invite)}
-                hitSlop={8}
+                hitSlop={4}
+                style={styles.share_icon}
                 accessibilityRole="button"
                 accessibilityLabel={'Share invite for ' + invite.tenantName}
               >
-                <Ionicons name="share-outline" size={24} color={COLORS.action} />
+                <Ionicons name="share-outline" size={24} color={COLORS.info_text} />
               </Pressable>
             </View>
           ))
@@ -317,48 +322,50 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: SPACING.md,
+    width: '100%',
+    maxWidth: SIZES.content_max_width,
+    alignSelf: 'center',
   },
   spinner: {
     marginTop: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.md,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
     marginBottom: 6,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 13,
-    opacity: 0.7,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
     textAlign: 'center',
   },
   helper_block: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 13,
-    opacity: 0.7,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
     marginBottom: SPACING.sm,
   },
   code: {
-    color: COLORS.title,
-    fontFamily: FONTS.heading,
+    fontFamily: TYPE.display.fontFamily,
     fontSize: 34,
-    letterSpacing: 3,
+    lineHeight: 44,
+    color: COLORS.cta,
+    backgroundColor: COLORS.surface_sunken,
+    borderRadius: RADIUS.md,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
+    overflow: 'hidden',
+    paddingVertical: SPACING.sm,
     textAlign: 'center',
     marginVertical: SPACING.sm,
   },
   share_button: {
     marginTop: SPACING.md,
     marginHorizontal: 0,
-    backgroundColor: COLORS.action,
   },
   wrap_row: {
     flexDirection: 'row',
@@ -367,23 +374,18 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   chip: {
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.background,
+    ...list_styles.chip,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   error: {
-    color: COLORS.danger,
-    fontFamily: FONTS.body_bold,
-    fontSize: 12,
+    ...TYPE.caption,
+    fontFamily: TYPE.label.fontFamily,
+    color: COLORS.danger_text,
     marginBottom: SPACING.sm,
   },
   button_row: {
@@ -394,37 +396,36 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
   create_button: {
     marginHorizontal: 0,
     marginTop: SPACING.sm,
-    backgroundColor: COLORS.success,
   },
   section_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
+    ...TYPE.label,
+    color: COLORS.text_muted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
     marginTop: SPACING.sm,
     marginBottom: SPACING.sm,
     marginLeft: SPACING.xs,
   },
   empty_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    opacity: 0.7,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
     marginLeft: SPACING.xs,
   },
   invite_row: {
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
   },
@@ -432,15 +433,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   invite_code: {
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
+    ...TYPE.heading,
+    color: COLORS.cta,
     letterSpacing: 1,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...list_styles.detail,
+  },
+  // a full 44pt circle so share is easy to hit
+  share_icon: {
+    width: SIZES.touch,
+    height: SIZES.touch,
+    borderRadius: RADIUS.pill,
+    backgroundColor: COLORS.surface_raised,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

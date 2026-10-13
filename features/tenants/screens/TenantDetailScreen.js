@@ -21,7 +21,10 @@ import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { useMessages } from '../../messages/context/MessagesContext';
 import { openConversationFor } from '../../messages/utils/openConversation';
 import { placeLabel, findMoveInChecklist } from '../utils/tenantHelpers';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import Avatar from '../../../components/ui/Avatar';
+import StatusPill from '../../../components/ui/StatusPill';
 
 // one tenant: how to reach them, where they live now, their work orders, where they lived before,
 // and the owner's actions (message, move, assign, end)
@@ -184,16 +187,19 @@ function TenantDetailScreen(props) {
           paddingHorizontal: SPACING.md,
         }}
       >
-        <Text style={styles.name_line}>{tenant.name}</Text>
+        {/* the tenant's initials over their name, the same avatar the Tenants list uses */}
+        <View style={styles.identity}>
+          <Avatar name={tenant.name} size={64} />
+          <Text style={styles.name_line}>{tenant.name}</Text>
+        </View>
 
         <Card>
           <View style={styles.top_line}>
             <Text style={styles.heading}>Contact</Text>
-            <View
-              style={[styles.badge, tenant.is_active ? styles.active_badge : styles.past_badge]}
-            >
-              <Text style={styles.badge_text}>{tenant.is_active ? 'Current' : 'Past tenant'}</Text>
-            </View>
+            <StatusPill
+              label={tenant.is_active ? 'Current' : 'Past tenant'}
+              tone={tenant.is_active ? 'Active' : 'Ended'}
+            />
           </View>
           {tenant.email ? (
             <Pressable
@@ -230,21 +236,21 @@ function TenantDetailScreen(props) {
                 <Text style={[styles.place, styles.place_link]}>
                   {placeLabel(tenancy.property_name, tenancy.unit_label)}
                 </Text>
-                <Ionicons name="chevron-forward" size={16} color={COLORS.action} />
+                <Ionicons name="chevron-forward" size={16} color={COLORS.info_text} />
               </Pressable>
               <Text style={styles.detail}>Moved in {tenancy.started_at}</Text>
               <View style={styles.button_row}>
                 <PrimaryButton
                   title="Move"
                   icon="swap-horizontal-outline"
-                  text_color={COLORS.text_light}
+                  variant="secondary"
                   onPress={() => openForm('move', tenancy)}
                   style={styles.move_button}
                 />
                 <PrimaryButton
                   title="End Tenancy"
                   icon="exit-outline"
-                  text_color={COLORS.text_light}
+                  variant="destructive"
                   onPress={() => openForm('end', tenancy)}
                   style={styles.end_button}
                 />
@@ -266,7 +272,7 @@ function TenantDetailScreen(props) {
               <Text style={styles.order_title} numberOfLines={1}>
                 {order.title}
               </Text>
-              <Text style={styles.detail}>{order.status}</Text>
+              <StatusPill label={order.status} />
             </View>
           ))}
           <Pressable
@@ -276,7 +282,7 @@ function TenantDetailScreen(props) {
             accessibilityRole="link"
           >
             <Text style={styles.link}>View in Work Orders</Text>
-            <Ionicons name="chevron-forward" size={16} color={COLORS.action} />
+            <Ionicons name="chevron-forward" size={16} color={COLORS.info_text} />
           </Pressable>
         </Card>
 
@@ -302,21 +308,21 @@ function TenantDetailScreen(props) {
           <PrimaryButton
             title="Message"
             icon="chatbubble-ellipses-outline"
-            text_color={COLORS.text_light}
+            variant="primary"
             onPress={openMessages}
             style={styles.message_button}
           />
           <PrimaryButton
             title="Lease and Documents"
             icon="document-text-outline"
-            text_color={COLORS.text_dark}
+            variant="secondary"
             onPress={() => props.navigation.navigate('TenantLease', { tenantId: tenant.id })}
             style={styles.lease_button}
           />
           <PrimaryButton
             title="Assign to a Property"
             icon="add-circle-outline"
-            text_color={COLORS.text_light}
+            variant="secondary"
             onPress={() => openForm('assign', null)}
             style={styles.assign_button}
           />
@@ -358,10 +364,10 @@ export default TenantDetailScreen;
 const styles = StyleSheet.create({
   // the header has the screen's title now, so the name gets its own plain line instead of the big card
   name_line: {
+    ...TYPE.title,
     color: COLORS.title,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     textAlign: 'center',
+    marginTop: SPACING.sm,
   },
   container: {
     flex: 1,
@@ -377,69 +383,51 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.xs,
   },
-  badge: {
-    paddingVertical: 3,
-    paddingHorizontal: SPACING.sm,
-    borderRadius: 10,
-  },
-  active_badge: {
-    backgroundColor: COLORS.success,
-  },
-  past_badge: {
-    backgroundColor: COLORS.secondary,
-  },
-  badge_text: {
-    color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
-    fontSize: 12,
-  },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...list_styles.detail,
   },
   note: {
+    ...TYPE.body_small,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
     fontStyle: 'italic',
-    marginTop: 2,
+    marginTop: SPACING.xxs,
   },
   link: {
-    color: COLORS.action,
-    fontFamily: FONTS.body_bold,
-    fontSize: 14,
+    ...TYPE.body_small,
+    fontFamily: TYPE.label.fontFamily,
+    color: COLORS.info_text,
   },
   link_row: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: SPACING.sm,
+    minHeight: SIZES.touch,
+    marginTop: SPACING.xs,
   },
   tenancy: {
     marginTop: SPACING.sm,
   },
   place: {
+    ...TYPE.subheading,
+    fontFamily: TYPE.heading.fontFamily,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 15,
   },
   order_row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     gap: SPACING.sm,
-    marginTop: SPACING.xs,
+    paddingVertical: SPACING.xs + SPACING.xxs,
+    borderBottomWidth: BORDER.hairline,
+    borderBottomColor: COLORS.border,
   },
   order_title: {
+    ...TYPE.body_small,
     flex: 1,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
   },
   button_row: {
     flexDirection: 'row',
@@ -449,41 +437,39 @@ const styles = StyleSheet.create({
   move_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.action,
   },
   end_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.danger,
   },
   actions: {
     width: '90%',
+    maxWidth: SIZES.content_max_width,
     alignSelf: 'center',
     gap: SPACING.sm,
     marginTop: SPACING.sm,
   },
   message_button: {
     marginHorizontal: 0,
-    backgroundColor: COLORS.accent,
   },
   place_link: {
-    color: COLORS.action,
+    color: COLORS.info_text,
   },
   lease_button: {
     marginHorizontal: 0,
-    backgroundColor: COLORS.highlight,
   },
   assign_button: {
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
   helper: {
+    ...TYPE.caption,
     width: '90%',
     alignSelf: 'center',
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    color: COLORS.text_muted,
     marginTop: SPACING.sm,
+  },
+  identity: {
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
   },
 });

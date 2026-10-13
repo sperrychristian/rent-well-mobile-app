@@ -27,7 +27,9 @@ import {
 } from '../utils/documentFiles';
 import { iconFor, expiryTag, daysUntil } from '../utils/documentHelpers';
 import { document_categories, expiring_soon_days } from '../../../data/documentOptions';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES, OPACITY } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import EmptyState from '../../../components/ui/EmptyState';
 
 const sort_options = ['Newest', 'Name'];
 
@@ -229,12 +231,14 @@ function DocumentsScreen() {
         <PrimaryButton
           title="Add Document"
           icon="add-circle-outline"
+          variant="primary"
           style={styles.add_button}
           onPress={openNewForm}
         />
         <PrimaryButton
           title="Scan"
           icon="camera-outline"
+          variant="secondary"
           style={styles.scan_button}
           onPress={scanDocument}
         />
@@ -251,6 +255,9 @@ function DocumentsScreen() {
             key={name}
             onPress={() => setPropertyFilter(name)}
             style={[styles.chip, property_filter === name && styles.chip_active]}
+            hitSlop={{ top: 8, bottom: 8 }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: property_filter === name }}
           >
             <Text style={styles.chip_text}>{name}</Text>
           </Pressable>
@@ -268,6 +275,9 @@ function DocumentsScreen() {
             key={option}
             onPress={() => setCategoryFilter(option)}
             style={[styles.chip, category_filter === option && styles.chip_active]}
+            hitSlop={{ top: 8, bottom: 8 }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: category_filter === option }}
           >
             <Text style={styles.chip_text}>{option}</Text>
           </Pressable>
@@ -290,8 +300,10 @@ function DocumentsScreen() {
 
       <TextInput
         style={styles.search_input}
+        accessibilityLabel="Search documents"
+        keyboardAppearance="dark"
         placeholder="Search name, tenant, property, or notes"
-        placeholderTextColor={COLORS.text}
+        placeholderTextColor={COLORS.text_muted}
         value={search_text}
         onChangeText={setSearchText}
         autoCorrect={false}
@@ -303,6 +315,9 @@ function DocumentsScreen() {
             key={option}
             onPress={() => setSortBy(option)}
             style={[styles.chip, sort_by === option && styles.chip_active]}
+            hitSlop={{ top: 8, bottom: 8 }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: sort_by === option }}
           >
             <Text style={styles.chip_text}>{option}</Text>
           </Pressable>
@@ -319,17 +334,25 @@ function DocumentsScreen() {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
         ListHeaderComponent={list_header}
-        ListEmptyComponent={<Text style={styles.empty_text}>No documents match</Text>}
+        ListEmptyComponent={
+          <EmptyState
+            illustration="empty_documents"
+            title="No documents match"
+            message="Try another property or category, or add a document above."
+          />
+        }
         renderItem={({ item }) => {
           const tag = expiryTag(item.expires_on);
           return (
-            <Pressable style={styles.row} onPress={() => openDetail(item.id)}>
-              <Ionicons
-                name={iconFor(item.mime_type)}
-                size={28}
-                color={COLORS.text}
-                style={styles.row_icon}
-              />
+            <Pressable
+              style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+              onPress={() => openDetail(item.id)}
+              accessibilityRole="button"
+              accessibilityLabel={item.name + ', ' + item.category}
+            >
+              <View style={styles.row_icon}>
+                <Ionicons name={iconFor(item.mime_type)} size={24} color={COLORS.info_text} />
+              </View>
               <View style={styles.row_text}>
                 <Text style={styles.row_name} numberOfLines={2}>
                   {item.name}
@@ -343,7 +366,9 @@ function DocumentsScreen() {
                     <View
                       style={[styles.tag, tag.expired ? styles.expired_tag : styles.expiring_tag]}
                     >
-                      <Text style={styles.tag_text}>{tag.text}</Text>
+                      <Text style={[styles.tag_text, !tag.expired && styles.tag_text_dark]}>
+                        {tag.text}
+                      </Text>
                     </View>
                   )}
                   {item.shared_with_tenant && (
@@ -398,68 +423,46 @@ const styles = StyleSheet.create({
   },
   add_button: {
     flex: 1,
-    backgroundColor: COLORS.success,
     marginHorizontal: 0,
   },
   scan_button: {
     flex: 1,
-    backgroundColor: COLORS.action,
     marginHorizontal: 0,
   },
   section_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...TYPE.label,
+    color: COLORS.text_muted,
     marginBottom: 6,
   },
   chip_row: {
-    gap: SPACING.sm,
-    paddingBottom: SPACING.sm,
+    ...list_styles.chip_row,
   },
   chip: {
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.muted,
+    ...list_styles.chip,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   summary_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
   },
   summary_total: {
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: 32,
+    ...TYPE.display,
+    color: COLORS.cta,
     marginVertical: 4,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...list_styles.detail,
   },
   warning_text: {
-    color: COLORS.warning,
-    fontFamily: FONTS.body_bold,
-    opacity: 1,
+    color: COLORS.warning_text,
   },
   search_input: {
-    backgroundColor: COLORS.muted,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
-    padding: SPACING.sm,
-    marginVertical: SPACING.sm,
+    ...list_styles.search_input,
   },
   sort_row: {
     flexDirection: 'row',
@@ -468,33 +471,33 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   sort_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
+    ...TYPE.label,
+    color: COLORS.text_muted,
   },
   row: {
+    ...list_styles.row,
     flexDirection: 'row',
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
+    gap: SPACING.sm + SPACING.xs,
   },
   row_icon: {
-    marginRight: SPACING.sm,
-    marginTop: 2,
+    width: SIZES.avatar,
+    height: SIZES.avatar,
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.surface_raised,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   row_text: {
     flex: 1,
   },
   row_name: {
+    ...TYPE.subheading,
+    fontFamily: TYPE.heading.fontFamily,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
   },
   row_category: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 14,
+    ...TYPE.label,
+    color: COLORS.info_text,
     marginTop: 2,
   },
   tag_row: {
@@ -504,9 +507,9 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   tag: {
+    borderRadius: RADIUS.pill,
     paddingVertical: 3,
     paddingHorizontal: SPACING.sm,
-    borderRadius: 10,
   },
   expiring_tag: {
     backgroundColor: COLORS.warning,
@@ -518,15 +521,20 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.action,
   },
   tag_text: {
-    color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
+    ...TYPE.caption,
     fontSize: 11,
+    lineHeight: 15,
+    fontFamily: TYPE.label.fontFamily,
+    color: COLORS.text_light,
   },
   empty_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    textAlign: 'center',
-    marginTop: SPACING.lg,
-    opacity: 0.7,
+    ...list_styles.empty_text,
+  },
+  // the expiring-soon tag is orange, so its words are dark
+  tag_text_dark: {
+    color: COLORS.on_light,
+  },
+  pressed: {
+    opacity: OPACITY.pressed,
   },
 });

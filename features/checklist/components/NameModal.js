@@ -40,7 +40,7 @@ function NameModal(props) {
           <TextInput
             style={styles.input}
             placeholder={props.placeholder}
-            placeholderTextColor={COLORS.text}
+            placeholderTextColor={COLORS.text_muted}
             value={name}
             onChangeText={setName}
             autoFocus

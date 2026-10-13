@@ -389,7 +389,7 @@ function NewWorkOrderScreen(props) {
               <TextInput
                 style={styles.input}
                 placeholder="e.g. Unit 2B, or Exterior"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={owner_unit}
                 onChangeText={setOwnerUnit}
               />
@@ -449,7 +449,7 @@ function NewWorkOrderScreen(props) {
               <TextInput
                 style={styles.input}
                 placeholder="Your name"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={tenant_name}
                 onChangeText={setTenantName}
               />
@@ -476,7 +476,7 @@ function NewWorkOrderScreen(props) {
               <TextInput
                 style={styles.input}
                 placeholder="Pick one above or type your address"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={property}
                 onChangeText={setProperty}
               />
@@ -487,7 +487,7 @@ function NewWorkOrderScreen(props) {
           <TextInput
             style={styles.input}
             placeholder="e.g. Kitchen faucet leaking"
-            placeholderTextColor={COLORS.text}
+            placeholderTextColor={COLORS.text_muted}
             value={title}
             onChangeText={setTitle}
           />
@@ -496,7 +496,7 @@ function NewWorkOrderScreen(props) {
           <TextInput
             style={[styles.input, styles.description_input]}
             placeholder="Anything the landlord should know"
-            placeholderTextColor={COLORS.text}
+            placeholderTextColor={COLORS.text_muted}
             multiline
             value={description}
             onChangeText={setDescription}
@@ -536,7 +536,7 @@ function NewWorkOrderScreen(props) {
                     hitSlop={8}
                     accessibilityLabel="Remove photo"
                   >
-                    <Ionicons name="close-circle" size={22} color={COLORS.danger} />
+                    <Ionicons name="close-circle" size={22} color={COLORS.danger_text} />
                   </Pressable>
                 </View>
               ))}
@@ -684,7 +684,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   link_text: {
-    color: COLORS.action,
+    color: COLORS.info_text,
     fontFamily: FONTS.body_bold,
     fontSize: 14,
   },

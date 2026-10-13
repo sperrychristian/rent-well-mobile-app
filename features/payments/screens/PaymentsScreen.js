@@ -1,9 +1,10 @@
-import { StyleSheet, View, Text, ScrollView } from 'react-native';
+import { StyleSheet, Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
-import PrimaryButton from '../../../components/PrimaryButton';
 import { useAppRole } from '../../auth/hooks/useAppRole';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../theme';
+import EmptyState from '../../../components/ui/EmptyState';
+import ListRow from '../../../components/ui/ListRow';
 
 // a few made-up payment ids so the detail screen has something to open, the real ones will come from the server
 const sample_payments = {
@@ -32,26 +33,31 @@ function PaymentsScreen(props) {
       contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
     >
       <Card>
-        <Text style={styles.heading}>Coming soon</Text>
-        <Text style={styles.body}>
-          {is_tenant
-            ? 'This is where you will see what rent is due, pay it, and look back at past payments.'
-            : 'This is where you will see rent collected for each unit, who is paid up, and who is late.'}
-        </Text>
+        {/* the pixel card stands in until real payments exist */}
+        <EmptyState
+          illustration="empty_payments"
+          title="Coming soon"
+          message={
+            is_tenant
+              ? 'This is where you will see what rent is due, pay it, and look back at past payments.'
+              : 'This is where you will see rent collected for each unit, who is paid up, and who is late.'
+          }
+          style={styles.empty}
+        />
       </Card>
       <Card>
         <Text style={styles.heading}>Sample payments</Text>
         {payments.map((payment) => (
-          <View key={payment.id} style={styles.row}>
-            <Text style={styles.body}>{payment.label}</Text>
-            <PrimaryButton
-              title={'Open ' + payment.id}
-              icon="cash-outline"
-              text_color={COLORS.text_light}
-              onPress={() => props.navigation.navigate('PaymentDetail', { paymentId: payment.id })}
-              style={styles.open_button}
-            />
-          </View>
+          // each sample is a row now, tapping it opens the same detail the Open button did
+          <ListRow
+            key={payment.id}
+            title={payment.label}
+            subtitle={'Open ' + payment.id}
+            icon="cash-outline"
+            icon_color={COLORS.success_text}
+            divider={payment !== payments[payments.length - 1]}
+            onPress={() => props.navigation.navigate('PaymentDetail', { paymentId: payment.id })}
+          />
         ))}
       </Card>
     </ScrollView>
@@ -66,22 +72,16 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.sm,
   },
   body: {
+    ...TYPE.body,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 15,
   },
-  row: {
-    marginBottom: SPACING.md,
-  },
-  open_button: {
-    marginHorizontal: 0,
-    marginTop: SPACING.sm,
-    backgroundColor: COLORS.action,
+  empty: {
+    paddingVertical: SPACING.md,
+    paddingHorizontal: 0,
   },
 });

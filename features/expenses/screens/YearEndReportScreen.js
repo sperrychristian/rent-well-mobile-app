@@ -7,7 +7,8 @@ import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { formatDate } from '../../../utils/formatDate';
 import { buildYearEndData, formatMoney } from '../utils/expenseStats';
 import { shareYearEndCsv } from '../utils/exportExpenses';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, BORDER } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
 
 function YearEndReportScreen(props) {
   // need the insets so the title clears the notch and status bar
@@ -50,6 +51,7 @@ function YearEndReportScreen(props) {
         <PrimaryButton
           title="Export Year-End CSV"
           icon="share-outline"
+          variant="primary"
           style={styles.export_button}
           onPress={exportReport}
         />
@@ -65,6 +67,9 @@ function YearEndReportScreen(props) {
               key={option}
               onPress={() => setYear(option)}
               style={[styles.chip, year === option && styles.chip_active]}
+              hitSlop={{ top: 8, bottom: 8 }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: year === option }}
             >
               <Text style={styles.chip_text}>{option}</Text>
             </Pressable>
@@ -160,98 +165,76 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   export_button: {
-    backgroundColor: COLORS.action,
     marginHorizontal: 0,
     marginBottom: SPACING.md,
   },
   section_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    marginBottom: 6,
+    ...TYPE.label,
+    color: COLORS.text_muted,
+    marginBottom: SPACING.xs + SPACING.xxs,
   },
   chip_row: {
-    gap: SPACING.sm,
-    paddingBottom: SPACING.sm,
+    ...list_styles.chip_row,
   },
   chip: {
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.muted,
+    ...list_styles.chip,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   heading: {
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
-    marginBottom: SPACING.sm,
+    ...list_styles.heading,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...list_styles.detail,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginBottom: SPACING.sm,
   },
   missing_text: {
-    color: COLORS.warning,
-    fontFamily: FONTS.body,
-    fontSize: 13,
-    marginTop: 4,
+    ...TYPE.body_small,
+    fontFamily: TYPE.label.fontFamily,
+    color: COLORS.warning_text,
+    marginTop: SPACING.xs,
   },
   summary_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
   },
   summary_total: {
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: 32,
-    marginVertical: 4,
+    ...TYPE.display,
+    color: COLORS.cta,
+    marginVertical: SPACING.xs,
   },
   line_row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 6,
+    gap: SPACING.sm,
+    paddingVertical: SPACING.xs + SPACING.xxs,
   },
   line_name: {
+    ...TYPE.body_small,
     flex: 1,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    marginRight: SPACING.sm,
   },
   line_amount: {
+    ...TYPE.body_small,
+    fontFamily: TYPE.label.fontFamily,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 14,
   },
   divider: {
-    height: 1,
-    backgroundColor: COLORS.background,
+    height: BORDER.hairline,
+    backgroundColor: COLORS.border,
     marginVertical: SPACING.sm,
   },
   footer_note: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.6,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     textAlign: 'center',
     marginTop: SPACING.md,
   },

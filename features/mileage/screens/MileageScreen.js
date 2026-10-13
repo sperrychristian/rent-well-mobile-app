@@ -16,7 +16,9 @@ import TripModal from '../components/TripModal';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { formatDate } from '../../../utils/formatDate';
 import { sumMiles, formatMoney } from '../../expenses/utils/expenseStats';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, OPACITY } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import EmptyState from '../../../components/ui/EmptyState';
 
 function MileageScreen(props) {
   // need the insets so the title clears the notch and status bar
@@ -98,6 +100,7 @@ function MileageScreen(props) {
       <PrimaryButton
         title="Add Trip"
         icon="add-circle-outline"
+        variant="primary"
         style={styles.add_button}
         onPress={openNewForm}
       />
@@ -113,6 +116,9 @@ function MileageScreen(props) {
             key={option}
             onPress={() => setYear(option)}
             style={[styles.chip, year === option && styles.chip_active]}
+            hitSlop={{ top: 8, bottom: 8 }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: year === option }}
           >
             <Text style={styles.chip_text}>{option}</Text>
           </Pressable>
@@ -136,13 +142,20 @@ function MileageScreen(props) {
         <View style={styles.rate_row}>
           <TextInput
             style={styles.rate_input}
+            accessibilityLabel="Rate per mile"
+            keyboardAppearance="dark"
             placeholder="0.70"
-            placeholderTextColor={COLORS.text}
+            placeholderTextColor={COLORS.text_muted}
             keyboardType="decimal-pad"
             value={rate_text}
             onChangeText={setRateText}
           />
-          <PrimaryButton title="Save Rate" onPress={saveRate} style={styles.rate_button} />
+          <PrimaryButton
+            title="Save Rate"
+            variant="secondary"
+            onPress={saveRate}
+            style={styles.rate_button}
+          />
         </View>
       </Card>
     </View>
@@ -156,9 +169,20 @@ function MileageScreen(props) {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
         ListHeaderComponent={list_header}
-        ListEmptyComponent={<Text style={styles.empty_text}>No trips logged for {year}</Text>}
+        ListEmptyComponent={
+          <EmptyState
+            illustration="empty_expenses"
+            title={'No trips logged for ' + year}
+            message="Tap Add Trip after a drive to a property."
+          />
+        }
         renderItem={({ item }) => (
-          <Pressable style={styles.row} onPress={() => openEditForm(item.id)}>
+          <Pressable
+            style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+            onPress={() => openEditForm(item.id)}
+            accessibilityRole="button"
+            accessibilityLabel={item.miles.toFixed(1) + ' miles on ' + item.date + ', edit trip'}
+          >
             <View style={styles.row_top}>
               <Text style={styles.row_miles}>{item.miles.toFixed(1)} miles</Text>
               <Text style={styles.detail}>{formatDate(item.date)}</Text>
@@ -190,64 +214,45 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   add_button: {
-    backgroundColor: COLORS.success,
     marginHorizontal: 0,
     marginBottom: SPACING.md,
   },
   section_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    marginBottom: 6,
+    ...TYPE.label,
+    color: COLORS.text_muted,
+    marginBottom: SPACING.xs + SPACING.xxs,
   },
   chip_row: {
-    gap: SPACING.sm,
-    paddingBottom: SPACING.sm,
+    ...list_styles.chip_row,
   },
   chip: {
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.muted,
+    ...list_styles.chip,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   heading: {
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
-    marginBottom: SPACING.sm,
+    ...list_styles.heading,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...list_styles.detail,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginBottom: SPACING.sm,
   },
   summary_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
   },
   summary_total: {
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: 32,
-    marginVertical: 4,
+    ...TYPE.display,
+    color: COLORS.cta,
+    marginVertical: SPACING.xs,
   },
   rate_row: {
     flexDirection: 'row',
@@ -255,22 +260,15 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   rate_input: {
+    ...list_styles.field_input,
     flex: 1,
-    backgroundColor: COLORS.background,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
-    padding: SPACING.sm,
+    marginBottom: 0,
   },
   rate_button: {
-    backgroundColor: COLORS.success,
     marginHorizontal: 0,
   },
   row: {
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
+    ...list_styles.row,
   },
   row_top: {
     flexDirection: 'row',
@@ -278,15 +276,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   row_miles: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
   },
   empty_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    textAlign: 'center',
-    marginTop: SPACING.lg,
-    opacity: 0.7,
+    ...list_styles.empty_text,
+  },
+  pressed: {
+    opacity: OPACITY.pressed,
   },
 });

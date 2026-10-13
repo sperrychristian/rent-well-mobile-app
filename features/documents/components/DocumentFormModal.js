@@ -175,7 +175,7 @@ function DocumentFormModal(props) {
               <TextInput
                 style={styles.input}
                 placeholder="e.g. Lease, Unit 2"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={name}
                 onChangeText={setName}
               />
@@ -215,7 +215,7 @@ function DocumentFormModal(props) {
               <TextInput
                 style={styles.input}
                 placeholder="Pick one above or type an address"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={property}
                 onChangeText={setProperty}
               />
@@ -224,7 +224,7 @@ function DocumentFormModal(props) {
               <TextInput
                 style={styles.input}
                 placeholder="Tenant name"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={tenant}
                 onChangeText={setTenant}
               />
@@ -244,7 +244,7 @@ function DocumentFormModal(props) {
               <TextInput
                 style={[styles.input, styles.notes_input]}
                 placeholder="Anything worth remembering"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 multiline
                 value={notes}
                 onChangeText={setNotes}

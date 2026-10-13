@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import { StyleSheet, View, Text, FlatList, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, SPACING, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../theme';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DemoBanner from '../../../components/DemoBanner';
@@ -9,6 +9,8 @@ import ErrorState from '../../../components/ErrorState';
 import ConversationRow from '../components/ConversationRow';
 import { useMessages } from '../context/MessagesContext';
 import { useAuth } from '../../auth/context/AuthContext';
+import EmptyState from '../../../components/ui/EmptyState';
+import SkeletonList from '../../../components/ui/Skeleton';
 
 function MessagesScreen(props) {
   const insets = useSafeAreaInsets();
@@ -57,7 +59,7 @@ function MessagesScreen(props) {
   } else if (status === 'error' && conversations.length === 0) {
     body = <ErrorState message={error_message} onRetry={reloadConversations} />;
   } else if (status === 'loading' && conversations.length === 0) {
-    body = <ActivityIndicator style={styles.spinner} color={COLORS.title} size="large" />;
+    body = <SkeletonList rows={4} />;
   } else {
     body = (
       <FlatList
@@ -82,11 +84,11 @@ function MessagesScreen(props) {
           ) : null
         }
         ListEmptyComponent={
-          <Text style={styles.empty_text}>
-            {is_owner
-              ? 'No conversations yet. Invite a tenant and the thread shows up once they sign up.'
-              : 'No conversations yet.'}
-          </Text>
+          <EmptyState
+            illustration="empty_messages"
+            title="No conversations yet."
+            message={is_owner ? 'Invite a tenant and the thread shows up once they sign up.' : null}
+          />
         }
         renderItem={({ item }) => (
           <ConversationRow
@@ -107,7 +109,7 @@ function MessagesScreen(props) {
         <PrimaryButton
           title="Invite a Tenant"
           icon="person-add-outline"
-          text_color={COLORS.text_light}
+          variant="primary"
           onPress={() => props.navigation.navigate('InviteTenant')}
           style={styles.invite_button}
         />
@@ -127,8 +129,8 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   body_text: {
+    ...TYPE.body,
     color: COLORS.text,
-    fontFamily: FONTS.body,
     textAlign: 'center',
   },
   list: {
@@ -144,21 +146,17 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     marginHorizontal: 0,
     marginBottom: SPACING.md,
-    backgroundColor: COLORS.success,
   },
   note: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
     textAlign: 'center',
     marginBottom: SPACING.sm,
-    opacity: 0.8,
   },
   empty_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
     textAlign: 'center',
     marginTop: SPACING.lg,
-    opacity: 0.7,
   },
 });

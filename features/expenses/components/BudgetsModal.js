@@ -71,7 +71,7 @@ function BudgetsModal(props) {
                 <TextInput
                   style={styles.input}
                   placeholder="No budget"
-                  placeholderTextColor={COLORS.text}
+                  placeholderTextColor={COLORS.text_muted}
                   keyboardType="decimal-pad"
                   value={budget_texts[name] || ''}
                   onChangeText={(text) =>

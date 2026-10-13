@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs + SPACING.xxs,
   },
   input: {
-    ...TYPE.body,
+    ...TYPE.input,
     minHeight: SIZES.touch + SPACING.xs,
     backgroundColor: COLORS.surface_sunken,
     color: COLORS.text,

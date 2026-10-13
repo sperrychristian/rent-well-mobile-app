@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { useTenants } from '../context/TenantsContext';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 
 // stub for the assignment: it gets only the property's id and looks the property up in the shared tenants data
 // (the demo's local copy or the server's), and if it isn't there it just shows the id instead of crashing
@@ -50,16 +50,16 @@ function PropertyDetailScreen(props) {
       <PrimaryButton
         title="Tenants Here"
         icon="people-outline"
-        text_color={COLORS.text_light}
+        variant="secondary"
         onPress={() => props.navigation.navigate('Tenants', { propertyId: property_id })}
-        style={[styles.button, styles.tenants_button]}
+        style={styles.button}
       />
       <PrimaryButton
         title="Work Orders Here"
         icon="construct-outline"
-        text_color={COLORS.text_light}
+        variant="secondary"
         onPress={() => props.navigation.navigate('WorkOrders', { propertyId: property_id })}
-        style={[styles.button, styles.orders_button]}
+        style={styles.button}
       />
     </ScrollView>
   );
@@ -70,9 +70,8 @@ export default PropertyDetailScreen;
 const styles = StyleSheet.create({
   // the header has the screen's title now, so the name gets its own plain line instead of the big card
   name_line: {
+    ...TYPE.title,
     color: COLORS.title,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     textAlign: 'center',
   },
   container: {
@@ -80,33 +79,24 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.sm,
   },
   body: {
+    ...TYPE.body,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 15,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
     marginTop: SPACING.xs,
   },
   button: {
     width: '90%',
+    maxWidth: SIZES.content_max_width,
     alignSelf: 'center',
     marginHorizontal: 0,
     marginBottom: SPACING.sm,
-  },
-  tenants_button: {
-    backgroundColor: COLORS.title,
-  },
-  orders_button: {
-    backgroundColor: COLORS.success,
   },
 });

@@ -61,7 +61,7 @@ function SignOffModal(props) {
               <TextInput
                 style={styles.input}
                 placeholder="Tenant types their full name"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={signed_by}
                 onChangeText={setSignedBy}
               />

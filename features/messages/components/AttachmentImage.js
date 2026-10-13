@@ -50,7 +50,7 @@ function AttachmentImage(props) {
   if (failed) {
     return (
       <Pressable style={[styles.frame, styles.center]} onPress={retry} accessibilityRole="button">
-        <Ionicons name="image-outline" size={28} color={COLORS.secondary} />
+        <Ionicons name="image-outline" size={28} color={COLORS.text_muted} />
         <Text style={styles.retry_text}>Tap to reload photo</Text>
       </Pressable>
     );
@@ -59,7 +59,7 @@ function AttachmentImage(props) {
   if (!url) {
     return (
       <View style={[styles.frame, styles.center]}>
-        <ActivityIndicator color={COLORS.secondary} />
+        <ActivityIndicator color={COLORS.text_muted} />
       </View>
     );
   }

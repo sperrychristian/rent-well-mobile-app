@@ -48,7 +48,7 @@ function RemoteImage(props) {
         accessibilityRole="button"
         accessibilityLabel="Reload photo"
       >
-        <Ionicons name="image-outline" size={24} color={COLORS.secondary} />
+        <Ionicons name="image-outline" size={24} color={COLORS.text_muted} />
         <Text style={styles.retry_text}>Tap to reload</Text>
       </Pressable>
     );
@@ -57,7 +57,7 @@ function RemoteImage(props) {
   if (!url) {
     return (
       <View style={[styles.frame, props.style, styles.center]}>
-        <ActivityIndicator color={COLORS.secondary} />
+        <ActivityIndicator color={COLORS.text_muted} />
       </View>
     );
   }

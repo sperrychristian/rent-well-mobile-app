@@ -141,6 +141,8 @@ export const TYPE = {
   label: { fontFamily: FONTS.body_bold, fontSize: 13, lineHeight: 18 },
   caption: { fontFamily: FONTS.body, fontSize: 12, lineHeight: 16 },
   button: { fontFamily: FONTS.body_bold, fontSize: 16, lineHeight: 22 },
+  // text boxes skip the line height on purpose, iOS pushes single-line input text off center when it's set
+  input: { fontFamily: FONTS.body, fontSize: 16 },
 };
 
 export const RADIUS = {

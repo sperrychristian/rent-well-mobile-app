@@ -183,7 +183,7 @@ function AddExpenseModal(props) {
               <TextInput
                 style={styles.input}
                 placeholder="e.g. 45.00"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 keyboardType="decimal-pad"
                 value={amount}
                 onChangeText={setAmount}
@@ -259,7 +259,7 @@ function AddExpenseModal(props) {
                 <TextInput
                   style={[styles.input, styles.input_after_chips]}
                   placeholder="Pick one above or type a property"
-                  placeholderTextColor={COLORS.text}
+                  placeholderTextColor={COLORS.text_muted}
                   value={property}
                   onChangeText={setProperty}
                 />
@@ -295,7 +295,7 @@ function AddExpenseModal(props) {
               <TextInput
                 style={styles.input}
                 placeholder="Who was paid?"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={vendor}
                 onChangeText={setVendor}
               />
@@ -328,7 +328,7 @@ function AddExpenseModal(props) {
                     <TextInput
                       style={styles.input}
                       placeholder="Amount recovered so far (e.g. 50.00)"
-                      placeholderTextColor={COLORS.text}
+                      placeholderTextColor={COLORS.text_muted}
                       keyboardType="decimal-pad"
                       value={recovered_text}
                       onChangeText={setRecoveredText}
@@ -341,7 +341,7 @@ function AddExpenseModal(props) {
               <TextInput
                 style={[styles.input, styles.notes_input]}
                 placeholder="What was it for?"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 multiline
                 value={notes}
                 onChangeText={setNotes}
@@ -360,7 +360,7 @@ function AddExpenseModal(props) {
                         onPress={() => removeReceipt(index)}
                         accessibilityLabel="Remove receipt"
                       >
-                        <Ionicons name="close-circle" size={22} color={COLORS.danger} />
+                        <Ionicons name="close-circle" size={22} color={COLORS.danger_text} />
                       </Pressable>
                     </View>
                   ))}

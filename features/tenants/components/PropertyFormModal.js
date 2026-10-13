@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   error: {
-    color: COLORS.danger,
+    color: COLORS.danger_text,
     fontFamily: FONTS.body_bold,
     fontSize: 13,
     marginBottom: SPACING.sm,

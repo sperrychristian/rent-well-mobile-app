@@ -17,10 +17,11 @@ import ErrorState from '../../../components/ErrorState';
 import RemoteImage from '../../../components/RemoteImage';
 import ImageViewerModal from '../../messages/components/ImageViewerModal';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { status_colors, priority_colors } from '../components/WorkOrderCard';
 import { canTenantAddPhotos, photosLeft } from '../utils/workOrderHelpers';
 import { formatDate } from '../../../utils/formatDate';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, FONTS, TYPE, RADIUS } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import StatusPill from '../../../components/ui/StatusPill';
 
 // the server takes photos up to 10 MB
 const max_photo_bytes = 10485760;
@@ -142,20 +143,11 @@ function RequestDetailScreen(props) {
         <Card>
           <View style={styles.top_line}>
             <Text style={styles.heading}>{order.title}</Text>
-            <View style={[styles.badge, { backgroundColor: status_colors[order.status] }]}>
-              <Text style={styles.badge_text}>{order.status}</Text>
-            </View>
+            <StatusPill label={order.status} />
           </View>
           <Text style={styles.detail}>{order.property}</Text>
           <View style={styles.tag_row}>
-            <View
-              style={[
-                styles.badge,
-                { backgroundColor: priority_colors[order.priority] || COLORS.secondary },
-              ]}
-            >
-              <Text style={styles.badge_text}>{order.priority}</Text>
-            </View>
+            <StatusPill label={order.priority} />
           </View>
           {order.description ? <Text style={styles.body}>{order.description}</Text> : null}
         </Card>
@@ -213,12 +205,14 @@ function RequestDetailScreen(props) {
                   <PrimaryButton
                     title="Camera"
                     icon="camera-outline"
+                    variant="secondary"
                     onPress={takePhoto}
                     style={styles.photo_button}
                   />
                   <PrimaryButton
                     title="Library"
                     icon="image-outline"
+                    variant="secondary"
                     onPress={choosePhotos}
                     style={styles.photo_button}
                   />
@@ -253,10 +247,9 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   heading: {
+    ...TYPE.heading,
     flex: 1,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.sm,
   },
   badge: {
@@ -274,31 +267,26 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...list_styles.detail,
   },
   body: {
+    ...TYPE.body,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 15,
     marginTop: SPACING.sm,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginTop: SPACING.sm,
   },
   photo_thumb: {
     width: 110,
     height: 110,
+    borderRadius: RADIUS.md,
     marginRight: SPACING.sm,
   },
   local_photo: {
-    borderRadius: 8,
+    borderRadius: RADIUS.md,
   },
   busy_row: {
     flexDirection: 'row',
@@ -314,6 +302,5 @@ const styles = StyleSheet.create({
   photo_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
 });

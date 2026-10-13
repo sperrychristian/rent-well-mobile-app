@@ -114,6 +114,49 @@ export function formatMessageTime(iso, now) {
   return hour_text + ':' + twoDigits(date.getMinutes()) + (hours < 12 ? ' AM' : ' PM');
 }
 
+// the thread groups messages by day: a divider goes above the first message of each day
+// messages are newest first, so the one just older than index is index + 1
+// gives back Today, Yesterday, or the YYYY-MM-DD date, and null when this message isn't the first of its day
+export function dayDividerLabel(messages, index, now) {
+  const message = messages[index];
+  if (!message || !message.createdAt) {
+    return null;
+  }
+  const day = localDate(new Date(message.createdAt));
+  const older = messages[index + 1];
+  if (older && older.createdAt && localDate(new Date(older.createdAt)) === day) {
+    return null;
+  }
+  const today = now || new Date();
+  const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+  if (day === localDate(today)) {
+    return 'Today';
+  }
+  if (day === localDate(yesterday)) {
+    return 'Yesterday';
+  }
+  return day;
+}
+
+// a run of quick messages from the same person only shows the time once, under the last one
+// true when the message at index is the newest of its run (the next newer one is someone else,
+// more than 5 minutes later, or on another day)
+const time_group_ms = 5 * 60000;
+
+export function showsTime(messages, index) {
+  const message = messages[index];
+  const newer = messages[index - 1];
+  if (!message || !newer) {
+    return true;
+  }
+  if (newer.senderId !== message.senderId) {
+    return true;
+  }
+  const gap = timeOf(newer.createdAt) - timeOf(message.createdAt);
+  const same_day = localDate(new Date(newer.createdAt)) === localDate(new Date(message.createdAt));
+  return gap > time_group_ms || !same_day;
+}
+
 // an attachment still needs text since the server rejects an empty body, so a photo on its own gets this
 export const photo_only_body = 'Photo';
 

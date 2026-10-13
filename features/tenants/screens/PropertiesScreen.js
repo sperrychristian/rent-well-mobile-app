@@ -16,7 +16,10 @@ import ErrorState from '../../../components/ErrorState';
 import HeaderIconButton from '../../../components/HeaderIconButton';
 import PropertyFormModal from '../components/PropertyFormModal';
 import { useTenants } from '../context/TenantsContext';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import EmptyState from '../../../components/ui/EmptyState';
+import SkeletonList from '../../../components/ui/Skeleton';
 
 // the owner's properties: add, rename, change the address, or delete one nobody uses anymore
 function PropertiesScreen(props) {
@@ -97,7 +100,7 @@ function PropertiesScreen(props) {
 
   let body;
   if (status === 'loading' && properties.length === 0) {
-    body = <ActivityIndicator style={styles.spinner} color={COLORS.title} size="large" />;
+    body = <SkeletonList rows={3} />;
   } else if (status === 'error' && properties.length === 0) {
     body = <ErrorState message={error_message} onRetry={refresh} />;
   } else {
@@ -112,7 +115,11 @@ function PropertiesScreen(props) {
           ) : undefined
         }
         ListEmptyComponent={
-          <Text style={styles.empty_text}>No properties yet. Add your first one above.</Text>
+          <EmptyState
+            illustration="house_mark"
+            title="No properties yet"
+            message="Add your first one above."
+          />
         }
         renderItem={({ item }) => (
           <View style={styles.row}>
@@ -123,7 +130,12 @@ function PropertiesScreen(props) {
               accessibilityRole="button"
               accessibilityLabel={'Open ' + item.name}
             >
-              <Text style={styles.name}>{item.name}</Text>
+              <View style={styles.name_row}>
+                <View style={styles.icon_square}>
+                  <Ionicons name="home-outline" size={18} color={COLORS.info_text} />
+                </View>
+                <Text style={styles.name}>{item.name}</Text>
+              </View>
               <Text style={styles.detail}>{item.address}</Text>
               <Text style={styles.detail}>
                 {item.tenancies.length === 0
@@ -138,19 +150,21 @@ function PropertiesScreen(props) {
               <View style={styles.row_buttons}>
                 <Pressable
                   onPress={() => openForm(item)}
-                  hitSlop={8}
+                  hitSlop={4}
+                  style={styles.icon_button}
                   accessibilityRole="button"
                   accessibilityLabel={'Edit ' + item.name}
                 >
-                  <Ionicons name="create-outline" size={22} color={COLORS.action} />
+                  <Ionicons name="create-outline" size={22} color={COLORS.info_text} />
                 </Pressable>
                 <Pressable
                   onPress={() => confirmDelete(item)}
-                  hitSlop={8}
+                  hitSlop={4}
+                  style={styles.icon_button}
                   accessibilityRole="button"
                   accessibilityLabel={'Delete ' + item.name}
                 >
-                  <Ionicons name="trash-outline" size={22} color={COLORS.danger} />
+                  <Ionicons name="trash-outline" size={22} color={COLORS.danger_text} />
                 </Pressable>
               </View>
             )}
@@ -165,7 +179,7 @@ function PropertiesScreen(props) {
       <PrimaryButton
         title="Add Property"
         icon="add-circle-outline"
-        text_color={COLORS.text_light}
+        variant="primary"
         onPress={() => openForm(null)}
         style={styles.add_button}
       />
@@ -199,55 +213,61 @@ const styles = StyleSheet.create({
   add_button: {
     marginHorizontal: 0,
     marginBottom: SPACING.md,
-    backgroundColor: COLORS.success,
   },
   spinner: {
     marginTop: SPACING.lg,
   },
   offline_banner: {
-    backgroundColor: COLORS.warning,
-    borderRadius: 8,
-    padding: SPACING.sm,
-    marginBottom: SPACING.sm,
+    ...list_styles.offline_banner,
   },
   offline_text: {
-    color: COLORS.text_dark,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    textAlign: 'center',
+    ...list_styles.offline_text,
   },
   row: {
+    ...list_styles.row,
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
   },
   row_text: {
     flex: 1,
   },
   row_buttons: {
     flexDirection: 'row',
-    gap: SPACING.md,
+    gap: SPACING.xs,
   },
   name: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
+    flexShrink: 1,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...list_styles.detail,
   },
   empty_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    textAlign: 'center',
-    marginTop: SPACING.lg,
-    opacity: 0.7,
+    ...list_styles.empty_text,
+  },
+  name_row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.xs,
+  },
+  icon_square: {
+    width: 32,
+    height: 32,
+    borderRadius: RADIUS.sm,
+    backgroundColor: COLORS.surface_raised,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // edit and delete are full 44pt circles so they are easy to hit
+  icon_button: {
+    width: SIZES.touch,
+    height: SIZES.touch,
+    borderRadius: RADIUS.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.surface_raised,
   },
 });
