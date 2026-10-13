@@ -11,7 +11,8 @@ function EmptyState(props) {
     <View style={[styles.box, props.style]}>
       {props.illustration ? (
         <View style={styles.art}>
-          <PixelArt name={props.illustration} pixel={5} />
+          {/* the fintech pass: the drawing is muted to two quiet tones so it's an accent, not the main thing */}
+          <PixelArt name={props.illustration} pixel={4} duotone />
         </View>
       ) : null}
       <Text style={styles.title} accessibilityRole="header">

@@ -2,6 +2,7 @@ import { View, StyleSheet } from 'react-native';
 import { COLORS, SPACING, RADIUS, BORDER, SHADOWS, SIZES } from '../../theme';
 
 // the shared look for every bottom sheet and pop-up modal, the modals keep their own layout and spread these in
+// (the fintech pass: white sheets on a soft ink backdrop, a hairline border, and one soft floating shadow)
 
 // the little grab bar at the top of a bottom sheet, it's only a visual cue so screen readers skip it
 export function SheetHandle() {
@@ -54,7 +55,7 @@ export const sheet_styles = StyleSheet.create({
   input: {
     backgroundColor: COLORS.surface_sunken,
     borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
+    borderColor: COLORS.border_strong,
     borderRadius: RADIUS.md,
     color: COLORS.text,
   },

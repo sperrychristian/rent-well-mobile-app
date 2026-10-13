@@ -1,11 +1,12 @@
 import { View, Pressable, StyleSheet } from 'react-native';
-import { COLORS, SPACING, RADIUS, BORDER, SHADOWS, OPACITY } from '../../theme';
+import { COLORS, SPACING, RADIUS, BORDER, SHADOWS } from '../../theme';
 
 // a surface that groups related things, all three looks share the same padding and corners
 // variants: flat (sits on the page with a border), raised (lifted with a shadow), interactive (raised and tappable)
 // props: variant, onPress (interactive only), accessibilityLabel, accessibilityHint, style, children
+// the fintech pass: flat is the default now, a white card with a hairline border, and only raised gets a soft shadow
 function Card(props) {
-  const variant = props.variant || 'raised';
+  const variant = props.variant || 'flat';
 
   if (variant === 'interactive') {
     return (
@@ -14,12 +15,7 @@ function Card(props) {
         accessibilityRole="button"
         accessibilityLabel={props.accessibilityLabel}
         accessibilityHint={props.accessibilityHint}
-        style={({ pressed }) => [
-          styles.card,
-          styles.raised,
-          props.style,
-          pressed && styles.pressed,
-        ]}
+        style={({ pressed }) => [styles.card, styles.flat, props.style, pressed && styles.pressed]}
       >
         {props.children}
       </Pressable>
@@ -48,10 +44,10 @@ const styles = StyleSheet.create({
   raised: {
     backgroundColor: COLORS.surface,
     borderColor: COLORS.border,
-    ...SHADOWS.medium,
+    ...SHADOWS.low,
   },
   pressed: {
-    opacity: OPACITY.pressed,
     backgroundColor: COLORS.surface_raised,
+    borderColor: COLORS.border_strong,
   },
 });

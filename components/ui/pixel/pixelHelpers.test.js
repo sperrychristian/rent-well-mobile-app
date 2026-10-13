@@ -1,4 +1,5 @@
 import { buildGrid, validateGrid, gridToRuns, gridSize } from './pixelHelpers';
+import { duotonePalette } from './pixelDuotone';
 import { drawings } from './pixelDrawings';
 import { COLORS } from '../../../theme';
 
@@ -114,5 +115,28 @@ describe('the drawings', () => {
       'empty_expenses',
       'empty_payments',
     ].forEach((name) => expect(drawings[name]).toBeDefined());
+  });
+});
+
+describe('duotonePalette', () => {
+  test('bright colors become the light tone and dark ones the dark tone, see-through stays', () => {
+    const palette = [null, 'pixel_paper', 'pixel_door_dark', 'pixel_frame'];
+    expect(duotonePalette(palette, COLORS, 'pixel_duo_light', 'pixel_duo_dark')).toEqual([
+      null,
+      'pixel_duo_light',
+      'pixel_duo_dark',
+      'pixel_duo_light',
+    ]);
+  });
+
+  test('every empty state in duotone is still a valid drawing with both tones', () => {
+    Object.keys(drawings)
+      .filter((name) => name.startsWith('empty_'))
+      .forEach((name) => {
+        const { grid, palette } = buildGrid(drawings[name]);
+        const duo = duotonePalette(palette, COLORS, 'pixel_duo_light', 'pixel_duo_dark');
+        expect({ name, problems: validateGrid(grid, duo, COLORS) }).toEqual({ name, problems: [] });
+        expect(duo.slice(1).every((token) => token.startsWith('pixel_duo_'))).toBe(true);
+      });
   });
 });

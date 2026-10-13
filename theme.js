@@ -34,6 +34,8 @@ export const COLORS = {
   on_cta: '#FFFFFF',
   focus: '#4F46E5',
   brand_tint: '#EEF0FE',
+  // the quieter text on top of the indigo summary card
+  on_brand_muted: '#E0E4FD',
 
   // ----- actions and states as fills, white text on them is AA -----
   success: '#157A3E',
@@ -84,7 +86,7 @@ export const COLORS = {
   photo_backdrop: 'black',
   shadow: '#0F1B2D',
   shimmer_edge: 'rgba(255,255,255,0)',
-  shimmer_peak: 'rgba(255,255,255,0.6)',
+  shimmer_peak: 'rgba(255,255,255,0.22)',
 
   // ----- pixel art palette, only the PixelArt drawings use these -----
   // the house logomark is recolored into the brand: indigo roof, soft indigo walls, ink door

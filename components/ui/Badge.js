@@ -24,15 +24,15 @@ export default Badge;
 
 const styles = StyleSheet.create({
   badge: {
+    borderRadius: RADIUS.pill,
+    borderWidth: BORDER.thick,
+    borderColor: COLORS.surface,
     minWidth: 22,
     minHeight: 22,
-    borderRadius: RADIUS.pill,
     paddingHorizontal: SPACING.xs + SPACING.xxs,
     alignItems: 'center',
     justifyContent: 'center',
     // the ring keeps it readable where it overlaps a button corner
-    borderWidth: BORDER.thick,
-    borderColor: COLORS.background,
   },
   danger: {
     backgroundColor: COLORS.danger,

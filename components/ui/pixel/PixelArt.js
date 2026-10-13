@@ -2,19 +2,30 @@ import { useMemo } from 'react';
 import Svg, { Rect } from 'react-native-svg';
 import { buildGrid, validateGrid, gridToRuns, gridSize } from './pixelHelpers';
 import { drawings } from './pixelDrawings';
+import { duotonePalette } from './pixelDuotone';
 import { COLORS } from '../../../theme';
 
 // draws one of the pixel drawings as crisp squares, every color comes from the theme's pixel_ tokens
 // props: name (a drawing in pixelDrawings.js), or grid and palette (rows of indexes and the token names),
 //   pixel (how big one square is, default 6), label (what a screen reader says, leave it out for decoration), style
+//   duotone (true redraws it in the two quiet pixel_duo_ tones, the empty states use that)
 function PixelArt(props) {
   const built = useMemo(() => {
     if (props.grid) {
       return { grid: props.grid, palette: props.palette };
     }
     const drawing = drawings[props.name];
-    return drawing ? buildGrid(drawing) : null;
-  }, [props.name, props.grid, props.palette]);
+    if (!drawing) {
+      return null;
+    }
+    const plain = buildGrid(drawing);
+    return props.duotone
+      ? {
+          grid: plain.grid,
+          palette: duotonePalette(plain.palette, COLORS, 'pixel_duo_light', 'pixel_duo_dark'),
+        }
+      : plain;
+  }, [props.name, props.grid, props.palette, props.duotone]);
 
   // a broken drawing draws nothing instead of crashing the screen, and says why in the log
   const problems = built ? validateGrid(built.grid, built.palette, COLORS) : ['no drawing'];

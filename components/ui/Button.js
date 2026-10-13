@@ -4,15 +4,37 @@ import { COLORS, SPACING, TYPE, RADIUS, BORDER, OPACITY, SIZES } from '../../the
 
 // the one button for the whole app, every look comes from a variant so screens don't style their own
 // variants: primary (amber, the main action), secondary (outlined), tertiary (text only), destructive (red),
+//   (the fintech pass made primary the indigo brand color, amber is only for warnings now)
 //   and plain (the steel blue PrimaryButton has always had, screens recolor it with style)
 // sizes: small, medium (default), large, every one is at least 44 tall with the hitSlop
 // props: title, icon, variant, size, loading, disabled, onPress, style, text_color, accessibilityLabel, accessibilityHint
 const variants = {
-  primary: { fill: COLORS.cta, text: COLORS.on_cta, border: 'transparent' },
-  secondary: { fill: COLORS.surface_raised, text: COLORS.text, border: COLORS.border_strong },
-  tertiary: { fill: 'transparent', text: COLORS.info_text, border: 'transparent' },
-  destructive: { fill: COLORS.danger, text: COLORS.text_light, border: 'transparent' },
-  plain: { fill: COLORS.primary, text: COLORS.text, border: 'transparent' },
+  primary: {
+    fill: COLORS.cta,
+    text: COLORS.on_cta,
+    border: COLORS.cta,
+    pressed: COLORS.cta_pressed,
+  },
+  secondary: {
+    fill: COLORS.surface,
+    text: COLORS.text,
+    border: COLORS.border_strong,
+    pressed: COLORS.surface_raised,
+  },
+  tertiary: {
+    fill: 'transparent',
+    text: COLORS.cta,
+    border: 'transparent',
+    pressed: COLORS.brand_tint,
+  },
+  destructive: {
+    fill: COLORS.danger,
+    text: COLORS.text_light,
+    border: COLORS.danger,
+    pressed: COLORS.danger_text,
+  },
+  // the fintech pass: plain is the indigo with white text now, screens that recolor it keep white text on top
+  plain: { fill: COLORS.primary, text: COLORS.text_light, border: 'transparent', pressed: null },
 };
 
 const heights = {
@@ -49,6 +71,7 @@ function Button(props) {
         size === 'large' && styles.large,
         props.style,
         pressed && !is_disabled && styles.pressed,
+        pressed && !is_disabled && look.pressed && { backgroundColor: look.pressed },
         is_disabled && styles.disabled,
       ]}
     >
@@ -96,8 +119,9 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.lg,
   },
   // a little dim and shrink so a tap feels like a press, it doesn't move anything so reduce motion is fine
+  // (the variants with a pressed color darken instead of fading)
   pressed: {
-    opacity: OPACITY.pressed,
+    opacity: OPACITY.subtle,
     transform: [{ scale: 0.98 }],
   },
   disabled: {

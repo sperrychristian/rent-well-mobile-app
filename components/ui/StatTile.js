@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, NUMBERS } from '../../theme';
 
 // one number in a home screen's summary row, like 3 open work orders
 // props: value, label, icon, color (a text-safe theme color for the icon and number), style
@@ -40,6 +40,7 @@ const styles = StyleSheet.create({
   },
   value: {
     ...TYPE.title,
+    ...NUMBERS,
   },
   label: {
     ...TYPE.caption,

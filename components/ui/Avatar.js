@@ -1,11 +1,13 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { initialsFor, avatarFill } from './uiHelpers';
-import { COLORS, SIZES, FONTS } from '../../theme';
+import { initialsFor, avatarTone } from './uiHelpers';
+import { SIZES, FONTS } from '../../theme';
 
 // a circle with someone's initials, the same name always gets the same color
 // props: name, size (default SIZES.avatar), style
 function Avatar(props) {
   const size = props.size || SIZES.avatar;
+  // the fintech pass: a soft tint with the initials in its darker color
+  const tone = avatarTone(props.name);
   return (
     <View
       style={[
@@ -14,7 +16,7 @@ function Avatar(props) {
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: avatarFill(props.name),
+          backgroundColor: tone.tint,
         },
         props.style,
       ]}
@@ -23,7 +25,7 @@ function Avatar(props) {
       importantForAccessibility="no-hide-descendants"
     >
       <Text
-        style={[styles.initials, { fontSize: Math.round(size * 0.38) }]}
+        style={[styles.initials, { fontSize: Math.round(size * 0.38), color: tone.text }]}
         allowFontScaling={false}
       >
         {initialsFor(props.name)}
@@ -40,7 +42,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   initials: {
-    color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
+    fontFamily: FONTS.subheading,
   },
 });

@@ -38,10 +38,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   title: {
-    ...TYPE.label,
+    ...TYPE.overline,
     color: COLORS.text_muted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
     flexShrink: 1,
   },
   count: {
@@ -53,6 +51,6 @@ const styles = StyleSheet.create({
   },
   action_text: {
     ...TYPE.label,
-    color: COLORS.info_text,
+    color: COLORS.cta,
   },
 });

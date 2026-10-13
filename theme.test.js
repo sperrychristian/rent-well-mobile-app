@@ -88,6 +88,7 @@ describe('theme contrast', () => {
 
   test('the brand button keeps white text AA even while pressed', () => {
     expect(meetsAA(COLORS.on_cta, COLORS.cta)).toBe(true);
+    expect(meetsAA(COLORS.on_brand_muted, COLORS.cta)).toBe(true);
     expect(meetsAA(COLORS.on_cta, COLORS.cta_pressed)).toBe(true);
   });
 

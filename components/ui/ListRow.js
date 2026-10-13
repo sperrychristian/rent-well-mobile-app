@@ -1,23 +1,23 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Avatar from './Avatar';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, OPACITY } from '../../theme';
+import IconCircle from './IconCircle';
+import { COLORS, SPACING, TYPE, BORDER, SIZES, NUMBERS } from '../../theme';
 
 // one row in a list: something on the left (an icon or an avatar), a title and a subtitle, and a value or chevron on the right
 // props: title, subtitle, icon, icon_color, avatar_name, trailing (text or a node), chevron, onPress,
+//   icon_tone (the fintech pass draws the icon in a tinted circle, brand by default),
 //   divider (a line under it), accessibilityLabel, accessibilityHint, style
 function ListRow(props) {
   const leading = props.avatar_name ? (
     <Avatar name={props.avatar_name} />
   ) : props.icon ? (
-    <View style={styles.icon_box}>
-      <Ionicons name={props.icon} size={SIZES.icon} color={props.icon_color || COLORS.info_text} />
-    </View>
+    <IconCircle icon={props.icon} tone={props.icon_tone || 'brand'} />
   ) : null;
 
   const trailing =
     typeof props.trailing === 'string' ? (
-      <Text style={styles.trailing_text}>{props.trailing}</Text>
+      <Text style={[styles.trailing_text, NUMBERS]}>{props.trailing}</Text>
     ) : (
       props.trailing || null
     );
@@ -71,15 +71,7 @@ const styles = StyleSheet.create({
     borderBottomColor: COLORS.border,
   },
   pressed: {
-    opacity: OPACITY.pressed,
-  },
-  icon_box: {
-    width: SIZES.avatar,
-    height: SIZES.avatar,
-    borderRadius: RADIUS.md,
     backgroundColor: COLORS.surface_raised,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   middle: {
     flex: 1,

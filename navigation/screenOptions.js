@@ -7,12 +7,17 @@ import { headerTitle } from './navigationMap';
 // (the card is only on the Dashboard and the tenant home now, everywhere else the header title is the only title)
 export const shared_screen_options = {
   headerShown: true,
-  headerStyle: { backgroundColor: COLORS.background },
+  // the fintech pass: a white bar with the thin line under it (headerShadowVisible draws that line)
+  headerStyle: { backgroundColor: COLORS.surface },
   headerTintColor: COLORS.title,
   // the design pass: a bolder title on the navy, the same size the system header uses
-  headerTitleStyle: { fontFamily: TYPE.heading.fontFamily, color: COLORS.title, fontSize: 17 },
+  headerTitleStyle: {
+    fontFamily: TYPE.heading.fontFamily,
+    color: COLORS.title,
+    fontSize: TYPE.heading.fontSize,
+  },
   headerTitleAlign: 'center',
-  headerShadowVisible: false,
+  headerShadowVisible: true,
   // just the arrow, the previous screen's title next to it made the bar crowded
   headerBackButtonDisplayMode: 'minimal',
   contentStyle: { backgroundColor: COLORS.background },

@@ -1,16 +1,19 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import PrimaryButton from './PrimaryButton';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../theme';
+import { COLORS, SPACING, TYPE, SIZES } from '../theme';
+import IconCircle from './ui/IconCircle';
 
 // shown instead of a blank screen when something couldn't load, like being offline or the server being down
 // props: message, onRetry
 function ErrorState(props) {
   return (
     <View style={styles.box} accessibilityLiveRegion="polite">
-      <View style={styles.icon_circle}>
-        <Ionicons name="cloud-offline-outline" size={32} color={COLORS.warning_text} />
-      </View>
+      <IconCircle
+        icon="cloud-offline-outline"
+        tone="warning"
+        size={64}
+        style={styles.icon_circle}
+      />
       <Text style={styles.title} accessibilityRole="header">
         Something went wrong
       </Text>
@@ -36,14 +39,6 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   icon_circle: {
-    width: 64,
-    height: 64,
-    borderRadius: RADIUS.pill,
-    backgroundColor: COLORS.surface,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: SPACING.xs,
   },
   title: {

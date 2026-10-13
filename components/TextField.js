@@ -14,7 +14,7 @@ function TextField(props) {
       <TextInput
         style={[styles.input, focused && styles.input_focused, error && styles.input_error, style]}
         placeholderTextColor={COLORS.text_muted}
-        keyboardAppearance="dark"
+        keyboardAppearance="light"
         accessibilityLabel={label}
         accessibilityHint={error || helper}
         {...input_props}

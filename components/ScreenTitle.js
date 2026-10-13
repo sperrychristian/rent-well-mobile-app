@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Animated, Text, View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useReduceMotion } from './ui/useReduceMotion';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../theme';
+import { COLORS, SPACING, TYPE, RADIUS, SHADOWS } from '../theme';
 
 // used AI to help create a shimmer behind each screen title
 
@@ -64,14 +64,12 @@ export default ScreenTitle;
 
 const styles = StyleSheet.create({
   // the hero card on the two homes: a raised navy panel with an amber edge along the bottom
+  // (the fintech pass: a solid indigo brand card with white text, the shimmer still runs across it)
   card: {
-    alignSelf: 'stretch',
-    backgroundColor: COLORS.surface_raised,
+    backgroundColor: COLORS.cta,
     borderRadius: RADIUS.lg,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border_strong,
-    borderBottomWidth: BORDER.thick + 1,
-    borderBottomColor: COLORS.cta,
+    ...SHADOWS.medium,
+    alignSelf: 'stretch',
     overflow: 'hidden',
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.lg,
@@ -79,7 +77,7 @@ const styles = StyleSheet.create({
   },
   title: {
     ...TYPE.title,
-    color: COLORS.title_text,
+    color: COLORS.on_cta,
     textAlign: 'center',
     letterSpacing: 0.5,
   },

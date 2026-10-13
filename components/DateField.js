@@ -27,7 +27,8 @@ function DateField(props) {
           mode="date"
           display="compact"
           // the app is navy now, so the compact picker uses its dark look to stay readable
-          themeVariant="dark"
+          // (the fintech pass went back to a light app, so the picker is light again)
+          themeVariant="light"
           accentColor={COLORS.cta}
           accessibilityLabel={'Date, ' + props.value}
           onChange={(event, selected) => {
