@@ -1,6 +1,5 @@
 import { StyleSheet, Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { useTenants } from '../context/TenantsContext';
@@ -20,7 +19,7 @@ function PropertyDetailScreen(props) {
       style={styles.container}
       contentContainerStyle={{ paddingTop: SPACING.md, paddingBottom: insets.bottom + SPACING.lg }}
     >
-      <ScreenTitle>{property ? property.name : 'Property'}</ScreenTitle>
+      <Text style={styles.name_line}>{property ? property.name : 'Property'}</Text>
       <Card>
         {property ? (
           <>
@@ -69,6 +68,13 @@ function PropertyDetailScreen(props) {
 export default PropertyDetailScreen;
 
 const styles = StyleSheet.create({
+  // the header has the screen's title now, so the name gets its own plain line instead of the big card
+  name_line: {
+    color: COLORS.title,
+    fontFamily: FONTS.heading,
+    fontSize: FONT_SIZES.body,
+    textAlign: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background,

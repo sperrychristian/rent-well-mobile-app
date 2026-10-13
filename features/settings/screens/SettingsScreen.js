@@ -1,6 +1,5 @@
 import { StyleSheet, Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DemoBanner from '../../../components/DemoBanner';
@@ -26,7 +25,6 @@ function SettingsScreen(props) {
     >
       {/* only shows while the demo is running, it's the demo's way out */}
       <DemoBanner />
-      <ScreenTitle>Settings</ScreenTitle>
 
       <Card>
         <Text style={styles.heading}>Profile</Text>

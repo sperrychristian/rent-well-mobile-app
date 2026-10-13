@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import PrimaryButton from '../../../components/PrimaryButton';
 import ErrorState from '../../../components/ErrorState';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
@@ -120,7 +119,6 @@ function MyRequestsScreen(props) {
 
   return (
     <View style={[styles.container, { paddingTop: SPACING.md }]}>
-      <ScreenTitle>My Requests</ScreenTitle>
       <PrimaryButton
         title="Report an Issue"
         icon="add-circle-outline"

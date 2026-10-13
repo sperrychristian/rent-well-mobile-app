@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import PrimaryButton from '../../../components/PrimaryButton';
 import ErrorState from '../../../components/ErrorState';
 import HeaderIconButton from '../../../components/HeaderIconButton';
@@ -163,7 +162,6 @@ function PropertiesScreen(props) {
 
   return (
     <View style={[styles.container, { paddingTop: SPACING.md }]}>
-      <ScreenTitle>Properties</ScreenTitle>
       <PrimaryButton
         title="Add Property"
         icon="add-circle-outline"

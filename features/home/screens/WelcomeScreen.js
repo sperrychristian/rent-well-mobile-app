@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View, Image } from 'react-native';
 import { COLORS, SPACING, FONT_SIZES } from '../../../theme';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
@@ -11,7 +10,6 @@ function WelcomeScreen(props) {
   return (
     <View style={styles.container}>
       <Image style={styles.image} source={require('../../../assets/images/pixel_art_house.png')} />
-      <ScreenTitle>Rent Well</ScreenTitle>
       <Card>
         <Text style={styles.body_text}>Property Management Made Simple</Text>
       </Card>

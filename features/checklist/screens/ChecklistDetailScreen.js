@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import ProgressBar from '../components/ProgressBar';
@@ -163,7 +162,7 @@ function ChecklistDetailScreen(props) {
 
   return (
     <View style={[styles.container, { paddingTop: SPACING.md }]}>
-      <ScreenTitle>{checklist.type}</ScreenTitle>
+      <Text style={styles.name_line}>{checklist.type}</Text>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}>
         <Card>
           <Text style={styles.info_name}>{checklist.property}</Text>
@@ -385,6 +384,13 @@ function ChecklistDetailScreen(props) {
 export default ChecklistDetailScreen;
 
 const styles = StyleSheet.create({
+  // the header has the screen's title now, so the name gets its own plain line instead of the big card
+  name_line: {
+    color: COLORS.title,
+    fontFamily: FONTS.heading,
+    fontSize: FONT_SIZES.body,
+    textAlign: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background,

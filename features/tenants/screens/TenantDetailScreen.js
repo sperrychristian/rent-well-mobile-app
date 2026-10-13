@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import ErrorState from '../../../components/ErrorState';
@@ -185,7 +184,7 @@ function TenantDetailScreen(props) {
           paddingHorizontal: SPACING.md,
         }}
       >
-        <ScreenTitle>{tenant.name}</ScreenTitle>
+        <Text style={styles.name_line}>{tenant.name}</Text>
 
         <Card>
           <View style={styles.top_line}>
@@ -357,6 +356,13 @@ function TenantDetailScreen(props) {
 export default TenantDetailScreen;
 
 const styles = StyleSheet.create({
+  // the header has the screen's title now, so the name gets its own plain line instead of the big card
+  name_line: {
+    color: COLORS.title,
+    fontFamily: FONTS.heading,
+    fontSize: FONT_SIZES.body,
+    textAlign: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background,

@@ -10,7 +10,6 @@ import {
   Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TripModal from '../components/TripModal';
@@ -151,7 +150,6 @@ function MileageScreen(props) {
 
   return (
     <View style={[styles.container, { paddingTop: SPACING.md }]}>
-      <ScreenTitle>Mileage</ScreenTitle>
       <FlatList
         data={year_trips}
         keyExtractor={(item) => item.id}

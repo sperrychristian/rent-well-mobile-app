@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, SPACING, FONTS } from '../../../theme';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DemoBanner from '../../../components/DemoBanner';
@@ -104,7 +103,6 @@ function MessagesScreen(props) {
     <View style={[styles.container, { paddingTop: SPACING.md }]}>
       {/* only shows while the demo is running */}
       <DemoBanner />
-      <ScreenTitle>Messages</ScreenTitle>
       {is_owner && (
         <PrimaryButton
           title="Invite a Tenant"

@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import ErrorState from '../../../components/ErrorState';
@@ -125,12 +124,9 @@ function RequestDetailScreen(props) {
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={{
-          paddingTop: SPACING.md,
           paddingBottom: insets.bottom + SPACING.lg,
         }}
       >
-        <ScreenTitle>Request</ScreenTitle>
-
         <Card>
           <View style={styles.top_line}>
             <Text style={styles.heading}>{order.title}</Text>

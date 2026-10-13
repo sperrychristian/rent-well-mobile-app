@@ -1,7 +1,6 @@
 import { View, Text, ScrollView, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import { COLORS, SPACING, FONTS } from '../../../theme';
 
@@ -25,7 +24,7 @@ function AuthLayout(props) {
           { paddingTop: SPACING.md, paddingBottom: insets.bottom + SPACING.lg },
         ]}
       >
-        <ScreenTitle>{props.title}</ScreenTitle>
+        {/* the title prop isn't drawn anymore, the header above already shows the same title */}
         {props.error ? (
           <View style={styles.error_box} accessibilityLiveRegion="polite">
             <Text style={styles.error_text}>{props.error}</Text>

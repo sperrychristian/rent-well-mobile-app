@@ -17,7 +17,6 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
-import ScreenTitle from '../../../components/ScreenTitle';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { useTenants } from '../../tenants/context/TenantsContext';
@@ -288,7 +287,7 @@ function NewWorkOrderScreen(props) {
         contentContainerStyle={[
           styles.container,
           {
-            paddingTop: SPACING.lg,
+            paddingTop: SPACING.md,
             paddingBottom: insets.bottom + SPACING.lg,
             paddingLeft: insets.left + SPACING.lg,
             paddingRight: insets.right + SPACING.lg,
@@ -297,8 +296,6 @@ function NewWorkOrderScreen(props) {
       >
         {/* I cap the width so the form doesn't stretch edge to edge on a tablet */}
         <View style={styles.form}>
-          <ScreenTitle>{owner_remote ? 'New Work Order' : 'Report an Issue'}</ScreenTitle>
-
           {/* an owner signed in for real can't file a tenant request, the dashboard hides the button but this is a backup */}
           {/* it's the owner's own work order form now, opened from the Add button on Work Orders */}
           {owner_remote ? (

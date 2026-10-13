@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
@@ -47,7 +46,6 @@ function YearEndReportScreen(props) {
 
   return (
     <View style={[styles.container, { paddingTop: SPACING.md }]}>
-      <ScreenTitle>Year-End</ScreenTitle>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}>
         <PrimaryButton
           title="Export Year-End CSV"

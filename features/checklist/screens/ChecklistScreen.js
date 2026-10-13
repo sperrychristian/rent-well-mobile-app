@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { StyleSheet, View, Text, FlatList, Pressable, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import PrimaryButton from '../../../components/PrimaryButton';
 import ProgressBar from '../components/ProgressBar';
 import NewChecklistModal from '../components/NewChecklistModal';
@@ -82,7 +81,6 @@ function ChecklistScreen(props) {
 
   return (
     <View style={[styles.container, { paddingTop: SPACING.md }]}>
-      <ScreenTitle>Checklist</ScreenTitle>
       <FlatList
         data={list_checklists}
         keyExtractor={(item) => item.id}

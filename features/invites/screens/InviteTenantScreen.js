@@ -14,7 +14,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TextField from '../../../components/TextField';
@@ -301,12 +300,8 @@ function InviteTenantScreen() {
     >
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={[
-          styles.content,
-          { paddingTop: SPACING.md, paddingBottom: insets.bottom + SPACING.lg },
-        ]}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + SPACING.lg }]}
       >
-        <ScreenTitle>Invite a Tenant</ScreenTitle>
         {content}
       </ScrollView>
     </KeyboardAvoidingView>

@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import AddExpenseModal from '../components/AddExpenseModal';
@@ -520,7 +519,6 @@ function ExpensesScreen(props) {
 
   return (
     <View style={[styles.container, { paddingTop: SPACING.md }]}>
-      <ScreenTitle>Expenses</ScreenTitle>
       <FlatList
         data={rows}
         keyExtractor={(item) => item.key}

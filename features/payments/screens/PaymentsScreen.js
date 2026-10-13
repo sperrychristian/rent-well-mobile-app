@@ -1,6 +1,5 @@
 import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { useAuth } from '../../auth/context/AuthContext';
@@ -29,9 +28,8 @@ function PaymentsScreen(props) {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingTop: SPACING.md, paddingBottom: insets.bottom + SPACING.lg }}
+      contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
     >
-      <ScreenTitle>Payments and Rent</ScreenTitle>
       <Card>
         <Text style={styles.heading}>Coming soon</Text>
         <Text style={styles.body}>

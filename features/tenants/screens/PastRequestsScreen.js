@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, FlatList, RefreshControl, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import ErrorState from '../../../components/ErrorState';
 import { getAllWorkOrders } from '../../../services/api';
 import { fromApiWorkOrder, mergeWorkOrders } from '../../workOrders/utils/workOrderHelpers';
@@ -93,7 +92,6 @@ function PastRequestsScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: SPACING.md }]}>
-      <ScreenTitle>Past Requests</ScreenTitle>
       <Text style={styles.helper}>Read only, since your tenancy has ended.</Text>
       {body}
     </View>

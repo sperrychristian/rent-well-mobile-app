@@ -13,7 +13,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DocumentDetailModal from '../components/DocumentDetailModal';
@@ -314,7 +313,6 @@ function DocumentsScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: SPACING.md }]}>
-      <ScreenTitle>Documents</ScreenTitle>
       <FlatList
         data={list_documents}
         keyExtractor={(item) => item.id}

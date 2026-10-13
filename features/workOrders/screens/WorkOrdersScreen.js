@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import ExpenseDetailsModal from '../../expenses/components/ExpenseDetailsModal';
 import { COLORS, SPACING, FONTS } from '../../../theme';
-import ScreenTitle from '../../../components/ScreenTitle';
 import WorkOrderCard from '../components/WorkOrderCard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState } from 'react';
@@ -230,7 +229,6 @@ function WorkOrdersScreen(props) {
 
   return (
     <View style={[styles.container, { paddingTop: SPACING.md }]}>
-      <ScreenTitle>Work Orders</ScreenTitle>
       {/* FlatList only renders what's on screen, so it scales when the list gets long */}
       {/* real mode can still be loading or have failed with nothing saved, so those get their own screens */}
       {is_remote && orders_status === 'loading' && orders.length === 0 ? (

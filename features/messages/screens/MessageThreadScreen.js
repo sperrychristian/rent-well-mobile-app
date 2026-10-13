@@ -17,14 +17,13 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
-import ScreenTitle from '../../../components/ScreenTitle';
 import ErrorState from '../../../components/ErrorState';
 import MessageBubble from '../components/MessageBubble';
 import ImageViewerModal from '../components/ImageViewerModal';
 import { useMessages } from '../context/MessagesContext';
 import { useTenants } from '../../tenants/context/TenantsContext';
 import { mergeMessages, lastSeenMessageId, messageBodyToSend } from '../utils/messageHelpers';
-import { COLORS, SPACING, FONTS } from '../../../theme';
+import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
 // the server takes photos up to 10 MB and message text up to 2000 characters
 const max_photo_bytes = 10485760;
@@ -271,7 +270,9 @@ function MessageThreadScreen(props) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={[styles.inner, { paddingTop: SPACING.md }]}>
-        <ScreenTitle>{conversation ? conversation.otherUser.name : 'Messages'}</ScreenTitle>
+        <Text style={styles.name_line}>
+          {conversation ? conversation.otherUser.name : 'Messages'}
+        </Text>
         {is_demo && (
           <View style={styles.demo_strip}>
             <Text style={styles.demo_text}>Demo mode: replies are automatic, nothing is sent</Text>
@@ -350,6 +351,14 @@ function MessageThreadScreen(props) {
 export default MessageThreadScreen;
 
 const styles = StyleSheet.create({
+  // the header has the screen's title now, so the name gets its own plain line instead of the big card
+  name_line: {
+    color: COLORS.title,
+    fontFamily: FONTS.heading,
+    fontSize: FONT_SIZES.body,
+    textAlign: 'center',
+    marginBottom: SPACING.sm,
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background,

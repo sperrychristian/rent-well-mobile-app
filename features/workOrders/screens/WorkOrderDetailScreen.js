@@ -14,7 +14,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import AddExpenseModal from '../../expenses/components/AddExpenseModal';
@@ -180,14 +179,11 @@ function WorkOrderDetailContent(props) {
         contentContainerStyle={[
           styles.content,
           {
-            paddingTop: SPACING.md,
             paddingBottom: insets.bottom + SPACING.lg,
           },
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        <ScreenTitle>Details</ScreenTitle>
-
         <Card>
           <Text style={styles.heading}>{order.title}</Text>
           <Text style={styles.detail}>{order.property}</Text>

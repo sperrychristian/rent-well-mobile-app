@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DemoBanner from '../../../components/DemoBanner';
 import ErrorState from '../../../components/ErrorState';
@@ -307,7 +306,6 @@ function TenantsScreen(props) {
     <View style={[styles.container, { paddingTop: SPACING.md }]}>
       {/* only shows while the demo is running */}
       <DemoBanner />
-      <ScreenTitle>Tenants</ScreenTitle>
       <View style={styles.header_buttons}>
         <PrimaryButton
           title="Invite a Tenant"

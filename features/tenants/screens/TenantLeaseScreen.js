@@ -1,6 +1,5 @@
 import { StyleSheet, Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { useTenants } from '../context/TenantsContext';
@@ -21,7 +20,7 @@ function TenantLeaseScreen(props) {
       style={styles.container}
       contentContainerStyle={{ paddingTop: SPACING.md, paddingBottom: insets.bottom + SPACING.lg }}
     >
-      <ScreenTitle>{tenant ? tenant.name : 'Tenant'}</ScreenTitle>
+      <Text style={styles.name_line}>{tenant ? tenant.name : 'Tenant'}</Text>
       <Card>
         <Text style={styles.heading}>Lease and documents</Text>
         {tenant && tenant.active_tenancies.length > 0 ? (
@@ -60,6 +59,13 @@ function TenantLeaseScreen(props) {
 export default TenantLeaseScreen;
 
 const styles = StyleSheet.create({
+  // the header has the screen's title now, so the name gets its own plain line instead of the big card
+  name_line: {
+    color: COLORS.title,
+    fontFamily: FONTS.heading,
+    fontSize: FONT_SIZES.body,
+    textAlign: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
