@@ -1,102 +1,117 @@
 // the design system lives here: every color, size, and font in the app comes from these tokens
 // the design pass made the navy the real base (dark navy surfaces with light text) and added a sunrise amber
 // for the main call to action, theme.test.js checks the contrast of every text and surface pair below
+// the fintech pass flipped it to a light theme: white cards on a soft cool gray, ink navy text, one indigo
+// brand color for the main action, and a soft tint behind each state color for pills and banners
 
 export const COLORS = {
   // ----- base -----
-  // primary is the steel blue for selected chips and the plain buttons, light text sits on it
-  primary: '#36598F',
-  background: '#0E1726',
-  text: '#EEF2F8',
+  // primary is the indigo brand color, selected chips and the plain buttons use it with white text
+  primary: '#4F46E5',
+  background: '#F5F7FA',
+  text: '#0F1B2D',
   // muted is the card and input surface (same as surface), the name stayed so old styles keep working
-  muted: '#17243A',
-  // title is the header and heading color, it's light now that the base is navy
-  title: '#F5F7FB',
-  title_text: '#FFFFFF',
+  muted: '#FFFFFF',
+  // title is the header and heading color, ink navy on the light theme
+  title: '#0F1B2D',
+  title_text: '#0F1B2D',
 
   // ----- surfaces and lines -----
-  surface: '#17243A',
-  surface_raised: '#203150',
-  surface_sunken: '#0A1220',
-  border: '#2B3D5C',
-  border_strong: '#41587F',
-  text_muted: '#A9B5C9',
-  // a dark navy for text on the light fills (amber, yellow, orange)
-  on_light: '#0E1726',
+  surface: '#FFFFFF',
+  // rows and secondary buttons inside a white card, a hair grayer than the card
+  surface_raised: '#F1F4F8',
+  // text boxes sit on this so they read as fields
+  surface_sunken: '#F8FAFC',
+  border: '#E3E8EF',
+  border_strong: '#C3CBD6',
+  text_muted: '#5B6779',
+  // ink text for the light fills (amber, yellow)
+  on_light: '#0F1B2D',
 
-  // ----- the warm accent, sunrise amber for the main call to action and highlights -----
-  cta: '#F7A93B',
-  cta_pressed: '#E0922A',
-  on_cta: '#0E1726',
-  focus: '#F7A93B',
+  // ----- the brand call to action (the name stayed from the amber days) -----
+  cta: '#4F46E5',
+  cta_pressed: '#4338CA',
+  on_cta: '#FFFFFF',
+  focus: '#4F46E5',
+  brand_tint: '#EEF0FE',
 
-  // ----- actions and states (fills, white text on them is AA) -----
-  success: '#1A7843',
-  action: '#2C64D8',
-  info: '#2C64D8',
-  accent: '#7448CF',
-  highlight: '#F6C445',
-  warning: '#F0A23A',
-  danger: '#C7352F',
-  secondary: '#4F5D78',
+  // ----- actions and states as fills, white text on them is AA -----
+  success: '#157A3E',
+  action: '#2563EB',
+  info: '#2563EB',
+  accent: '#7C3AED',
+  highlight: '#FACC15',
+  warning: '#F79009',
+  danger: '#D92D20',
+  secondary: '#5B6779',
 
-  // ----- the same states as text or icons on the navy surfaces -----
-  success_text: '#5FD394',
-  info_text: '#8DB5FF',
-  accent_text: '#B89CFF',
-  warning_text: '#FFC266',
-  danger_text: '#FF8A84',
+  // ----- the same states as text or icons on white or gray -----
+  success_text: '#157A3E',
+  info_text: '#1D4ED8',
+  accent_text: '#6D28D9',
+  warning_text: '#A95A00',
+  danger_text: '#B42318',
+
+  // ----- soft tints behind each state, for pills and banners (the matching _text color sits on them) -----
+  success_tint: '#E7F6EC',
+  info_tint: '#EAF1FE',
+  accent_tint: '#F2ECFE',
+  warning_tint: '#FEF4E2',
+  danger_tint: '#FDECEA',
+  neutral_tint: '#EEF1F5',
 
   // ----- text on colored buttons -----
   text_light: '#FFFFFF',
-  text_dark: '#0E1726',
+  text_dark: '#0F1B2D',
 
   // ----- other surfaces -----
   surface_light: '#FFFFFF',
-  toast_background: '#27395A',
-  skeleton: '#22334F',
-  skeleton_shine: '#2C4063',
+  toast_background: '#0F1B2D',
+  skeleton: '#E9EEF4',
+  skeleton_shine: '#F2F5F9',
 
   // ----- priority -----
-  priority_emergency: '#A61B1B',
-  priority_low: '#2A7686',
+  priority_emergency: '#B42318',
+  priority_low: '#0E7490',
 
   // ----- expense tags -----
-  tag_billed: '#0E6E87',
-  tag_recurring: '#4E5A70',
-  tag_missing_receipt: '#9A5A00',
+  tag_billed: '#0F766E',
+  tag_recurring: '#475569',
+  tag_missing_receipt: '#A95A00',
 
   // ----- overlays -----
-  backdrop: 'rgba(3,8,18,0.72)',
+  backdrop: 'rgba(15,27,45,0.45)',
   photo_backdrop: 'black',
-  shadow: 'black',
+  shadow: '#0F1B2D',
   shimmer_edge: 'rgba(255,255,255,0)',
-  shimmer_peak: 'rgba(255,255,255,0.18)',
-  // the faint pixel grid behind the Welcome hero
-  grid_line: 'rgba(141,181,255,0.07)',
+  shimmer_peak: 'rgba(255,255,255,0.6)',
 
   // ----- pixel art palette, only the PixelArt drawings use these -----
-  pixel_sun: '#FFD43B',
-  pixel_roof: '#D9534A',
-  pixel_roof_dark: '#9E3A35',
-  pixel_chimney: '#A65A32',
-  pixel_chimney_dark: '#7A3F1F',
-  pixel_wall: '#EBD5A4',
-  pixel_wall_shade: '#CDB27C',
-  pixel_frame: '#F3F4F6',
-  pixel_glass: '#6FC4EF',
-  pixel_glass_light: '#C3E8FA',
-  pixel_door: '#6E4426',
-  pixel_door_dark: '#4A2E19',
-  pixel_grass: '#4FAF52',
-  pixel_grass_dark: '#3A8C3E',
-  pixel_path: '#A3A3A3',
+  // the house logomark is recolored into the brand: indigo roof, soft indigo walls, ink door
+  pixel_sun: '#F79009',
+  pixel_roof: '#4F46E5',
+  pixel_roof_dark: '#3730A3',
+  pixel_chimney: '#64748B',
+  pixel_chimney_dark: '#475569',
+  pixel_wall: '#E0E4FD',
+  pixel_wall_shade: '#C7CDFB',
+  pixel_frame: '#FFFFFF',
+  pixel_glass: '#93B4F5',
+  pixel_glass_light: '#DCE7FD',
+  pixel_door: '#312E81',
+  pixel_door_dark: '#1E1B4B',
+  pixel_grass: '#86D3A2',
+  pixel_grass_dark: '#4FAE74',
+  pixel_path: '#C3CBD6',
   pixel_paper: '#E9EEF6',
-  pixel_ink: '#5B6B86',
+  pixel_ink: '#5B6779',
   pixel_steel: '#8FA3BF',
   pixel_bubble: '#5B8DEF',
   pixel_coin: '#F7A93B',
   pixel_coin_dark: '#C47A14',
+  // the two quiet tones every empty-state drawing is redrawn in, so they read as accents and not as art
+  pixel_duo_light: '#DCE1F9',
+  pixel_duo_dark: '#9AA3D6',
 };
 
 // one step for every gap, padding, and margin
@@ -125,30 +140,40 @@ export const FONTS = {
   subheading: 'Inter_600SemiBold',
   body: 'Inter_400Regular',
   body_bold: 'Inter_700Bold',
-  // the pixel font is only for the Rent Well wordmark at big sizes, it gets hard to read small
-  wordmark: 'PixelifySans_700Bold',
 };
 
 // the type scale: each style has its font, size, and line height so text lines up the same everywhere
 // line heights are about 1.3 to 1.5 times the size, which keeps larger system font sizes from clipping
+// the fintech pass tightened it: bold display figures with tight tracking, semibold headings, and small caps labels
 export const TYPE = {
-  display: { fontFamily: FONTS.heading, fontSize: 32, lineHeight: 40 },
-  title: { fontFamily: FONTS.heading, fontSize: 24, lineHeight: 32 },
-  heading: { fontFamily: FONTS.body_bold, fontSize: 18, lineHeight: 24 },
-  subheading: { fontFamily: FONTS.subheading, fontSize: 16, lineHeight: 22 },
+  display: { fontFamily: FONTS.body_bold, fontSize: 32, lineHeight: 40, letterSpacing: -0.6 },
+  title: { fontFamily: FONTS.body_bold, fontSize: 24, lineHeight: 30, letterSpacing: -0.4 },
+  heading: { fontFamily: FONTS.subheading, fontSize: 17, lineHeight: 24, letterSpacing: -0.2 },
+  subheading: { fontFamily: FONTS.subheading, fontSize: 15, lineHeight: 21 },
   body: { fontFamily: FONTS.body, fontSize: 16, lineHeight: 24 },
   body_small: { fontFamily: FONTS.body, fontSize: 14, lineHeight: 20 },
-  label: { fontFamily: FONTS.body_bold, fontSize: 13, lineHeight: 18 },
+  label: { fontFamily: FONTS.subheading, fontSize: 13, lineHeight: 18 },
   caption: { fontFamily: FONTS.body, fontSize: 12, lineHeight: 16 },
-  button: { fontFamily: FONTS.body_bold, fontSize: 16, lineHeight: 22 },
+  // the small uppercase label over a section or a figure
+  overline: {
+    fontFamily: FONTS.subheading,
+    fontSize: 12,
+    lineHeight: 16,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+  button: { fontFamily: FONTS.subheading, fontSize: 16, lineHeight: 22 },
   // text boxes skip the line height on purpose, iOS pushes single-line input text off center when it's set
   input: { fontFamily: FONTS.body, fontSize: 16 },
 };
 
+// every number that lines up in a column (money, counts) uses tabular figures so the digits don't wiggle
+export const NUMBERS = { fontVariant: ['tabular-nums'] };
+
 export const RADIUS = {
-  sm: 6,
-  md: 10,
-  lg: 14,
+  sm: 8,
+  md: 12,
+  lg: 16,
   xl: 20,
   pill: 999,
 };
@@ -160,6 +185,7 @@ export const BORDER = {
 };
 
 // shadows need both the iOS shadow props and Android elevation, so each preset has both
+// the fintech pass keeps them very soft, cards get a hairline border instead, and only floating things lift
 export const SHADOWS = {
   none: {
     shadowOpacity: 0,
@@ -167,24 +193,24 @@ export const SHADOWS = {
   },
   low: {
     shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   medium: {
     shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 3,
   },
   high: {
     shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 8,
   },
 };
 
@@ -207,6 +233,9 @@ export const SIZES = {
   icon_large: 28,
   avatar: 40,
   avatar_large: 56,
+  // the soft circle behind a row's leading icon
+  icon_circle: 40,
+  thumb: 56,
   // keeps forms and lists a phone width on an iPad
   content_max_width: 600,
 };
