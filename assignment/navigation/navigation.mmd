@@ -1,0 +1,124 @@
+flowchart LR
+  classDef auth fill:#dfe0e6,stroke:#293355,stroke-width:2px;
+  classDef owner fill:#e0f0e6,stroke:#2E9E5B,stroke-width:2px;
+  classDef tenant fill:#ebe5f9,stroke:#7B4FD6,stroke-width:2px;
+  classDef shared fill:#e0e9fc,stroke:#2F6FED,stroke-width:2px;
+  classDef stub stroke-dasharray: 6 4;
+  subgraph signed_out [Signed out]
+    Welcome["Welcome to Rent Well"]
+    Login["Log In to Rent Well"]
+    RegisterOwner["Landlord Sign Up"]
+    RegisterTenant["Tenant Sign Up"]
+  end
+  Dashboard["Landlord Dashboard<br/>TAB owner"]
+  WorkOrders["All Work Orders<br/>TAB owner"]
+  WorkOrderDetail["Work Order"]
+  Tenants["Your Tenants<br/>TAB owner"]
+  TenantDetail["Tenant Profile"]
+  TenantLease["Lease and Documents (stub)"]
+  Properties["Your Properties<br/>DRAWER owner"]
+  PropertyDetail["Property Overview (stub)"]
+  InviteTenant["Invite a New Tenant"]
+  Documents["Document Storage<br/>DRAWER owner"]
+  Checklist["Condition Checklists<br/>DRAWER owner"]
+  ChecklistDetail["Checklist"]
+  Expenses["Property Expenses<br/>DRAWER owner"]
+  Mileage["Mileage Log"]
+  YearEndReport["Year-End Tax Report"]
+  TenantHome["My Home<br/>TAB tenant"]
+  MyRequests["My Repair Requests<br/>TAB tenant"]
+  RequestDetail["Request"]
+  PastRequests["Past Repair Requests"]
+  NewWorkOrder["Add a Work Order"]
+  Messages["Message Inbox<br/>TAB owner, TAB tenant"]
+  MessageThread["Conversation"]
+  Payments["Payments and Rent (stub)"]
+  PaymentDetail["Payment Record (stub)"]
+  Settings["Settings and Profile (stub)<br/>DRAWER owner"]
+  Welcome --> Login
+  Welcome --> RegisterOwner
+  Welcome -.-> Dashboard
+  Login -.-> Dashboard
+  Login -.-> TenantHome
+  Login --> RegisterOwner
+  Login --> RegisterTenant
+  RegisterOwner -.-> Dashboard
+  RegisterOwner --> RegisterTenant
+  RegisterOwner --> Login
+  RegisterTenant -.-> TenantHome
+  RegisterTenant --> Login
+  Dashboard -->|header: Settings gear| Settings
+  Dashboard --> WorkOrders
+  Dashboard --> NewWorkOrder
+  Dashboard --> Messages
+  Dashboard --> Tenants
+  Dashboard --> Payments
+  Dashboard --> Documents
+  Dashboard --> Checklist
+  Dashboard --> Expenses
+  Dashboard -.-> Welcome
+  WorkOrders -->|header: Add| NewWorkOrder
+  WorkOrders -->|workOrderId| WorkOrderDetail
+  WorkOrders -->|conversationId| MessageThread
+  WorkOrderDetail -->|conversationId| MessageThread
+  Tenants -->|header: Invite| InviteTenant
+  Tenants --> Properties
+  Tenants -->|tenantId| TenantDetail
+  TenantDetail -->|conversationId| MessageThread
+  TenantDetail -->|propertyId| PropertyDetail
+  TenantDetail -->|tenantId| TenantLease
+  TenantDetail -->|tenantId| WorkOrders
+  TenantDetail -->|checklistId| ChecklistDetail
+  TenantLease --> Documents
+  Properties -->|propertyId| PropertyDetail
+  PropertyDetail -->|propertyId| Tenants
+  PropertyDetail -->|propertyId| WorkOrders
+  Checklist -->|checklistId| ChecklistDetail
+  ChecklistDetail -->|checklistId| ChecklistDetail
+  Expenses --> Mileage
+  Expenses -->|yearId| YearEndReport
+  Expenses -->|workOrderId| WorkOrderDetail
+  TenantHome -->|header: Settings gear| Settings
+  TenantHome --> Messages
+  TenantHome --> MyRequests
+  TenantHome --> NewWorkOrder
+  TenantHome --> Payments
+  TenantHome --> PastRequests
+  TenantHome -.-> Welcome
+  MyRequests -->|header: Add| NewWorkOrder
+  MyRequests -->|workOrderId| RequestDetail
+  NewWorkOrder --> MyRequests
+  Messages -->|header: Invite| InviteTenant
+  Messages -->|conversationId| MessageThread
+  Payments -->|paymentId| PaymentDetail
+  Settings --> Mileage
+  Settings -.-> Welcome
+  class Welcome auth;
+  class Login auth;
+  class RegisterOwner auth;
+  class RegisterTenant auth;
+  class Dashboard owner;
+  class WorkOrders owner;
+  class WorkOrderDetail owner;
+  class Tenants owner;
+  class TenantDetail owner;
+  class TenantLease owner,stub;
+  class Properties owner;
+  class PropertyDetail owner,stub;
+  class InviteTenant owner;
+  class Documents owner;
+  class Checklist owner;
+  class ChecklistDetail owner;
+  class Expenses owner;
+  class Mileage owner;
+  class YearEndReport owner;
+  class TenantHome tenant;
+  class MyRequests tenant;
+  class RequestDetail tenant;
+  class PastRequests tenant;
+  class NewWorkOrder shared;
+  class Messages shared;
+  class MessageThread shared;
+  class Payments shared,stub;
+  class PaymentDetail shared,stub;
+  class Settings shared,stub;

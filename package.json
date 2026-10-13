@@ -40,10 +40,12 @@
     "lint": "expo lint .",
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "diagram": "node --no-warnings scripts/buildNavigationDiagram.mjs"
   },
   "private": true,
   "devDependencies": {
+    "elkjs": "^0.12.0",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~57.0.2",
     "eslint-config-prettier": "^10.1.8",
