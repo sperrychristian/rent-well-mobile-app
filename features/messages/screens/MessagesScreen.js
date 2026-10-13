@@ -32,12 +32,12 @@ function MessagesScreen(props) {
   useEffect(() => {
     if (tenant_conversation && !opened_for_tenant.current) {
       opened_for_tenant.current = true;
-      props.navigation.navigate('MessageThread', { conversation_id: tenant_conversation.id });
+      props.navigation.navigate('MessageThread', { conversationId: tenant_conversation.id });
     }
   }, [tenant_conversation, props.navigation]);
 
   function openThread(conversation_id) {
-    props.navigation.navigate('MessageThread', { conversation_id: conversation_id });
+    props.navigation.navigate('MessageThread', { conversationId: conversation_id });
   }
 
   const is_owner = mode === 'real' && role === 'owner';
@@ -101,7 +101,7 @@ function MessagesScreen(props) {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
       {/* only shows while the demo is running */}
       <DemoBanner />
       <ScreenTitle>Messages</ScreenTitle>

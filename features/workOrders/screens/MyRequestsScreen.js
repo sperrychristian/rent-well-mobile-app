@@ -74,7 +74,7 @@ function MyRequestsScreen(props) {
         renderItem={({ item }) => (
           <Pressable
             style={({ pressed }) => [styles.row, pressed && styles.pressed]}
-            onPress={() => props.navigation.navigate('RequestDetail', { order_id: item.id })}
+            onPress={() => props.navigation.navigate('RequestDetail', { workOrderId: item.id })}
             accessibilityRole="button"
             accessibilityLabel={item.title + ', ' + item.status}
           >
@@ -119,7 +119,7 @@ function MyRequestsScreen(props) {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
       <ScreenTitle>My Requests</ScreenTitle>
       <PrimaryButton
         title="Report an Issue"

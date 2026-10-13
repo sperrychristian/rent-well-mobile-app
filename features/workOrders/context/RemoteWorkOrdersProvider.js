@@ -7,6 +7,7 @@ import {
   getAllWorkOrders,
   getWorkOrder,
   createTenantWorkOrder,
+  createOwnerWorkOrder,
   updateWorkOrderStatus,
   updateWorkOrderPriority,
   updateWorkOrderNotes,
@@ -164,7 +165,7 @@ function RemoteStore(props) {
     const stop_connect = onSocketEvent('connect', () => latest.current.loadOrders(true));
     const stop_taps = listenForWorkOrderTaps((work_order_id) =>
       navigateWhenReady(is_tenant ? 'RequestDetail' : 'WorkOrderDetail', {
-        order_id: work_order_id,
+        workOrderId: work_order_id,
       }),
     );
     return () => {
@@ -250,8 +251,22 @@ function RemoteStore(props) {
 
   // the tenant's Report an Issue, request is { title, description, priority, photos, tenancy_id }
   // photos are { uri, mime_type }, they go up first and only then does the request get created
+  // an owner's request also has property_id, unit_label, and tenant_user_id, since there's no tenancy to read them from
   async function addWorkOrder(request, onProgress) {
     const photo_keys = await uploadPhotos(request.photos || [], onProgress);
+    if (!is_tenant) {
+      return upsert(
+        await createOwnerWorkOrder({
+          property_id: request.property_id,
+          title: request.title,
+          description: request.description,
+          priority: request.priority,
+          unit_label: request.unit_label,
+          tenant_user_id: request.tenant_user_id,
+          photo_keys: photo_keys,
+        }),
+      );
+    }
     const api_order = await createTenantWorkOrder({
       title: request.title,
       description: request.description,

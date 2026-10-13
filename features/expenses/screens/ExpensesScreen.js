@@ -324,7 +324,7 @@ function ExpensesScreen(props) {
           icon="document-text-outline"
           text_color={COLORS.text_dark}
           style={styles.report_button}
-          onPress={() => props.navigation.navigate('YearEndReport', { year: year })}
+          onPress={() => props.navigation.navigate('YearEndReport', { yearId: year })}
         />
       </View>
       <View style={styles.button_row}>
@@ -519,7 +519,7 @@ function ExpensesScreen(props) {
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
       <ScreenTitle>Expenses</ScreenTitle>
       <FlatList
         data={rows}
@@ -572,7 +572,9 @@ function ExpensesScreen(props) {
                     <Pressable
                       style={[styles.tag, styles.order_tag]}
                       onPress={() =>
-                        props.navigation.navigate('WorkOrderDetail', { order_id: linked_order.id })
+                        props.navigation.navigate('WorkOrderDetail', {
+                          workOrderId: linked_order.id,
+                        })
                       }
                     >
                       <Text style={styles.tag_text} numberOfLines={1}>

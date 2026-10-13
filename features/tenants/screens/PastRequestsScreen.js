@@ -92,7 +92,7 @@ function PastRequestsScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
       <ScreenTitle>Past Requests</ScreenTitle>
       <Text style={styles.helper}>Read only, since your tenancy has ended.</Text>
       {body}

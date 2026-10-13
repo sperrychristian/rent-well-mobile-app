@@ -313,7 +313,7 @@ function DocumentsScreen() {
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
       <ScreenTitle>Documents</ScreenTitle>
       <FlatList
         data={list_documents}

@@ -1,5 +1,6 @@
 import { View, Text, ScrollView, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useHeaderHeight } from '@react-navigation/elements';
 import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import { COLORS, SPACING, FONTS } from '../../../theme';
@@ -8,9 +9,12 @@ import { COLORS, SPACING, FONTS } from '../../../theme';
 // props: title, error (a message from the server shown above the form), children, footer
 function AuthLayout(props) {
   const insets = useSafeAreaInsets();
+  // the header sits above this screen now, so the keyboard lift has to count its height too
+  const header_height = useHeaderHeight();
   return (
     // iOS needs padding to lift the form, Android already resizes the window so it gets nothing
     <KeyboardAvoidingView
+      keyboardVerticalOffset={header_height}
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
@@ -18,7 +22,7 @@ function AuthLayout(props) {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + SPACING.lg },
+          { paddingTop: SPACING.md, paddingBottom: insets.bottom + SPACING.lg },
         ]}
       >
         <ScreenTitle>{props.title}</ScreenTitle>

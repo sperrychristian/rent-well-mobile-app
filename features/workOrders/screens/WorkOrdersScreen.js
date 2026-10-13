@@ -19,6 +19,9 @@ import { useState } from 'react';
 import AddExpenseModal from '../../expenses/components/AddExpenseModal';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import ErrorState from '../../../components/ErrorState';
+import { useTenants } from '../../tenants/context/TenantsContext';
+import { useMessages } from '../../messages/context/MessagesContext';
+import { openConversationFor } from '../../messages/utils/openConversation';
 
 // lower number sorts first, so emergencies come out on top
 const priority_rank = { Emergency: 0, Normal: 1, Low: 2 };
@@ -51,9 +54,17 @@ function WorkOrdersScreen(props) {
   const [property_filter, setPropertyFilter] = useState('All');
   // what's typed in the search box and which sort chip is picked
   // the tenant detail screen can open this with their name already searched
-  const [search_text, setSearchText] = useState(
-    props.route && props.route.params && props.route.params.search ? props.route.params.search : '',
-  );
+  // it passes the tenant's id, and I look up the name here so only ids travel between screens
+  const route_params = props.route && props.route.params ? props.route.params : {};
+  const { getTenantById, properties: tenant_properties } = useTenants();
+  const { conversations } = useMessages();
+  const linked_tenant = route_params.tenantId ? getTenantById(route_params.tenantId) : null;
+  const [search_text, setSearchText] = useState(linked_tenant ? linked_tenant.name : '');
+  // a property's detail screen can open this showing only that property, the chip up top clears it
+  const [only_property_id, setOnlyPropertyId] = useState(route_params.propertyId || null);
+  const only_property = only_property_id
+    ? tenant_properties.find((property) => property.id === only_property_id)
+    : null;
   const [sort_by, setSortBy] = useState('Newest');
 
   // in real mode the actions go to the server and can fail, so I show why (the local ones never throw)
@@ -63,6 +74,18 @@ function WorkOrdersScreen(props) {
     } catch (error) {
       Alert.alert('Could not update the work order', error.message);
     }
+  }
+
+  // server orders know their property id, local ones only have the label, so those match by the property name
+  function inOnlyProperty(order) {
+    if (!only_property_id) {
+      return true;
+    }
+    if (order.property_id) {
+      return order.property_id === only_property_id;
+    }
+    const name = only_property ? only_property.name : null;
+    return !!name && (order.property === name || order.property.startsWith(name + ','));
   }
 
   // ask first so a stray tap doesn't close out a request
@@ -90,6 +113,7 @@ function WorkOrdersScreen(props) {
       (order) =>
         (show_resolved ? order.status === 'Resolved' : order.status !== 'Resolved') &&
         (property_filter === 'All' || order.property === property_filter) &&
+        inOnlyProperty(order) &&
         // a server order can have no tenant, so every field falls back to empty text
         (search_lower === '' ||
           (order.title || '').toLowerCase().includes(search_lower) ||
@@ -137,6 +161,19 @@ function WorkOrdersScreen(props) {
             {orders_error + ' Showing the last saved list, pull down to try again.'}
           </Text>
         </View>
+      ) : null}
+      {only_property_id ? (
+        <Pressable
+          onPress={() => setOnlyPropertyId(null)}
+          style={[styles.chip, styles.chip_active, styles.only_chip]}
+          hitSlop={{ top: 8, bottom: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel="Show work orders for every property"
+        >
+          <Text style={styles.chip_text}>
+            {'Only ' + (only_property ? only_property.name : only_property_id) + '  ✕'}
+          </Text>
+        </Pressable>
       ) : null}
       <TextInput
         style={styles.search_input}
@@ -192,7 +229,7 @@ function WorkOrdersScreen(props) {
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
       <ScreenTitle>Work Orders</ScreenTitle>
       {/* FlatList only renders what's on screen, so it scales when the list gets long */}
       {/* real mode can still be loading or have failed with nothing saved, so those get their own screens */}
@@ -204,7 +241,7 @@ function WorkOrdersScreen(props) {
         <FlatList
           data={visible_orders}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + SPACING.lg }]}
           keyboardShouldPersistTaps="handled"
           refreshControl={
             is_remote ? (
@@ -228,9 +265,11 @@ function WorkOrdersScreen(props) {
               onViewExpenses={() => setDetailsOrderId(item.id)}
               onStart={() => tryAction(() => startWorkOrder(item.id))}
               onResolve={() => confirmResolve(item.id)}
-              onMessage={() => props.navigation.navigate('Messages', { tenant: item.tenant })}
+              onMessage={() =>
+                openConversationFor(props.navigation, conversations, item.tenant, item.tenant_id)
+              }
               onOpenDetail={() =>
-                props.navigation.navigate('WorkOrderDetail', { order_id: item.id })
+                props.navigation.navigate('WorkOrderDetail', { workOrderId: item.id })
               }
             />
           )}
@@ -334,6 +373,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     borderRadius: 16,
     backgroundColor: COLORS.muted,
+  },
+  only_chip: {
+    alignSelf: 'flex-start',
+    marginBottom: SPACING.sm,
   },
   chip_active: {
     backgroundColor: COLORS.primary,

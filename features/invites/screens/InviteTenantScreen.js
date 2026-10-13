@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useHeaderHeight } from '@react-navigation/elements';
 import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
@@ -24,6 +25,8 @@ import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
 function InviteTenantScreen() {
   const insets = useSafeAreaInsets();
+  // the header sits above this screen now, so the keyboard lift has to count its height too
+  const header_height = useHeaderHeight();
 
   // properties and invites come from the shared tenants data, so this works the same in the demo and for real
   const {
@@ -292,6 +295,7 @@ function InviteTenantScreen() {
   return (
     // iOS needs padding to lift the form, Android already resizes the window
     <KeyboardAvoidingView
+      keyboardVerticalOffset={header_height}
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
@@ -299,7 +303,7 @@ function InviteTenantScreen() {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + SPACING.lg },
+          { paddingTop: SPACING.md, paddingBottom: insets.bottom + SPACING.lg },
         ]}
       >
         <ScreenTitle>Invite a Tenant</ScreenTitle>

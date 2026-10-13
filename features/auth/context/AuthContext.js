@@ -35,7 +35,7 @@ export function AuthProvider(props) {
         setUser(null);
         setStatus('signed_out');
         setSessionExpired(true);
-        resetTo('Login', { expired: true });
+        resetTo('Login');
       }
     });
 

@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useHeaderHeight } from '@react-navigation/elements';
 import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
@@ -21,6 +22,8 @@ import RemoteImage from '../../../components/RemoteImage';
 import ErrorState from '../../../components/ErrorState';
 import ImageViewerModal from '../../messages/components/ImageViewerModal';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useMessages } from '../../messages/context/MessagesContext';
+import { openConversationFor } from '../../messages/utils/openConversation';
 import { formatDate } from '../../../utils/formatDate';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
@@ -31,7 +34,7 @@ const priority_options = ['Emergency', 'Normal', 'Low'];
 function WorkOrderDetailScreen(props) {
   const insets = useSafeAreaInsets();
   const { getOrder, is_remote, ensureOrder } = useWorkOrders();
-  const order_id = props.route.params.order_id;
+  const order_id = props.route.params.workOrderId;
   const order = getOrder(order_id);
   const [load_error, setLoadError] = useState('');
   // goes up on Try Again so the effect asks again
@@ -56,7 +59,7 @@ function WorkOrderDetailScreen(props) {
 
   if (!order && is_remote) {
     return (
-      <View style={[styles.flex, styles.center, { paddingTop: insets.top + SPACING.md }]}>
+      <View style={[styles.flex, styles.center, { paddingBottom: insets.bottom }]}>
         {load_error ? (
           <ErrorState
             message={load_error}
@@ -77,6 +80,8 @@ function WorkOrderDetailScreen(props) {
 
 function WorkOrderDetailContent(props) {
   const insets = useSafeAreaInsets();
+  // the header sits above this screen now, so the keyboard lift has to count its height too
+  const header_height = useHeaderHeight();
   const {
     getOrder,
     startWorkOrder,
@@ -87,8 +92,9 @@ function WorkOrderDetailContent(props) {
     addExpense,
     properties: known_properties,
   } = useWorkOrders();
+  const { conversations } = useMessages();
 
-  const order_id = props.route.params.order_id;
+  const order_id = props.route.params.workOrderId;
   const order = getOrder(order_id);
 
   // the text boxes keep their own copy until I tap save, so typing doesn't write on every key
@@ -104,7 +110,7 @@ function WorkOrderDetailContent(props) {
   // if the order can't be found I show a simple message instead of crashing
   if (!order) {
     return (
-      <View style={[styles.flex, { paddingTop: insets.top + SPACING.md }]}>
+      <View style={[styles.flex, { paddingTop: SPACING.md }]}>
         <Text style={styles.detail}>That work order could not be found.</Text>
         <PrimaryButton title="Back" onPress={() => props.navigation.goBack()} />
       </View>
@@ -166,6 +172,7 @@ function WorkOrderDetailContent(props) {
   return (
     // iOS needs padding to lift the form, Android already resizes the window so it uses height
     <KeyboardAvoidingView
+      keyboardVerticalOffset={header_height}
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
@@ -173,7 +180,7 @@ function WorkOrderDetailContent(props) {
         contentContainerStyle={[
           styles.content,
           {
-            paddingTop: insets.top + SPACING.md,
+            paddingTop: SPACING.md,
             paddingBottom: insets.bottom + SPACING.lg,
           },
         ]}
@@ -329,7 +336,9 @@ function WorkOrderDetailContent(props) {
               title="Message Tenant"
               icon="chatbubble-ellipses-outline"
               style={styles.message_button}
-              onPress={() => props.navigation.navigate('Messages', { tenant: order.tenant })}
+              onPress={() =>
+                openConversationFor(props.navigation, conversations, order.tenant, order.tenant_id)
+              }
             />
             <PrimaryButton
               title="Back"

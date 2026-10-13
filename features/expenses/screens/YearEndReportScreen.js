@@ -18,7 +18,7 @@ function YearEndReportScreen(props) {
   const current_year = String(new Date().getFullYear());
   // the Expenses screen passes its selected year in, and this falls back to the current year
   const starting_year =
-    props.route.params && props.route.params.year ? props.route.params.year : current_year;
+    props.route.params && props.route.params.yearId ? props.route.params.yearId : current_year;
   const [year, setYear] = useState(starting_year);
 
   const years = [
@@ -46,7 +46,7 @@ function YearEndReportScreen(props) {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
       <ScreenTitle>Year-End</ScreenTitle>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}>
         <PrimaryButton

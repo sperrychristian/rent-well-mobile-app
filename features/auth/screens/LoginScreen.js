@@ -8,9 +8,10 @@ import { checkEmail, checkLoginPassword, collectErrors } from '../utils/authVali
 import { COLORS, SPACING, FONTS } from '../../../theme';
 
 function LoginScreen(props) {
-  const { login } = useAuth();
+  const { login, session_expired } = useAuth();
   // expired is set when the app sent someone here because their session ran out
-  const expired = props.route.params ? props.route.params.expired : false;
+  // it comes from the auth context now, so only ids ever travel as route params
+  const expired = session_expired;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

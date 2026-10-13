@@ -45,9 +45,28 @@ function TenantsScreen(props) {
   // the invite a button is working on, so a double tap can't send two requests
   const [busy_invite_id, setBusyInviteId] = useState(null);
 
-  const sections = groupByProperty(tenants, properties);
+  // a property's detail screen can open this showing only that property, the chip up top clears it
+  const [only_property_id, setOnlyPropertyId] = useState(
+    props.route && props.route.params && props.route.params.propertyId
+      ? props.route.params.propertyId
+      : null,
+  );
+  const only_property = only_property_id
+    ? properties.find((property) => property.id === only_property_id)
+    : null;
+
+  const sections = groupByProperty(tenants, properties).filter(
+    (section) => !only_property_id || section.property_id === only_property_id,
+  );
   const { past } = splitActivePast(tenants);
-  const pending = pendingInvites(invites);
+  const pending = pendingInvites(invites).filter(
+    (invite) => !only_property_id || invite.propertyId === only_property_id,
+  );
+  const shown_past = past.filter(
+    (tenant) =>
+      !only_property_id ||
+      tenant.ended_tenancies.some((tenancy) => tenancy.property_id === only_property_id),
+  );
 
   function propertyName(property_id) {
     const property = properties.find((item) => item.id === property_id);
@@ -55,7 +74,7 @@ function TenantsScreen(props) {
   }
 
   function openTenant(tenant_id) {
-    props.navigation.navigate('TenantDetail', { tenant_id: tenant_id });
+    props.navigation.navigate('TenantDetail', { tenantId: tenant_id });
   }
 
   async function shareCode(invite) {
@@ -171,6 +190,19 @@ function TenantsScreen(props) {
   } else {
     body = (
       <View>
+        {only_property_id ? (
+          <Pressable
+            onPress={() => setOnlyPropertyId(null)}
+            style={styles.only_chip}
+            hitSlop={{ top: 8, bottom: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel="Show tenants at every property"
+          >
+            <Text style={styles.small_button_text}>
+              {'Only ' + (only_property ? only_property.name : only_property_id) + '  ✕'}
+            </Text>
+          </Pressable>
+        ) : null}
         {/* the list on screen is the last one that loaded, pulling down tries again */}
         {error_message ? (
           <View style={styles.offline_banner}>
@@ -254,7 +286,7 @@ function TenantsScreen(props) {
           accessibilityRole="button"
           accessibilityState={{ expanded: show_past }}
         >
-          <Text style={styles.group_title}>Past Tenants ({past.length})</Text>
+          <Text style={styles.group_title}>Past Tenants ({shown_past.length})</Text>
           <Ionicons
             name={show_past ? 'chevron-up' : 'chevron-down'}
             size={18}
@@ -262,17 +294,17 @@ function TenantsScreen(props) {
           />
         </Pressable>
         {show_past &&
-          (past.length === 0 ? (
+          (shown_past.length === 0 ? (
             <Text style={styles.empty_small}>No past tenants.</Text>
           ) : (
-            past.map((tenant) => tenantRow(tenant, null, tenant.id))
+            shown_past.map((tenant) => tenantRow(tenant, null, tenant.id))
           ))}
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
       {/* only shows while the demo is running */}
       <DemoBanner />
       <ScreenTitle>Tenants</ScreenTitle>
@@ -445,6 +477,14 @@ const styles = StyleSheet.create({
     color: COLORS.text_light,
     fontFamily: FONTS.body_bold,
     fontSize: 13,
+  },
+  only_chip: {
+    alignSelf: 'flex-start',
+    backgroundColor: COLORS.primary,
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   past_header: {
     flexDirection: 'row',

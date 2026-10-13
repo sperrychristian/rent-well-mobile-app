@@ -24,6 +24,8 @@ module.exports = defineConfig([
         afterEach: 'readonly',
         beforeAll: 'readonly',
         afterAll: 'readonly',
+        // the navigation tests read App.js and the source files from disk
+        __dirname: 'readonly',
       },
     },
   },

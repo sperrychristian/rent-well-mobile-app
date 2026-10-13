@@ -16,9 +16,11 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useHeaderHeight } from '@react-navigation/elements';
 import ScreenTitle from '../../../components/ScreenTitle';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useTenants } from '../../tenants/context/TenantsContext';
 import { getMe } from '../../../services/api';
 import { max_photos_per_upload } from '../utils/workOrderHelpers';
 import { COLORS, SPACING, FONTS } from '../../../theme';
@@ -31,8 +33,15 @@ function NewWorkOrderScreen(props) {
   const { addWorkOrder, properties, is_remote, role } = useWorkOrders();
   // in real mode a tenant's property, unit, and name come from their account, so those boxes go away
   const tenant_remote = is_remote && role === 'tenant';
+  // a real owner picks the property (and optionally the tenant) from their own list, the Work Orders Add button opens this
+  const owner_remote = is_remote && role === 'owner';
+  // both real versions keep a list of up to 5 photos that get uploaded
+  const remote_form = tenant_remote || owner_remote;
+  const { properties: owner_properties } = useTenants();
   // the header is hidden, so I push the content below the status bar and notch myself
   const insets = useSafeAreaInsets();
+  // the header sits above this screen now, so the keyboard lift has to count its height too
+  const header_height = useHeaderHeight();
   // I check the screen shape so the photo can shrink when it's wider than it is tall
   const { width, height } = useWindowDimensions();
   const is_landscape = width > height;
@@ -54,6 +63,21 @@ function NewWorkOrderScreen(props) {
   // loading, ready, or error for the rental lookup
   const [me_status, setMeStatus] = useState('loading');
   const [me_attempt, setMeAttempt] = useState(0);
+  // the owner's choices: which property, which unit, and which tenant (all but the property are optional)
+  const [owner_property_id, setOwnerPropertyId] = useState(null);
+  const [owner_unit, setOwnerUnit] = useState('');
+  const [owner_tenant_id, setOwnerTenantId] = useState(null);
+  const owner_property = owner_properties.find((item) => item.id === owner_property_id);
+
+  // picking a tenant also fills in their unit, picking them again unlinks them
+  function chooseOwnerTenant(tenancy) {
+    if (owner_tenant_id === tenancy.tenant_id) {
+      setOwnerTenantId(null);
+      return;
+    }
+    setOwnerTenantId(tenancy.tenant_id);
+    setOwnerUnit(tenancy.unit_label || '');
+  }
 
   useEffect(() => {
     if (!tenant_remote) {
@@ -110,7 +134,7 @@ function NewWorkOrderScreen(props) {
     }
     const result = await ImagePicker.launchCameraAsync({ quality: 0.7 });
     if (!result.canceled) {
-      if (tenant_remote) {
+      if (remote_form) {
         keepPhotos(result.assets);
       } else {
         setPhotoUri(result.assets[0].uri);
@@ -123,11 +147,11 @@ function NewWorkOrderScreen(props) {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       quality: 0.7,
-      allowsMultipleSelection: tenant_remote,
-      selectionLimit: tenant_remote ? max_photos_per_upload - photos.length : 1,
+      allowsMultipleSelection: remote_form,
+      selectionLimit: remote_form ? max_photos_per_upload - photos.length : 1,
     });
     if (!result.canceled) {
-      if (tenant_remote) {
+      if (remote_form) {
         keepPhotos(result.assets);
       } else {
         setPhotoUri(result.assets[0].uri);
@@ -177,10 +201,54 @@ function NewWorkOrderScreen(props) {
     setBusy(false);
   }
 
+  // the owner's version: the property comes from the chips, then the photos upload and the order is created
+  async function submitOwnerOrder() {
+    if (!owner_property_id) {
+      Alert.alert('Pick a property', 'Choose which property this work order is for.');
+      return;
+    }
+    if (title.trim() === '' || title.trim().length > 120) {
+      Alert.alert('Describe the issue', 'Add a short title (up to 120 characters).');
+      return;
+    }
+    if (owner_unit.trim().length > 50) {
+      Alert.alert('Shorten the unit', 'Keep the unit under 50 characters.');
+      return;
+    }
+    setBusy(true);
+    try {
+      await addWorkOrder(
+        {
+          property_id: owner_property_id,
+          title: title.trim(),
+          description: description.trim(),
+          priority: priority,
+          photos: photos,
+          unit_label: owner_unit.trim(),
+          tenant_user_id: owner_tenant_id,
+        },
+        (number, total) => setProgressText('Uploading photo ' + number + ' of ' + total + '...'),
+      );
+      Alert.alert('Work order added', 'It shows up in Work Orders as Open.', [
+        { text: 'OK', onPress: () => props.navigation.goBack() },
+      ]);
+    } catch (error) {
+      console.log('Could not add the work order', error.message);
+      // everything stays filled in so it can be sent again
+      Alert.alert('Work order not added', error.message);
+    }
+    setProgressText('');
+    setBusy(false);
+  }
+
   // I check the required pieces first so an empty request never gets submitted
   function handleSubmit() {
     if (tenant_remote) {
       submitToServer();
+      return;
+    }
+    if (owner_remote) {
+      submitOwnerOrder();
       return;
     }
     if (tenant_name.trim() === '') {
@@ -211,6 +279,7 @@ function NewWorkOrderScreen(props) {
   return (
     // iOS doesn't resize the app when the keyboard opens, so it needs padding; Android already moves the content up on its own
     <KeyboardAvoidingView
+      keyboardVerticalOffset={header_height}
       style={styles.screen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
@@ -219,7 +288,7 @@ function NewWorkOrderScreen(props) {
         contentContainerStyle={[
           styles.container,
           {
-            paddingTop: insets.top + SPACING.lg,
+            paddingTop: SPACING.lg,
             paddingBottom: insets.bottom + SPACING.lg,
             paddingLeft: insets.left + SPACING.lg,
             paddingRight: insets.right + SPACING.lg,
@@ -228,16 +297,71 @@ function NewWorkOrderScreen(props) {
       >
         {/* I cap the width so the form doesn't stretch edge to edge on a tablet */}
         <View style={styles.form}>
-          <ScreenTitle>Report an Issue</ScreenTitle>
+          <ScreenTitle>{owner_remote ? 'New Work Order' : 'Report an Issue'}</ScreenTitle>
 
           {/* an owner signed in for real can't file a tenant request, the dashboard hides the button but this is a backup */}
-          {is_remote && !tenant_remote ? (
-            <Text style={styles.notice}>
-              {"Report an Issue is for tenants. Your tenants' requests show up in Work Orders."}
-            </Text>
-          ) : null}
-
-          {tenant_remote ? (
+          {/* it's the owner's own work order form now, opened from the Add button on Work Orders */}
+          {owner_remote ? (
+            <View>
+              <Text style={styles.label}>Property</Text>
+              {owner_properties.length === 0 ? (
+                <Text style={styles.notice}>
+                  Add a property first from Tenants, then Properties.
+                </Text>
+              ) : (
+                <View style={styles.chip_wrap}>
+                  {owner_properties.map((item) => (
+                    <Pressable
+                      key={item.id}
+                      onPress={() => {
+                        setOwnerPropertyId(item.id);
+                        setOwnerTenantId(null);
+                      }}
+                      hitSlop={{ top: 8, bottom: 8 }}
+                      style={[styles.chip, owner_property_id === item.id && styles.chip_active]}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: owner_property_id === item.id }}
+                    >
+                      <Text style={styles.chip_text}>{item.name}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+              {owner_property && owner_property.tenancies.length > 0 && (
+                <View>
+                  <Text style={styles.label}>Tenant (optional)</Text>
+                  <View style={styles.chip_wrap}>
+                    {owner_property.tenancies.map((tenancy) => (
+                      <Pressable
+                        key={tenancy.id}
+                        onPress={() => chooseOwnerTenant(tenancy)}
+                        hitSlop={{ top: 8, bottom: 8 }}
+                        style={[
+                          styles.chip,
+                          owner_tenant_id === tenancy.tenant_id && styles.chip_active,
+                        ]}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: owner_tenant_id === tenancy.tenant_id }}
+                      >
+                        <Text style={styles.chip_text}>
+                          {tenancy.tenant_name +
+                            (tenancy.unit_label ? ', ' + tenancy.unit_label : '')}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+              )}
+              <Text style={styles.label}>Unit (optional)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="e.g. Unit 2B, or Exterior"
+                placeholderTextColor={COLORS.text}
+                value={owner_unit}
+                onChangeText={setOwnerUnit}
+              />
+            </View>
+          ) : tenant_remote ? (
             <View style={styles.rental_box}>
               <Text style={styles.label}>Reporting for</Text>
               {me_status === 'loading' && <ActivityIndicator color={COLORS.title} />}
@@ -355,7 +479,7 @@ function NewWorkOrderScreen(props) {
               style={[styles.preview, is_landscape && styles.preview_landscape]}
             />
           )}
-          {tenant_remote && photos.length > 0 && (
+          {remote_form && photos.length > 0 && (
             <ScrollView
               horizontal
               style={styles.chip_scroll}
@@ -376,12 +500,12 @@ function NewWorkOrderScreen(props) {
               ))}
             </ScrollView>
           )}
-          {tenant_remote && (
+          {remote_form && (
             <Text style={styles.helper}>
               {photos.length + ' of ' + max_photos_per_upload + ' photos'}
             </Text>
           )}
-          {(!tenant_remote || photos.length < max_photos_per_upload) && (
+          {(!remote_form || photos.length < max_photos_per_upload) && (
             <View style={styles.button_row}>
               <PrimaryButton
                 title="Camera"
@@ -402,7 +526,7 @@ function NewWorkOrderScreen(props) {
           <PrimaryButton
             title={busy ? 'Sending...' : 'Submit Request'}
             icon="send-outline"
-            onPress={busy || (is_remote && !tenant_remote) ? undefined : handleSubmit}
+            onPress={busy ? undefined : handleSubmit}
             style={[styles.submit_button, busy && styles.busy]}
           />
         </View>

@@ -16,6 +16,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useHeaderHeight } from '@react-navigation/elements';
 import ScreenTitle from '../../../components/ScreenTitle';
 import ErrorState from '../../../components/ErrorState';
 import MessageBubble from '../components/MessageBubble';
@@ -31,7 +32,9 @@ const max_body_length = 2000;
 
 function MessageThreadScreen(props) {
   const insets = useSafeAreaInsets();
-  const conversation_id = props.route.params.conversation_id;
+  // the header sits above this screen now, so the keyboard lift has to count its height too
+  const header_height = useHeaderHeight();
+  const conversation_id = props.route.params.conversationId;
   const {
     is_demo,
     my_user_id,
@@ -263,10 +266,11 @@ function MessageThreadScreen(props) {
   return (
     // iOS needs padding to lift the composer, Android already resizes the window
     <KeyboardAvoidingView
+      keyboardVerticalOffset={header_height}
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={[styles.inner, { paddingTop: insets.top + SPACING.md }]}>
+      <View style={[styles.inner, { paddingTop: SPACING.md }]}>
         <ScreenTitle>{conversation ? conversation.otherUser.name : 'Messages'}</ScreenTitle>
         {is_demo && (
           <View style={styles.demo_strip}>

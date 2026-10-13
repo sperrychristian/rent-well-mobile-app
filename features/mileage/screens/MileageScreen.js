@@ -150,7 +150,7 @@ function MileageScreen(props) {
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
       <ScreenTitle>Mileage</ScreenTitle>
       <FlatList
         data={year_trips}

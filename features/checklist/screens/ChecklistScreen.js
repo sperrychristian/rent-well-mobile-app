@@ -50,7 +50,7 @@ function ChecklistScreen(props) {
     setNewOpen(false);
     // I clear the filter so the new one is in the list when coming back
     setStatusFilter('All');
-    props.navigation.navigate('ChecklistDetail', { checklist_id: new_id });
+    props.navigation.navigate('ChecklistDetail', { checklistId: new_id });
   }
 
   const list_header = (
@@ -81,7 +81,7 @@ function ChecklistScreen(props) {
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
       <ScreenTitle>Checklist</ScreenTitle>
       <FlatList
         data={list_checklists}
@@ -101,9 +101,7 @@ function ChecklistScreen(props) {
           return (
             <Pressable
               style={styles.row}
-              onPress={() =>
-                props.navigation.navigate('ChecklistDetail', { checklist_id: item.id })
-              }
+              onPress={() => props.navigation.navigate('ChecklistDetail', { checklistId: item.id })}
             >
               <Ionicons
                 name={item.type === 'Move-In' ? 'log-in-outline' : 'log-out-outline'}

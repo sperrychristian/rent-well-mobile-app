@@ -124,3 +124,23 @@ export function messageBodyToSend(text, has_photo) {
   }
   return trimmed;
 }
+
+// the thread with one tenant, by their account id when there is one (server work orders and tenants)
+// and by name otherwise (the local work orders only know the name), null when there's no thread yet
+export function findConversationFor(conversations, tenant_name, tenant_id) {
+  if (tenant_id) {
+    const by_id = conversations.find((conversation) => conversation.otherUser.id === tenant_id);
+    if (by_id) {
+      return by_id;
+    }
+  }
+  const name = (tenant_name || '').trim().toLowerCase();
+  if (name === '') {
+    return null;
+  }
+  return (
+    conversations.find(
+      (conversation) => conversation.otherUser.name.trim().toLowerCase() === name,
+    ) || null
+  );
+}

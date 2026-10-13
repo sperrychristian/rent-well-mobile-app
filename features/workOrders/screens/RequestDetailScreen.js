@@ -22,7 +22,7 @@ const max_photo_bytes = 10485760;
 function RequestDetailScreen(props) {
   const insets = useSafeAreaInsets();
   const { getOrder, is_remote, ensureOrder, addOrderPhotos } = useWorkOrders();
-  const order_id = props.route.params.order_id;
+  const order_id = props.route.params.workOrderId;
   const order = getOrder(order_id);
 
   const [load_error, setLoadError] = useState('');
@@ -52,7 +52,7 @@ function RequestDetailScreen(props) {
 
   if (!order) {
     return (
-      <View style={[styles.container, styles.center, { paddingTop: insets.top + SPACING.md }]}>
+      <View style={[styles.container, styles.center, { paddingTop: SPACING.md }]}>
         {load_error || !is_remote ? (
           <ErrorState
             message={load_error || 'That request could not be found.'}
@@ -125,7 +125,7 @@ function RequestDetailScreen(props) {
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={{
-          paddingTop: insets.top + SPACING.md,
+          paddingTop: SPACING.md,
           paddingBottom: insets.bottom + SPACING.lg,
         }}
       >

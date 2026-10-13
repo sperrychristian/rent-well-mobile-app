@@ -171,7 +171,7 @@ export function TenantsProvider(props) {
         ),
       );
       if (found) {
-        navigateWhenReady('TenantDetail', { tenant_id: found.id });
+        navigateWhenReady('TenantDetail', { tenantId: found.id });
       } else {
         navigateWhenReady('Tenants');
       }

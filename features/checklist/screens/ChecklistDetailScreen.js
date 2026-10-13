@@ -43,7 +43,7 @@ function ChecklistDetailScreen(props) {
     deleteChecklist,
   } = useWorkOrders();
 
-  const checklist_id = props.route.params.checklist_id;
+  const checklist_id = props.route.params.checklistId;
   const checklist = checklists.find((current) => current.id === checklist_id);
 
   // the ids stay set while the item modal slides away, item_open is what shows or hides it
@@ -140,7 +140,7 @@ function ChecklistDetailScreen(props) {
       tenant: checklist.tenant,
       move_in_id: checklist.id,
     });
-    props.navigation.push('ChecklistDetail', { checklist_id: new_id });
+    props.navigation.push('ChecklistDetail', { checklistId: new_id });
   }
 
   function confirmDelete() {
@@ -162,7 +162,7 @@ function ChecklistDetailScreen(props) {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
       <ScreenTitle>{checklist.type}</ScreenTitle>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}>
         <Card>

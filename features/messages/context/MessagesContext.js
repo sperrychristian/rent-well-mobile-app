@@ -45,7 +45,7 @@ export function MessagesProvider(props) {
 // opens the thread from a push tap, the navigator might still be starting on a cold launch so I wait a little
 function openThreadWhenReady(conversation_id, tries_left) {
   if (navigation_ref.isReady()) {
-    navigation_ref.navigate('MessageThread', { conversation_id: conversation_id });
+    navigation_ref.navigate('MessageThread', { conversationId: conversation_id });
   } else if (tries_left > 0) {
     setTimeout(() => openThreadWhenReady(conversation_id, tries_left - 1), 300);
   }

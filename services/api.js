@@ -273,6 +273,28 @@ export async function createTenantWorkOrder(fields) {
   return data.workOrder;
 }
 
+// the owner version, the property is required and the tenant link and unit are optional
+// fields: property_id, title, description, priority, unit_label, tenant_user_id, photo_keys
+export async function createOwnerWorkOrder(fields) {
+  const body = {
+    propertyId: fields.property_id,
+    title: fields.title,
+    description: fields.description,
+    priority: fields.priority,
+  };
+  if (fields.unit_label) {
+    body.unitLabel = fields.unit_label;
+  }
+  if (fields.tenant_user_id) {
+    body.tenantUserId = fields.tenant_user_id;
+  }
+  if (fields.photo_keys && fields.photo_keys.length > 0) {
+    body.photoKeys = fields.photo_keys;
+  }
+  const data = await api_client.request('POST', '/work-orders', { body: body });
+  return data.workOrder;
+}
+
 // changes is already in the server's shape, only the fields being changed get sent
 async function patchWorkOrder(work_order_id, changes) {
   const data = await api_client.request(
