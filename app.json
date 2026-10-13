@@ -4,27 +4,36 @@
     "slug": "rent-well-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/pixel-icon.png",
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#0E1726",
+        "foregroundImage": "./assets/pixel-adaptive-foreground.png",
+        "backgroundImage": "./assets/pixel-adaptive-background.png",
+        "monochromeImage": "./assets/pixel-adaptive-monochrome.png"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/pixel-favicon.png"
     },
     "plugins": [
       "expo-font",
       "expo-sharing",
       "@react-native-community/datetimepicker",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/pixel-splash.png",
+          "imageWidth": 220,
+          "resizeMode": "contain",
+          "backgroundColor": "#0E1726"
+        }
+      ]
     ],
     "backgroundColor": "#0E1726"
   }
