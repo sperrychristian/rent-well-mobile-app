@@ -7,6 +7,7 @@ import {
   lastSeenMessageId,
   formatMessageTime,
   messageBodyToSend,
+  findConversationFor,
 } from './messageHelpers';
 
 function message(id, created_at, sender_id, conversation_id) {
@@ -196,5 +197,24 @@ describe('messageBodyToSend', () => {
     expect(messageBodyToSend('   ', true)).toBe('Photo');
     expect(messageBodyToSend('look', true)).toBe('look');
     expect(messageBodyToSend('', false)).toBe('');
+  });
+});
+
+describe('findConversationFor', () => {
+  const conversations = [
+    { id: 'c1', otherUser: { id: 'u1', name: 'Tara Tenant' } },
+    { id: 'c2', otherUser: { id: 'u2', name: 'Sam Rivera' } },
+  ];
+
+  test('matches the account id first, then the name without minding case or spaces', () => {
+    expect(findConversationFor(conversations, 'Someone Else', 'u1').id).toBe('c1');
+    expect(findConversationFor(conversations, ' sam rivera ', null).id).toBe('c2');
+    expect(findConversationFor(conversations, 'Sam Rivera', 'unknown').id).toBe('c2');
+  });
+
+  test('nothing for an empty name or someone without a thread', () => {
+    expect(findConversationFor(conversations, '', null)).toBeNull();
+    expect(findConversationFor(conversations, 'Priya Shah', null)).toBeNull();
+    expect(findConversationFor([], 'Tara Tenant', 'u1')).toBeNull();
   });
 });
