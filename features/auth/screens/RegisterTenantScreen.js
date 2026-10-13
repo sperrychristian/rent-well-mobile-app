@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   },
   link: {
     ...TYPE.subheading,
-    color: COLORS.info_text,
+    color: COLORS.cta,
     textAlign: 'center',
   },
 });

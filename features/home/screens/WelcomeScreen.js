@@ -4,12 +4,20 @@ import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 import PrimaryButton from '../../../components/PrimaryButton';
 import Wordmark from '../../../components/ui/Wordmark';
 import FadeInView from '../../../components/ui/FadeInView';
-import PixelGridBackground from '../../../components/ui/PixelGridBackground';
+import IconCircle from '../../../components/ui/IconCircle';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 
 // the design pass: a hero with the pixel house and the wordmark over a faint pixel grid,
 // and the buttons down in the thumb zone (Log In, then Sign Up, then the demo with a line explaining it)
 // on a wide landscape screen the hero and the buttons sit side by side, and on an iPad it's capped to a phone width
+// the fintech pass: a clean light hero (no grid), a one-line value proposition, a small row of what's inside,
+// and the brand Log In, an outlined Sign Up, and the demo as a text link
+const trust_items = [
+  { icon: 'construct-outline', label: 'Work orders', tone: 'brand' },
+  { icon: 'chatbubble-ellipses-outline', label: 'Messages', tone: 'info' },
+  { icon: 'receipt-outline', label: 'Expenses', tone: 'success' },
+];
+
 function WelcomeScreen(props) {
   const { exitDemo } = useWorkOrders();
   const insets = useSafeAreaInsets();
@@ -18,7 +26,6 @@ function WelcomeScreen(props) {
 
   return (
     <View style={styles.screen}>
-      <PixelGridBackground />
       <ScrollView
         contentContainerStyle={[
           styles.content,
@@ -31,7 +38,23 @@ function WelcomeScreen(props) {
         ]}
       >
         <FadeInView index={0} style={[styles.hero, side_by_side && styles.half]}>
-          <Wordmark size={height < 600 ? 'medium' : 'large'} />
+          <Wordmark size={height < 600 ? 'medium' : 'large'} tagline={null} />
+          <Text style={styles.value_prop}>
+            Rent, repairs, and receipts for your rentals, all in one calm place.
+          </Text>
+          {/* what's inside, as three quiet icons, it's a summary so it reads as one line */}
+          <View
+            style={styles.trust_row}
+            accessible
+            accessibilityLabel="Includes work orders, messages, and expenses"
+          >
+            {trust_items.map((item) => (
+              <View key={item.label} style={styles.trust_item}>
+                <IconCircle icon={item.icon} tone={item.tone} size={36} />
+                <Text style={styles.trust_label}>{item.label}</Text>
+              </View>
+            ))}
+          </View>
         </FadeInView>
 
         <View style={[styles.actions, side_by_side && styles.half]}>
@@ -132,5 +155,27 @@ const styles = StyleSheet.create({
     ...TYPE.caption,
     color: COLORS.text_muted,
     textAlign: 'center',
+  },
+  value_prop: {
+    ...TYPE.body,
+    color: COLORS.text_muted,
+    textAlign: 'center',
+    maxWidth: 320,
+    marginTop: SPACING.md,
+  },
+  trust_row: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: SPACING.lg,
+    marginTop: SPACING.xl,
+  },
+  trust_item: {
+    alignItems: 'center',
+    gap: SPACING.xs + SPACING.xxs,
+  },
+  trust_label: {
+    ...TYPE.caption,
+    fontFamily: TYPE.label.fontFamily,
+    color: COLORS.text_muted,
   },
 });

@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Card from '../../../components/ui/Card';
 import Wordmark from '../../../components/ui/Wordmark';
 import FadeInView from '../../../components/ui/FadeInView';
-import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES, BORDER } from '../../../theme';
 
 // the shared frame for login and both sign up screens: title, a card for the form, and room for the keyboard
 // props: title, error (a message from the server shown above the form), children, footer
@@ -35,7 +35,7 @@ function AuthLayout(props) {
         </FadeInView>
         {props.error ? (
           <View style={styles.error_box} accessibilityLiveRegion="polite">
-            <Ionicons name="alert-circle" size={20} color={COLORS.text_light} />
+            <Ionicons name="alert-circle" size={20} color={COLORS.danger_text} />
             <Text style={styles.error_text}>{props.error}</Text>
           </View>
         ) : null}
@@ -78,18 +78,20 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   error_box: {
+    backgroundColor: COLORS.danger_tint,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.danger,
+    borderRadius: RADIUS.md,
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    backgroundColor: COLORS.danger,
-    borderRadius: RADIUS.md,
     padding: SPACING.md - SPACING.xs,
     marginBottom: SPACING.md,
   },
   error_text: {
     ...TYPE.body_small,
     fontFamily: TYPE.label.fontFamily,
-    color: COLORS.text_light,
+    color: COLORS.danger_text,
     flex: 1,
   },
 });

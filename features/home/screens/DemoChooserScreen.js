@@ -5,7 +5,8 @@ import Card from '../../../components/ui/Card';
 import Wordmark from '../../../components/ui/Wordmark';
 import FadeInView from '../../../components/ui/FadeInView';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import IconCircle from '../../../components/ui/IconCircle';
 
 // the two ways into the demo, both run on the same local sample data and never touch an account
 const demo_choices = [
@@ -15,6 +16,7 @@ const demo_choices = [
     detail: 'Work orders, tenants, expenses, documents, and checklists for the sample properties.',
     icon: 'business-outline',
     color: COLORS.success,
+    tone: 'success',
     hint: 'Starts the demo on the landlord dashboard',
   },
   {
@@ -23,6 +25,7 @@ const demo_choices = [
     detail: 'Sam Rivera at 123 Maple St, Unit 2: message the landlord and report an issue.',
     icon: 'key-outline',
     color: COLORS.accent,
+    tone: 'accent',
     hint: "Starts the demo on Sam's home screen",
   },
 ];
@@ -57,9 +60,8 @@ function DemoChooserScreen() {
             style={styles.choice_card}
           >
             <View style={styles.choice_row}>
-              <View style={[styles.icon_circle, { backgroundColor: choice.color }]}>
-                <Ionicons name={choice.icon} size={28} color={COLORS.text_light} />
-              </View>
+              {/* the fintech pass: a soft tinted circle instead of a solid one */}
+              <IconCircle icon={choice.icon} tone={choice.tone} size={SIZES.avatar_large} />
               <View style={styles.choice_text}>
                 <Text style={styles.choice_title}>{choice.title}</Text>
                 <Text style={styles.choice_detail}>{choice.detail}</Text>
@@ -104,13 +106,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
-  },
-  icon_circle: {
-    width: SIZES.avatar_large,
-    height: SIZES.avatar_large,
-    borderRadius: RADIUS.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   choice_text: {
     flex: 1,
