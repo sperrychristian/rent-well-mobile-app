@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true
     },
@@ -25,6 +25,7 @@
       "expo-sharing",
       "@react-native-community/datetimepicker",
       "expo-secure-store"
-    ]
+    ],
+    "backgroundColor": "#0E1726"
   }
 }

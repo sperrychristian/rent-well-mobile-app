@@ -44,6 +44,8 @@ import {
   AddRequestHeaderButton,
 } from './navigation/headerButtons';
 import { setupNotificationHandler } from './services/push';
+import { StatusBar } from 'expo-status-bar';
+import { PixelifySans_700Bold } from '@expo-google-fonts/pixelify-sans';
 
 import {
   useFonts,
@@ -271,6 +273,8 @@ export default function App() {
     Inter_600SemiBold,
     Inter_700Bold,
     Inter_800ExtraBold,
+    // only the Rent Well wordmark uses the pixel font
+    PixelifySans_700Bold,
   });
 
   if (!fonts_loaded) {
@@ -279,6 +283,8 @@ export default function App() {
 
   return (
     <AuthProvider>
+      {/* light clock and battery icons, the app is navy */}
+      <StatusBar style="light" />
       <AccountData>
         <AppNavigator />
       </AccountData>

@@ -1,4 +1,4 @@
-import { COLORS, FONTS } from '../theme';
+import { COLORS, TYPE } from '../theme';
 import { headerTitle } from './navigationMap';
 
 // one header style for every screen, all from theme.js
@@ -9,7 +9,8 @@ export const shared_screen_options = {
   headerShown: true,
   headerStyle: { backgroundColor: COLORS.background },
   headerTintColor: COLORS.title,
-  headerTitleStyle: { fontFamily: FONTS.subheading, color: COLORS.title, fontSize: 17 },
+  // the design pass: a bolder title on the navy, the same size the system header uses
+  headerTitleStyle: { fontFamily: TYPE.heading.fontFamily, color: COLORS.title, fontSize: 17 },
   headerTitleAlign: 'center',
   headerShadowVisible: false,
   // just the arrow, the previous screen's title next to it made the bar crowded
