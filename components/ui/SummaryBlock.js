@@ -61,8 +61,8 @@ const styles = StyleSheet.create({
   },
   value: {
     ...TYPE.display,
-    fontSize: 36,
-    lineHeight: 44,
+    fontSize: TYPE.figure.fontSize,
+    lineHeight: TYPE.figure.lineHeight,
     color: COLORS.text,
     marginTop: SPACING.xs,
   },

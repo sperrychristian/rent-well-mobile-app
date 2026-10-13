@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     ...TYPE.label,
     color: COLORS.text,
     marginTop: SPACING.sm,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   helper: {
     ...TYPE.caption,

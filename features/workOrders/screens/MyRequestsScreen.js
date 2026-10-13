@@ -7,7 +7,7 @@ import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { ordersForTenant } from '../utils/workOrderHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { formatDate } from '../../../utils/formatDate';
-import { COLORS, SPACING, FONTS, TYPE } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusPill from '../../../components/ui/StatusPill';
 import EmptyState from '../../../components/ui/EmptyState';
@@ -157,21 +157,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    marginBottom: 4,
+    marginBottom: SPACING.xs,
   },
   title: {
     ...list_styles.title,
     flex: 1,
-  },
-  badge: {
-    paddingVertical: 4,
-    paddingHorizontal: SPACING.sm,
-    borderRadius: 12,
-  },
-  badge_text: {
-    color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
-    fontSize: 12,
   },
   detail: {
     ...list_styles.detail,

@@ -280,7 +280,7 @@ function TenantsScreen(props) {
                     accessibilityRole="button"
                     accessibilityLabel={'Revoke invite for ' + invite.tenantName}
                   >
-                    <Text style={styles.small_button_text}>Revoke</Text>
+                    <Text style={[styles.small_button_text, styles.revoke_text]}>Revoke</Text>
                   </Pressable>
                 </View>
               )}
@@ -438,8 +438,8 @@ const styles = StyleSheet.create({
   count_text: {
     ...TYPE.label,
     ...NUMBERS,
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: TYPE.caption.fontSize,
+    lineHeight: TYPE.caption.lineHeight,
     color: COLORS.warning_text,
   },
   group_title: {
@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
   },
   small_button_text: {
     ...TYPE.label,
-    color: COLORS.text_light,
+    color: COLORS.text,
   },
   only_chip: {
     ...list_styles.chip,
@@ -500,5 +500,9 @@ const styles = StyleSheet.create({
   empty_small: {
     ...TYPE.body_small,
     color: COLORS.text_muted,
+  },
+  // Revoke is the red one, so its words stay white
+  revoke_text: {
+    color: COLORS.text_light,
   },
 });

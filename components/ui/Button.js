@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   label_small: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: TYPE.body_small.fontSize,
+    lineHeight: TYPE.body_small.lineHeight,
   },
 });

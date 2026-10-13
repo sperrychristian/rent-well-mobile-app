@@ -19,7 +19,7 @@ import ImageViewerModal from '../../messages/components/ImageViewerModal';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { canTenantAddPhotos, photosLeft } from '../utils/workOrderHelpers';
 import { formatDate } from '../../../utils/formatDate';
-import { COLORS, SPACING, FONTS, TYPE, RADIUS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusPill from '../../../components/ui/StatusPill';
 
@@ -252,16 +252,6 @@ const styles = StyleSheet.create({
     flex: 1,
     color: COLORS.text,
     marginBottom: SPACING.sm,
-  },
-  badge: {
-    paddingVertical: 4,
-    paddingHorizontal: SPACING.sm,
-    borderRadius: 12,
-  },
-  badge_text: {
-    color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
-    fontSize: 12,
   },
   tag_row: {
     flexDirection: 'row',

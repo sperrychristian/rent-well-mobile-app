@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   },
   text: {
     ...TYPE.label,
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: TYPE.caption.fontSize,
+    lineHeight: TYPE.caption.lineHeight,
   },
 });

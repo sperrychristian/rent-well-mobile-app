@@ -51,6 +51,7 @@ function MessagesScreen(props) {
         <Text style={styles.body_text}>Log in to see your messages.</Text>
         <PrimaryButton
           title="Log In"
+          variant="primary"
           onPress={() => props.navigation.navigate('Login')}
           style={styles.inline_button}
         />

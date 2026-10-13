@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     ...TYPE.label,
     color: COLORS.text,
     marginTop: SPACING.sm,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   helper: {
     ...TYPE.caption,
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   },
   chip: {
     ...list_styles.chip,
-    paddingVertical: 6,
+    paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
   },
   chip_active: {

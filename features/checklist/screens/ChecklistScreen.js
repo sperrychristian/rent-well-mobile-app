@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   row_type: {
     ...TYPE.label,
     color: COLORS.info_text,
-    marginTop: 2,
+    marginTop: SPACING.xxs,
   },
   detail: {
     ...list_styles.detail,
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    marginTop: 6,
+    marginTop: SPACING.sm,
   },
   progress_bar: {
     flex: 1,
@@ -235,8 +235,8 @@ const styles = StyleSheet.create({
   tag_row: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
-    marginTop: 6,
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
   },
   empty_text: {
     ...list_styles.empty_text,

@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   tag_row: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: SPACING.sm,
     marginTop: SPACING.sm,
     marginBottom: SPACING.sm,
   },

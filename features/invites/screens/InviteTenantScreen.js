@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
   label: {
     ...TYPE.label,
     color: COLORS.text,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   helper: {
     ...TYPE.body_small,
@@ -351,8 +351,8 @@ const styles = StyleSheet.create({
   },
   code: {
     fontFamily: TYPE.display.fontFamily,
-    fontSize: 34,
-    lineHeight: 44,
+    fontSize: TYPE.figure.fontSize,
+    lineHeight: TYPE.figure.lineHeight,
     color: COLORS.cta,
     backgroundColor: COLORS.surface_sunken,
     borderRadius: RADIUS.md,

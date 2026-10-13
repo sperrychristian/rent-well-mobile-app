@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { badgeLabel } from './uiHelpers';
-import { COLORS, FONTS, SPACING, RADIUS, BORDER } from '../../theme';
+import { COLORS, FONTS, SPACING, RADIUS, BORDER, TYPE } from '../../theme';
 
 // a small count bubble, it hides itself at zero
 // props: count, label (what a screen reader says, like "3 unread messages"), tone (danger or cta), style
@@ -43,8 +43,8 @@ const styles = StyleSheet.create({
   text: {
     color: COLORS.text_light,
     fontFamily: FONTS.body_bold,
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: TYPE.caption.fontSize,
+    lineHeight: TYPE.caption.lineHeight,
   },
   cta_text: {
     color: COLORS.on_cta,

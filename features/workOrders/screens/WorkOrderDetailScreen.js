@@ -115,7 +115,7 @@ function WorkOrderDetailContent(props) {
     return (
       <View style={[styles.flex, { paddingTop: SPACING.md }]}>
         <Text style={styles.detail}>That work order could not be found.</Text>
-        <PrimaryButton title="Back" onPress={() => props.navigation.goBack()} />
+        <PrimaryButton title="Back" variant="secondary" onPress={() => props.navigation.goBack()} />
       </View>
     );
   }

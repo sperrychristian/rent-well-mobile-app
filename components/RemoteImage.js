@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { View, Image, Pressable, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { cachedAttachmentUrl, forgetAttachmentUrl } from '../services/attachmentUrls';
-import { COLORS, FONTS } from '../theme';
+import { COLORS, FONTS, TYPE, SPACING, RADIUS } from '../theme';
 
 // shows an uploaded photo from its key, the key gets swapped for a short-lived url first
 // props: attachment_key, style (size and corners), onPress (gets the url, optional)
@@ -95,7 +95,7 @@ export default RemoteImage;
 const styles = StyleSheet.create({
   frame: {
     backgroundColor: COLORS.background,
-    borderRadius: 8,
+    borderRadius: RADIUS.sm,
   },
   center: {
     alignItems: 'center',
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   retry_text: {
     color: COLORS.text,
     fontFamily: FONTS.body,
-    fontSize: 11,
-    marginTop: 2,
+    fontSize: TYPE.micro.fontSize,
+    marginTop: SPACING.xxs,
   },
 });

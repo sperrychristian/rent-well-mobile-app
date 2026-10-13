@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   label: {
     ...TYPE.label,
     color: COLORS.text,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   helper: {
     ...TYPE.caption,
@@ -341,11 +341,11 @@ const styles = StyleSheet.create({
   file_name: {
     color: COLORS.text,
     fontFamily: FONTS.body_bold,
-    fontSize: 14,
+    fontSize: TYPE.body_small.fontSize,
   },
   file_button: {
     marginHorizontal: 0,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   input: {
     ...list_styles.field_input,
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
   },
   chip: {
     ...list_styles.chip,
-    paddingVertical: 6,
+    paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
   },
   chip_active: {

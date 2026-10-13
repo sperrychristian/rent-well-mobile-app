@@ -156,6 +156,12 @@ export const TYPE = {
   body_small: { fontFamily: FONTS.body, fontSize: 14, lineHeight: 20 },
   label: { fontFamily: FONTS.subheading, fontSize: 13, lineHeight: 18 },
   caption: { fontFamily: FONTS.body, fontSize: 12, lineHeight: 16 },
+  // the smallest text, for tags and message times
+  micro: { fontFamily: FONTS.body, fontSize: 11, lineHeight: 15 },
+  // message bubbles, a touch smaller than body so a thread fits more
+  body_compact: { fontFamily: FONTS.body, fontSize: 15, lineHeight: 21 },
+  // the big key figure on a summary card or an invite code
+  figure: { fontFamily: FONTS.body_bold, fontSize: 36, lineHeight: 44, letterSpacing: -0.8 },
   // the small uppercase label over a section or a figure
   overline: {
     fontFamily: FONTS.subheading,

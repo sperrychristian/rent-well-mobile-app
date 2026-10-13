@@ -898,8 +898,8 @@ const styles = StyleSheet.create({
   },
   tag_text: {
     ...TYPE.caption,
-    fontSize: 11,
-    lineHeight: 15,
+    fontSize: TYPE.micro.fontSize,
+    lineHeight: TYPE.micro.lineHeight,
     fontFamily: TYPE.label.fontFamily,
   },
   receipt_box: {
@@ -936,7 +936,7 @@ const styles = StyleSheet.create({
   },
   undo_action: {
     ...TYPE.label,
-    fontSize: 14,
+    fontSize: TYPE.body_small.fontSize,
     color: COLORS.brand_tint,
   },
   undo_button: {

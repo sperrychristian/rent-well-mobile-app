@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   label: {
     ...TYPE.label,
     color: COLORS.text,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   helper: {
     ...TYPE.caption,
@@ -386,8 +386,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    gap: 4,
-    paddingVertical: 3,
+    gap: SPACING.xs,
+    paddingVertical: SPACING.xs,
     paddingHorizontal: SPACING.sm,
     marginBottom: SPACING.sm,
   },
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
     ...TYPE.subheading,
     fontFamily: TYPE.heading.fontFamily,
     color: COLORS.text,
-    marginBottom: 2,
+    marginBottom: SPACING.xxs,
   },
   worse_value: {
     color: COLORS.danger_text,
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
   },
   chip: {
     ...list_styles.chip,
-    paddingVertical: 6,
+    paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
   },
   chip_text: {

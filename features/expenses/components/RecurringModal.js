@@ -42,11 +42,13 @@ function RecurringModal(props) {
                 </Text>
                 <View style={styles.button_row}>
                   <PrimaryButton
+                    variant="secondary"
                     title={rule.active ? 'Pause' : 'Resume'}
                     onPress={() => props.onToggle(rule.id)}
                     style={styles.pause_button}
                   />
                   <PrimaryButton
+                    variant="destructive"
                     title="Delete"
                     onPress={() => confirmDelete(rule)}
                     style={styles.delete_button}

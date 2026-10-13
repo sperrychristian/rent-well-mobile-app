@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   info_name: {
     ...TYPE.heading,
     color: COLORS.text,
-    marginBottom: 2,
+    marginBottom: SPACING.xxs,
   },
   detail: {
     ...list_styles.detail,
@@ -413,8 +413,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
-    gap: 6,
-    marginTop: 6,
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
   },
   signed_row: {
     flexDirection: 'row',
@@ -498,7 +498,7 @@ const styles = StyleSheet.create({
   },
   add_item_text: {
     ...TYPE.label,
-    fontSize: 14,
+    fontSize: TYPE.body_small.fontSize,
     color: COLORS.info_text,
   },
   actions: {

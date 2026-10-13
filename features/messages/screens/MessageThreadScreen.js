@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
   },
   input: {
     ...TYPE.input,
-    fontSize: 15,
+    fontSize: TYPE.body_compact.fontSize,
     backgroundColor: COLORS.surface,
     borderWidth: BORDER.hairline,
     borderColor: COLORS.border_strong,

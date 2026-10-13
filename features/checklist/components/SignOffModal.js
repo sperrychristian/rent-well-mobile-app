@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   label: {
     ...TYPE.label,
     color: COLORS.text,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   input: {
     ...list_styles.field_input,

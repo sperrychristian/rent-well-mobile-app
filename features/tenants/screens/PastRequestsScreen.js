@@ -143,21 +143,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    marginBottom: 4,
+    marginBottom: SPACING.xs,
   },
   title: {
     ...list_styles.title,
     flex: 1,
-  },
-  badge: {
-    paddingVertical: 4,
-    paddingHorizontal: SPACING.sm,
-    borderRadius: 12,
-  },
-  badge_text: {
-    color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
-    fontSize: 12,
   },
   detail: {
     ...list_styles.detail,
@@ -165,9 +155,9 @@ const styles = StyleSheet.create({
   note: {
     color: COLORS.text,
     fontFamily: FONTS.body,
-    fontSize: 14,
+    fontSize: TYPE.body_small.fontSize,
     fontStyle: 'italic',
-    marginTop: 4,
+    marginTop: SPACING.xs,
   },
   empty_text: {
     ...list_styles.empty_text,

@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
   section_label: {
     ...TYPE.label,
     color: COLORS.text_muted,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   chip_row: {
     ...list_styles.chip_row,
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
     ...TYPE.display,
     ...NUMBERS,
     color: COLORS.text,
-    marginVertical: 4,
+    marginVertical: SPACING.xs,
   },
   detail: {
     ...list_styles.detail,
@@ -497,13 +497,13 @@ const styles = StyleSheet.create({
   row_category: {
     ...TYPE.label,
     color: COLORS.info_text,
-    marginTop: 2,
+    marginTop: SPACING.xxs,
   },
   tag_row: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
-    marginTop: 6,
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
   },
   empty_text: {
     ...list_styles.empty_text,

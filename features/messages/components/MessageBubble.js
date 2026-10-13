@@ -73,8 +73,8 @@ const styles = StyleSheet.create({
   },
   body: {
     ...TYPE.body,
-    fontSize: 15,
-    lineHeight: 21,
+    fontSize: TYPE.body_compact.fontSize,
+    lineHeight: TYPE.body_compact.lineHeight,
     color: COLORS.text,
   },
   body_mine: {
@@ -82,8 +82,8 @@ const styles = StyleSheet.create({
   },
   meta: {
     ...TYPE.caption,
-    fontSize: 11,
-    lineHeight: 15,
+    fontSize: TYPE.micro.fontSize,
+    lineHeight: TYPE.micro.lineHeight,
     color: COLORS.text_muted,
     marginTop: SPACING.xxs,
     marginHorizontal: SPACING.xs,

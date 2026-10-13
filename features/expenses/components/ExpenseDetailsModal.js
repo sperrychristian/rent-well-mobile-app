@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   description: {
     ...TYPE.body_small,
     color: COLORS.text_muted,
-    marginTop: 4,
+    marginTop: SPACING.xs,
   },
   photo: {
     borderRadius: RADIUS.md,
