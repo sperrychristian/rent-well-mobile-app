@@ -1,19 +1,21 @@
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import PrimaryButton from '../../../components/PrimaryButton';
-import { COLORS, SPACING } from '../../../theme';
+import { View, StyleSheet } from 'react-native';
+import Button from '../../../components/ui/Button';
+import { SPACING } from '../../../theme';
 
 // a PrimaryButton that shows a spinner and ignores taps while the request is out
 // props: title, busy_title, busy, onPress
+// the design pass made it the amber primary button with the spinner inside it instead of next to it
 function SubmitButton(props) {
   return (
     <View style={styles.row}>
-      <PrimaryButton
+      <Button
         title={props.busy ? props.busy_title : props.title}
-        text_color={COLORS.text_light}
-        onPress={props.busy ? undefined : props.onPress}
-        style={[styles.button, props.busy && styles.busy]}
+        variant="primary"
+        size="large"
+        loading={props.busy}
+        onPress={props.onPress}
+        style={styles.button}
       />
-      {props.busy && <ActivityIndicator color={COLORS.action} style={styles.spinner} />}
     </View>
   );
 }
@@ -29,12 +31,5 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
-  },
-  busy: {
-    opacity: 0.7,
-  },
-  spinner: {
-    marginLeft: SPACING.sm,
   },
 });

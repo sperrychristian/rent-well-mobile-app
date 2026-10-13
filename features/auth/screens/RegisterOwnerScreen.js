@@ -5,7 +5,7 @@ import SubmitButton from '../components/SubmitButton';
 import TextField from '../../../components/TextField';
 import { useAuth, homeRouteFor } from '../context/AuthContext';
 import { checkEmail, checkNewPassword, checkName, collectErrors } from '../utils/authValidation';
-import { COLORS, SPACING, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 
 function RegisterOwnerScreen(props) {
   const { registerOwner } = useAuth();
@@ -46,13 +46,24 @@ function RegisterOwnerScreen(props) {
   return (
     <AuthLayout
       title="Landlord Sign Up"
+      subtitle="Create a landlord account for your properties."
       error={server_error}
       footer={
         <View style={styles.links}>
-          <Pressable onPress={() => props.navigation.navigate('RegisterTenant')} hitSlop={8}>
+          <Pressable
+            onPress={() => props.navigation.navigate('RegisterTenant')}
+            hitSlop={8}
+            accessibilityRole="link"
+            style={styles.link_press}
+          >
             <Text style={styles.link}>Renting? Sign up with your invite code</Text>
           </Pressable>
-          <Pressable onPress={() => props.navigation.navigate('Login')} hitSlop={8}>
+          <Pressable
+            onPress={() => props.navigation.navigate('Login')}
+            hitSlop={8}
+            accessibilityRole="link"
+            style={styles.link_press}
+          >
             <Text style={styles.link}>Already have an account? Log in</Text>
           </Pressable>
         </View>
@@ -105,11 +116,17 @@ export default RegisterOwnerScreen;
 const styles = StyleSheet.create({
   links: {
     alignItems: 'center',
-    gap: SPACING.md,
+    gap: SPACING.xs,
+  },
+  // each link is a full 44pt tall row so it's easy to tap
+  link_press: {
+    minHeight: SIZES.touch,
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.sm,
   },
   link: {
-    color: COLORS.action,
-    fontFamily: FONTS.body_bold,
-    fontSize: 15,
+    ...TYPE.subheading,
+    color: COLORS.info_text,
+    textAlign: 'center',
   },
 });

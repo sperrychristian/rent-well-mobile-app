@@ -5,7 +5,7 @@ import SubmitButton from '../components/SubmitButton';
 import TextField from '../../../components/TextField';
 import { useAuth, homeRouteFor } from '../context/AuthContext';
 import { checkEmail, checkLoginPassword, collectErrors } from '../utils/authValidation';
-import { COLORS, SPACING, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 
 function LoginScreen(props) {
   const { login, session_expired } = useAuth();
@@ -46,13 +46,24 @@ function LoginScreen(props) {
   return (
     <AuthLayout
       title="Log In"
+      subtitle="Welcome back. Log in to manage your rentals."
       error={server_error}
       footer={
         <View style={styles.links}>
-          <Pressable onPress={() => props.navigation.navigate('RegisterOwner')} hitSlop={8}>
+          <Pressable
+            onPress={() => props.navigation.navigate('RegisterOwner')}
+            hitSlop={8}
+            accessibilityRole="link"
+            style={styles.link_press}
+          >
             <Text style={styles.link}>New landlord? Create an account</Text>
           </Pressable>
-          <Pressable onPress={() => props.navigation.navigate('RegisterTenant')} hitSlop={8}>
+          <Pressable
+            onPress={() => props.navigation.navigate('RegisterTenant')}
+            hitSlop={8}
+            accessibilityRole="link"
+            style={styles.link_press}
+          >
             <Text style={styles.link}>I have an invite code</Text>
           </Pressable>
         </View>
@@ -91,11 +102,17 @@ export default LoginScreen;
 const styles = StyleSheet.create({
   links: {
     alignItems: 'center',
-    gap: SPACING.md,
+    gap: SPACING.xs,
+  },
+  // each link is a full 44pt tall row so it's easy to tap
+  link_press: {
+    minHeight: SIZES.touch,
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.sm,
   },
   link: {
-    color: COLORS.action,
-    fontFamily: FONTS.body_bold,
-    fontSize: 15,
+    ...TYPE.subheading,
+    color: COLORS.info_text,
+    textAlign: 'center',
   },
 });

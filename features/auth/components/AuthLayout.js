@@ -1,11 +1,15 @@
 import { View, Text, ScrollView, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
-import Card from '../../../components/Card';
-import { COLORS, SPACING, FONTS } from '../../../theme';
+import { Ionicons } from '@expo/vector-icons';
+import Card from '../../../components/ui/Card';
+import Wordmark from '../../../components/ui/Wordmark';
+import FadeInView from '../../../components/ui/FadeInView';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
 
 // the shared frame for login and both sign up screens: title, a card for the form, and room for the keyboard
 // props: title, error (a message from the server shown above the form), children, footer
+// the design pass added the Rent Well lockup on top and subtitle (one line saying what this form is for)
 function AuthLayout(props) {
   const insets = useSafeAreaInsets();
   // the header sits above this screen now, so the keyboard lift has to count its height too
@@ -25,13 +29,20 @@ function AuthLayout(props) {
         ]}
       >
         {/* the title prop isn't drawn anymore, the header above already shows the same title */}
+        <FadeInView index={0} style={styles.top}>
+          <Wordmark size="small" tagline={null} />
+          {props.subtitle ? <Text style={styles.subtitle}>{props.subtitle}</Text> : null}
+        </FadeInView>
         {props.error ? (
           <View style={styles.error_box} accessibilityLiveRegion="polite">
+            <Ionicons name="alert-circle" size={20} color={COLORS.text_light} />
             <Text style={styles.error_text}>{props.error}</Text>
           </View>
         ) : null}
-        <Card>{props.children}</Card>
-        {props.footer}
+        <FadeInView index={1}>
+          <Card style={styles.form_card}>{props.children}</Card>
+        </FadeInView>
+        <FadeInView index={2}>{props.footer}</FadeInView>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -50,20 +61,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     // keeps the form a phone width on a tablet
     width: '100%',
-    maxWidth: 600,
+    maxWidth: SIZES.content_max_width,
     alignSelf: 'center',
+  },
+  top: {
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  subtitle: {
+    ...TYPE.body,
+    color: COLORS.text_muted,
+    textAlign: 'center',
+    marginTop: SPACING.sm,
+  },
+  form_card: {
+    marginBottom: SPACING.lg,
   },
   error_box: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
     backgroundColor: COLORS.danger,
-    borderRadius: 8,
-    padding: SPACING.sm,
-    width: '90%',
-    alignSelf: 'center',
+    borderRadius: RADIUS.md,
+    padding: SPACING.md - SPACING.xs,
+    marginBottom: SPACING.md,
   },
   error_text: {
+    ...TYPE.body_small,
+    fontFamily: TYPE.label.fontFamily,
     color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
-    fontSize: 14,
-    textAlign: 'center',
+    flex: 1,
   },
 });

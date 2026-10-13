@@ -12,7 +12,7 @@ import {
   normalizeInviteCode,
   collectErrors,
 } from '../utils/authValidation';
-import { COLORS, SPACING, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 
 function RegisterTenantScreen(props) {
   const { registerTenant } = useAuth();
@@ -58,10 +58,16 @@ function RegisterTenantScreen(props) {
   return (
     <AuthLayout
       title="Tenant Sign Up"
+      subtitle="Join your rental with the code from your landlord."
       error={server_error}
       footer={
         <View style={styles.links}>
-          <Pressable onPress={() => props.navigation.navigate('Login')} hitSlop={8}>
+          <Pressable
+            onPress={() => props.navigation.navigate('Login')}
+            hitSlop={8}
+            accessibilityRole="link"
+            style={styles.link_press}
+          >
             <Text style={styles.link}>Already have an account? Log in</Text>
           </Pressable>
         </View>
@@ -75,8 +81,9 @@ function RegisterTenantScreen(props) {
         placeholder="K7M2-QX9P"
         autoCapitalize="characters"
         autoCorrect={false}
+        // the hint lives in the field now, so it sits under the box and swaps out for an error
+        helper="Your landlord sends this. Dashes and spaces are fine."
       />
-      <Text style={styles.helper}>Your landlord sends this. Dashes and spaces are fine.</Text>
       <TextField
         label="Your name (optional)"
         value={name}
@@ -117,21 +124,19 @@ function RegisterTenantScreen(props) {
 export default RegisterTenantScreen;
 
 const styles = StyleSheet.create({
-  helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
-    marginTop: -4,
-    marginBottom: SPACING.sm,
-  },
   links: {
     alignItems: 'center',
-    gap: SPACING.md,
+    gap: SPACING.xs,
+  },
+  // each link is a full 44pt tall row so it's easy to tap
+  link_press: {
+    minHeight: SIZES.touch,
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.sm,
   },
   link: {
-    color: COLORS.action,
-    fontFamily: FONTS.body_bold,
-    fontSize: 15,
+    ...TYPE.subheading,
+    color: COLORS.info_text,
+    textAlign: 'center',
   },
 });
