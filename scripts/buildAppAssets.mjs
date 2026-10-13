@@ -47,16 +47,6 @@ function centered(name, size, fraction, solid_color) {
   return drawingRects(name, x, y, pixel, solid_color);
 }
 
-// the same faint grid as the Welcome hero, drawn as lines so it works without svg patterns
-function gridLines(size, cell, color) {
-  const lines = [];
-  for (let at = 0; at <= size; at += cell) {
-    lines.push('<rect x="' + at + '" y="0" width="1" height="' + size + '" fill="' + color + '"/>');
-    lines.push('<rect x="0" y="' + at + '" width="' + size + '" height="1" fill="' + color + '"/>');
-  }
-  return lines.join('');
-}
-
 function svg(size, body, background) {
   return (
     '<svg xmlns="http://www.w3.org/2000/svg" width="' +
@@ -74,18 +64,12 @@ function svg(size, body, background) {
   );
 }
 
-// a softer version of the grid line, since rgba can't go straight into a solid rect fill on every renderer
-const grid_color = COLORS.surface;
-
+// the fintech pass: the house is a small logomark on the soft indigo tint, no grid, and the splash sits on white
 const outputs = [
   {
     file: 'pixel-icon.png',
     size: 1024,
-    svg: svg(
-      1024,
-      gridLines(1024, 64, grid_color) + centered('house', 1024, 0.78),
-      COLORS.background,
-    ),
+    svg: svg(1024, centered('house_mark', 1024, 0.62), COLORS.brand_tint),
   },
   {
     file: 'pixel-adaptive-foreground.png',
@@ -97,7 +81,7 @@ const outputs = [
   {
     file: 'pixel-adaptive-background.png',
     size: 1024,
-    svg: svg(1024, gridLines(1024, 64, grid_color), COLORS.background),
+    svg: svg(1024, '', COLORS.brand_tint),
   },
   {
     file: 'pixel-adaptive-monochrome.png',
@@ -108,13 +92,13 @@ const outputs = [
   {
     file: 'pixel-splash.png',
     size: 1024,
-    svg: svg(1024, centered('house', 1024, 0.9)),
+    svg: svg(1024, centered('house_mark', 1024, 0.9)),
     transparent: true,
   },
   {
     file: 'pixel-favicon.png',
     size: 48,
-    svg: svg(48, centered('house_mark', 48, 0.84), COLORS.background),
+    svg: svg(48, centered('house_mark', 48, 0.84), COLORS.brand_tint),
   },
 ];
 
@@ -164,7 +148,7 @@ expo.icon = './assets/pixel-icon.png';
 expo.backgroundColor = COLORS.background;
 expo.android = expo.android || {};
 expo.android.adaptiveIcon = {
-  backgroundColor: COLORS.background,
+  backgroundColor: COLORS.brand_tint,
   foregroundImage: './assets/pixel-adaptive-foreground.png',
   backgroundImage: './assets/pixel-adaptive-background.png',
   monochromeImage: './assets/pixel-adaptive-monochrome.png',
@@ -177,7 +161,7 @@ const splash = [
     image: './assets/pixel-splash.png',
     imageWidth: 220,
     resizeMode: 'contain',
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.surface,
   },
 ];
 expo.plugins = (expo.plugins || []).filter(
