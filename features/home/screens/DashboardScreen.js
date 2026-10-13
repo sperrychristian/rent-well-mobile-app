@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, SPACING } from '../../../theme';
 import ScreenTitle from '../../../components/ScreenTitle';
@@ -17,10 +17,11 @@ function DashboardScreen(props) {
   const { is_remote, open_count } = useWorkOrders();
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
+    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
       {/* only shows while the demo is running */}
       <DemoBanner />
-      <View style={styles.content}>
+      {/* it scrolls now, the header takes some room and a small phone can't fit every button */}
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <View>
           <ScreenTitle>Dashboard</ScreenTitle>
         </View>
@@ -62,6 +63,13 @@ function DashboardScreen(props) {
             onPress={() => props.navigation.navigate('Tenants')}
           />
           <PrimaryButton
+            title="Payments and Rent"
+            icon="card-outline"
+            style={styles.payments_button}
+            text_color={COLORS.text_light}
+            onPress={() => props.navigation.navigate('Payments')}
+          />
+          <PrimaryButton
             title="Documents"
             icon="document-text-outline"
             style={styles.documents_button}
@@ -84,7 +92,7 @@ function DashboardScreen(props) {
           {/* only shows for a signed-in account, not in the demo */}
           <LogoutButton />
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -99,8 +107,11 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
   },
 
+  scroll: {
+    width: '100%',
+  },
   content: {
-    flex: 1,
+    flexGrow: 1,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -123,6 +134,9 @@ const styles = StyleSheet.create({
   },
   checklist_button: {
     backgroundColor: COLORS.accent,
+  },
+  payments_button: {
+    backgroundColor: COLORS.priority_low,
   },
   tenants_button: {
     backgroundColor: COLORS.title,

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useLayoutEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -14,12 +14,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenTitle from '../../../components/ScreenTitle';
 import PrimaryButton from '../../../components/PrimaryButton';
 import ErrorState from '../../../components/ErrorState';
+import HeaderIconButton from '../../../components/HeaderIconButton';
 import PropertyFormModal from '../components/PropertyFormModal';
 import { useTenants } from '../context/TenantsContext';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
 // the owner's properties: add, rename, change the address, or delete one nobody uses anymore
-function PropertiesScreen() {
+function PropertiesScreen(props) {
   const insets = useSafeAreaInsets();
   const {
     mode,
@@ -38,6 +39,23 @@ function PropertiesScreen() {
   // goes up every time the form opens, the new key gives the form a fresh start
   const [form_key, setFormKey] = useState(0);
   const [deleting_id, setDeletingId] = useState(null);
+
+  // the header's Add button opens the same form as the Add Property button, so it's set here where the form lives
+  useLayoutEffect(() => {
+    props.navigation.setOptions({
+      headerRight: () => (
+        <HeaderIconButton
+          icon="add-circle-outline"
+          label="Add a property"
+          onPress={() => {
+            setFormKey((current) => current + 1);
+            setEditing(null);
+            setFormOpen(true);
+          }}
+        />
+      ),
+    });
+  }, [props.navigation]);
 
   function openForm(property) {
     setFormKey((current) => current + 1);
@@ -99,7 +117,13 @@ function PropertiesScreen() {
         }
         renderItem={({ item }) => (
           <View style={styles.row}>
-            <View style={styles.row_text}>
+            {/* tapping the name side opens the property's details, the icons on the right still edit and delete */}
+            <Pressable
+              style={styles.row_text}
+              onPress={() => props.navigation.navigate('PropertyDetail', { propertyId: item.id })}
+              accessibilityRole="button"
+              accessibilityLabel={'Open ' + item.name}
+            >
               <Text style={styles.name}>{item.name}</Text>
               <Text style={styles.detail}>{item.address}</Text>
               <Text style={styles.detail}>
@@ -108,7 +132,7 @@ function PropertiesScreen() {
                   : item.tenancies.length +
                     (item.tenancies.length === 1 ? ' current tenant' : ' current tenants')}
               </Text>
-            </View>
+            </Pressable>
             {deleting_id === item.id ? (
               <ActivityIndicator color={COLORS.title} />
             ) : (
@@ -138,7 +162,7 @@ function PropertiesScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
       <ScreenTitle>Properties</ScreenTitle>
       <PrimaryButton
         title="Add Property"

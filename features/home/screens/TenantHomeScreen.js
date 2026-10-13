@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Pressable } from 'react-native';
+import { StyleSheet, View, Text, Pressable, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenTitle from '../../../components/ScreenTitle';
@@ -24,7 +24,7 @@ function TenantHomeScreen(props) {
   if (is_read_only) {
     const last = my_ended_tenancies[0];
     return (
-      <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
         <ScreenTitle>No Active Rental</ScreenTitle>
         <Card>
           <View style={styles.card_row}>
@@ -88,12 +88,12 @@ function TenantHomeScreen(props) {
         <View style={[styles.footer, { paddingBottom: insets.bottom + SPACING.md }]}>
           <LogoutButton />
         </View>
-      </View>
+      </ScrollView>
     );
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
       <ScreenTitle>Home</ScreenTitle>
       <Text style={styles.greeting}>Hi{user ? ', ' + user.name : ''}!</Text>
       {/* where they live now, once GET /me has answered */}
@@ -165,20 +165,44 @@ function TenantHomeScreen(props) {
         </Card>
       </Pressable>
 
+      <Pressable
+        onPress={() => props.navigation.navigate('Payments')}
+        accessibilityRole="button"
+        accessibilityLabel="Payments and rent"
+        style={({ pressed }) => [styles.card_press, pressed && styles.pressed]}
+      >
+        <Card>
+          <View style={styles.card_row}>
+            <Ionicons name="card-outline" size={32} color={COLORS.priority_low} />
+            <View style={styles.card_text}>
+              <Text style={styles.card_title}>Payments and Rent</Text>
+              <Text style={styles.card_detail}>Coming soon: pay rent and see past payments</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={COLORS.text} />
+          </View>
+        </Card>
+      </Pressable>
+
       <View style={[styles.footer, { paddingBottom: insets.bottom + SPACING.md }]}>
         <LogoutButton />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 export default TenantHomeScreen;
 
 const styles = StyleSheet.create({
-  container: {
+  scroll: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  // flexGrow instead of flex so it can scroll, the footer still sits at the bottom when there's room
+  container: {
+    flexGrow: 1,
+    backgroundColor: COLORS.background,
     padding: SPACING.lg,
+    paddingTop: SPACING.md,
   },
   place: {
     color: COLORS.text,

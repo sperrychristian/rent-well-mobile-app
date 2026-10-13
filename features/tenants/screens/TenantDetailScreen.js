@@ -19,6 +19,8 @@ import PlaceModal from '../components/PlaceModal';
 import EndTenancyModal from '../components/EndTenancyModal';
 import { useTenants } from '../context/TenantsContext';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useMessages } from '../../messages/context/MessagesContext';
+import { openConversationFor } from '../../messages/utils/openConversation';
 import { placeLabel, findMoveInChecklist } from '../utils/tenantHelpers';
 import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 
@@ -26,7 +28,7 @@ import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
 // and the owner's actions (message, move, assign, end)
 function TenantDetailScreen(props) {
   const insets = useSafeAreaInsets();
-  const tenant_id = props.route.params.tenant_id;
+  const tenant_id = props.route.params.tenantId;
   const {
     tenants,
     properties,
@@ -38,6 +40,7 @@ function TenantDetailScreen(props) {
     endTenancy,
   } = useTenants();
   const { checklists, addChecklist } = useWorkOrders();
+  const { conversations } = useMessages();
 
   // the fresh copy from the server, with the recent work orders the list doesn't have
   const [detail, setDetail] = useState(null);
@@ -86,7 +89,7 @@ function TenantDetailScreen(props) {
 
   if (!tenant) {
     return (
-      <View style={[styles.container, styles.center, { paddingTop: insets.top + SPACING.md }]}>
+      <View style={[styles.container, styles.center, { paddingTop: SPACING.md }]}>
         {load_error ? (
           <ErrorState message={load_error} onRetry={() => setLoadCount((current) => current + 1)} />
         ) : detail === null ? (
@@ -116,9 +119,9 @@ function TenantDetailScreen(props) {
   // the owner can still message a former tenant, like about the deposit
   function openMessages() {
     if (tenant.conversation_id) {
-      props.navigation.navigate('MessageThread', { conversation_id: tenant.conversation_id });
+      props.navigation.navigate('MessageThread', { conversationId: tenant.conversation_id });
     } else {
-      props.navigation.navigate('Messages', { tenant: tenant.name });
+      openConversationFor(props.navigation, conversations, tenant.name, tenant.id);
     }
   }
 
@@ -166,7 +169,7 @@ function TenantDetailScreen(props) {
               tenant: tenant.name,
               move_in_id: move_in ? move_in.id : null,
             });
-            props.navigation.navigate('ChecklistDetail', { checklist_id: checklist_id });
+            props.navigation.navigate('ChecklistDetail', { checklistId: checklist_id });
           },
         },
       ],
@@ -177,7 +180,7 @@ function TenantDetailScreen(props) {
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={{
-          paddingTop: insets.top + SPACING.md,
+          paddingTop: SPACING.md,
           paddingBottom: insets.bottom + SPACING.lg,
           paddingHorizontal: SPACING.md,
         }}
@@ -213,9 +216,23 @@ function TenantDetailScreen(props) {
           )}
           {tenant.active_tenancies.map((tenancy) => (
             <View key={tenancy.id} style={styles.tenancy}>
-              <Text style={styles.place}>
-                {placeLabel(tenancy.property_name, tenancy.unit_label)}
-              </Text>
+              {/* tapping the place opens that property's details */}
+              <Pressable
+                onPress={() =>
+                  props.navigation.navigate('PropertyDetail', { propertyId: tenancy.property_id })
+                }
+                hitSlop={8}
+                style={styles.link_row}
+                accessibilityRole="link"
+                accessibilityLabel={
+                  'Open property ' + placeLabel(tenancy.property_name, tenancy.unit_label)
+                }
+              >
+                <Text style={[styles.place, styles.place_link]}>
+                  {placeLabel(tenancy.property_name, tenancy.unit_label)}
+                </Text>
+                <Ionicons name="chevron-forward" size={16} color={COLORS.action} />
+              </Pressable>
               <Text style={styles.detail}>Moved in {tenancy.started_at}</Text>
               <View style={styles.button_row}>
                 <PrimaryButton
@@ -254,7 +271,7 @@ function TenantDetailScreen(props) {
             </View>
           ))}
           <Pressable
-            onPress={() => props.navigation.navigate('WorkOrders', { search: tenant.name })}
+            onPress={() => props.navigation.navigate('WorkOrders', { tenantId: tenant.id })}
             hitSlop={8}
             style={styles.link_row}
             accessibilityRole="link"
@@ -289,6 +306,13 @@ function TenantDetailScreen(props) {
             text_color={COLORS.text_light}
             onPress={openMessages}
             style={styles.message_button}
+          />
+          <PrimaryButton
+            title="Lease and Documents"
+            icon="document-text-outline"
+            text_color={COLORS.text_dark}
+            onPress={() => props.navigation.navigate('TenantLease', { tenantId: tenant.id })}
+            style={styles.lease_button}
           />
           <PrimaryButton
             title="Assign to a Property"
@@ -435,6 +459,13 @@ const styles = StyleSheet.create({
   message_button: {
     marginHorizontal: 0,
     backgroundColor: COLORS.accent,
+  },
+  place_link: {
+    color: COLORS.action,
+  },
+  lease_button: {
+    marginHorizontal: 0,
+    backgroundColor: COLORS.highlight,
   },
   assign_button: {
     marginHorizontal: 0,
