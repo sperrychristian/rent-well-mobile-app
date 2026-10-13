@@ -52,7 +52,11 @@ The demo works with no backend. Logging in, signing up, messages, and work order
    - iOS simulator: works as is (`http://localhost:4000`).
    - Android emulator: works as is (`http://10.0.2.2:4000`).
    - Physical phone: open `services/config.js`, set `lan_api_url` to your computer's address, like `'http://192.168.1.20:4000'` (find it with `ipconfig getifaddr en0`). The phone and computer need to be on the same wifi.
-3. Log in with a seed account (password `password1234`): `owner@example.com` (landlord) or `tenant@example.com` (tenant). To try tenant sign up, use invite code `WELCOME2`. Run `npm run seed` in the API repo again to reset the seed data.
+3. Log in with a seed account (password `password1234`): `owner@example.com` (landlord), `tenant@example.com` (tenant), `roommate@example.com` (shares Tara's unit), or `former@example.com` (a former tenant, read only). To try tenant sign up, use invite code `WELCOME2`. Run `npm run seed` in the API repo again to reset the seed data.
+
+Tenant management, as the landlord: Dashboard, then Tenants. Tenants are grouped by property and unit, with pending invites (Resend, Revoke) and Past Tenants underneath. Tap a tenant to message, move, assign, or end their tenancy. Properties is in the Tenants header. Changes show up live on other devices signed in to the same account.
+
+As `former@example.com` the home says "No Active Rental" and messages are read-only. If the landlord assigns them to a property again, the normal home comes back without logging out.
 
 What to try once you're signed in:
 - As the landlord: Work Orders loads from the server. Pull down to refresh, start or resolve an order, and edit priority, notes, contractor, and estimate on its detail screen. The Dashboard badge counts orders nobody has started.

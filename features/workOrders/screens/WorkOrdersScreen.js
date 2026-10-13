@@ -50,7 +50,10 @@ function WorkOrdersScreen(props) {
   // track which property chip is selected, All means no property filter
   const [property_filter, setPropertyFilter] = useState('All');
   // what's typed in the search box and which sort chip is picked
-  const [search_text, setSearchText] = useState('');
+  // the tenant detail screen can open this with their name already searched
+  const [search_text, setSearchText] = useState(
+    props.route && props.route.params && props.route.params.search ? props.route.params.search : '',
+  );
   const [sort_by, setSortBy] = useState('Newest');
 
   // in real mode the actions go to the server and can fail, so I show why (the local ones never throw)

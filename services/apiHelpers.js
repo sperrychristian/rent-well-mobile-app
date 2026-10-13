@@ -2,6 +2,16 @@
 
 // what the app shows for each error code, the server's own message is a fallback since it's not meant for users
 const friendly_messages = {
+  NO_ACTIVE_TENANCY: 'Your tenancy has ended, so this is read-only now.',
+  TENANCY_EXISTS: 'That tenant already lives in that unit.',
+  TENANCY_ENDED: 'That tenancy has already ended.',
+  INVALID_END_DATE:
+    "The move-out date can't be before they moved in or more than 30 days from today.",
+  INVITE_USED: 'A tenant already signed up with that invite, so it can no longer be changed.',
+  PROPERTY_HAS_ACTIVE_TENANCY:
+    'This property still has tenants living there. Move them or end their tenancies first.',
+  PROPERTY_HAS_OPEN_WORK_ORDERS:
+    'This property still has open work orders. Resolve them first, then delete it.',
   INVALID_CREDENTIALS: 'Invalid email or password.',
   EMAIL_TAKEN: 'An account with that email already exists. Try logging in instead.',
   INVITE_INVALID:

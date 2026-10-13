@@ -93,6 +93,97 @@ export async function createInvite(fields) {
   return data.invite;
 }
 
+// owner only, send only what changed, fields is { name, address }
+export async function updateProperty(property_id, fields) {
+  const data = await api_client.request('PATCH', '/properties/' + encodeURIComponent(property_id), {
+    body: fields,
+  });
+  return data.property;
+}
+
+// a soft delete, the server turns it away while tenants live there or work orders are open
+export async function deleteProperty(property_id) {
+  await api_client.request('DELETE', '/properties/' + encodeURIComponent(property_id));
+}
+
+// revoking just stops the code, resending makes a brand new code and revokes the old one
+export async function revokeInvite(invite_id) {
+  const data = await api_client.request(
+    'POST',
+    '/invites/' + encodeURIComponent(invite_id) + '/revoke',
+  );
+  return data.invite;
+}
+
+export async function resendInvite(invite_id) {
+  const data = await api_client.request(
+    'POST',
+    '/invites/' + encodeURIComponent(invite_id) + '/resend',
+  );
+  return { invite: data.invite, revoked_invite: data.revokedInvite };
+}
+
+// ----- tenants and tenancies (owner only) -----
+
+// every tenant I have or had, current ones first
+export async function getTenants() {
+  const data = await api_client.request('GET', '/tenants');
+  return data.tenants;
+}
+
+// one tenant plus up to 10 of their recent work orders, tenant_id is their user id
+export async function getTenant(tenant_id) {
+  const data = await api_client.request('GET', '/tenants/' + encodeURIComponent(tenant_id));
+  return data.tenant;
+}
+
+// unit_label is optional, an empty one would fail the 1 to 50 character rule
+export async function assignTenancy(tenant_id, property_id, unit_label) {
+  const body = { tenantUserId: tenant_id, propertyId: property_id };
+  if (unit_label) {
+    body.unitLabel = unit_label;
+  }
+  const data = await api_client.request('POST', '/tenancies', { body: body });
+  return data.tenancy;
+}
+
+// fields: property_id, unit_label, ended_at (YYYY-MM-DD), move_out_note, only the filled ones get sent
+export async function moveTenancy(tenancy_id, fields) {
+  const body = { propertyId: fields.property_id };
+  if (fields.unit_label) {
+    body.unitLabel = fields.unit_label;
+  }
+  if (fields.ended_at) {
+    body.endedAt = fields.ended_at;
+  }
+  if (fields.move_out_note) {
+    body.moveOutNote = fields.move_out_note;
+  }
+  const data = await api_client.request(
+    'POST',
+    '/tenancies/' + encodeURIComponent(tenancy_id) + '/move',
+    { body: body },
+  );
+  return { tenancy: data.tenancy, ended_tenancy: data.endedTenancy };
+}
+
+// fields: ended_at (YYYY-MM-DD), move_out_note, both optional
+export async function endTenancy(tenancy_id, fields) {
+  const body = {};
+  if (fields.ended_at) {
+    body.endedAt = fields.ended_at;
+  }
+  if (fields.move_out_note) {
+    body.moveOutNote = fields.move_out_note;
+  }
+  const data = await api_client.request(
+    'POST',
+    '/tenancies/' + encodeURIComponent(tenancy_id) + '/end',
+    { body: body },
+  );
+  return data.tenancy;
+}
+
 // ----- conversations and messages -----
 
 export async function getConversations() {

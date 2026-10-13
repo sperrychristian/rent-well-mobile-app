@@ -118,6 +118,10 @@ export function createApiClient(options) {
     try {
       return await rawRequest(method, path, { ...settings, token: token_used });
     } catch (error) {
+      // a former tenant tried to write, so whoever shows the tenant's home can switch to read-only
+      if (error.code === 'NO_ACTIVE_TENANCY') {
+        emit('read_only', error);
+      }
       if (error.status !== 401 || error.code !== 'TOKEN_INVALID') {
         throw error;
       }

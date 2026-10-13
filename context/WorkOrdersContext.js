@@ -14,6 +14,7 @@ import { storageKey } from '../utils/storageKeys';
 import { addPeriod } from '../utils/recurring';
 import { deleteDocumentFile, clearDemoFiles } from '../features/documents/utils/documentFiles';
 import { sample_checklists } from '../features/checklist/data/sampleChecklists';
+import { buildSampleTenantData } from '../features/tenants/data/sampleTenants';
 import { checklist_templates } from '../features/checklist/data/checklistTemplates';
 import {
   copyTemplate,
@@ -79,6 +80,8 @@ export function WorkOrdersProvider(props) {
   const [documents, setDocuments] = useState(seed_documents);
   // checklists start empty, the samples only show up in the demo
   const [checklists, setChecklists] = useState([]);
+  // the demo's properties, tenants, and invites, null outside the demo since real mode gets them from the server
+  const [demo_tenant_data, setDemoTenantData] = useState(null);
   // I wait for the saved data to load before saving anything, so the mock data can't overwrite it
   // loaded_user is whose data is in memory (null for the original keys), so switching accounts counts as not loaded yet
   const [loaded_user, setLoadedUser] = useState(undefined);
@@ -300,6 +303,7 @@ export function WorkOrdersProvider(props) {
     setMileageRate(default_mileage_rate);
     setDocuments(seed_documents);
     setChecklists(sample_checklists);
+    setDemoTenantData(buildSampleTenantData());
     // clears out files left behind if the app was closed in the middle of a demo
     clearDemoFiles();
     clearDemoChecklistPhotos();
@@ -318,6 +322,7 @@ export function WorkOrdersProvider(props) {
     // files added during the demo lived in the cache and go away with it
     clearDemoFiles();
     clearDemoChecklistPhotos();
+    setDemoTenantData(null);
     setDemoMode(false);
   }
 
@@ -668,6 +673,8 @@ export function WorkOrdersProvider(props) {
     deleteChecklistRoom,
     signChecklist,
     deleteChecklist,
+    demo_tenant_data,
+    setDemoTenantData,
   };
 
   return <WorkOrdersContext.Provider value={value}>{props.children}</WorkOrdersContext.Provider>;

@@ -113,6 +113,17 @@ export function listenForNotificationTaps(onOpen) {
   return listenForTaps(conversationFromResponse, onOpen);
 }
 
+// tenancy pushes go to the tenant when the owner assigns, moves, or ends a tenancy, onOpen gets the tenancy id
+function tenancyFromResponse(response) {
+  const data =
+    response && response.notification ? response.notification.request.content.data : null;
+  return data && data.type === 'tenancy:updated' && data.tenancyId ? data.tenancyId : null;
+}
+
+export function listenForTenancyTaps(onOpen) {
+  return listenForTaps(tenancyFromResponse, onOpen);
+}
+
 // same thing for work order pushes, onOpen gets the work order id
 export function listenForWorkOrderTaps(onOpen) {
   return listenForTaps(workOrderFromResponse, onOpen);

@@ -1,6 +1,10 @@
 // an invite is still waiting when nobody has used it and it hasn't run out
+// the server now sends a status (which also covers revoked), the dates are the fallback for an older copy
 export function isPending(invite, now) {
   const current = now || new Date();
+  if (invite.status) {
+    return invite.status === 'pending' && Date.parse(invite.expiresAt) > current.getTime();
+  }
   return invite.usedAt === null && Date.parse(invite.expiresAt) > current.getTime();
 }
 

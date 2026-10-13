@@ -55,6 +55,13 @@ function DashboardScreen(props) {
             <UnreadBadge count={unread_total} style={styles.unread_badge} />
           </View>
           <PrimaryButton
+            title="Tenants"
+            icon="people-outline"
+            style={styles.tenants_button}
+            text_color={COLORS.text_light}
+            onPress={() => props.navigation.navigate('Tenants')}
+          />
+          <PrimaryButton
             title="Documents"
             icon="document-text-outline"
             style={styles.documents_button}
@@ -116,6 +123,9 @@ const styles = StyleSheet.create({
   },
   checklist_button: {
     backgroundColor: COLORS.accent,
+  },
+  tenants_button: {
+    backgroundColor: COLORS.title,
   },
   expenses_button: {
     backgroundColor: COLORS.highlight,

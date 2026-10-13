@@ -24,6 +24,11 @@ import { MessagesProvider } from './features/messages/context/MessagesContext';
 import { RemoteWorkOrdersProvider } from './features/workOrders/context/RemoteWorkOrdersProvider';
 import MyRequestsScreen from './features/workOrders/screens/MyRequestsScreen';
 import RequestDetailScreen from './features/workOrders/screens/RequestDetailScreen';
+import { TenantsProvider } from './features/tenants/context/TenantsContext';
+import TenantsScreen from './features/tenants/screens/TenantsScreen';
+import TenantDetailScreen from './features/tenants/screens/TenantDetailScreen';
+import PropertiesScreen from './features/tenants/screens/PropertiesScreen';
+import PastRequestsScreen from './features/tenants/screens/PastRequestsScreen';
 import { navigation_ref } from './services/navigationRef';
 import { setupNotificationHandler } from './services/push';
 
@@ -48,7 +53,10 @@ function AccountData(props) {
     <WorkOrdersProvider user_id={user ? user.id : null}>
       {/* in real mode the work orders come from the server, demo and signed out keep the local ones */}
       <RemoteWorkOrdersProvider>
-        <MessagesProvider>{props.children}</MessagesProvider>
+        <MessagesProvider>
+          {/* tenants and properties: the demo's local copy, or the server's in real mode */}
+          <TenantsProvider>{props.children}</TenantsProvider>
+        </MessagesProvider>
       </RemoteWorkOrdersProvider>
     </WorkOrdersProvider>
   );
@@ -102,6 +110,10 @@ function AppNavigator() {
         <Stack.Screen name="NewWorkOrder" component={NewWorkOrderScreen} />
         <Stack.Screen name="MyRequests" component={MyRequestsScreen} />
         <Stack.Screen name="RequestDetail" component={RequestDetailScreen} />
+        <Stack.Screen name="Tenants" component={TenantsScreen} />
+        <Stack.Screen name="TenantDetail" component={TenantDetailScreen} />
+        <Stack.Screen name="Properties" component={PropertiesScreen} />
+        <Stack.Screen name="PastRequests" component={PastRequestsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
