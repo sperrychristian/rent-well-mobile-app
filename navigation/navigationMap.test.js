@@ -150,3 +150,29 @@ describe('headerTitle', () => {
     expect(shortId('abc')).toBe('abc');
   });
 });
+
+describe('the diagram is up to date with the map', () => {
+  // if the map changes without running npm run diagram, these fail
+  const folder = path.join(root, 'assignment', 'navigation');
+  const svg = fs.readFileSync(path.join(folder, 'navigation-diagram.svg'), 'utf8');
+  const mermaid = fs.readFileSync(path.join(folder, 'navigation.mmd'), 'utf8');
+  const unescape = (text) => text.replace(/&amp;/g, '&');
+
+  test('every screen and its title are drawn', () => {
+    expect(unescape(svg)).toContain(mapped.length + ' screens');
+    mapped.forEach((route_name) => {
+      expect(unescape(svg)).toContain('>' + navigation_map[route_name].title + '<');
+      expect(mermaid).toContain(route_name + '["');
+    });
+  });
+
+  test('every arrow that passes an id is in the mermaid copy with its label', () => {
+    mapped.forEach((route_name) => {
+      navigation_map[route_name].edges
+        .filter((edge) => edge.param)
+        .forEach((edge) => {
+          expect(mermaid).toContain(route_name + ' -->|' + edge.param + '| ' + edge.to);
+        });
+    });
+  });
+});
