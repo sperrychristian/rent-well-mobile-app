@@ -30,7 +30,7 @@ import { document_categories, expiring_soon_days } from '../../../data/documentO
 import { COLORS, SPACING, TYPE, SIZES, OPACITY, NUMBERS } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
-import StatusPill from '../../../components/ui/StatusPill';
+import StatusLabel from '../../../components/ui/StatusLabel';
 
 const sort_options = ['Newest', 'Name'];
 
@@ -365,14 +365,14 @@ function DocumentsScreen() {
                 <View style={styles.tag_row}>
                   {/* the fintech pass: soft tinted pills, red when it's expired and amber when it's close */}
                   {tag && (
-                    <StatusPill
+                    <StatusLabel
                       label={tag.text}
                       tone={tag.expired ? 'danger' : 'warning'}
                       icon={tag.expired ? 'alert-circle' : 'time'}
                     />
                   )}
                   {item.shared_with_tenant && (
-                    <StatusPill label="Shared with tenant" tone="info" icon="people" />
+                    <StatusLabel label="Shared with tenant" tone="info" icon="people-outline" />
                   )}
                 </View>
               </View>

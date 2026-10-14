@@ -9,7 +9,7 @@ import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { formatDate } from '../../../utils/formatDate';
 import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import StatusPill from '../../../components/ui/StatusPill';
+import StatusLabel from '../../../components/ui/StatusLabel';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
 
@@ -85,7 +85,7 @@ function MyRequestsScreen(props) {
               <Text style={styles.title} numberOfLines={2}>
                 {item.title}
               </Text>
-              <StatusPill label={item.status} />
+              <StatusLabel label={item.status} />
             </View>
             <Text style={styles.detail}>
               {item.property} · {formatDate(item.created_at)}
@@ -96,7 +96,7 @@ function MyRequestsScreen(props) {
               </Text>
             ) : null}
             <View style={styles.bottom_line}>
-              <StatusPill label={item.priority} />
+              <StatusLabel label={item.priority} />
               {item.photos && item.photos.length > 0 && (
                 <View style={styles.photo_count}>
                   <Ionicons name="camera-outline" size={14} color={COLORS.text} />
@@ -104,7 +104,7 @@ function MyRequestsScreen(props) {
                 </View>
               )}
               <View style={styles.spacer} />
-              <Ionicons name="chevron-forward" size={18} color={COLORS.text_muted} />
+              <Ionicons name="chevron-forward-outline" size={18} color={COLORS.text_muted} />
             </View>
           </Pressable>
         )}

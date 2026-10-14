@@ -13,7 +13,7 @@ import { demo_tenant } from '../data/sampleTenants';
 import { formatDate } from '../../../utils/formatDate';
 import { COLORS, SPACING, FONTS, TYPE, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import StatusPill from '../../../components/ui/StatusPill';
+import StatusLabel from '../../../components/ui/StatusLabel';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
 
@@ -66,7 +66,7 @@ function PastRequestsScreen() {
       <View style={styles.row}>
         <View style={styles.top_line}>
           <Text style={styles.title}>{item.title}</Text>
-          <StatusPill label={item.status} />
+          <StatusLabel label={item.status} />
         </View>
         <Text style={styles.detail}>
           {item.property} · {formatDate(item.created_at)}

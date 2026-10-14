@@ -26,7 +26,7 @@ import { openConversationFor } from '../../messages/utils/openConversation';
 import { formatDate } from '../../../utils/formatDate';
 import { COLORS, SPACING, TYPE, RADIUS, SIZES, NUMBERS, BORDER } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import StatusPill from '../../../components/ui/StatusPill';
+import StatusLabel from '../../../components/ui/StatusLabel';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
 
@@ -194,8 +194,8 @@ function WorkOrderDetailContent(props) {
           <Text style={styles.detail}>{order.property}</Text>
           <Text style={styles.detail}>{order.tenant || 'No tenant'}</Text>
           <View style={styles.pill_row}>
-            <StatusPill label={order.status} />
-            <StatusPill label={order.priority || 'Normal'} />
+            <StatusLabel label={order.status} />
+            <StatusLabel label={order.priority || 'Normal'} />
           </View>
           {order.description ? <Text style={styles.detail}>{order.description}</Text> : null}
           {/* I only show the issue photo if the work order has one */}
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     ...list_styles.field_input,
   },
   notes_input: {
-    minHeight: 80,
+    minHeight: SIZES.row_min_height + SPACING.md,
     textAlignVertical: 'top',
   },
   save_button: {

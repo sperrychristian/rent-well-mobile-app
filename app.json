@@ -4,21 +4,21 @@
     "slug": "rent-well-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/pixel-icon.png",
+    "icon": "./assets/hearth-icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#EEF0FE",
-        "foregroundImage": "./assets/pixel-adaptive-foreground.png",
-        "backgroundImage": "./assets/pixel-adaptive-background.png",
-        "monochromeImage": "./assets/pixel-adaptive-monochrome.png"
+        "backgroundColor": "#F7F3EC",
+        "foregroundImage": "./assets/hearth-adaptive-foreground.png",
+        "backgroundImage": "./assets/hearth-adaptive-background.png",
+        "monochromeImage": "./assets/hearth-adaptive-monochrome.png"
       }
     },
     "web": {
-      "favicon": "./assets/pixel-favicon.png"
+      "favicon": "./assets/hearth-favicon.png"
     },
     "plugins": [
       "expo-font",
@@ -28,13 +28,13 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/pixel-splash.png",
-          "imageWidth": 220,
+          "image": "./assets/hearth-splash.png",
+          "imageWidth": 160,
           "resizeMode": "contain",
-          "backgroundColor": "#FFFFFF"
+          "backgroundColor": "#F7F3EC"
         }
       ]
     ],
-    "backgroundColor": "#F5F7FA"
+    "backgroundColor": "#F7F3EC"
   }
 }

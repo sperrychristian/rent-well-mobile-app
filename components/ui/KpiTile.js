@@ -13,7 +13,12 @@ function KpiTile(props) {
       <Text style={styles.label} numberOfLines={2}>
         {props.label}
       </Text>
-      <Text style={[styles.value, NUMBERS]} numberOfLines={1} adjustsFontSizeToFit>
+      <Text
+        style={[styles.value, NUMBERS]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        maxFontSizeMultiplier={1.3}
+      >
         {props.value}
       </Text>
       {props.caption ? (

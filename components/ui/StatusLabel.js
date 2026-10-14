@@ -23,6 +23,7 @@ function StatusLabel(props) {
           name={lineIcon(icon)}
           size={SIZES.icon_small}
           color={color}
+          style={styles.icon}
           accessible={false}
           importantForAccessibility="no"
         />
@@ -35,11 +36,15 @@ function StatusLabel(props) {
 export default StatusLabel;
 
 const styles = StyleSheet.create({
+  // the icon sits on the first line when the words wrap
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     alignSelf: 'flex-start',
     gap: SPACING.xs,
+  },
+  icon: {
+    marginTop: SPACING.xxs,
   },
   text: {
     ...TYPE.label,

@@ -172,3 +172,47 @@ Branch `hearth-redesign`, made from `payments-ledger-app`. Not merged. This is a
   - Format: clean.
   - iOS export with `--clear`: OK.
   - Tests: 363 passed, 363 total.
+
+## Phase 6: sweeps and final QA (done)
+
+- **Removed dead code:**
+  - Components: `FeatureTile`, `QuickAction`, `StatTile`, `Sparkline`, `components/ui/pixel/` (PixelArt, the drawings, the duotone, the helpers and their test), `ScreenTitle`, and `StatusPill` (its 10 callers now use `StatusLabel`).
+  - Helpers and tokens: `sparklinePoints` and its tests, and the `pixel_` colors in `theme.js`.
+  - Assets: the old `assets/pixel-*.png` files.
+  - Packages: `expo-linear-gradient` (only ScreenTitle used it) and `@expo-google-fonts/inter`.
+- **Dropped comments** (their code was removed):
+  - `theme.js`: "pixel art palette, only the PixelArt drawings use these", "the house logomark is recolored into the brand: indigo roof, soft indigo walls, ink door", and "the two quiet tones every empty-state drawing is redrawn in, so they read as accents and not as art".
+  - `uiHelpers.js`: the three-line sparklinePoints comment.
+  - `buildAppAssets.mjs`: "the pixel squares of one drawing as svg rects, placed at x, y with each square `pixel` big" and "a drawing centered on a square canvas, pixel is picked so it fills `fraction` of the width".
+  - The deleted files took their own comments with them.
+- **App icon, splash, favicon, and Android adaptive layers:** `scripts/buildAppAssets.mjs` now draws a forest green line house (the Ionicons home-outline shape, stroke about 1.6) on the paper. `npm run assets` wrote `assets/hearth-*.png`, and `app.json` points at them, with a paper background and splash. It needs a new native build to show on a device.
+- **Line icon sweep:** every literal Ionicons name in features and components went to its outline twin where one exists (21 files), checked against the glyph map. The shared components also run names through `lineIcon` at render.
+- **Hex sweep:** no hex colors outside `theme.js`.
+- **Magic number sweep:**
+  - Note box heights, badge offsets, the 600 width cap, letter spacing, Welcome's line width, and ErrorState's button width now come from tokens.
+  - What's left are one-off photo and thumbnail sizes (48, 56, 72, 110, 120, 150, 160, 200, 220), the sheet handle, and the badge bubble. Those are sizes, not spacing, so they stay.
+- **Contrast:** `theme.test.js`, `stylePairs.test.js`, and `hearth.test.js` all pass.
+- **Touch targets and accessibility:**
+  - Every Pressable in features and components has an `accessibilityRole` (I checked with a brace-aware scan).
+  - The ones without an explicit label wrap visible text, which screen readers read.
+  - The new pieces (top bar avatar, hero note, action sheet rows, demo banner text buttons, ledger pills) are all 44 or more.
+- **Font scaling:** I rendered the Dashboard, Rent Ledger, and Record Payment form with every type size times 1.6 (in the scratch copy only).
+  - Fixed: "Record Payment" broke mid-word. The ledger's pills now wrap onto two lines.
+  - Fixed: status icons centered against wrapped words. They sit on the first line now.
+  - Fixed: the hero numbers now cap at 1.2 times and shrink to fit (`maxFontSizeMultiplier` and `adjustsFontSizeToFit`, which iOS honors). The web render can't shrink to fit, so it shows an ellipsis there.
+  - Everything else wrapped cleanly with no clipping.
+- **Reduce Motion:** the sheets (FormSheet, ActionSheet, the existing modals), the toast, and FadeInView all check `useReduceMotion()`.
+- **Final visual QA** at 360 by 640, 390 by 844, and 820 by 1180 (Dashboard, Ledger, Payments, Record Payment, Work Orders, and the chat): no page errors, and nothing cluttered or clipped.
+  - Note: on the tablet, Work Orders and the chat run wider than the other screens because of their older width caps (`content_max_width + 160` or none). I left it, since it's a layout cap and not the look.
+- **Screenshots:** all of `docs/screenshots/` was re-shot at 2x from the demo, and `documents.png` replaced `documents_empty.png`. The README has a new "The look" section with four of them, and its payments section shows the new payments shots.
+- **CLAUDE.md:** the Design system section is rewritten for Hearth, plus the stack, assets, colors, and status lines.
+- **Navigation:** `navigation/navigationMap.js`, its tests, and `assignment/navigation/` are unchanged from `payments-ledger-app`.
+- **Test changes:**
+  - New: `components/ui/hearth.test.js` (23 tests) and the ledger helper tests for `behindSummary`, `chargeStatusLine`, and `paymentStatusLine`.
+  - Removed with their code: the pixel and sparkline tests.
+  - Copy changes: two ledger tests tap More first, and the hearth test's chevron is `chevron-forward-outline`.
+- **Checks:**
+  - Lint: the 13 known problems.
+  - Tests: 346 passed in 30 suites.
+  - Format: clean.
+  - iOS export with `--clear`: OK.

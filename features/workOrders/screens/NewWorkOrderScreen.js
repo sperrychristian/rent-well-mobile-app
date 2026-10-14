@@ -24,7 +24,7 @@ import { getMe } from '../../../services/api';
 import { max_photos_per_upload } from '../utils/workOrderHelpers';
 import { placeLabel } from '../../tenants/utils/tenantHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 
 const urgency_options = ['Emergency', 'Normal', 'Low'];
@@ -550,7 +550,7 @@ function NewWorkOrderScreen(props) {
                     accessibilityLabel="Remove photo"
                     accessibilityRole="button"
                   >
-                    <Ionicons name="close-circle" size={22} color={COLORS.danger_text} />
+                    <Ionicons name="close-circle-outline" size={22} color={COLORS.danger_text} />
                   </Pressable>
                 </View>
               ))}
@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
   },
   form: {
     width: '100%',
-    maxWidth: 600,
+    maxWidth: SIZES.content_max_width,
     alignSelf: 'center',
   },
   label: {
@@ -622,7 +622,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   description_input: {
-    minHeight: 80,
+    minHeight: SIZES.row_min_height + SPACING.md,
     textAlignVertical: 'top',
   },
   // without this the horizontal list grows to fill the spare height and the chips stretch with it
@@ -716,7 +716,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface_raised,
     borderRadius: RADIUS.pill,
     position: 'absolute',
-    top: -8,
-    right: -8,
+    top: -SPACING.sm,
+    right: -SPACING.sm,
   },
 });

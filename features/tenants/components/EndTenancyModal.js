@@ -16,7 +16,7 @@ import DateField from '../../../components/DateField';
 import TextField from '../../../components/TextField';
 import { todayString } from '../../../utils/formatDate';
 import { checkEndDate, placeLabel } from '../utils/tenantHelpers';
-import { COLORS, SPACING, TYPE } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   },
   note_input: {
     ...list_styles.field_input,
-    minHeight: 70,
+    minHeight: SIZES.touch + SPACING.lg + SPACING.xs,
     textAlignVertical: 'top',
   },
   error: {

@@ -17,7 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
-import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER } from '../../../theme';
+import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
 import { document_categories, dated_categories } from '../../../data/documentOptions';
 import { todayString } from '../../../utils/formatDate';
 import { addPeriod } from '../../../utils/recurring';
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   notes_input: {
-    minHeight: 70,
+    minHeight: SIZES.touch + SPACING.lg + SPACING.xs,
     textAlignVertical: 'top',
   },
   // without this the horizontal list grows to fill the spare height and the chips stretch with it

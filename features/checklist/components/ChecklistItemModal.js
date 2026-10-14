@@ -21,7 +21,7 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import { conditions } from '../data/checklistTemplates';
 import { itemGotWorse } from '../utils/checklistHelpers';
 import { getPhotoUri, saveChecklistPhoto, deleteChecklistPhoto } from '../utils/checklistPhotos';
-import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER } from '../../../theme';
+import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
@@ -170,7 +170,7 @@ function ChecklistItemModal(props) {
               <Text style={styles.heading}>{props.item.name}</Text>
               {got_worse && (
                 <View style={styles.worse_tag}>
-                  <Ionicons name="trending-down" size={14} color={COLORS.danger_text} />
+                  <Ionicons name="trending-down-outline" size={14} color={COLORS.danger_text} />
                   <Text style={styles.worse_text}>Changed since move-in</Text>
                 </View>
               )}
@@ -276,7 +276,11 @@ function ChecklistItemModal(props) {
                           accessibilityRole="button"
                           accessibilityLabel="Remove photo"
                         >
-                          <Ionicons name="close-circle" size={22} color={COLORS.danger_text} />
+                          <Ionicons
+                            name="close-circle-outline"
+                            size={22}
+                            color={COLORS.danger_text}
+                          />
                         </Pressable>
                       )}
                     </View>
@@ -467,7 +471,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   notes_input: {
-    minHeight: 70,
+    minHeight: SIZES.touch + SPACING.lg + SPACING.xs,
     textAlignVertical: 'top',
   },
   photo_wrap: {
@@ -482,8 +486,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface_raised,
     borderRadius: RADIUS.pill,
     position: 'absolute',
-    top: -8,
-    right: -8,
+    top: -SPACING.sm,
+    right: -SPACING.sm,
   },
   button_row: {
     flexDirection: 'row',

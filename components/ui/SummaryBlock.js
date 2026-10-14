@@ -21,6 +21,8 @@ function SummaryBlock(props) {
           style={[styles.value, is_small && styles.value_small, NUMBERS]}
           numberOfLines={1}
           adjustsFontSizeToFit
+          // the hero is already 58, so it only grows a little with the system text size and shrinks to fit
+          maxFontSizeMultiplier={1.2}
         >
           {props.value}
         </Text>

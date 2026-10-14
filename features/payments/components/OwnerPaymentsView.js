@@ -139,7 +139,7 @@ function OwnerPaymentsView(props) {
             accessibilityState={{ disabled: month <= first_month }}
             style={[styles.month_arrow, month <= first_month && styles.disabled]}
           >
-            <Ionicons name="chevron-back" size={SIZES.icon_large} color={COLORS.text} />
+            <Ionicons name="chevron-back-outline" size={SIZES.icon_large} color={COLORS.text} />
           </Pressable>
           <Text style={styles.month_title} accessibilityRole="header">
             {monthTitle(month)}
@@ -152,7 +152,7 @@ function OwnerPaymentsView(props) {
             accessibilityState={{ disabled: month >= last_month }}
             style={[styles.month_arrow, month >= last_month && styles.disabled]}
           >
-            <Ionicons name="chevron-forward" size={SIZES.icon_large} color={COLORS.text} />
+            <Ionicons name="chevron-forward-outline" size={SIZES.icon_large} color={COLORS.text} />
           </Pressable>
         </View>
 
@@ -293,7 +293,7 @@ function OwnerPaymentsView(props) {
             >
               <Text style={styles.fold_text}>{'Past tenants (' + past_rows.length + ')'}</Text>
               <Ionicons
-                name={show_past ? 'chevron-up' : 'chevron-down'}
+                name={show_past ? 'chevron-up-outline' : 'chevron-down'}
                 size={SIZES.icon}
                 color={COLORS.text_muted}
               />

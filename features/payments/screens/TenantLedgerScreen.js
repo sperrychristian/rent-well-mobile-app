@@ -257,6 +257,7 @@ function TenantLedgerScreen(props) {
             style={[styles.balance, NUMBERS]}
             numberOfLines={1}
             adjustsFontSizeToFit
+            maxFontSizeMultiplier={1.2}
             accessibilityLabel={balance.text}
           >
             {formatCents(Math.abs(derived.balance_cents))}
@@ -294,14 +295,14 @@ function TenantLedgerScreen(props) {
         <View style={styles.action_row}>
           <Button
             variant="primary"
-            icon="add"
+            icon="add-outline"
             title="Record Payment"
             onPress={() => openForm('payment')}
             style={styles.action_main}
           />
           <Button
             variant="secondary"
-            icon="ellipsis-horizontal"
+            icon="ellipsis-horizontal-outline"
             title="More"
             accessibilityLabel="More actions: add charge, edit rent schedule, void"
             onPress={() => setMoreOpen(true)}
@@ -490,16 +491,20 @@ const styles = StyleSheet.create({
     ...TYPE.body,
     color: COLORS.danger_text,
   },
+  // the pills wrap onto two lines at big text sizes instead of breaking words
   action_row: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: SPACING.sm,
     marginTop: SPACING.md,
   },
   action_main: {
-    flex: 1,
+    flexGrow: 1,
+    minWidth: '60%',
     marginHorizontal: 0,
   },
   action_more: {
+    flexGrow: 1,
     marginHorizontal: 0,
   },
   schedule_line: {

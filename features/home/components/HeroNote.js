@@ -13,7 +13,7 @@ function HeroNote(props) {
       <Ionicons name={props.icon} size={SIZES.icon} color={color} />
       <Text style={[styles.text, { color: color }]}>{props.text}</Text>
       {props.onPress ? (
-        <Ionicons name="chevron-forward" size={SIZES.chevron} color={color} />
+        <Ionicons name="chevron-forward-outline" size={SIZES.chevron} color={color} />
       ) : null}
     </>
   );

@@ -2,7 +2,7 @@ import { Text, View, Image, Pressable, StyleSheet } from 'react-native';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import RemoteImage from '../../../components/RemoteImage';
-import StatusPill from '../../../components/ui/StatusPill';
+import StatusLabel from '../../../components/ui/StatusLabel';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../../theme';
 import { formatDate } from '../../../utils/formatDate';
 import { formatCurrency } from '../../../utils/formatCurrency';
@@ -42,7 +42,7 @@ function WorkOrderCard(props) {
       >
         <View style={styles.top_row}>
           <Text style={styles.title}>{order.title}</Text>
-          <StatusPill label={order.status} />
+          <StatusLabel label={order.status} />
         </View>
         <Text style={styles.detail}>{order.property}</Text>
         {/* an owner-made order can have no tenant, so the name can be empty */}
@@ -55,7 +55,7 @@ function WorkOrderCard(props) {
           </Text>
         ) : null}
         <View style={styles.tag_row}>
-          <StatusPill label={priority} />
+          <StatusLabel label={priority} />
         </View>
       </Pressable>
       {/* only show the landlord note, contractor, and estimate when they've been filled in */}

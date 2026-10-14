@@ -3,13 +3,13 @@
 // run it with: npm run assets
 // it writes new files next to the old ones in assets/ (the old ones stay), then points app.json at them,
 // and every color (app.json's too) comes from theme.js so no hex gets typed by hand
+// the Hearth pass: the pixel house is retired, the mark is a forest green line house (the same shape as the
+// Ionicons home-outline the wordmark uses) on the warm paper, and the files are named hearth-*.png
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { drawings } from '../components/ui/pixel/pixelDrawings.js';
-import { buildGrid, gridToRuns, gridSize } from '../components/ui/pixel/pixelHelpers.js';
 import { COLORS } from '../theme.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -17,34 +17,31 @@ const root = path.join(here, '..');
 const assets = path.join(root, 'assets');
 const work = path.join(assets, '.build');
 
-// the pixel squares of one drawing as svg rects, placed at x, y with each square `pixel` big
-function drawingRects(name, x, y, pixel, solid_color) {
-  const { grid, palette } = buildGrid(drawings[name]);
-  return gridToRuns(grid)
-    .map(
-      (run) =>
-        '<rect x="' +
-        (x + run.x * pixel) +
-        '" y="' +
-        (y + run.y * pixel) +
-        '" width="' +
-        run.width * pixel +
-        '" height="' +
-        pixel +
-        '" fill="' +
-        (solid_color || COLORS[palette[run.index]]) +
-        '"/>',
-    )
-    .join('');
-}
-
-// a drawing centered on a square canvas, pixel is picked so it fills `fraction` of the width
-function centered(name, size, fraction, solid_color) {
-  const { columns, rows } = gridSize(buildGrid(drawings[name]).grid);
-  const pixel = Math.floor((size * fraction) / columns);
-  const x = Math.round((size - columns * pixel) / 2);
-  const y = Math.round((size - rows * pixel) / 2);
-  return drawingRects(name, x, y, pixel, solid_color);
+// the line house drawn in a 512 box (Ionicons home-outline), scaled to `fraction` of the canvas and centered
+// stroke 32 of 512 is about 1.6 at 24, the same weight as the icons in the app
+function lineHouse(size, fraction, color) {
+  const scale = (size * fraction) / 512;
+  const offset = (size - 512 * scale) / 2;
+  const stroke =
+    'fill="none" stroke="' +
+    color +
+    '" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"';
+  return (
+    '<g transform="translate(' +
+    offset +
+    ' ' +
+    offset +
+    ') scale(' +
+    scale +
+    ')">' +
+    '<path d="M80 212v236a16 16 0 0016 16h96V328a24 24 0 0124-24h80a24 24 0 0124 24v136h96a16 16 0 0016-16V212" ' +
+    stroke +
+    '/>' +
+    '<path d="M480 256L266.89 52c-5-5.28-16.69-5.34-21.78 0L32 256M400 179V64h-48v69" ' +
+    stroke +
+    '/>' +
+    '</g>'
+  );
 }
 
 function svg(size, body, background) {
@@ -57,7 +54,7 @@ function svg(size, body, background) {
     size +
     ' ' +
     size +
-    '" shape-rendering="crispEdges">' +
+    '">' +
     (background ? '<rect width="100%" height="100%" fill="' + background + '"/>' : '') +
     body +
     '</svg>'
@@ -65,40 +62,41 @@ function svg(size, body, background) {
 }
 
 // the fintech pass: the house is a small logomark on the soft indigo tint, no grid, and the splash sits on white
+// the Hearth pass: the green line house on the paper for the icon, and on its own for the splash and Android layers
 const outputs = [
   {
-    file: 'pixel-icon.png',
+    file: 'hearth-icon.png',
     size: 1024,
-    svg: svg(1024, centered('house_mark', 1024, 0.62), COLORS.brand_tint),
+    svg: svg(1024, lineHouse(1024, 0.56, COLORS.cta), COLORS.background),
   },
   {
-    file: 'pixel-adaptive-foreground.png',
+    file: 'hearth-adaptive-foreground.png',
     size: 1024,
     // Android crops adaptive icons to a circle or squircle, so the house stays inside the middle 60%
-    svg: svg(1024, centered('house_mark', 1024, 0.56)),
+    svg: svg(1024, lineHouse(1024, 0.5, COLORS.cta)),
     transparent: true,
   },
   {
-    file: 'pixel-adaptive-background.png',
+    file: 'hearth-adaptive-background.png',
     size: 1024,
-    svg: svg(1024, '', COLORS.brand_tint),
+    svg: svg(1024, '', COLORS.background),
   },
   {
-    file: 'pixel-adaptive-monochrome.png',
+    file: 'hearth-adaptive-monochrome.png',
     size: 1024,
-    svg: svg(1024, centered('house_mark', 1024, 0.56, COLORS.text_light)),
+    svg: svg(1024, lineHouse(1024, 0.5, COLORS.text_light)),
     transparent: true,
   },
   {
-    file: 'pixel-splash.png',
+    file: 'hearth-splash.png',
     size: 1024,
-    svg: svg(1024, centered('house_mark', 1024, 0.9)),
+    svg: svg(1024, lineHouse(1024, 0.8, COLORS.cta)),
     transparent: true,
   },
   {
-    file: 'pixel-favicon.png',
+    file: 'hearth-favicon.png',
     size: 48,
-    svg: svg(48, centered('house_mark', 48, 0.84), COLORS.brand_tint),
+    svg: svg(48, lineHouse(48, 0.72, COLORS.cta), COLORS.background),
   },
 ];
 
@@ -144,24 +142,24 @@ fs.rmSync(work, { recursive: true, force: true });
 const app_json_path = path.join(root, 'app.json');
 const app_json = JSON.parse(fs.readFileSync(app_json_path, 'utf8'));
 const expo = app_json.expo;
-expo.icon = './assets/pixel-icon.png';
+expo.icon = './assets/hearth-icon.png';
 expo.backgroundColor = COLORS.background;
 expo.android = expo.android || {};
 expo.android.adaptiveIcon = {
-  backgroundColor: COLORS.brand_tint,
-  foregroundImage: './assets/pixel-adaptive-foreground.png',
-  backgroundImage: './assets/pixel-adaptive-background.png',
-  monochromeImage: './assets/pixel-adaptive-monochrome.png',
+  backgroundColor: COLORS.background,
+  foregroundImage: './assets/hearth-adaptive-foreground.png',
+  backgroundImage: './assets/hearth-adaptive-background.png',
+  monochromeImage: './assets/hearth-adaptive-monochrome.png',
 };
 expo.web = expo.web || {};
-expo.web.favicon = './assets/pixel-favicon.png';
+expo.web.favicon = './assets/hearth-favicon.png';
 const splash = [
   'expo-splash-screen',
   {
-    image: './assets/pixel-splash.png',
-    imageWidth: 220,
+    image: './assets/hearth-splash.png',
+    imageWidth: 160,
     resizeMode: 'contain',
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.background,
   },
 ];
 expo.plugins = (expo.plugins || []).filter(

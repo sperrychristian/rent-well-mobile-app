@@ -93,33 +93,6 @@ export const COLORS = {
   shadow: '#2A2520',
   shimmer_edge: 'rgba(255,255,255,0)',
   shimmer_peak: 'rgba(255,255,255,0.22)',
-
-  // ----- pixel art palette, only the PixelArt drawings use these -----
-  // the house logomark is recolored into the brand: indigo roof, soft indigo walls, ink door
-  pixel_sun: '#F79009',
-  pixel_roof: '#4F46E5',
-  pixel_roof_dark: '#3730A3',
-  pixel_chimney: '#64748B',
-  pixel_chimney_dark: '#475569',
-  pixel_wall: '#E0E4FD',
-  pixel_wall_shade: '#C7CDFB',
-  pixel_frame: '#FFFFFF',
-  pixel_glass: '#93B4F5',
-  pixel_glass_light: '#DCE7FD',
-  pixel_door: '#312E81',
-  pixel_door_dark: '#1E1B4B',
-  pixel_grass: '#86D3A2',
-  pixel_grass_dark: '#4FAE74',
-  pixel_path: '#C3CBD6',
-  pixel_paper: '#E9EEF6',
-  pixel_ink: '#5B6779',
-  pixel_steel: '#8FA3BF',
-  pixel_bubble: '#5B8DEF',
-  pixel_coin: '#F7A93B',
-  pixel_coin_dark: '#C47A14',
-  // the two quiet tones every empty-state drawing is redrawn in, so they read as accents and not as art
-  pixel_duo_light: '#DCE1F9',
-  pixel_duo_dark: '#9AA3D6',
 };
 
 // one step for every gap, padding, and margin

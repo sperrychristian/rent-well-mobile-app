@@ -5,7 +5,6 @@ import {
   avatarFill,
   avatarTone,
   badgeLabel,
-  sparklinePoints,
   toneColors,
   tone_colors,
 } from './uiHelpers';
@@ -81,37 +80,5 @@ describe('badgeLabel', () => {
     expect(badgeLabel(0)).toBe('');
     expect(badgeLabel(undefined)).toBe('');
     expect(badgeLabel(-2)).toBe('');
-  });
-});
-
-describe('sparklinePoints', () => {
-  test('spreads the points across the width, low at the bottom and high at the top', () => {
-    expect(sparklinePoints([0, 5, 10], 100, 20)).toEqual([
-      { x: 0, y: 20 },
-      { x: 50, y: 10 },
-      { x: 100, y: 0 },
-    ]);
-  });
-
-  test('the inset keeps the line off the edges', () => {
-    expect(sparklinePoints([0, 10], 100, 20, 2)).toEqual([
-      { x: 2, y: 18 },
-      { x: 98, y: 2 },
-    ]);
-  });
-
-  test('a flat line sits in the middle and one point sits in the center', () => {
-    expect(sparklinePoints([4, 4], 10, 10)).toEqual([
-      { x: 0, y: 5 },
-      { x: 10, y: 5 },
-    ]);
-    expect(sparklinePoints([7], 10, 10)).toEqual([{ x: 5, y: 5 }]);
-  });
-
-  test('skips anything that is not a number and gives nothing back for empty input', () => {
-    expect(sparklinePoints([1, NaN, 3], 10, 10).length).toBe(2);
-    expect(sparklinePoints([], 10, 10)).toEqual([]);
-    expect(sparklinePoints(null, 10, 10)).toEqual([]);
-    expect(sparklinePoints([1, 2], 0, 10)).toEqual([]);
   });
 });

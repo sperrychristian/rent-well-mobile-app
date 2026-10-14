@@ -36,7 +36,7 @@ const tones = {
   'Emergency': {
     fill: COLORS.priority_emergency,
     text: COLORS.text_light,
-    icon: 'flash',
+    icon: 'flash-outline',
     label_color: COLORS.danger_text,
   },
   'Normal': tinted('neutral', 'remove-circle'),
@@ -115,26 +115,4 @@ export function badgeLabel(count) {
     return '';
   }
   return count > 99 ? '99+' : String(count);
-}
-
-// turns a list of numbers into points for a little trend line that fills width by height
-// the lowest value sits on the bottom edge and the highest on the top, a flat line sits in the middle,
-// and inset keeps the line's stroke from getting cut off at the edges
-export function sparklinePoints(values, width, height, inset) {
-  const list = (values || []).filter((value) => Number.isFinite(value));
-  if (list.length === 0 || width <= 0 || height <= 0) {
-    return [];
-  }
-  const pad = inset || 0;
-  const low = Math.min(...list);
-  const high = Math.max(...list);
-  const usable_height = Math.max(height - pad * 2, 0);
-  const step = list.length > 1 ? (width - pad * 2) / (list.length - 1) : 0;
-  return list.map((value, index) => {
-    const share = high === low ? 0.5 : (value - low) / (high - low);
-    return {
-      x: Math.round((pad + (list.length > 1 ? step * index : (width - pad * 2) / 2)) * 100) / 100,
-      y: Math.round((pad + usable_height * (1 - share)) * 100) / 100,
-    };
-  });
 }

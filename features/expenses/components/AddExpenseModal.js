@@ -19,7 +19,7 @@ import * as ImagePicker from 'expo-image-picker';
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
-import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
 import { expense_categories, payment_methods } from '../../../data/expenseOptions';
 import { todayString } from '../../../utils/formatDate';
 import { list_styles } from '../../../components/ui/listStyles';
@@ -397,7 +397,11 @@ function AddExpenseModal(props) {
                         accessibilityRole="button"
                         accessibilityLabel="Remove receipt"
                       >
-                        <Ionicons name="close-circle" size={22} color={COLORS.danger_text} />
+                        <Ionicons
+                          name="close-circle-outline"
+                          size={22}
+                          color={COLORS.danger_text}
+                        />
                       </Pressable>
                     </View>
                   ))}
@@ -513,7 +517,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   notes_input: {
-    minHeight: 70,
+    minHeight: SIZES.touch + SPACING.lg + SPACING.xs,
     textAlignVertical: 'top',
   },
   chip_row: {
@@ -560,8 +564,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface_raised,
     borderRadius: RADIUS.pill,
     position: 'absolute',
-    top: -8,
-    right: -8,
+    top: -SPACING.sm,
+    right: -SPACING.sm,
   },
   button_row: {
     flexDirection: 'row',

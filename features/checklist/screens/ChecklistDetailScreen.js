@@ -19,7 +19,7 @@ import {
 import { shareChecklistText } from '../utils/exportChecklist';
 import { COLORS, SPACING, TYPE, BORDER, SIZES, OPACITY } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import StatusPill from '../../../components/ui/StatusPill';
+import StatusLabel from '../../../components/ui/StatusLabel';
 
 function ChecklistDetailScreen(props) {
   // need the insets so the title clears the notch and status bar
@@ -175,12 +175,12 @@ function ChecklistDetailScreen(props) {
             </Text>
           </View>
           <View style={styles.tag_row}>
-            <StatusPill
+            <StatusLabel
               label={locked ? 'Complete' : 'In progress'}
               tone={locked ? 'Signed' : 'In progress'}
             />
             {worse > 0 && (
-              <StatusPill
+              <StatusLabel
                 label={worse + (worse === 1 ? ' item' : ' items') + ' worse since move-in'}
                 tone="Late"
               />
@@ -192,7 +192,7 @@ function ChecklistDetailScreen(props) {
         {locked && (
           <Card>
             <View style={styles.signed_row}>
-              <Ionicons name="lock-closed" size={18} color={COLORS.success_text} />
+              <Ionicons name="lock-closed-outline" size={18} color={COLORS.success_text} />
               <Text style={styles.signed_text}>
                 Signed by {checklist.signed_by} on {checklist.signed_on}
               </Text>
@@ -242,7 +242,7 @@ function ChecklistDetailScreen(props) {
                     accessibilityLabel={item.name}
                   >
                     <Ionicons
-                      name={item.done ? 'checkbox' : 'square-outline'}
+                      name={item.done ? 'checkbox-outline' : 'square-outline'}
                       size={24}
                       color={item.done ? COLORS.success_text : COLORS.text_muted}
                     />
@@ -257,12 +257,12 @@ function ChecklistDetailScreen(props) {
                     {(item.condition || item.move_in_condition || item.photos.length > 0) && (
                       <View style={styles.tag_row}>
                         {/* the pill uses the same condition colors as the item form */}
-                        {item.condition && <StatusPill label={item.condition} />}
+                        {item.condition && <StatusLabel label={item.condition} />}
                         {item.move_in_condition && (
                           <Text style={styles.item_note}>Move-in: {item.move_in_condition}</Text>
                         )}
                         {itemGotWorse(item) && (
-                          <StatusPill label="Changed since move-in" tone="Late" />
+                          <StatusLabel label="Changed since move-in" tone="Late" />
                         )}
                         {item.photos.length > 0 && (
                           <View style={styles.photo_count}>
@@ -273,7 +273,7 @@ function ChecklistDetailScreen(props) {
                       </View>
                     )}
                   </View>
-                  <Ionicons name="chevron-forward" size={18} color={COLORS.text_muted} />
+                  <Ionicons name="chevron-forward-outline" size={18} color={COLORS.text_muted} />
                 </Pressable>
               ))}
 
@@ -286,7 +286,7 @@ function ChecklistDetailScreen(props) {
                   accessibilityRole="button"
                   accessibilityLabel={'Add an item to ' + room.name}
                 >
-                  <Ionicons name="add" size={18} color={COLORS.info_text} />
+                  <Ionicons name="add-outline" size={18} color={COLORS.info_text} />
                   <Text style={styles.add_item_text}>Add item</Text>
                 </Pressable>
               )}

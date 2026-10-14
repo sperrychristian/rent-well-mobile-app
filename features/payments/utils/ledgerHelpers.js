@@ -34,31 +34,31 @@ export function chargeKindLabel(kind) {
 // ----- status words, the pills always show these with an icon so a status is never color only -----
 
 const charge_pills = {
-  paid: { label: 'Paid', tone: 'success', icon: 'checkmark-circle' },
-  partial: { label: 'Partly paid', tone: 'info', icon: 'pie-chart' },
-  due: { label: 'Due', tone: 'warning', icon: 'calendar' },
-  overdue: { label: 'Overdue', tone: 'danger', icon: 'alert-circle' },
-  upcoming: { label: 'Upcoming', tone: 'neutral', icon: 'time' },
-  voided: { label: 'Voided', tone: 'neutral', icon: 'close-circle' },
+  paid: { label: 'Paid', tone: 'success', icon: 'checkmark-circle-outline' },
+  partial: { label: 'Partly paid', tone: 'info', icon: 'pie-chart-outline' },
+  due: { label: 'Due', tone: 'warning', icon: 'calendar-outline' },
+  overdue: { label: 'Overdue', tone: 'danger', icon: 'alert-circle-outline' },
+  upcoming: { label: 'Upcoming', tone: 'neutral', icon: 'time-outline' },
+  voided: { label: 'Voided', tone: 'neutral', icon: 'close-circle-outline' },
 };
 
 const payment_pills = {
-  pending: { label: 'Waiting for confirmation', tone: 'warning', icon: 'hourglass' },
-  confirmed: { label: 'Confirmed', tone: 'success', icon: 'checkmark-circle' },
-  rejected: { label: 'Rejected', tone: 'danger', icon: 'close-circle' },
-  voided: { label: 'Voided', tone: 'neutral', icon: 'remove-circle' },
+  pending: { label: 'Waiting for confirmation', tone: 'warning', icon: 'hourglass-outline' },
+  confirmed: { label: 'Confirmed', tone: 'success', icon: 'checkmark-circle-outline' },
+  rejected: { label: 'Rejected', tone: 'danger', icon: 'close-circle-outline' },
+  voided: { label: 'Voided', tone: 'neutral', icon: 'remove-circle-outline' },
 };
 
 // the owner's per-tenant row: what needs attention first
 const row_pills = {
-  overdue: { label: 'Overdue', tone: 'danger', icon: 'alert-circle' },
-  pending: { label: 'Claim to review', tone: 'warning', icon: 'hourglass' },
-  due: { label: 'Due', tone: 'warning', icon: 'calendar' },
-  credit: { label: 'Credit', tone: 'info', icon: 'wallet' },
-  paid: { label: 'All paid up', tone: 'success', icon: 'checkmark-circle' },
+  overdue: { label: 'Overdue', tone: 'danger', icon: 'alert-circle-outline' },
+  pending: { label: 'Claim to review', tone: 'warning', icon: 'hourglass-outline' },
+  due: { label: 'Due', tone: 'warning', icon: 'calendar-outline' },
+  credit: { label: 'Credit', tone: 'info', icon: 'wallet-outline' },
+  paid: { label: 'All paid up', tone: 'success', icon: 'checkmark-circle-outline' },
 };
 
-const unknown_pill = { label: 'Unknown', tone: 'neutral', icon: 'help-circle' };
+const unknown_pill = { label: 'Unknown', tone: 'neutral', icon: 'help-circle-outline' };
 
 export function chargePill(status) {
   return charge_pills[status] || unknown_pill;

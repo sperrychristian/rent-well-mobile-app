@@ -91,3 +91,17 @@ The backend doesn't have the ledger yet. Real mode calls the draft endpoints in 
 | Landlord | Rent Ledger | Tenant | Payment Record |
 | --- | --- | --- | --- |
 | ![Payments](docs/screenshots/payments.png) | ![Rent ledger](docs/screenshots/rent_ledger.png) | ![Tenant payments](docs/screenshots/payments_tenant.png) | ![Payment record](docs/screenshots/payment_record.png) |
+
+## The look
+
+The app uses the Hearth design:
+- warm paper and ink with one forest green for actions
+- big Fraunces numbers
+- hairline rows instead of cards
+
+The full guide is in `docs/DESIGN.md`.
+
+| Landlord home | Tenant home | Work orders | Messages |
+| --- | --- | --- | --- |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Tenant home](docs/screenshots/tenant_home.png) | ![Work orders](docs/screenshots/work_orders.png) | ![Thread](docs/screenshots/thread.png) |
+

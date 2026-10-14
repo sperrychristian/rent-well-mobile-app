@@ -9,8 +9,8 @@ The code so far was written in an earlier chat session and has been run only par
 - Expo, React Native, plain JavaScript (no TypeScript)
 - React Navigation native stack, `react-native-safe-area-context`
 - AsyncStorage for saving, `expo-image-picker`, `expo-file-system` and `expo-sharing` (CSV export, documents), `expo-document-picker`, `@react-native-community/datetimepicker`, `@expo/vector-icons` (Ionicons)
-- Inter fonts from `@expo-google-fonts/inter`, loaded in `App.js` (the pixel font from the design pass is gone, the wordmark is Inter now)
-- `react-native-svg` (pixel art and the Welcome grid), `expo-splash-screen` (splash through its config plugin), `expo-status-bar` (light status bar)
+- Fraunces and DM Sans from `@expo-google-fonts/fraunces` and `@expo-google-fonts/dm-sans`, loaded in `App.js` behind the splash (Inter and the pixel font are gone)
+- `react-native-svg`, `expo-splash-screen` (the splash through its config plugin, held in `App.js` until the fonts load), `expo-status-bar`
 - Backend (real mode only): `expo-secure-store` (tokens), `socket.io-client` (realtime), `expo-notifications` (push). The API is the sibling repo `rent-well-api`, contract in `docs/API.md`.
 - Run with `npx expo start -c` (clear the cache after adding or renaming files)
 - Checks: `npm run lint` (whole project), `npm test` (runs once, `npm run test:watch` to watch), `npm run format:check`. Format with `npx prettier --write <files>`. Prettier keeps quoted keys as written (`quoteProps: preserve`). Lint has 13 known problems in existing code (it was 16, the design pass fixed ScreenTitle's three), listed in the Phase 1 report, left alone during the refactor.
@@ -18,7 +18,7 @@ The code so far was written in an earlier chat session and has been run only par
 ## Layout (project root)
 - `App.js`: font loading, then `AuthProvider` > `AccountData` (`WorkOrdersProvider` keyed by the signed-in user id, then `RemoteWorkOrdersProvider`, then `MessagesProvider`, then `TenantsProvider`) > navigator. It waits for the saved session, then starts on the role's home (`Dashboard` for owners, `TenantHome` for tenants), the demo side's home (`Dashboard` or `TenantHome`), `Login` after a session ran out, or `Welcome`. The keyed providers remount the navigator whenever the mode or account changes, and the `NavigationContainer` is also keyed on the demo side (`navigator_key`), so the start screen has to match the mode. In the demo only that side's screens are registered (`shows_owner` and `shows_tenant` wrap the owner and tenant `Stack.Group`s). Every screen shows a header with one shared style (`shared_screen_options`) and its title from the navigation map. The homes open with a greeting and an indigo `SummaryBlock` (the fintech pass), the `ScreenTitle` card is left only on the tenant's "No Active Rental" home, and screens that showed a name in it (tenant, property, lease, checklist type, conversation) keep it as a plain `name_line` text.
 - `navigation/`: `navigationMap.js` is the single source of truth for screens: route name, header title, role, feature, file, params (all ids ending in `Id`), outgoing edges (`demo: true` for demo-only ones), stub or built, future tab or drawer spot, and `reachable_in` (the situations that can open it: signed_out, owner, tenant, demo_owner, demo_tenant, defined in `situations`). `screenOptions.js` (shared header style, `optionsFor(route)` reads titles from the map, adding a short id where the title depends on a param), `headerButtons.js` (Settings gear, Add work order, Invite, Add request). Tests: `navigationMap.test.js` (App.js and the map match, reachability for all five situations checked against `reachable_in`, the demo chooser and switch edges, the App.js role groups, id params, the diagram is current) and `navigationCalls.test.js` (no navigation call passes an object or a non-id param, every reset goes to a registered screen with no params). Add a screen: register it in `App.js`, add it to the map with its edges, then run `npm run diagram`.
-- `scripts/buildAppAssets.mjs` (`npm run assets`): draws the app icon, Android adaptive icon layers, splash image, and favicon (`assets/pixel-*.png`) from the pixel house with headless Chrome and points `app.json` at them, colors from `theme.js`. The old assets are kept.
+- `scripts/buildAppAssets.mjs` (`npm run assets`): draws the app icon, Android adaptive icon layers, splash image, and favicon (`assets/hearth-*.png`) as a green line house on paper with headless Chrome and points `app.json` at them, colors from `theme.js`.
 - `scripts/buildNavigationDiagram.mjs` (`npm run diagram`): draws `assignment/navigation/navigation-diagram.svg/.png/.pdf` and `navigation.mmd` from the map with elkjs and headless Chrome.
 - `services/`: `config.js` (API base URL, with the marked spot for the LAN IP on a physical phone), `apiHelpers.js` (pure: `ApiError`, `parseApiError`, `createSingleFlight`, `buildQuery`), `apiClient.js` (client factory: token attach, 401 refresh and retry, single-flight refresh, session events), `api.js` (the shared client plus one function per endpoint: auth, properties, invites, tenants, tenancies, messages, work orders, uploads, push tokens), `attachmentUrls.js` (short-lived download URL cache), `tokenStorage.js` (SecureStore), `socket.js` (one socket, `onSocketEvent` lets other features listen on it), `push.js` (message, work order, and tenancy taps), `navigationRef.js` (navigate from outside screens, `navigateWhenReady` for cold-start push taps). `apiClient.js` emits a `read_only` session event on any `NO_ACTIVE_TENANCY` error.
 - `theme.js`: `COLORS`, `SPACING`, `FONT_SIZES`, `FONTS`
@@ -88,27 +88,52 @@ The code so far was written in an earlier chat session and has been run only par
 ## Colors rule
 All colors must come from `theme.js`. When touching a file, use theme tokens. Never add a new hex value to a component. (`'transparent'` is a keyword and stays inline.)
 
-The app is light (the fintech pass): white cards on a soft cool gray, ink navy text, and one indigo brand color. `theme.test.js` checks every text and surface pair, every state on its tint, and every fill for WCAG AA, and `components/ui/stylePairs.test.js` checks every style block's text and background pair. Run them after changing a color.
+The app is light and warm (the Hearth pass, see the Design system section): paper, ink, hairlines, forest green for actions, and terracotta for overdue. `theme.test.js` checks every text and surface pair, every state on its tint, and every fill for WCAG AA, `components/ui/stylePairs.test.js` checks every style block's text and background pair, and `components/ui/hearth.test.js` checks the Hearth pairs. Run them after changing a color.
 - Base: `background` (cool gray page), `surface` and `muted` (white cards), `text` and `title` (ink), `text_muted` (slate), `primary` and `cta` (the indigo brand, white text on it), `cta_pressed`, `on_cta`, `on_brand_muted` (quiet text on the indigo card), `brand_tint`, `focus`
 - Surfaces and lines: `surface_raised` (rows inside cards, pressed states), `surface_sunken` (text boxes), `border` (hairlines), `border_strong` (outlined buttons and inputs), `on_light` (ink text on yellow or orange)
 - States as fills (white text): `success`, `action`/`info`, `accent`, `danger`, `secondary`, plus `warning` and `highlight` (ink text). Green is only for positive money and success, amber only for warnings, red for danger and overdue
 - States as text or icons on white or gray: `success_text`, `info_text`, `accent_text`, `warning_text`, `danger_text`
 - Soft tints for pills and banners, with the matching `_text` color on them: `success_tint`, `info_tint`, `accent_tint`, `warning_tint`, `danger_tint`, `neutral_tint`, `brand_tint`
-- Other: `text_light`, `text_dark`, `surface_light`, `toast_background`, `skeleton`, `skeleton_shine`, `priority_emergency`, `priority_low`, the `tag_` colors, `backdrop`, `photo_backdrop`, `shadow`, `shimmer_edge`, `shimmer_peak`, and the `pixel_` colors (only the pixel drawings use those, `pixel_duo_light` and `pixel_duo_dark` are the empty-state tones)
+- Other: `text_light`, `text_dark`, `surface_light`, `toast_background`, `skeleton`, `skeleton_shine`, `priority_emergency`, `priority_low`, the `tag_` colors, `backdrop`, `photo_backdrop`, `shadow`, `shimmer_edge`, `shimmer_peak`, and `hairline` (the pixel colors are gone with the pixel art)
 
-## Design system (branch `fintech-polish`, full guide in `docs/DESIGN.md`)
-- Tokens in `theme.js`: `COLORS` (above), `SPACING` (4 point steps, xxs 2 to xxl 48), `TYPE` (display, title, heading, subheading, body, body_compact, body_small, label, caption, micro, overline, figure, button, and `input` with no line height since iOS misplaces single-line input text with one), `NUMBERS` (tabular digits for every number in a column), `FONT_SIZES`, `FONTS` (Inter only), `RADIUS` (12 and 16 for cards), `BORDER`, `SHADOWS` (very soft, only for raised or floating things), `OPACITY`, `SIZES` (touch 44, buttons, icons, avatars, `icon_circle`, `content_max_width` 600), `MOTION`. No raw numbers in styles, the review sweep found none left except one-off photo sizes.
-- Primitives in `components/ui/`:
-  - Button: `primary` (indigo, one per card or screen), `secondary` (white, outlined), `tertiary` (indigo text), `destructive` (red), `plain`. Sizes `small` (hitSlop to 44), `medium`, `large`, plus `loading` and `disabled`.
-  - Surfaces: Card (`flat` default, white with a hairline border, `raised` with a soft shadow, `interactive`), ModalCard (the sheet the modals import as Card), SummaryBlock (the key figure big, `brand` is the indigo overview card).
-  - Rows and figures: ListRow (IconCircle or Avatar on the left, amount right-aligned), IconCircle (tinted circle by tone), KpiTile, StatTile, QuickAction, FeatureTile, Sparkline (tested `sparklinePoints`), MoneyText, CurrencyInput ($ prefix, decimal pad).
-  - Labels and controls: StatusPill (tinted fill, icon, and words, takes a status name or a plain tone), Avatar (tinted initials), Badge, Chip (picked chips are tinted with an indigo border), SegmentedControl (for filters that act as tabs), SectionHeader (uppercase overline).
-  - States and motion: EmptyState (a duotone pixel drawing, title, line, optional button), SkeletonList, ErrorState, FadeInView, `useReduceMotion`, Wordmark, `listStyles.js`, `sheet.js`.
-- Pixel art: `components/ui/pixel/`. The house is a small logomark in the brand colors (Wordmark and the app icon), the empty states draw in two quiet tones through `duotonePalette`. Never use pixel art for buttons or text.
-- Wordmark: the house logomark in a soft indigo tile, then "Rent Well" in Inter ExtraBold with tight tracking.
-- Accessibility: every pressable has a role and a label (chips also say if they're picked), every tap target is 44pt, text is AA on its background (both contrast tests), status is never color only, text uses `TYPE` line heights and `flexShrink` so larger system fonts wrap, and every animation and modal transition checks `useReduceMotion()`.
-- Headers stay one shared style in `navigation/screenOptions.js`: white bar, ink title, a thin line under it, dark status bar.
-- Visual QA: the demo can be rendered on the web in a scratch copy outside the repo (react-native-web plus small mocks for the native modules), never add web packages to this repo.
+## Design system: Hearth (branch `hearth-redesign`, full guide in `docs/DESIGN.md`)
+- **The look:** warm and quiet, more like an editorial page than a dashboard.
+  - Paper background (`#F7F3EC`), ink text (`#2A2520`), muted `#6B6259`, hairlines `#E4DCCF`.
+  - Forest green `#2F5D4A` for actions and good news, terracotta `#A8442A` for overdue or urgent, amber `#83560F` for waiting.
+  - No cards around lists, no pills, no icon circles. Shadows only on sheets.
+  - The token names stayed the same, so old styles picked up the new colors.
+- **Fonts:** Fraunces (400, 500) for the wordmark, hero numbers, and names. DM Sans (400, 500, 600) for everything else.
+  - `App.js` holds the splash until they load, and the app falls back to the system font if they fail.
+  - Inter is gone.
+- **Tokens in `theme.js`:**
+  - `TYPE`: the old keys, plus `hero` (58), `number` (30), `name`, `empty_title`, `wordmark`.
+  - `SPACING` adds `xxxl` (64), and `RADIUS.button` is 26 (every button is a pill).
+  - `SIZES` adds `screen_padding` (24), `row_min_height` (64), `row_icon`, `chevron`, `progress`, `header_avatar`. Buttons are 52 tall.
+  - `SHADOWS.low` and `medium` are flat.
+  - `COLORS.hairline`.
+- **Primitives in `components/ui/`:**
+  - `Button`: pills. Primary green, secondary see-through with an outline, tertiary green text, destructive terracotta outline.
+  - `ListRow` (the Row): 64 tall, a hairline on top, a line under the last one, a 24 green line icon, `subtitle_tone`, and a `detail` node.
+  - `StatusLabel`: an icon and colored words. It replaces StatusPill.
+  - `SummaryBlock`: the hero amount, no card.
+  - `ProgressLine`, `ActionSheet`.
+  - `KpiTile`: plain figures.
+  - `IconCircle`: now just the line icon.
+  - `Avatar`: a hairline ring.
+  - `Chip`, `SegmentedControl` (underline tabs), `EmptyState` (a muted line icon, a Fraunces title, a green pill), `Toast` (an ink pill), `Wordmark` (Fraunces and a green line house, `align`), `lineIcon` (filled to outline), `sheet.js` (12 corners), `listStyles.js`, `FadeInView`, `useReduceMotion`, `Skeleton`, `Badge`, `MoneyText`, `CurrencyInput`, `ModalCard`.
+  - Removed: FeatureTile, QuickAction, StatTile, Sparkline, the pixel folder and its colors, ScreenTitle, and StatusPill.
+- **Homes:** `features/home/components/HomeTopBar` and `HeroNote`.
+- **Icons:** Ionicons outline only, which a sweep enforces.
+- **Brand assets:** `npm run assets` draws the green line house on paper (`assets/hearth-*.png`).
+- **Accessibility:**
+  - Every pressable has a role.
+  - Touch targets are 44 (rows 64).
+  - Text is AA (`theme.test.js`, `stylePairs.test.js`, `components/ui/hearth.test.js`).
+  - Status is never color only.
+  - Hero numbers cap font scaling at 1.2 and shrink to fit.
+  - Sheets and toasts check Reduce Motion.
+- **Headers** keep one shared style in `navigation/screenOptions.js`: a paper bar with no line or shadow, a DM Sans 600 title, and an ink back chevron.
+- **Visual QA:** the demo can be rendered on the web in a scratch copy outside the repo (react-native-web plus small mocks for the native modules). Never add web packages to this repo.
 
 ## Gotchas
 - Metro file names are case sensitive. Past errors came from `FormatDate.js` vs `formatDate.js`, `MilageScreen`, and `BudgetModal`. Check names and import paths after creating files.
@@ -125,6 +150,7 @@ The app is light (the fintech pass): white cards on a soft cool gray, ink navy t
 - Tenant management: Tenants and Properties screens, tenant detail, move, assign, end with a Move-Out checklist offer, invite revoke and resend, read-only mode for former tenants. Works offline in the demo on sample data, including a past tenant. The tenant detail's open count and recent orders come from `GET /tenants/:id`, and its Work Orders link opens the list searched by name.
 - Navigation assignment (branch `navigation-assignment`, not merged, built from master with `work-orders-api` and `tenant-management` merged in): every screen has a header, all route params are ids, header buttons on the Dashboard, tenant home, Work Orders, Tenants, Messages, My Requests, and Properties, stubs for Payments, Payment Detail, Settings, Property Detail, and Lease, a diagram in `assignment/navigation/`, and the write-up draft in `ASSIGNMENT_NAV.md`. Owners can add work orders in real mode now (the Work Orders Add button). The duplicate title cards are gone, and the demo has two sides (Pick a Demo Role screen, banner switch, guarded routes, shared demo data).
 - Design pass (branch `design-polish`, not merged): navy base with a sunrise amber call to action, rebuilt Welcome, a shared lockup on the chooser and auth screens, dashboards with a summary row and feature grid, pixel art empty states, and generated icons and splash.
+- Hearth redesign (branch `hearth-redesign`, built on `payments-ledger-app`, not merged): the warm editorial look above across every screen, both homes rebuilt as a hero number plus rows, the Rent Ledger with a More action sheet, and regenerated icons. Visual only, no route, data, or logic changes.
 - Fintech pass (branch `fintech-polish`, built on `design-polish`, not merged): light theme with an indigo brand, the design system above, overview dashboards with a monthly spending sparkline, `formatCurrency` everywhere money shows, segmented controls, tinted pills, `$` money inputs, a slim demo banner, regenerated icons, and the audit in `docs/design-audit.md`.
 - The Dashboard still has a temporary "New Work Order" button in the demo (hidden in real mode). Push needs a development build with an EAS project id, it logs and does nothing in Expo Go or the simulator.
 

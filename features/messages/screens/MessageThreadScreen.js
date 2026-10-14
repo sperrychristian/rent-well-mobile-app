@@ -306,7 +306,7 @@ function MessageThreadScreen(props) {
               accessibilityRole="button"
               accessibilityLabel="Remove photo"
             >
-              <Ionicons name="close-circle" size={24} color={COLORS.danger_text} />
+              <Ionicons name="close-circle-outline" size={24} color={COLORS.danger_text} />
             </Pressable>
           </View>
         )}
@@ -346,7 +346,7 @@ function MessageThreadScreen(props) {
               {sending ? (
                 <ActivityIndicator color={COLORS.text_light} />
               ) : (
-                <Ionicons name="send" size={20} color={COLORS.text_light} />
+                <Ionicons name="send-outline" size={20} color={COLORS.text_light} />
               )}
             </Pressable>
           </View>

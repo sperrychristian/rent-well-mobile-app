@@ -302,7 +302,7 @@ function TenantPaymentsView(props) {
             >
               <Text style={styles.fold_text}>{'Past rentals (' + past.length + ')'}</Text>
               <Ionicons
-                name={show_past ? 'chevron-up' : 'chevron-down'}
+                name={show_past ? 'chevron-up-outline' : 'chevron-down'}
                 size={SIZES.icon}
                 color={COLORS.text_muted}
               />

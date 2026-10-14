@@ -71,7 +71,11 @@ function DemoChooserScreen() {
                 <Text style={styles.choice_title}>{choice.title}</Text>
                 <Text style={styles.choice_detail}>{choice.detail}</Text>
               </View>
-              <Ionicons name="chevron-forward" size={SIZES.chevron} color={COLORS.text_muted} />
+              <Ionicons
+                name="chevron-forward-outline"
+                size={SIZES.chevron}
+                color={COLORS.text_muted}
+              />
             </View>
           </Card>
         </FadeInView>

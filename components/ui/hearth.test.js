@@ -3,7 +3,6 @@ import { StyleSheet } from 'react-native';
 import Button from './Button';
 import ListRow from './ListRow';
 import StatusLabel from './StatusLabel';
-import StatusPill from './StatusPill';
 import SummaryBlock from './SummaryBlock';
 import ProgressLine from './ProgressLine';
 import { lineIcon } from './lineIcon';
@@ -56,7 +55,7 @@ describe('Row', () => {
     // the last row (no divider) closes the list with a line under it too
     expect(style.borderBottomWidth).toBe(BORDER.hairline);
     expect(screen.getByText('card-outline', { includeHiddenElements: true })).toBeTruthy();
-    expect(screen.getByText('chevron-forward')).toBeTruthy();
+    expect(screen.getByText('chevron-forward-outline')).toBeTruthy();
   });
 
   test('subtitle_tone danger makes the subtitle terracotta', () => {
@@ -74,10 +73,10 @@ describe('StatusLabel', () => {
     expect(flat(words.parent.parent).backgroundColor).toBeUndefined();
   });
 
-  test('statuses keep their meaning, an emergency reads terracotta, and StatusPill draws the same thing', () => {
+  test('statuses keep their meaning, and an emergency reads terracotta', () => {
     render(<StatusLabel label="Resolved" />);
     expect(flat(screen.getByText('Resolved')).color).toBe(COLORS.success_text);
-    render(<StatusPill label="Emergency" />);
+    render(<StatusLabel label="Emergency" />);
     expect(flat(screen.getByText('Emergency')).color).toBe(COLORS.danger_text);
   });
 });

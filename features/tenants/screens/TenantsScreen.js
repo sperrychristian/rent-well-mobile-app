@@ -184,7 +184,7 @@ function TenantsScreen(props) {
             <Text style={styles.count_text}>{tenant.open_work_order_count}</Text>
           </View>
         )}
-        <Ionicons name="chevron-forward" size={18} color={COLORS.text_muted} />
+        <Ionicons name="chevron-forward-outline" size={18} color={COLORS.text_muted} />
       </Pressable>
     );
   }
@@ -297,7 +297,7 @@ function TenantsScreen(props) {
         >
           <Text style={styles.group_title}>Past Tenants ({shown_past.length})</Text>
           <Ionicons
-            name={show_past ? 'chevron-up' : 'chevron-down'}
+            name={show_past ? 'chevron-up-outline' : 'chevron-down'}
             size={18}
             color={COLORS.text_muted}
           />

@@ -102,7 +102,7 @@ export const PaymentRow = memo(function PaymentRow(props) {
       >
         {amount}
       </Text>
-      <Ionicons name="chevron-forward" size={SIZES.chevron} color={COLORS.text_muted} />
+      <Ionicons name="chevron-forward-outline" size={SIZES.chevron} color={COLORS.text_muted} />
     </Pressable>
   );
 });

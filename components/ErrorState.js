@@ -20,7 +20,7 @@ function ErrorState(props) {
       <Text style={styles.message}>{props.message}</Text>
       <PrimaryButton
         title="Try Again"
-        icon="refresh"
+        icon="refresh-outline"
         variant="secondary"
         onPress={props.onRetry}
         style={styles.retry_button}
@@ -54,6 +54,6 @@ const styles = StyleSheet.create({
   },
   retry_button: {
     marginTop: SPACING.sm,
-    minWidth: 160,
+    minWidth: SIZES.content_max_width / 4 + SPACING.sm,
   },
 });

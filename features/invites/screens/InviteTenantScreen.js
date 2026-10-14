@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
     ...TYPE.label,
     color: COLORS.text_muted,
     textTransform: 'uppercase',
-    letterSpacing: 0.8,
+    letterSpacing: TYPE.overline.letterSpacing,
     marginTop: SPACING.sm,
     marginBottom: SPACING.sm,
     marginLeft: SPACING.xs,

@@ -21,7 +21,7 @@ import { canTenantAddPhotos, photosLeft } from '../utils/workOrderHelpers';
 import { formatDate } from '../../../utils/formatDate';
 import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import StatusPill from '../../../components/ui/StatusPill';
+import StatusLabel from '../../../components/ui/StatusLabel';
 
 // the server takes photos up to 10 MB
 const max_photo_bytes = 10485760;
@@ -144,11 +144,11 @@ function RequestDetailScreen(props) {
         <Card>
           <View style={styles.top_line}>
             <Text style={[styles.heading, styles.title_big]}>{order.title}</Text>
-            <StatusPill label={order.status} />
+            <StatusLabel label={order.status} />
           </View>
           <Text style={styles.detail}>{order.property}</Text>
           <View style={styles.tag_row}>
-            <StatusPill label={order.priority} />
+            <StatusLabel label={order.priority} />
           </View>
           {order.description ? <Text style={styles.body}>{order.description}</Text> : null}
         </Card>

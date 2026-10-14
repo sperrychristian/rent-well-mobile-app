@@ -23,7 +23,7 @@ function Chip(props) {
       ]}
     >
       {props.selected ? (
-        <Ionicons name="checkmark" size={14} color={COLORS.cta} style={styles.icon} />
+        <Ionicons name="checkmark-outline" size={14} color={COLORS.cta} style={styles.icon} />
       ) : props.icon ? (
         <Ionicons name={props.icon} size={14} color={COLORS.text} style={styles.icon} />
       ) : null}

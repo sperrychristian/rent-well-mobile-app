@@ -10,7 +10,7 @@ import { checklistProgress, filterChecklists, worseCount } from '../utils/checkl
 import { COLORS, SPACING, TYPE, SIZES, OPACITY } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
-import StatusPill from '../../../components/ui/StatusPill';
+import StatusLabel from '../../../components/ui/StatusLabel';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
 
 const status_filters = ['All', 'In progress', 'Complete'];
@@ -137,12 +137,12 @@ function ChecklistScreen(props) {
                   </Text>
                 </View>
                 <View style={styles.tag_row}>
-                  <StatusPill
+                  <StatusLabel
                     label={item.completed ? 'Complete' : 'In progress'}
                     tone={item.completed ? 'Signed' : 'In progress'}
                   />
                   {worse > 0 && (
-                    <StatusPill
+                    <StatusLabel
                       label={worse + (worse === 1 ? ' item' : ' items') + ' worse since move-in'}
                       tone="Late"
                     />

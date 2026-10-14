@@ -48,7 +48,7 @@ function ListRow(props) {
       </View>
       {trailing}
       {props.chevron || (props.onPress && props.chevron !== false) ? (
-        <Ionicons name="chevron-forward" size={SIZES.chevron} color={COLORS.text_muted} />
+        <Ionicons name="chevron-forward-outline" size={SIZES.chevron} color={COLORS.text_muted} />
       ) : null}
     </>
   );

@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     ...TYPE.body,
     color: COLORS.text_muted,
     textAlign: 'center',
-    maxWidth: 320,
+    maxWidth: SIZES.content_max_width / 2 + SPACING.lg,
     marginTop: SPACING.md,
   },
   trust_row: {

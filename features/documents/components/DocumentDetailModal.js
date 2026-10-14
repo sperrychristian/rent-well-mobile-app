@@ -6,7 +6,7 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
 import { getDocumentUri } from '../utils/documentFiles';
 import { isImage, iconFor, expiryTag, daysUntil, formatSize } from '../utils/documentHelpers';
-import StatusPill from '../../../components/ui/StatusPill';
+import StatusLabel from '../../../components/ui/StatusLabel';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // props: visible, document, in_demo, onOpen, onEdit, onDelete, onClose, and onDismiss (iOS calls it once the modal is fully gone)
@@ -54,16 +54,18 @@ function DocumentDetailModal(props) {
             <View style={styles.tag_row}>
               {/* the fintech pass: soft tinted pills, red when it's expired and amber when it's close */}
               {tag && (
-                <StatusPill
+                <StatusLabel
                   label={tag.text}
                   tone={tag.expired ? 'danger' : 'warning'}
                   icon={tag.expired ? 'alert-circle' : 'time'}
                 />
               )}
               {document.shared_with_tenant && (
-                <StatusPill label="Shared with tenant" tone="info" icon="people" />
+                <StatusLabel label="Shared with tenant" tone="info" icon="people-outline" />
               )}
-              {document.sample && <StatusPill label="Sample" tone="neutral" icon="document" />}
+              {document.sample && (
+                <StatusLabel label="Sample" tone="neutral" icon="document-outline" />
+              )}
             </View>
 
             {preview_uri && (

@@ -24,7 +24,7 @@ import { placeLabel, findMoveInChecklist } from '../utils/tenantHelpers';
 import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import Avatar from '../../../components/ui/Avatar';
-import StatusPill from '../../../components/ui/StatusPill';
+import StatusLabel from '../../../components/ui/StatusLabel';
 
 // one tenant: how to reach them, where they live now, their work orders, where they lived before,
 // and the owner's actions (message, move, assign, end)
@@ -196,7 +196,7 @@ function TenantDetailScreen(props) {
         <Card>
           <View style={styles.top_line}>
             <Text style={styles.heading}>Contact</Text>
-            <StatusPill
+            <StatusLabel
               label={tenant.is_active ? 'Current' : 'Past tenant'}
               tone={tenant.is_active ? 'Active' : 'Ended'}
             />
@@ -236,7 +236,7 @@ function TenantDetailScreen(props) {
                 <Text style={[styles.place, styles.place_link]}>
                   {placeLabel(tenancy.property_name, tenancy.unit_label)}
                 </Text>
-                <Ionicons name="chevron-forward" size={16} color={COLORS.cta} />
+                <Ionicons name="chevron-forward-outline" size={16} color={COLORS.cta} />
               </Pressable>
               <Text style={styles.detail}>Moved in {tenancy.started_at}</Text>
               {/* their rent: balance, charges, and payments for this home */}
@@ -251,7 +251,7 @@ function TenantDetailScreen(props) {
                 }
               >
                 <Text style={styles.link}>Rent Ledger</Text>
-                <Ionicons name="chevron-forward" size={16} color={COLORS.cta} />
+                <Ionicons name="chevron-forward-outline" size={16} color={COLORS.cta} />
               </Pressable>
               <View style={styles.button_row}>
                 <PrimaryButton
@@ -286,7 +286,7 @@ function TenantDetailScreen(props) {
               <Text style={styles.order_title} numberOfLines={1}>
                 {order.title}
               </Text>
-              <StatusPill label={order.status} />
+              <StatusLabel label={order.status} />
             </View>
           ))}
           <Pressable
@@ -296,7 +296,7 @@ function TenantDetailScreen(props) {
             accessibilityRole="link"
           >
             <Text style={styles.link}>View in Work Orders</Text>
-            <Ionicons name="chevron-forward" size={16} color={COLORS.cta} />
+            <Ionicons name="chevron-forward-outline" size={16} color={COLORS.cta} />
           </Pressable>
         </Card>
 
