@@ -81,3 +81,45 @@ Branch `hearth-redesign`, made from `payments-ledger-app`. Not merged. This is a
   - Dashboard: "the badge sits on the corner of the button and hides itself at zero", "an empty half next to the odd third tile, so it stays the same size instead of stretching", "capped so the tiles don't stretch across a whole iPad", and "two tiles to a row, they grow taller instead of squishing when the text is big".
   - Tenant home: "two tiles to a row, they grow taller instead of squishing when the text is big" and "the read-only home still uses the full-width cards".
 - **Visual QA** (web render at 390, 360 by 640, and 820 by 1180): Welcome, Login, the chooser, and both homes. There were no page errors, and nothing was clipped or cramped. At 360 the hero note wraps to two lines, which reads fine.
+- **Phase 2 checks:** lint at the 13 known problems, 361 tests passed, format clean, iOS export OK.
+
+## Phase 3: Payments and ledger screens (done)
+
+- **New shared piece:** `components/ui/ActionSheet` slides up from the bottom. It's a white sheet with 12 corners and the shadow, with ruled rows that each have a line icon, and Cancel at the bottom.
+- **New helpers** (tested): `chargeStatusLine` and `paymentStatusLine` give lines like "Overdue, was due Oct 1", "Overdue, $450.00 left, was due Sep 1", "Paid Sep 2 by Zelle", "Waiting for confirmation, sent Oct 14 by Venmo", and "Rejected, sent Sep 20 by Venmo".
+- **`LedgerRows`:**
+  - Charge and payment rows are plain ruled rows: the title on top, the status as a line icon and colored words under it, and the amount at 17 medium on the right.
+  - Claim rows have Reject as a secondary pill and Confirm as a primary pill.
+  - `ProgressBar` now draws the shared `ProgressLine`.
+- **Rent Ledger:**
+  - The tenant's name in Fraunces 30 with the address muted under it.
+  - A status label: Overdue in terracotta, Paid up in green, or Credit.
+  - The balance in Fraunces 58.
+  - "Next rent $1,450.00 on Nov 1. Deposit held $1,450.00." muted, and the overdue sentence in terracotta.
+  - One green "Record Payment" pill with a plus, and a secondary "More" pill. More opens an action sheet with Add Charge, Edit or Set Rent Schedule, and Void a Charge or Payment. Void opens a second sheet with the 8 newest things that can be voided, then the reason sheet.
+  - Then the schedule line, then month section headers over plain rows.
+  - Tapping a charge still offers Void Charge, and the header add button still opens Record Payment.
+- **Payments (owner):**
+  - The hero is "Collected in October 2026" in Fraunces with the green progress line.
+  - The two KPI figures have no tiles.
+  - The claims queue is rows.
+  - Tenant rows show the address and balance, with the status as a label under them through the new `ListRow` `detail` prop, so it never squeezes the name.
+  - Tabs are on a hairline.
+- **Payments (tenant):**
+  - A Fraunces "You owe" hero, and the overdue note as terracotta words with no fill.
+  - Next rent and deposit as plain figures.
+  - "I Paid" is a 52 pill.
+  - "How to pay" with a Copy pill, and the waiting and rejected sections as rows.
+- **Payment Record:** a hero amount, a status label, banners turned into plain icon-and-words lines, hairline facts, the timeline, a secondary Share Receipt, Confirm as primary and Reject as secondary, an outlined terracotta Void, and the ledger link as a text button.
+- **Forms** (`FormBits`): muted labels above white inputs (hairline edge, 8 corners, 52 tall), and 24 between field groups.
+- **Test copy changes** (the visible copy really changed): `paymentScreens.test.js` and `paymentFlows.test.js` now tap More before Add Charge or Edit Rent Schedule, since those moved into the More sheet.
+- **Visual QA** (web render at 390, 360 by 640, and 820 by 1180): Payments, Rent Ledger, tenant Payments, Payment Record, the More sheet, and Record Payment. No page errors.
+  - Fixed: the status label on the owner's tenant rows squeezed the address ("Unit / 1" on two lines). It moved under the subtitle.
+  - Fixed: the address turned red along with an overdue balance. It's muted now, and the label carries the color.
+  - Fixed: the rejected-claim reason was still indented for the old icon circle.
+- **Checks:**
+  - Lint: the 13 known problems.
+  - Tests: listed in the next line.
+  - Format: clean.
+  - iOS export with `--clear`: OK.
+  - Tests: 363 passed, 363 total.

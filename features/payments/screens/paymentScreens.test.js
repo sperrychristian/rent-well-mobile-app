@@ -92,8 +92,11 @@ describe('owner screens in the demo', () => {
       />,
     );
     expect(screen.getByText('Record Payment')).toBeTruthy();
+    // the Hearth pass moved Add Charge and the rent schedule into the More sheet
+    fireEvent.press(screen.getByText('More'));
     expect(screen.getByText('Add Charge')).toBeTruthy();
-    expect(screen.getByText('Edit Rent')).toBeTruthy();
+    expect(screen.getByText('Edit Rent Schedule')).toBeTruthy();
+    expect(screen.getByText('Void a Charge or Payment')).toBeTruthy();
     expect(screen.getByText(/is overdue across/)).toBeTruthy();
     expect(navigation.setOptions).toHaveBeenCalled();
   });

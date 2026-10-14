@@ -20,7 +20,7 @@ import { hapticSuccess } from '../../../utils/haptics';
 import { formatCents } from '../../../utils/formatCurrency';
 import { deriveLedger, addDays } from '../utils/ledgerMath';
 import { formatBalance, groupByMonth, shortDate, upcomingRent } from '../utils/ledgerHelpers';
-import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 
 // how far back a rejected claim stays pinned at the top, after that it's just in the history
 const rejected_days = 60;
@@ -120,7 +120,7 @@ function TenantPaymentsView(props) {
 
         {derived.overdue_cents > 0 ? (
           <View style={[styles.banner, styles.banner_danger]} accessibilityRole="alert">
-            <Ionicons name="alert-circle" size={SIZES.icon} color={COLORS.danger_text} />
+            <Ionicons name="alert-circle-outline" size={SIZES.icon} color={COLORS.danger_text} />
             <Text style={[styles.banner_text, styles.danger_text]}>
               {'Rent is overdue. Pay ' +
                 formatCents(derived.overdue_cents) +
@@ -152,7 +152,6 @@ function TenantPaymentsView(props) {
 
         <Button
           variant="primary"
-          size="large"
           icon="checkmark-done-outline"
           title="I Paid"
           accessibilityHint="Tell your landlord about a payment you sent them"
@@ -281,7 +280,11 @@ function TenantPaymentsView(props) {
         {/* a former tenant only gets their history */}
         {ledger_store.is_read_only ? (
           <View style={[styles.banner, styles.banner_info]}>
-            <Ionicons name="information-circle" size={SIZES.icon} color={COLORS.info_text} />
+            <Ionicons
+              name="information-circle-outline"
+              size={SIZES.icon}
+              color={COLORS.info_text}
+            />
             <Text style={[styles.banner_text, styles.info_text]}>
               Your rental has ended, so this is read-only. Your payment history stays here.
             </Text>
@@ -383,7 +386,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingTop: SPACING.md,
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
     width: '100%',
     maxWidth: SIZES.content_max_width,
     alignSelf: 'center',
@@ -404,14 +407,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    borderRadius: RADIUS.md,
-    padding: SPACING.sm + SPACING.xs,
+    paddingVertical: SPACING.xs,
   },
   banner_danger: {
-    backgroundColor: COLORS.danger_tint,
+    // the Hearth pass: no fill, the icon and the colored words carry it
+    backgroundColor: 'transparent',
   },
   banner_info: {
-    backgroundColor: COLORS.info_tint,
+    // the Hearth pass: no fill, the icon and the colored words carry it
+    backgroundColor: 'transparent',
   },
   banner_text: {
     ...TYPE.body_small,
@@ -447,7 +451,6 @@ const styles = StyleSheet.create({
     color: COLORS.danger_text,
     marginTop: -SPACING.xs,
     marginBottom: SPACING.sm,
-    paddingLeft: SIZES.icon_circle + SPACING.sm + SPACING.xs,
   },
   reason_gap: {
     marginBottom: SPACING.md,

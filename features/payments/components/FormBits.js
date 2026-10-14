@@ -103,7 +103,7 @@ export function ReceiptPicker(props) {
           accessibilityLabel="Remove the receipt photo"
           style={styles.remove}
         >
-          <Ionicons name="close-circle" size={SIZES.icon} color={COLORS.danger_text} />
+          <Ionicons name="close-circle-outline" size={SIZES.icon} color={COLORS.danger_text} />
           <Text style={styles.remove_text}>Remove</Text>
         </Pressable>
       </View>
@@ -132,14 +132,15 @@ export function ReceiptPicker(props) {
 }
 
 export const form_styles = StyleSheet.create({
+  // the Hearth pass: white, a hairline edge, 8 corners, 52 tall
   input: {
     ...TYPE.input,
-    minHeight: SIZES.touch + SPACING.xs,
+    minHeight: SIZES.button_medium,
     backgroundColor: COLORS.surface_sunken,
     color: COLORS.text,
-    borderRadius: RADIUS.md,
-    borderWidth: BORDER.thin,
-    borderColor: COLORS.border,
+    borderRadius: RADIUS.sm,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.hairline,
     paddingHorizontal: SPACING.md - SPACING.xs,
     paddingVertical: SPACING.sm + SPACING.xxs,
   },
@@ -154,11 +155,11 @@ export const form_styles = StyleSheet.create({
 
 const styles = StyleSheet.create({
   field: {
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.lg,
   },
   label: {
     ...TYPE.label,
-    color: COLORS.text,
+    color: COLORS.text_muted,
     marginBottom: SPACING.xs + SPACING.xxs,
   },
   error: {
@@ -173,11 +174,11 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
   },
   money_box: {
-    minHeight: SIZES.touch + SPACING.xs,
+    minHeight: SIZES.button_medium,
     backgroundColor: COLORS.surface_sunken,
-    borderRadius: RADIUS.md,
-    borderWidth: BORDER.thin,
-    borderColor: COLORS.border,
+    borderRadius: RADIUS.sm,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.hairline,
     paddingHorizontal: SPACING.md - SPACING.xs,
     paddingVertical: SPACING.sm + SPACING.xxs,
   },

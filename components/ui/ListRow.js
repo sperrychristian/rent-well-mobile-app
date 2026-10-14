@@ -12,6 +12,7 @@ import { COLORS, SPACING, TYPE, BORDER, SIZES, NUMBERS } from '../../theme';
 // the Hearth pass: no card and no circle, a plain 24pt line icon in green, a 17 medium title, a muted subtitle
 // (subtitle_tone danger makes it terracotta for anything overdue), a hairline on top of every row, and the
 // last row (the one with no divider) gets a hairline under it too, so a list reads as one ruled block
+// detail is an optional node under the subtitle, like a StatusLabel, so a status never squeezes the title
 function ListRow(props) {
   const icon_color = props.icon_tone ? toneColors(props.icon_tone).text : COLORS.cta;
   const leading = props.avatar_name ? (
@@ -43,6 +44,7 @@ function ListRow(props) {
             {props.subtitle}
           </Text>
         ) : null}
+        {props.detail || null}
       </View>
       {trailing}
       {props.chevron || (props.onPress && props.chevron !== false) ? (

@@ -9,7 +9,7 @@ import SectionHeader from '../../../components/ui/SectionHeader';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
 import Chip from '../../../components/ui/Chip';
 import ListRow from '../../../components/ui/ListRow';
-import StatusPill from '../../../components/ui/StatusPill';
+import StatusLabel from '../../../components/ui/StatusLabel';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
 import ErrorState from '../../../components/ErrorState';
@@ -264,7 +264,7 @@ function OwnerPaymentsView(props) {
                 avatar_name={row.ledger.tenant_name}
                 title={row.ledger.tenant_name}
                 subtitle={placeOf(row.ledger) + '\n' + balance.text}
-                trailing={<StatusPill label={pill.label} tone={pill.tone} icon={pill.icon} />}
+                detail={<StatusLabel label={pill.label} tone={pill.tone} icon={pill.icon} />}
                 accessibilityLabel={
                   row.ledger.tenant_name +
                   ', ' +
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingTop: SPACING.md,
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
     width: '100%',
     maxWidth: SIZES.content_max_width,
     alignSelf: 'center',

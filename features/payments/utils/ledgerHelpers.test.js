@@ -296,3 +296,36 @@ describe('behindSummary', () => {
     expect(behindSummary([], today)).toEqual({ count: 0, cents: 0 });
   });
 });
+
+describe('status lines for the Hearth rows', () => {
+  const { chargeStatusLine, paymentStatusLine } = require('./ledgerHelpers');
+  const charge = { due_date: '2026-10-01', amount_cents: 120000, remaining_cents: 120000 };
+
+  test('charges say when they were or are due', () => {
+    expect(chargeStatusLine({ ...charge, status: 'overdue' })).toEqual({
+      text: 'Overdue, was due Oct 1',
+      tone: 'danger',
+      icon: 'alert-circle-outline',
+    });
+    expect(chargeStatusLine({ ...charge, status: 'overdue', remaining_cents: 45000 }).text).toBe(
+      'Overdue, $450.00 left, was due Oct 1',
+    );
+    expect(chargeStatusLine({ ...charge, status: 'paid', remaining_cents: 0 }).tone).toBe(
+      'success',
+    );
+    expect(chargeStatusLine({ ...charge, status: 'upcoming' }).text).toBe('Due Oct 1');
+    expect(chargeStatusLine({ ...charge, status: 'voided', void_reason: 'Typo' }).text).toBe(
+      'Voided: Typo',
+    );
+  });
+
+  test('payments say how and when', () => {
+    const payment = { paid_on: '2026-09-02', method: 'zelle', is_refund: false };
+    expect(paymentStatusLine({ ...payment, status: 'confirmed' }).text).toBe('Paid Sep 2 by Zelle');
+    expect(paymentStatusLine({ ...payment, status: 'confirmed', is_refund: true }).text).toBe(
+      'Refunded Sep 2 by Zelle',
+    );
+    expect(paymentStatusLine({ ...payment, status: 'pending' }).tone).toBe('warning');
+    expect(paymentStatusLine({ ...payment, status: 'rejected' }).tone).toBe('danger');
+  });
+});

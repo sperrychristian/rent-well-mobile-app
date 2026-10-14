@@ -225,7 +225,9 @@ describe('the demo story, end to end', () => {
     const alex = () =>
       peek.store.ledgers.find((ledger) => ledger.tenancy_id === 'demo-tenancy-alex');
     const charged = alex().charges.filter((charge) => charge.kind === 'rent').length;
-    fireEvent.press(screen.getByText('Edit Rent'));
+    // the Hearth pass moved the rent schedule into the More sheet
+    fireEvent.press(screen.getByText('More'));
+    fireEvent.press(screen.getByText('Edit Rent Schedule'));
     fireEvent.changeText(screen.getByLabelText('Monthly rent, dollars'), '1050');
     await act(async () => {
       fireEvent.press(screen.getByText('Save Schedule'));

@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Card from '../../../components/ui/Card';
 import SummaryBlock from '../../../components/ui/SummaryBlock';
 import SectionHeader from '../../../components/ui/SectionHeader';
-import StatusPill from '../../../components/ui/StatusPill';
+import StatusLabel from '../../../components/ui/StatusLabel';
 import Button from '../../../components/ui/Button';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
@@ -123,13 +123,13 @@ function PaymentDetailScreen(props) {
           value={formatCents(payment.amount_cents)}
           caption={ledger.tenant_name + ', ' + payment.paid_on}
         >
-          <StatusPill label={pill.label} tone={pill.tone} icon={pill.icon} />
+          <StatusLabel label={pill.label} tone={pill.tone} icon={pill.icon} />
         </SummaryBlock>
 
         {/* why it was turned down or taken back, so both sides can see it */}
         {payment.status === 'rejected' && payment.reject_reason ? (
           <View style={[styles.banner, styles.banner_danger]} accessibilityRole="alert">
-            <Ionicons name="close-circle" size={SIZES.icon} color={COLORS.danger_text} />
+            <Ionicons name="close-circle-outline" size={SIZES.icon} color={COLORS.danger_text} />
             <Text style={[styles.banner_text, styles.danger_text]}>
               {'Rejected: ' + payment.reject_reason}
             </Text>
@@ -137,7 +137,7 @@ function PaymentDetailScreen(props) {
         ) : null}
         {payment.status === 'voided' && payment.void_reason ? (
           <View style={[styles.banner, styles.banner_neutral]}>
-            <Ionicons name="remove-circle" size={SIZES.icon} color={COLORS.text_muted} />
+            <Ionicons name="remove-circle-outline" size={SIZES.icon} color={COLORS.text_muted} />
             <Text style={[styles.banner_text, styles.muted_text]}>
               {'Voided: ' + payment.void_reason}
             </Text>
@@ -145,7 +145,7 @@ function PaymentDetailScreen(props) {
         ) : null}
         {payment.status === 'pending' && !is_owner ? (
           <View style={[styles.banner, styles.banner_warning]}>
-            <Ionicons name="hourglass" size={SIZES.icon} color={COLORS.warning_text} />
+            <Ionicons name="hourglass-outline" size={SIZES.icon} color={COLORS.warning_text} />
             <Text style={[styles.banner_text, styles.warning_text]}>
               Waiting for your landlord to confirm they got it. It counts toward your balance once
               they do.
@@ -273,11 +273,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   missing: {
-    padding: SPACING.md,
+    padding: SIZES.screen_padding,
   },
   content: {
     paddingTop: SPACING.md,
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
     width: '100%',
     maxWidth: SIZES.content_max_width,
     alignSelf: 'center',
@@ -291,17 +291,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    borderRadius: RADIUS.md,
-    padding: SPACING.sm + SPACING.xs,
+    paddingVertical: SPACING.xs,
   },
   banner_danger: {
-    backgroundColor: COLORS.danger_tint,
+    // the Hearth pass: no fill, the icon and the colored words carry it
+    backgroundColor: 'transparent',
   },
   banner_warning: {
-    backgroundColor: COLORS.warning_tint,
+    // the Hearth pass: no fill, the icon and the colored words carry it
+    backgroundColor: 'transparent',
   },
   banner_neutral: {
-    backgroundColor: COLORS.neutral_tint,
+    // the Hearth pass: no fill, the icon and the colored words carry it
+    backgroundColor: 'transparent',
   },
   banner_text: {
     ...TYPE.body_small,

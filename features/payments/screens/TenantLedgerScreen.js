@@ -1,12 +1,10 @@
 import { useLayoutEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, RefreshControl, Alert, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import Card from '../../../components/ui/Card';
-import SummaryBlock from '../../../components/ui/SummaryBlock';
-import KpiTile from '../../../components/ui/KpiTile';
 import SectionHeader from '../../../components/ui/SectionHeader';
-import StatusPill from '../../../components/ui/StatusPill';
+import StatusLabel from '../../../components/ui/StatusLabel';
+import ActionSheet from '../../../components/ui/ActionSheet';
 import Button from '../../../components/ui/Button';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
@@ -29,7 +27,7 @@ import {
   shortDate,
   upcomingRent,
 } from '../utils/ledgerHelpers';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES, NUMBERS } from '../../../theme';
 
 function placeOf(ledger) {
   return ledger.unit_label ? ledger.property_name + ', ' + ledger.unit_label : ledger.property_name;
@@ -67,6 +65,9 @@ function TenantLedgerScreen(props) {
   // which form is open, and a key that goes up every time so each one opens fresh
   const [open_form, setOpenForm] = useState(null);
   const [form_key, setFormKey] = useState(0);
+  // the More sheet, and the second sheet that picks what to void
+  const [more_open, setMoreOpen] = useState(false);
+  const [void_open, setVoidOpen] = useState(false);
 
   function openForm(name) {
     setFormKey((current) => current + 1);
@@ -133,6 +134,37 @@ function TenantLedgerScreen(props) {
   const pill = rowPill(derived.row_status);
   const next_rent = upcomingRent(ledger, today);
   const place = ledger.tenant_name + ', ' + placeOf(ledger);
+  // what the Void sheet offers: charges that still count and confirmed payments, newest first, up to 8
+  const voidable = [
+    ...derived.charges
+      .filter((charge) => charge.status !== 'voided')
+      .map((charge) => ({
+        type: 'charge',
+        date: charge.due_date,
+        item: charge,
+        label:
+          (charge.description || 'Charge') +
+          ', ' +
+          formatCents(charge.amount_cents) +
+          ', due ' +
+          shortDate(charge.due_date),
+      })),
+    ...ledger.payments
+      .filter((payment) => payment.status === 'confirmed')
+      .map((payment) => ({
+        type: 'payment',
+        date: payment.paid_on,
+        item: payment,
+        label:
+          (payment.is_refund ? 'Refund' : 'Payment') +
+          ', ' +
+          formatCents(payment.amount_cents) +
+          ', ' +
+          shortDate(payment.paid_on),
+      })),
+  ]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 8);
 
   async function savePayment(value, receipt) {
     const payment = await ledger_store.recordPayment(tenancy_id, value, receipt);
@@ -188,85 +220,95 @@ function TenantLedgerScreen(props) {
           </View>
         ) : null}
 
-        <SummaryBlock
-          label={derived.balance_cents < 0 ? 'Credit' : 'Balance'}
-          value={formatCents(Math.abs(derived.balance_cents))}
-          caption={place}
-        >
-          <StatusPill label={pill.label} tone={pill.tone} icon={pill.icon} />
-        </SummaryBlock>
+        {/* the Hearth pass: their name big in Fraunces with the address under it, then the balance as the
+            one big number, a status line, and the next rent and deposit in one muted sentence */}
+        <Text style={styles.name} accessibilityRole="header">
+          {ledger.tenant_name}
+        </Text>
+        <Text style={styles.address}>{placeOf(ledger)}</Text>
 
-        {derived.overdue_cents > 0 ? (
-          <View style={styles.danger_banner} accessibilityRole="alert">
-            <Ionicons name="alert-circle" size={SIZES.icon} color={COLORS.danger_text} />
-            <Text style={styles.danger_text}>
+        <View style={styles.hero}>
+          <StatusLabel
+            label={
+              derived.overdue_cents > 0
+                ? 'Overdue'
+                : derived.balance_cents < 0
+                  ? 'Credit'
+                  : derived.balance_cents > 0
+                    ? pill.label
+                    : 'Paid up'
+            }
+            tone={
+              derived.overdue_cents > 0
+                ? 'danger'
+                : derived.balance_cents > 0
+                  ? 'warning'
+                  : 'success'
+            }
+            icon={
+              derived.overdue_cents > 0
+                ? 'alert-circle-outline'
+                : derived.balance_cents > 0
+                  ? 'time-outline'
+                  : 'checkmark-circle-outline'
+            }
+          />
+          <Text
+            style={[styles.balance, NUMBERS]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            accessibilityLabel={balance.text}
+          >
+            {formatCents(Math.abs(derived.balance_cents))}
+          </Text>
+          <Text style={styles.muted_line}>
+            {(next_rent && !is_ended
+              ? 'Next rent ' +
+                formatCents(next_rent.amount_cents) +
+                ' on ' +
+                shortDate(next_rent.date) +
+                '. '
+              : '') +
+              'Deposit held ' +
+              formatCents(derived.deposit_held_cents) +
+              '.' +
+              (derived.deposit_due_cents > 0
+                ? ' ' + formatCents(derived.deposit_due_cents) + ' of the deposit still owed.'
+                : '')}
+          </Text>
+          {derived.overdue_cents > 0 ? (
+            <Text style={styles.overdue_line}>
               {formatCents(derived.overdue_cents) +
                 ' is overdue across ' +
                 derived.overdue_count +
                 (derived.overdue_count === 1 ? ' charge.' : ' charges.')}
             </Text>
-          </View>
-        ) : null}
-
-        {is_ended ? (
-          <View style={styles.info_banner}>
-            <Ionicons name="information-circle" size={SIZES.icon} color={COLORS.info_text} />
-            <Text style={styles.info_text}>
+          ) : null}
+          {is_ended ? (
+            <Text style={styles.muted_line}>
               This tenancy has ended. You can still record a payment or a deposit refund.
             </Text>
-          </View>
-        ) : null}
-
-        <View style={styles.kpi_row}>
-          <KpiTile
-            icon="calendar-outline"
-            tone="brand"
-            label="Next rent"
-            value={next_rent ? shortDate(next_rent.date) : 'None'}
-            caption={next_rent ? formatCents(next_rent.amount_cents) : balance.text}
-          />
-          <KpiTile
-            icon="shield-checkmark-outline"
-            tone="info"
-            label="Deposit held"
-            value={formatCents(derived.deposit_held_cents)}
-            caption={
-              derived.deposit_due_cents > 0
-                ? formatCents(derived.deposit_due_cents) + ' still owed'
-                : 'Nothing owed'
-            }
-          />
+          ) : null}
         </View>
 
-        <Card style={styles.card}>
+        <View style={styles.action_row}>
           <Button
             variant="primary"
-            icon="add-circle-outline"
+            icon="add"
             title="Record Payment"
             onPress={() => openForm('payment')}
-            style={styles.action}
+            style={styles.action_main}
           />
-          {!is_ended ? (
-            <View style={styles.action_row}>
-              <Button
-                variant="secondary"
-                icon="pricetag-outline"
-                title="Add Charge"
-                onPress={() => openForm('charge')}
-                style={styles.action_half}
-              />
-              <Button
-                variant="secondary"
-                icon="calendar-outline"
-                title={ledger.schedule ? 'Edit Rent' : 'Set Rent'}
-                accessibilityLabel={ledger.schedule ? 'Edit rent schedule' : 'Set rent schedule'}
-                onPress={() => openForm('schedule')}
-                style={styles.action_half}
-              />
-            </View>
-          ) : null}
-          <Text style={styles.schedule_line}>{scheduleLine(ledger.schedule)}</Text>
-        </Card>
+          <Button
+            variant="secondary"
+            icon="ellipsis-horizontal"
+            title="More"
+            accessibilityLabel="More actions: add charge, edit rent schedule, void"
+            onPress={() => setMoreOpen(true)}
+            style={styles.action_more}
+          />
+        </View>
+        <Text style={styles.schedule_line}>{scheduleLine(ledger.schedule)}</Text>
 
         {derived.pending_payments.length > 0 ? (
           <Card style={styles.card}>
@@ -356,6 +398,46 @@ function TenantLedgerScreen(props) {
           onClose={() => setOpenForm(null)}
         />
       ) : null}
+      <ActionSheet
+        visible={more_open}
+        title="More"
+        actions={[
+          ...(!is_ended
+            ? [
+                {
+                  label: 'Add Charge',
+                  icon: 'pricetag-outline',
+                  onPress: () => openForm('charge'),
+                },
+                {
+                  label: ledger.schedule ? 'Edit Rent Schedule' : 'Set Rent Schedule',
+                  icon: 'calendar-outline',
+                  onPress: () => openForm('schedule'),
+                },
+              ]
+            : []),
+          {
+            label: 'Void a Charge or Payment',
+            icon: 'remove-circle-outline',
+            destructive: true,
+            onPress: () => setVoidOpen(true),
+          },
+        ]}
+        onClose={() => setMoreOpen(false)}
+      />
+      {/* the newest things that can still be voided, picking one asks for the reason */}
+      <ActionSheet
+        visible={void_open}
+        title="Void which one?"
+        actions={voidable.map((item) => ({
+          label: item.label,
+          icon: item.type === 'charge' ? 'pricetag-outline' : 'cash-outline',
+          destructive: true,
+          onPress: () =>
+            item.type === 'charge' ? review.voidCharge(item.item) : review.voidPayment(item.item),
+        }))}
+        onClose={() => setVoidOpen(false)}
+      />
       {review.sheet}
     </View>
   );
@@ -369,11 +451,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   missing: {
-    padding: SPACING.md,
+    padding: SIZES.screen_padding,
   },
   content: {
     paddingTop: SPACING.md,
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
     width: '100%',
     maxWidth: SIZES.content_max_width,
     alignSelf: 'center',
@@ -383,54 +465,45 @@ const styles = StyleSheet.create({
     width: '100%',
     marginVertical: 0,
   },
-  kpi_row: {
-    flexDirection: 'row',
-    gap: SPACING.sm + SPACING.xs,
+  name: {
+    ...TYPE.name,
+    color: COLORS.text,
   },
-  danger_banner: {
-    ...list_styles.offline_banner,
-    backgroundColor: COLORS.danger_tint,
-    borderColor: COLORS.danger,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    marginBottom: 0,
+  address: {
+    ...TYPE.body,
+    color: COLORS.text_muted,
+    marginTop: -SPACING.sm,
   },
-  danger_text: {
-    ...TYPE.body_small,
-    fontFamily: TYPE.label.fontFamily,
+  hero: {
+    marginTop: SPACING.lg,
+    gap: SPACING.xs,
+  },
+  balance: {
+    ...TYPE.hero,
+    color: COLORS.text,
+  },
+  muted_line: {
+    ...TYPE.body,
+    color: COLORS.text_muted,
+  },
+  overdue_line: {
+    ...TYPE.body,
     color: COLORS.danger_text,
-    flexShrink: 1,
-  },
-  info_banner: {
-    ...list_styles.offline_banner,
-    backgroundColor: COLORS.info_tint,
-    borderColor: COLORS.info_text,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    marginBottom: 0,
-  },
-  info_text: {
-    ...TYPE.body_small,
-    color: COLORS.info_text,
-    flexShrink: 1,
-  },
-  action: {
-    marginHorizontal: 0,
   },
   action_row: {
     flexDirection: 'row',
     gap: SPACING.sm,
-    marginTop: SPACING.sm,
+    marginTop: SPACING.md,
   },
-  action_half: {
+  action_main: {
     flex: 1,
+    marginHorizontal: 0,
+  },
+  action_more: {
     marginHorizontal: 0,
   },
   schedule_line: {
     ...TYPE.body_small,
     color: COLORS.text_muted,
-    marginTop: SPACING.sm + SPACING.xs,
   },
 });

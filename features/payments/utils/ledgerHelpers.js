@@ -72,6 +72,66 @@ export function rowPill(row_status) {
   return row_pills[row_status] || unknown_pill;
 }
 
+// ----- status lines, the Hearth rows show a status as a line icon and words instead of a pill -----
+
+// a charge's line, like "Overdue, was due Oct 1" or "Paid", gives back { text, tone, icon }
+export function chargeStatusLine(charge) {
+  const due = shortDate(charge.due_date);
+  const left =
+    charge.remaining_cents > 0 && charge.remaining_cents < charge.amount_cents
+      ? formatCents(charge.remaining_cents) + ' left, '
+      : '';
+  switch (charge.status) {
+    case 'paid':
+      return { text: 'Paid', tone: 'success', icon: 'checkmark-circle-outline' };
+    case 'overdue':
+      return {
+        text: 'Overdue, ' + left + 'was due ' + due,
+        tone: 'danger',
+        icon: 'alert-circle-outline',
+      };
+    case 'partial':
+      return { text: left + 'due ' + due, tone: 'warning', icon: 'time-outline' };
+    case 'due':
+      return { text: 'Due ' + due, tone: 'warning', icon: 'time-outline' };
+    case 'upcoming':
+      return { text: 'Due ' + due, tone: 'neutral', icon: 'calendar-outline' };
+    case 'voided':
+      return {
+        text: 'Voided' + (charge.void_reason ? ': ' + charge.void_reason : ''),
+        tone: 'neutral',
+        icon: 'remove-circle-outline',
+      };
+    default:
+      return { text: 'Due ' + due, tone: 'neutral', icon: 'calendar-outline' };
+  }
+}
+
+// a payment's line, like "Paid Sep 2 by Zelle" or "Waiting for confirmation, sent Oct 14 by Venmo"
+export function paymentStatusLine(payment) {
+  const when = shortDate(payment.paid_on) + ' by ' + methodLabel(payment.method);
+  switch (payment.status) {
+    case 'confirmed':
+      return {
+        text: (payment.is_refund ? 'Refunded ' : 'Paid ') + when,
+        tone: 'success',
+        icon: 'checkmark-circle-outline',
+      };
+    case 'pending':
+      return {
+        text: 'Waiting for confirmation, sent ' + when,
+        tone: 'warning',
+        icon: 'hourglass-outline',
+      };
+    case 'rejected':
+      return { text: 'Rejected, sent ' + when, tone: 'danger', icon: 'close-circle-outline' };
+    case 'voided':
+      return { text: 'Voided, was ' + when, tone: 'neutral', icon: 'remove-circle-outline' };
+    default:
+      return { text: when, tone: 'neutral', icon: 'ellipse-outline' };
+  }
+}
+
 // ----- balances -----
 
 // a balance in words: owed, all paid up, or a credit, with the tone the screens color it by
