@@ -66,3 +66,28 @@ What to try once you're signed in:
 If the server stops, the work order list keeps showing the last copy it loaded with a note at the top, and pulling down tries again.
 
 Push notifications need a development build with an EAS project id. In Expo Go or the simulator the app skips push and logs why.
+
+## Payments and rent
+
+A rent ledger for each tenancy, in both roles. Rent Well never takes payments: tenants pay the landlord directly (Zelle, check, and so on) and the app keeps the record.
+
+- **Landlord:**
+  - Payments and Rent shows a month at a time: collected against expected, overdue charges, claims to confirm or reject right from the list, and every tenant's balance.
+  - A tenant's Rent Ledger has the balance, the next rent, the deposit held, and charges and payments by month. From there the landlord can record a payment or refund, add a charge, set the rent schedule (amount, due day, grace days, late fee, start date), and void with a reason.
+  - Payment Record shows a timeline, the receipt photo, and Share Receipt (a text receipt).
+  - Payment instructions live on Property Overview.
+- **Tenant:**
+  - What's due and the next rent date.
+  - The landlord's payment instructions, with Copy.
+  - "I Paid" sends a claim with an optional receipt photo. It shows "Waiting for confirmation" until the landlord confirms it, or shows the reason if they reject it.
+  - History. Former tenants get it read only.
+- **Both home screens** show a live line: "1 overdue" or "Rent due Nov 1: $1,450.00".
+- **Money** is whole cents everywhere, so there's no float math.
+
+Try it in the demo: as the landlord, open Payments and Rent, confirm Jordan's $75 claim, then open Sam's ledger and record a payment. As the tenant (Sam), tap I Paid. Then switch to the landlord view and confirm it.
+
+The backend doesn't have the ledger yet. Real mode calls the draft endpoints in `docs/API-ledger-draft.md`, and until they exist it says rent tracking isn't on the server yet.
+
+| Landlord | Rent Ledger | Tenant | Payment Record |
+| --- | --- | --- | --- |
+| ![Payments](docs/screenshots/payments.png) | ![Rent ledger](docs/screenshots/rent_ledger.png) | ![Tenant payments](docs/screenshots/payments_tenant.png) | ![Payment record](docs/screenshots/payment_record.png) |

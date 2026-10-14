@@ -125,6 +125,7 @@ Every number that lines up in a column adds `NUMBERS` (`fontVariant: ['tabular-n
 | `EmptyState`, `SkeletonList`, `ErrorState` | Empty lists (duotone pixel drawing), first loads, and offline or server errors. |
 | `ModalCard`, `sheet.js` | The sheet every modal sits in, with a grab handle. |
 | `Wordmark`, `PixelArt` | The house logomark and the Rent Well name, and the pixel drawings. |
+| `Toast` | `ToastProvider` sits once at the root, and screens call `useToast().show(text, icon)` for routine success ("Payment recorded"). It's a dark bar at the bottom that screen readers announce, and it doesn't fade when Reduce Motion is on. |
 | `FadeInView`, `useReduceMotion` | The short staggered entrance, and the Reduce Motion check every animation uses. |
 | `listStyles.js` | Shared search box, chips, banners, rows, and field styles for screens that draw their own. |
 
@@ -141,8 +142,23 @@ Every number that lines up in a column adds `NUMBERS` (`fontVariant: ['tabular-n
 - Every pressable has `accessibilityRole` and a label, and picked chips and tabs say they're selected.
 - Text grows with the system font size: use `TYPE` line heights and `flexShrink`, and never fix a text box's height.
 - Animations and modal transitions check `useReduceMotion()` and skip themselves when it's on.
+- Haptics (`utils/haptics.js`) only on confirm and save: recording a payment, saving a rent schedule, sending or confirming a claim. Everything else gets a toast at most.
+- Ledger money is whole cents: `formatCents`, `parseAmountToCents`, and `centsToInputText` in `utils/formatCurrency.js`. The output looks exactly like `formatCurrency`.
 - Money uses `formatCurrency` and `NUMBERS`. Dates stay `YYYY-MM-DD` or the short forms `formatDate` gives.
 - Numbers you add to a screen come from data the screen already has in memory, never from a new request.
+
+## Payments screens
+
+The payments feature is built only from these pieces:
+- The indigo `SummaryBlock` with a progress bar (collected against expected), and `KpiTile` pairs.
+- Icon-circle rows with a right-aligned amount and a `StatusPill` (Paid, Partly paid, Due, Overdue, Upcoming, Voided; Waiting for confirmation, Confirmed, Rejected).
+- `SegmentedControl` for properties, and `Chip` pickers in the forms.
+- Tinted banners for overdue, ended, and rejected.
+- The forms share `features/payments/components/FormSheet.js` (the sheet, a title and a line under it, inline errors, and Cancel then the action with its icon on the left).
+
+| Landlord | Rent Ledger | Tenant | Payment Record |
+| --- | --- | --- | --- |
+| ![Payments](screenshots/payments.png) | ![Rent ledger](screenshots/rent_ledger.png) | ![Tenant payments](screenshots/payments_tenant.png) | ![Payment record](screenshots/payment_record.png) |
 
 ## Do and don't
 

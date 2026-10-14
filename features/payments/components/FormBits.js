@@ -45,7 +45,8 @@ export function MoneyField(props) {
 // props: options ([{ value, label }]), value, onChange, label (what the group is, for screen readers)
 export function ChipPicker(props) {
   return (
-    <View style={styles.chips} accessibilityRole="radiogroup" accessibilityLabel={props.label}>
+    // each chip says it's selected, so the group itself is just a label for screen readers
+    <View style={styles.chips} accessibilityLabel={props.label}>
       {props.options.map((option) => (
         <Chip
           key={option.value}
@@ -146,7 +147,7 @@ export const form_styles = StyleSheet.create({
     borderColor: COLORS.danger_text,
   },
   note: {
-    minHeight: 72,
+    minHeight: SIZES.touch + SPACING.lg + SPACING.xs,
     textAlignVertical: 'top',
   },
 });

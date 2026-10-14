@@ -277,7 +277,12 @@ function RemoteLedgerStore(props) {
       setErrorMessage('');
     } catch (error) {
       console.log('Could not load the rent ledger', error.message);
-      setErrorMessage(error.message);
+      // the ledger endpoints are still a draft, so a server without them answers 404 for the whole list
+      setErrorMessage(
+        error.code === 'NOT_FOUND'
+          ? "Rent tracking isn't on the server yet. It works in the demo for now."
+          : error.message,
+      );
       if (ledgers_ref.current.length > 0) {
         setFromCache(true);
         setStatus('ready');

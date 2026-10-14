@@ -210,7 +210,7 @@ function OwnerPaymentsView(props) {
           <KpiTile
             icon="alert-circle-outline"
             tone={summary.overdue_count > 0 ? 'danger' : 'success'}
-            label="Overdue now"
+            label="Overdue charges"
             value={String(summary.overdue_count)}
             caption={
               summary.overdue_count > 0 ? formatCents(summary.overdue_cents) : 'Nothing late'

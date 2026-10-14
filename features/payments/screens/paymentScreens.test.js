@@ -57,7 +57,7 @@ describe('owner screens in the demo', () => {
   test('Payments and Rent shows the month, the KPIs, the claims queue, and every tenant', () => {
     renderScreen(<PaymentsScreen navigation={fakeNavigation()} />);
     expect(screen.getByText(/^Collected in /)).toBeTruthy();
-    expect(screen.getByText('Overdue now')).toBeTruthy();
+    expect(screen.getByText('Overdue charges')).toBeTruthy();
     expect(screen.getByText(/^Claims to review/)).toBeTruthy();
     ['Sam Rivera', 'Priya Shah', 'Alex Chen'].forEach((name) =>
       expect(screen.getAllByText(name).length).toBeGreaterThan(0),

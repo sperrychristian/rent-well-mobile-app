@@ -143,3 +143,39 @@ Branch `payments-ledger-app`, made from `fintech-polish` because there's no `pol
   - Tests: 326 passed in 29 suites.
   - Format: clean.
   - iOS export with `--clear`: OK.
+
+## Phase 5: tests, docs, sweeps (done)
+
+- **`paymentFlows.test.js`:**
+  - Every form renders and shows its inline errors: Record Payment, I Paid (no refund switch), Add Charge (the kind fills in the description), Rent Schedule (turns away day 31), Reason, and Payment Instructions.
+  - The demo end to end:
+    - Tenant claims $500 → "Waiting for confirmation" → balance unchanged → switch to the landlord → Confirm from the list → balance down exactly 50000 cents.
+    - The landlord records $1,234.56 → balance down 123456 cents and a toast.
+    - A schedule change keeps rent already charged at the old amount.
+  - Real mode with the API mocked:
+    - The vectors give the same balance and row status after the trip through the camelCase API shape (parity).
+    - An owner's recorded payment goes out as `amountCents: 1230`.
+    - A real tenant gets I Paid and the server's instructions.
+    - A real former tenant gets history and no I Paid.
+- **Doc changes:**
+  - README: a new "Payments and rent" section with four screenshots. The brief asked for this. The assignment audit at the top is untouched, and the submitted state is still tagged.
+  - DESIGN.md: Toast in the components table, haptic and cents rules, and a Payments screens section.
+  - CLAUDE.md: the payments folder, how the ledger data works, status, and next up.
+  - ASSIGNMENT_NAV.md: a note in requirement 3.
+  - Screenshots: `docs/screenshots/payments.png`, `dashboard.png`, and `tenant_home.png` were re-shot. `rent_ledger.png`, `payments_tenant.png`, and `payment_record.png` are new.
+- **Sweeps:**
+  - No hex or rgba values outside `theme.js`. The last raw sizes became tokens (a note box at `SIZES.touch + SPACING.lg + SPACING.xs`, the timeline line at `BORDER.thick`).
+  - The contrast and style pair tests pass. Every pill shows words and an icon.
+  - Touch targets: month arrows 44, fold rows 44, chips with hitSlop, small buttons with hitSlop, and Remove at 44.
+  - Every pressable has a role and a label. The chip group dropped a `radiogroup` role, since its chips are buttons that say they're selected.
+  - Reduce Motion is checked by the sheets and the toast.
+  - The only "—" added is the existing placeholder `formatCurrency` uses for a missing amount, which `formatCents` matches.
+- **Diff read findings, fixed:**
+  - A server without `/ledgers` answered with a generic "couldn't be found". It now says "Rent tracking isn't on the server yet. It works in the demo for now."
+  - The owner KPI "Overdue now 4" counted charges while the Dashboard's "1 overdue" counts tenants. The KPI is now "Overdue charges".
+- **Final visual QA:** 390 at 2x, 360 by 640, and 820 by 1180. No page errors. On the tablet, content is capped at 600 and centered.
+- **Checks:**
+  - Lint: the 13 known problems.
+  - Tests: 337 passed in 30 suites.
+  - Format: clean.
+  - iOS export with `--clear`: OK.

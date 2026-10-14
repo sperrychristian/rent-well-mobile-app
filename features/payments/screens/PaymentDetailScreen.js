@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   },
   event_line: {
     flex: 1,
-    width: 2,
+    width: BORDER.thick,
     backgroundColor: COLORS.border,
     marginVertical: SPACING.xxs,
   },
