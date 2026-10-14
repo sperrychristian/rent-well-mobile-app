@@ -234,3 +234,22 @@ describe('receipts and timelines', () => {
     expect(timelineFor({ events: undefined })).toEqual([]);
   });
 });
+
+describe('upcoming rent', () => {
+  const { upcomingRent } = require('./ledgerHelpers');
+  const schedule = {
+    amount_cents: 120000,
+    due_day: 1,
+    grace_days: 5,
+    late_fee_cents: 0,
+    start_date: '2026-08-01',
+  };
+  test('the next schedule date, even when older rent is owed', () => {
+    expect(upcomingRent({ schedule, tenancy_status: 'active' }, '2026-10-14')).toEqual({
+      date: '2026-11-01',
+      amount_cents: 120000,
+    });
+    expect(upcomingRent({ schedule, tenancy_status: 'ended' }, '2026-10-14')).toBeNull();
+    expect(upcomingRent({ schedule: null }, '2026-10-14')).toBeNull();
+  });
+});

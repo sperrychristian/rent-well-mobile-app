@@ -177,10 +177,9 @@
 <rect x="4567" y="121" width="360" height="112" rx="16" fill="#dee8fc" stroke="#2563EB" stroke-width="3.5"/>
 <text x="4583" y="155" font-size="28" font-weight="800" fill="#0F1B2D">Conversation</text>
 <text x="4583" y="185" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">MessageThread(conversationId)</text>
-<rect x="1726" y="1347" width="360" height="112" rx="16" fill="#FFFFFF" stroke="#2563EB" stroke-width="3.5" stroke-dasharray="14 8"/>
+<rect x="1726" y="1347" width="360" height="112" rx="16" fill="#dee8fc" stroke="#2563EB" stroke-width="3.5"/>
 <text x="1742" y="1381" font-size="28" font-weight="800" fill="#0F1B2D">Payments and Rent</text>
 <text x="1742" y="1411" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">Payments</text>
-<rect x="1740" y="1425" width="54" height="24" rx="12" fill="#F79009"/><text x="1767" y="1442" text-anchor="middle" font-size="15" font-weight="800" fill="#0F1B2D">STUB</text>
 <rect x="3259" y="1508" width="360" height="112" rx="16" fill="#dcebe2" stroke="#157A3E" stroke-width="3.5"/>
 <text x="3275" y="1542" font-size="28" font-weight="800" fill="#0F1B2D">Rent Ledger</text>
 <text x="3275" y="1572" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">TenantLedger(tenancyId)</text>

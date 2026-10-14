@@ -1,7 +1,7 @@
 // pure helpers for the payments screens: words for statuses, months, balances, form checks, and receipt text
 // nothing here draws anything or touches the network, so the tests can check all of it
 import { formatCents, parseAmountToCents } from '../../../utils/formatCurrency';
-import { isDate, monthOf } from './ledgerMath';
+import { isDate, monthOf, nextScheduledDue } from './ledgerMath';
 
 // ----- choices -----
 
@@ -83,6 +83,17 @@ export function formatBalance(balance_cents) {
     return { text: formatCents(-balance_cents) + ' credit', tone: 'success', short: 'Credit' };
   }
   return { text: 'All paid up', tone: 'success', short: 'Paid up' };
+}
+
+// the next rent date from the schedule and its amount, for "Next rent" and "Rent due Nov 1: $1,200.00"
+// it's always the coming date, even when older rent is still owed (that shows as overdue instead)
+// gives back null with no schedule or once the tenancy has ended
+export function upcomingRent(ledger, today) {
+  if (!ledger || !ledger.schedule || ledger.tenancy_status === 'ended') {
+    return null;
+  }
+  const date = nextScheduledDue(ledger.schedule, today);
+  return date ? { date: date, amount_cents: ledger.schedule.amount_cents } : null;
 }
 
 // ----- months -----

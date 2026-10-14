@@ -22,7 +22,13 @@ import { useLedgerReview } from '../hooks/useLedgerReview';
 import { hapticSuccess } from '../../../utils/haptics';
 import { formatCents } from '../../../utils/formatCurrency';
 import { deriveLedger } from '../utils/ledgerMath';
-import { formatBalance, groupByMonth, rowPill, shortDate } from '../utils/ledgerHelpers';
+import {
+  formatBalance,
+  groupByMonth,
+  rowPill,
+  shortDate,
+  upcomingRent,
+} from '../utils/ledgerHelpers';
 import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 
 function placeOf(ledger) {
@@ -125,6 +131,7 @@ function TenantLedgerScreen(props) {
   const is_ended = ledger.tenancy_status === 'ended';
   const balance = formatBalance(derived.balance_cents);
   const pill = rowPill(derived.row_status);
+  const next_rent = upcomingRent(ledger, today);
   const place = ledger.tenant_name + ', ' + placeOf(ledger);
 
   async function savePayment(value, receipt) {
@@ -214,13 +221,9 @@ function TenantLedgerScreen(props) {
           <KpiTile
             icon="calendar-outline"
             tone="brand"
-            label="Next due"
-            value={derived.next_due && !is_ended ? shortDate(derived.next_due.date) : 'None'}
-            caption={
-              derived.next_due && !is_ended
-                ? formatCents(derived.next_due.amount_cents)
-                : balance.text
-            }
+            label="Next rent"
+            value={next_rent ? shortDate(next_rent.date) : 'None'}
+            caption={next_rent ? formatCents(next_rent.amount_cents) : balance.text}
           />
           <KpiTile
             icon="shield-checkmark-outline"

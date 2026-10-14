@@ -61,7 +61,7 @@ function PaymentFormModal(props) {
           : props.place
       }
       error={form_error}
-      submit_label={props.is_claim ? 'Send to Landlord' : 'Save Payment'}
+      submit_label={props.is_claim ? 'Send' : 'Save'}
       submit_icon={props.is_claim ? 'paper-plane-outline' : 'checkmark-circle-outline'}
       busy={busy}
       onSubmit={submit}

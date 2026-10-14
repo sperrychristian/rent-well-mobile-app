@@ -33,7 +33,7 @@ flowchart LR
   NewWorkOrder["Add a Work Order"]
   Messages["Message Inbox<br/>TAB owner, TAB tenant"]
   MessageThread["Conversation"]
-  Payments["Payments and Rent (stub)"]
+  Payments["Payments and Rent"]
   TenantLedger["Rent Ledger"]
   PaymentDetail["Payment Record"]
   Settings["Settings and Profile (stub)<br/>DRAWER owner"]
@@ -130,7 +130,7 @@ flowchart LR
   class NewWorkOrder shared;
   class Messages shared;
   class MessageThread shared;
-  class Payments shared,stub;
+  class Payments shared;
   class TenantLedger owner;
   class PaymentDetail shared;
   class Settings shared,stub;

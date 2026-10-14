@@ -121,3 +121,42 @@ describe('owner screens in the demo', () => {
     expect(screen.getByText('Share Receipt')).toBeTruthy();
   });
 });
+
+describe('tenant screens in the demo', () => {
+  test('Payments and Rent shows what is due, how to pay, and the I Paid button', () => {
+    renderScreen(<PaymentsScreen navigation={fakeNavigation()} />, 'tenant');
+    expect(screen.getByText('You owe')).toBeTruthy();
+    expect(screen.getByText('I Paid')).toBeTruthy();
+    expect(screen.getByText(/^How to pay/)).toBeTruthy();
+    expect(screen.getByText(/Zelle to rentals@example.com/)).toBeTruthy();
+    // the rejected claim shows the landlord's reason
+    expect(screen.getByText(/Your landlord said: Nothing came in on Venmo/)).toBeTruthy();
+    // the tenant only ever sees their own ledger
+    expect(screen.queryByText('Jordan Lee')).toBeNull();
+  });
+
+  test('copying the instructions puts them on the clipboard', async () => {
+    const Clipboard = require('expo-clipboard');
+    renderScreen(<PaymentsScreen navigation={fakeNavigation()} />, 'tenant');
+    await act(async () => {
+      fireEvent.press(screen.getByLabelText('Copy the payment instructions'));
+    });
+    expect(Clipboard.setStringAsync).toHaveBeenCalledWith(
+      expect.stringContaining('rentals@example.com'),
+    );
+  });
+
+  test('Payment Detail is read only for the tenant', () => {
+    renderScreen(
+      <PaymentDetailScreen
+        navigation={fakeNavigation()}
+        route={{ params: { paymentId: 'demo-pay-sam-rejected' } }}
+      />,
+      'tenant',
+    );
+    expect(screen.getByText(/^Rejected: /)).toBeTruthy();
+    expect(screen.queryByText('Confirm')).toBeNull();
+    expect(screen.queryByText('Void Payment')).toBeNull();
+    expect(screen.getByText('Share Receipt')).toBeTruthy();
+  });
+});

@@ -98,7 +98,7 @@ Requirements before the changes:
 | NewWorkOrder | `features/workOrders/screens/NewWorkOrderScreen.js` | Add a Work Order | shared | built | none | Dashboard, WorkOrders [header], TenantHome, MyRequests [header] | owner, tenant, demo owner, demo tenant |  |
 | Messages | `features/messages/screens/MessagesScreen.js` | Message Inbox | shared | built | none | Dashboard, TenantHome | owner, tenant, demo owner, demo tenant | tab (owner), tab (tenant) |
 | MessageThread | `features/messages/screens/MessageThreadScreen.js` | Conversation | shared | built | conversationId | WorkOrders (conversationId), WorkOrderDetail (conversationId), TenantDetail (conversationId), Messages (conversationId) | owner, tenant, demo owner, demo tenant |  |
-| Payments | `features/payments/screens/PaymentsScreen.js` | Payments and Rent | shared | stub | none | Dashboard, TenantHome | owner, tenant, demo owner, demo tenant |  |
+| Payments | `features/payments/screens/PaymentsScreen.js` | Payments and Rent | shared | built | none | Dashboard, TenantHome | owner, tenant, demo owner, demo tenant |  |
 | TenantLedger | `features/payments/screens/TenantLedgerScreen.js` | Rent Ledger | owner | built | tenancyId | TenantDetail (tenancyId), Payments (tenancyId), PaymentDetail (tenancyId) | owner, demo owner |  |
 | PaymentDetail | `features/payments/screens/PaymentDetailScreen.js` | Payment Record #(short paymentId) | shared | built | paymentId | Payments (paymentId), TenantLedger (paymentId) | owner, tenant, demo owner, demo tenant |  |
 | Settings | `features/settings/screens/SettingsScreen.js` | Settings and Profile | shared | stub | none | Dashboard [header], TenantHome [header] | owner, tenant, demo owner, demo tenant | drawer (owner) |

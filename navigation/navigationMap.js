@@ -458,7 +458,7 @@ export const navigation_map = {
     reachable_in: ['owner', 'tenant', 'demo_owner', 'demo_tenant'],
     feature: 'payments',
     file: 'features/payments/screens/PaymentsScreen.js',
-    status: 'stub',
+    status: 'built',
     params: [],
     edges: [
       { to: 'PaymentDetail', param: 'paymentId', via: 'list item', label: 'a payment' },

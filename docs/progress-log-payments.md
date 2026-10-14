@@ -94,3 +94,33 @@ Branch `payments-ledger-app`, made from `fintech-polish` because there's no `pol
   - Tests: 320 passed in 29 suites.
   - Format: clean.
   - iOS export with `--clear`: OK.
+
+## Phase 3: tenant screens (done)
+
+- **Payments and Rent for tenants** (`components/TenantPaymentsView.js`) has:
+  - an indigo "You owe" card with due now, overdue, or a credit
+  - an overdue banner
+  - KPI tiles for next rent and deposit held
+  - a large primary "I Paid" button
+  - a "How to pay" card with the landlord's instructions, a Copy button (`expo-clipboard` and a toast), and a line that Rent Well doesn't take payments
+  - claims waiting for confirmation
+  - "Not accepted" claims from the last 60 days with the landlord's reason
+  - charges and payments by month (two months, then "Show all history")
+  - folded past rentals
+  - a skeleton, an error state, an empty state, the offline banner, and pull to refresh
+- **"I Paid"** reuses `PaymentFormModal` as a claim: amount (it starts on what's due now or the next rent), method, date, rent or deposit, note, and receipt. There's no refund switch. Sending gives a toast and a success haptic, and the claim shows "Waiting for confirmation" until the landlord acts.
+- **Former tenants** (`is_read_only`) see an info banner and their history, with no "I Paid" button.
+- **Payment Record** for tenants is read only. A pending claim shows a waiting banner, and a rejected or voided one shows the reason.
+- **`PaymentsScreen`** is now a thin switch: tenant view or owner view. The map marks Payments `built`, the diagram was redrawn, and the `ASSIGNMENT_NAV.md` row was regenerated.
+  - Dropped comments that described the removed sample payments: "a few made-up payment ids so the detail screen has something to open, the real ones will come from the server", "the pixel card stands in until real payments exist", and "each sample is a row now, tapping it opens the same detail the Open button did".
+- **Visual QA** (web render in the scratch copy, 390 wide plus 360 by 640) found three things, all fixed and re-checked:
+  - "Next due" showed the oldest unpaid charge (Sep 1, $450) and not the coming rent date. A new `upcomingRent` helper gives "Next rent Nov 1, $1,450.00".
+  - The tenant card caption repeated the amount ("$2,000.00 of it is overdue"). It now says "Overdue" when all of it is.
+  - "Save Payment" and "Send to Landlord" wrapped on a phone. They're now "Save" and "Send".
+  - Nothing else stood out: no page errors, every pill has words and an icon, and the sheets fit at 390.
+- **Tests:** tenant render tests for the view, Copy, and the read-only Payment Record, plus `upcomingRent`.
+- **Checks:**
+  - Lint: the 13 known problems.
+  - Tests: 324 passed in 29 suites.
+  - Format: clean.
+  - iOS export with `--clear`: OK.
