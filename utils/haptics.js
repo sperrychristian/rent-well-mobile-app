@@ -6,8 +6,3 @@ import * as Haptics from 'expo-haptics';
 export function hapticSuccess() {
   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
 }
-
-// for a void or a reject, the things that take money back out
-export function hapticWarning() {
-  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
-}

@@ -1,7 +1,7 @@
 // pure helpers for the payments screens: words for statuses, months, balances, form checks, and receipt text
 // nothing here draws anything or touches the network, so the tests can check all of it
 import { formatCents, parseAmountToCents } from '../../../utils/formatCurrency';
-import { isDate, monthOf, nextScheduledDue } from './ledgerMath';
+import { isDate, monthOf, nextScheduledDue, deriveLedger, monthSummary } from './ledgerMath';
 
 // ----- choices -----
 
@@ -94,6 +94,60 @@ export function upcomingRent(ledger, today) {
   }
   const date = nextScheduledDue(ledger.schedule, today);
   return date ? { date: date, amount_cents: ledger.schedule.amount_cents } : null;
+}
+
+// ----- the home screens' one-liners -----
+
+// the landlord's Payments tile: what needs doing first, overdue, then claims, otherwise all paid up
+// gives back { text, tone, claims, collected_cents, expected_cents } for this month
+export function ownerPaymentsLine(ledgers, today) {
+  const active = ledgers.filter((ledger) => ledger.tenancy_status !== 'ended');
+  const summary = monthSummary(ledgers, monthOf(today), today);
+  const overdue_tenants = active.filter((ledger) => deriveLedger(ledger, today).overdue_count > 0);
+  let text = 'All paid up';
+  let tone = 'success';
+  if (active.length === 0) {
+    text = 'Set up rent';
+    tone = 'info';
+  } else if (overdue_tenants.length > 0) {
+    text = overdue_tenants.length + ' overdue';
+    tone = 'danger';
+  } else if (summary.pending.length > 0) {
+    text =
+      summary.pending.length + (summary.pending.length === 1 ? ' claim' : ' claims') + ' to review';
+    tone = 'warning';
+  }
+  return {
+    text: text,
+    tone: tone,
+    claims: summary.pending.length,
+    collected_cents: summary.collected_cents,
+    expected_cents: summary.expected_cents,
+  };
+}
+
+// the tenant's Payments tile: overdue, due now, or the next rent date, like "Rent due Nov 1: $1,200.00"
+export function tenantRentLine(ledger, today) {
+  if (!ledger) {
+    return { text: 'No rent set up yet', tone: 'neutral' };
+  }
+  const derived = deriveLedger(ledger, today);
+  if (derived.overdue_cents > 0) {
+    return { text: formatCents(derived.overdue_cents) + ' overdue', tone: 'danger' };
+  }
+  if (derived.due_now_cents > 0) {
+    return { text: 'Rent due now: ' + formatCents(derived.due_now_cents), tone: 'warning' };
+  }
+  const next = upcomingRent(ledger, today);
+  if (next) {
+    // a credit comes off what's due next
+    const amount = Math.max(next.amount_cents + Math.min(derived.balance_cents, 0), 0);
+    return {
+      text: 'Rent due ' + shortDate(next.date) + ': ' + formatCents(amount),
+      tone: 'success',
+    };
+  }
+  return { text: formatBalance(derived.balance_cents).text, tone: 'success' };
 }
 
 // ----- months -----

@@ -14,6 +14,8 @@ import { placeLabel } from '../../tenants/utils/tenantHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { ordersForTenant, activeCount } from '../../workOrders/utils/workOrderHelpers';
 import FeatureTile from '../../../components/ui/FeatureTile';
+import { useLedger } from '../../payments/context/LedgerContext';
+import { tenantRentLine } from '../../payments/utils/ledgerHelpers';
 import KpiTile from '../../../components/ui/KpiTile';
 import QuickAction from '../../../components/ui/QuickAction';
 import SummaryBlock from '../../../components/ui/SummaryBlock';
@@ -38,6 +40,9 @@ function TenantHomeScreen(props) {
   const name = demo_mode ? demo_tenant.name : user ? user.name : '';
   // with no active rental the tenant can only read, and this flips back on its own if they're assigned again
   const { is_read_only, my_active_tenancies, my_ended_tenancies } = useTenants();
+  // rent from the ledger already in memory: overdue, due now, or "Rent due Nov 1: $1,200.00"
+  const ledger_store = useLedger();
+  const rent = tenantRentLine(ledger_store.current_ledger, ledger_store.today);
 
   if (is_read_only) {
     const last = my_ended_tenancies[0];
@@ -82,6 +87,25 @@ function TenantHomeScreen(props) {
                 <Text style={styles.card_detail}>Read only</Text>
               </View>
               <UnreadBadge count={unread_total} />
+              <Ionicons name="chevron-forward" size={20} color={COLORS.text_muted} />
+            </View>
+          </Card>
+        </Pressable>
+
+        {/* their rent history stays readable too, with no I Paid button */}
+        <Pressable
+          onPress={() => props.navigation.navigate('Payments')}
+          accessibilityRole="button"
+          accessibilityLabel="Payment history, read only"
+          style={({ pressed }) => [styles.card_press, pressed && styles.pressed]}
+        >
+          <Card>
+            <View style={styles.card_row}>
+              <Ionicons name="card-outline" size={32} color={COLORS.info_text} />
+              <View style={styles.card_text}>
+                <Text style={styles.card_title}>Payment History</Text>
+                <Text style={styles.card_detail}>Read only</Text>
+              </View>
               <Ionicons name="chevron-forward" size={20} color={COLORS.text_muted} />
             </View>
           </Card>
@@ -203,10 +227,10 @@ function TenantHomeScreen(props) {
           />
           <FeatureTile
             title="Payments and Rent"
-            detail="Coming soon: pay rent and see past payments"
-            icon="card-outline"
-            tone="neutral"
-            accessibilityLabel="Payments and rent"
+            detail={rent.text}
+            icon={rent.tone === 'danger' ? 'alert-circle-outline' : 'card-outline'}
+            tone={rent.tone}
+            accessibilityLabel={'Payments and rent, ' + rent.text}
             style={styles.tile}
             onPress={() => props.navigation.navigate('Payments')}
           />

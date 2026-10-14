@@ -17,7 +17,9 @@ import { useAuth } from '../../auth/context/AuthContext';
 import { useTenants } from '../../tenants/context/TenantsContext';
 import { openCount } from '../../workOrders/utils/workOrderHelpers';
 import { monthlyTotals, percentChange, shortMonth } from '../utils/overviewStats';
-import { formatCurrency } from '../../../utils/formatCurrency';
+import { formatCurrency, formatCents } from '../../../utils/formatCurrency';
+import { useLedger } from '../../payments/context/LedgerContext';
+import { ownerPaymentsLine } from '../../payments/utils/ledgerHelpers';
 
 // the fintech pass: an overview like a bank's home screen, a hello, one indigo summary card with this month's
 // spending and its trend, three key numbers, the four things landlords open most, then everything else
@@ -33,6 +35,9 @@ function DashboardScreen(props) {
   const open_orders = openCount(orders);
   const active_tenants = tenants.filter((tenant) => tenant.is_active).length;
   const first_name = user && user.name ? user.name.trim().split(/\s+/)[0] : '';
+  // rent this month from the ledger already in memory: what needs doing first, and what's come in
+  const ledger_store = useLedger();
+  const rent = ownerPaymentsLine(ledger_store.ledgers, ledger_store.today);
   // this month's spending and the five months before it, from the expenses already loaded on the phone
   const months = monthlyTotals(expenses, new Date(), 6);
   const this_month = months[months.length - 1];
@@ -106,6 +111,17 @@ function DashboardScreen(props) {
               tone="success"
             />
           </View>
+          <View style={[styles.kpi_row, styles.collected]}>
+            <KpiTile
+              label={'Collected in ' + shortMonth(this_month.month)}
+              value={formatCents(rent.collected_cents)}
+              caption={'of ' + formatCents(rent.expected_cents) + ' rent expected'}
+              icon="cash"
+              tone="success"
+              accessibilityHint="Opens Payments and Rent"
+              onPress={() => props.navigation.navigate('Payments')}
+            />
+          </View>
         </FadeInView>
 
         <FadeInView index={1}>
@@ -158,9 +174,12 @@ function DashboardScreen(props) {
           <View style={styles.grid}>
             <FeatureTile
               title="Payments and Rent"
-              detail="Coming soon"
+              detail={rent.text}
               icon="card-outline"
-              tone="info"
+              tone={rent.tone}
+              badge_count={rent.claims}
+              badge_label={rent.claims + ' payment claims to review'}
+              accessibilityLabel={'Payments and Rent, ' + rent.text}
               style={styles.tile}
               onPress={() => props.navigation.navigate('Payments')}
             />
@@ -239,6 +258,9 @@ const styles = StyleSheet.create({
   kpi_row: {
     flexDirection: 'row',
     gap: SPACING.sm,
+  },
+  collected: {
+    marginTop: SPACING.sm,
   },
   quick_row: {
     flexDirection: 'row',

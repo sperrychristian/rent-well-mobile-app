@@ -253,3 +253,35 @@ describe('upcoming rent', () => {
     expect(upcomingRent({ schedule: null }, '2026-10-14')).toBeNull();
   });
 });
+
+describe('home screen lines', () => {
+  const { ownerPaymentsLine, tenantRentLine } = require('./ledgerHelpers');
+  const { buildSampleLedgers } = require('../data/sampleLedger');
+  const today = '2026-10-14';
+
+  test('the landlord sees overdue first, then claims, then all paid up', () => {
+    const ledgers = buildSampleLedgers(today);
+    expect(ownerPaymentsLine(ledgers, today)).toMatchObject({ text: '1 overdue', tone: 'danger' });
+    const no_sam = ledgers.filter((ledger) => ledger.tenancy_id !== 'demo-tenancy-sam');
+    expect(ownerPaymentsLine(no_sam, today)).toMatchObject({
+      text: '1 claim to review',
+      claims: 1,
+    });
+    const alex = ledgers.filter((ledger) => ledger.tenancy_id === 'demo-tenancy-alex');
+    expect(ownerPaymentsLine(alex, today).text).toBe('All paid up');
+    expect(ownerPaymentsLine([], today).text).toBe('Set up rent');
+  });
+
+  test('the tenant sees overdue, due now, or the next rent date', () => {
+    const ledgers = buildSampleLedgers(today);
+    const find = (id) => ledgers.find((ledger) => ledger.tenancy_id === id);
+    expect(tenantRentLine(find('demo-tenancy-sam'), today)).toEqual({
+      text: '$2,000.00 overdue',
+      tone: 'danger',
+    });
+    expect(tenantRentLine(find('demo-tenancy-priya'), today).text).toBe('Rent due now: $580.00');
+    // Alex is $200 ahead, so the next rent shows what's actually left to pay
+    expect(tenantRentLine(find('demo-tenancy-alex'), today).text).toBe('Rent due Nov 1: $780.00');
+    expect(tenantRentLine(null, today).text).toBe('No rent set up yet');
+  });
+});

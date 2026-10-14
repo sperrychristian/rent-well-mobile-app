@@ -124,3 +124,22 @@ Branch `payments-ledger-app`, made from `fintech-polish` because there's no `pol
   - Tests: 324 passed in 29 suites.
   - Format: clean.
   - iOS export with `--clear`: OK.
+
+## Phase 4: dashboards and polish (done)
+
+- **Landlord Dashboard:**
+  - The Payments and Rent tile is live. It reads "1 overdue", "2 claims to review", "All paid up", or "Set up rent", with a matching tone and a badge for the claims count.
+  - A new tappable "Collected in Oct" KPI tile shows rent collected this month against rent expected, and opens Payments.
+  - Both come from `ownerPaymentsLine`, which reads the ledger already in memory.
+- **My Home (tenant):**
+  - The Payments and Rent tile reads "$2,000.00 overdue" (red, with an alert icon), "Rent due now: $580.00", or "Rent due Nov 1: $1,450.00". A credit comes off the next rent.
+  - The read-only home has a new "Payment History, read only" card.
+  - These lines come from `tenantRentLine`.
+- **Haptics:** only on confirm and save (record a payment, save a schedule, send a claim, confirm a claim). I took the warning buzz off reject and void to match the brief, and `hapticWarning` is gone.
+- **States and toasts:** empty, offline, and error states and toasts for routine success were already in from Phases 2 and 3.
+- **Visual QA:** the first try of the Collected tile used `flex: 0` and collapsed on the web render. I fixed it by putting it in a row like the other KPI tiles, then re-checked it.
+- **Checks:**
+  - Lint: the 13 known problems.
+  - Tests: 326 passed in 29 suites.
+  - Format: clean.
+  - iOS export with `--clear`: OK.

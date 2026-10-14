@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import ReasonModal from '../components/ReasonModal';
 import { useLedger } from '../context/LedgerContext';
 import { useToast } from '../../../components/ui/Toast';
-import { hapticSuccess, hapticWarning } from '../../../utils/haptics';
+import { hapticSuccess } from '../../../utils/haptics';
 import { formatCents } from '../../../utils/formatCurrency';
 import { methodLabel } from '../utils/ledgerHelpers';
 
@@ -46,7 +46,6 @@ export function useLedgerReview() {
       await ledger.voidCharge(item.id, reason);
       toast.show('Charge voided', 'remove-circle');
     }
-    hapticWarning();
     setAsking(null);
   }
 
