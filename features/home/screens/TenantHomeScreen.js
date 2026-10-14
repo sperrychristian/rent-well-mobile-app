@@ -1,10 +1,7 @@
-import { StyleSheet, View, Text, Pressable, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
-import Card from '../../../components/Card';
 import DemoBanner from '../../../components/DemoBanner';
-import UnreadBadge from '../../messages/components/UnreadBadge';
 import LogoutButton from '../../auth/components/LogoutButton';
 import { useAuth } from '../../auth/context/AuthContext';
 import { useMessages } from '../../messages/context/MessagesContext';
@@ -13,17 +10,20 @@ import { useTenants } from '../../tenants/context/TenantsContext';
 import { placeLabel } from '../../tenants/utils/tenantHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { ordersForTenant, activeCount } from '../../workOrders/utils/workOrderHelpers';
-import FeatureTile from '../../../components/ui/FeatureTile';
 import { useLedger } from '../../payments/context/LedgerContext';
-import { tenantRentLine } from '../../payments/utils/ledgerHelpers';
-import KpiTile from '../../../components/ui/KpiTile';
-import QuickAction from '../../../components/ui/QuickAction';
+import { tenantRentLine, upcomingRent, shortDate } from '../../payments/utils/ledgerHelpers';
+import { deriveLedger } from '../../payments/utils/ledgerMath';
+import { formatCents } from '../../../utils/formatCurrency';
 import SummaryBlock from '../../../components/ui/SummaryBlock';
-import SectionHeader from '../../../components/ui/SectionHeader';
+import ListRow from '../../../components/ui/ListRow';
 import FadeInView from '../../../components/ui/FadeInView';
-import { COLORS, SPACING, TYPE, SIZES, OPACITY, RADIUS, BORDER } from '../../../theme';
+import HomeTopBar from '../components/HomeTopBar';
+import HeroNote from '../components/HeroNote';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 
 // the tenant's home: message the landlord or report something that needs fixing
+// the Hearth pass: the wordmark and your initials, then what you owe right now as one big number with the
+// next rent under it, one line saying if anything is late, and the places to go as plain rows
 function TenantHomeScreen(props) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
@@ -43,6 +43,24 @@ function TenantHomeScreen(props) {
   // rent from the ledger already in memory: overdue, due now, or "Rent due Nov 1: $1,200.00"
   const ledger_store = useLedger();
   const rent = tenantRentLine(ledger_store.current_ledger, ledger_store.today);
+  const derived = ledger_store.current_ledger
+    ? deriveLedger(ledger_store.current_ledger, ledger_store.today)
+    : null;
+  const next_rent = upcomingRent(ledger_store.current_ledger, ledger_store.today);
+  const due_now = derived ? derived.due_now_cents : 0;
+  // the one line under the hero: overdue in terracotta, due in amber, or all paid up in green
+  let note = { text: "You're all paid up", tone: 'success', icon: 'checkmark-circle-outline' };
+  if (!derived) {
+    note = { text: "Your landlord hasn't set up rent yet", tone: 'neutral', icon: 'card-outline' };
+  } else if (derived.overdue_cents > 0) {
+    note = {
+      text: formatCents(derived.overdue_cents) + ' is overdue',
+      tone: 'danger',
+      icon: 'alert-circle-outline',
+    };
+  } else if (due_now > 0) {
+    note = { text: 'Due now', tone: 'warning', icon: 'time-outline' };
+  }
 
   if (is_read_only) {
     const last = my_ended_tenancies[0];
@@ -50,84 +68,56 @@ function TenantHomeScreen(props) {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
         {/* only shows while the demo is running, with the switch to the landlord side */}
         <DemoBanner />
-        <ScreenTitle>No Active Rental</ScreenTitle>
-        <Card>
-          <View style={styles.card_row}>
-            <Ionicons name="home-outline" size={32} color={COLORS.text_muted} />
-            <View style={styles.card_text}>
-              <Text style={styles.card_title}>Your tenancy has ended</Text>
-              <Text style={styles.card_detail}>
-                {last
-                  ? 'You moved out of ' +
-                    placeLabel(last.property_name, last.unit_label) +
-                    ' on ' +
-                    last.ended_at +
-                    '.'
-                  : "You don't have an active rental right now."}
-              </Text>
-              <Text style={styles.card_detail}>
-                Your messages and past requests are still here to read. If your landlord adds you to
-                a rental again, everything opens back up.
-              </Text>
-            </View>
+        <HomeTopBar name={name} onProfile={() => props.navigation.navigate('Settings')} />
+        <Text style={styles.name_line} accessibilityRole="header">
+          No Active Rental
+        </Text>
+        <View style={styles.ended}>
+          <Ionicons name="home-outline" size={SIZES.row_icon} color={COLORS.text_muted} />
+          <View style={styles.ended_text}>
+            <Text style={styles.ended_title}>Your tenancy has ended</Text>
+            <Text style={styles.muted}>
+              {last
+                ? 'You moved out of ' +
+                  placeLabel(last.property_name, last.unit_label) +
+                  ' on ' +
+                  last.ended_at +
+                  '.'
+                : "You don't have an active rental right now."}
+            </Text>
+            <Text style={styles.muted}>
+              Your messages and past requests are still here to read. If your landlord adds you to a
+              rental again, everything opens back up.
+            </Text>
           </View>
-        </Card>
+        </View>
 
-        <Pressable
-          onPress={() => props.navigation.navigate('Messages')}
-          accessibilityRole="button"
-          accessibilityLabel="Message history, read only"
-          style={({ pressed }) => [styles.card_press, pressed && styles.pressed]}
-        >
-          <Card>
-            <View style={styles.card_row}>
-              <Ionicons name="chatbubble-ellipses-outline" size={32} color={COLORS.info_text} />
-              <View style={styles.card_text}>
-                <Text style={styles.card_title}>Message History</Text>
-                <Text style={styles.card_detail}>Read only</Text>
-              </View>
-              <UnreadBadge count={unread_total} />
-              <Ionicons name="chevron-forward" size={20} color={COLORS.text_muted} />
-            </View>
-          </Card>
-        </Pressable>
-
-        {/* their rent history stays readable too, with no I Paid button */}
-        <Pressable
-          onPress={() => props.navigation.navigate('Payments')}
-          accessibilityRole="button"
-          accessibilityLabel="Payment history, read only"
-          style={({ pressed }) => [styles.card_press, pressed && styles.pressed]}
-        >
-          <Card>
-            <View style={styles.card_row}>
-              <Ionicons name="card-outline" size={32} color={COLORS.info_text} />
-              <View style={styles.card_text}>
-                <Text style={styles.card_title}>Payment History</Text>
-                <Text style={styles.card_detail}>Read only</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color={COLORS.text_muted} />
-            </View>
-          </Card>
-        </Pressable>
-
-        <Pressable
-          onPress={() => props.navigation.navigate('PastRequests')}
-          accessibilityRole="button"
-          accessibilityLabel="Past requests, read only"
-          style={({ pressed }) => [styles.card_press, pressed && styles.pressed]}
-        >
-          <Card>
-            <View style={styles.card_row}>
-              <Ionicons name="list-outline" size={32} color={COLORS.success_text} />
-              <View style={styles.card_text}>
-                <Text style={styles.card_title}>Past Requests</Text>
-                <Text style={styles.card_detail}>Read only</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color={COLORS.text_muted} />
-            </View>
-          </Card>
-        </Pressable>
+        <View style={styles.rows}>
+          <ListRow
+            icon="chatbubble-outline"
+            title="Message History"
+            subtitle={unread_total ? 'Read only, ' + unread_total + ' unread' : 'Read only'}
+            accessibilityLabel="Message history, read only"
+            divider
+            onPress={() => props.navigation.navigate('Messages')}
+          />
+          {/* their rent history stays readable too, with no I Paid button */}
+          <ListRow
+            icon="card-outline"
+            title="Payment History"
+            subtitle="Read only"
+            accessibilityLabel="Payment history, read only"
+            divider
+            onPress={() => props.navigation.navigate('Payments')}
+          />
+          <ListRow
+            icon="list-outline"
+            title="Past Requests"
+            subtitle="Read only"
+            accessibilityLabel="Past requests, read only"
+            onPress={() => props.navigation.navigate('PastRequests')}
+          />
+        </View>
 
         <View style={[styles.footer, { paddingBottom: insets.bottom + SPACING.md }]}>
           <LogoutButton />
@@ -140,18 +130,15 @@ function TenantHomeScreen(props) {
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
       {/* only shows while the demo is running, with the switch to the landlord side */}
       <DemoBanner />
+      <HomeTopBar name={name} onProfile={() => props.navigation.navigate('Settings')} />
       {/* the hero: the big title, a hello, where they live, and the two numbers they care about */}
       {/* the fintech pass: a hello, an indigo summary card with their requests in progress, two key numbers,
           the two things tenants do most, then the rest */}
       <FadeInView index={0}>
-        <Text style={styles.overline}>Your home</Text>
-        <Text style={styles.greeting} accessibilityRole="header">
-          Hi{name ? ', ' + name : ''}!
-        </Text>
         {/* where they live now, once GET /me has answered */}
         {my_active_tenancies.length > 0 && (
           <View style={styles.place_row}>
-            <Ionicons name="location-outline" size={16} color={COLORS.text_muted} />
+            <Ionicons name="location-outline" size={SIZES.icon_small} color={COLORS.text_muted} />
             <Text style={styles.place}>
               {my_active_tenancies
                 .map((tenancy) => placeLabel(tenancy.property_name, tenancy.unit_label))
@@ -160,81 +147,66 @@ function TenantHomeScreen(props) {
           </View>
         )}
         <SummaryBlock
-          variant="brand"
-          label="Requests in progress"
-          value={String(in_progress || 0)}
+          label={due_now > 0 ? 'Due now' : 'Your balance'}
+          value={formatCents(Math.max(due_now, 0))}
           caption={
-            total_requests === 0
-              ? 'Nothing reported yet'
-              : 'Out of ' + total_requests + (total_requests === 1 ? ' request' : ' requests')
+            next_rent
+              ? 'Next rent ' +
+                formatCents(next_rent.amount_cents) +
+                ' on ' +
+                shortDate(next_rent.date)
+              : 'No rent scheduled'
           }
-          style={styles.summary}
         />
-        <View style={styles.summary_row}>
-          <KpiTile
-            label="Unread"
-            value={unread_total || 0}
-            caption="Messages"
-            icon="chatbubble-ellipses"
-            tone="info"
-          />
-          <KpiTile
-            label="Requests"
-            value={total_requests}
-            caption="All time"
-            icon="list"
-            tone="success"
-          />
-        </View>
+        <HeroNote
+          text={note.text}
+          tone={note.tone}
+          icon={note.icon}
+          accessibilityHint="Opens Payments and Rent"
+          onPress={() => props.navigation.navigate('Payments')}
+        />
       </FadeInView>
 
-      <FadeInView index={1}>
-        <SectionHeader title="Quick actions" />
-        <View style={styles.quick_row}>
-          {/* still saves on this phone only, it moves to the server in a later phase */}
-          <QuickAction
-            label="Report an issue"
-            icon="construct-outline"
-            tone="brand"
-            accessibilityLabel="Report an issue"
-            onPress={() => props.navigation.navigate('NewWorkOrder')}
-          />
-          <QuickAction
-            label="Message landlord"
-            icon="chatbubble-ellipses-outline"
-            tone="info"
-            badge_count={unread_total}
-            badge_label={unread_total + ' unread messages'}
-            accessibilityLabel={'Messages' + (unread_total ? ', ' + unread_total + ' unread' : '')}
-            onPress={() => props.navigation.navigate('Messages')}
-          />
-        </View>
-
-        <SectionHeader title="Your rental" />
-        <View style={styles.grid}>
-          <FeatureTile
-            title="My Requests"
-            detail={
-              in_progress
-                ? in_progress + (in_progress === 1 ? ' request' : ' requests') + ' in progress'
+      <FadeInView index={1} style={styles.rows}>
+        <ListRow
+          icon="card-outline"
+          title="Payments"
+          subtitle={rent.text}
+          subtitle_tone={rent.tone === 'danger' ? 'danger' : undefined}
+          accessibilityLabel={'Payments and rent, ' + rent.text}
+          divider
+          onPress={() => props.navigation.navigate('Payments')}
+        />
+        <ListRow
+          icon="list-outline"
+          title="My Requests"
+          subtitle={
+            in_progress
+              ? in_progress + (in_progress === 1 ? ' request' : ' requests') + ' in progress'
+              : total_requests === 0
+                ? 'Nothing reported yet'
                 : 'See what you reported and where it is at'
-            }
-            icon="list-outline"
-            tone="success"
-            accessibilityLabel="My requests"
-            style={styles.tile}
-            onPress={() => props.navigation.navigate('MyRequests')}
-          />
-          <FeatureTile
-            title="Payments and Rent"
-            detail={rent.text}
-            icon={rent.tone === 'danger' ? 'alert-circle-outline' : 'card-outline'}
-            tone={rent.tone}
-            accessibilityLabel={'Payments and rent, ' + rent.text}
-            style={styles.tile}
-            onPress={() => props.navigation.navigate('Payments')}
-          />
-        </View>
+          }
+          accessibilityLabel="My requests"
+          divider
+          onPress={() => props.navigation.navigate('MyRequests')}
+        />
+        {/* still saves on this phone only, it moves to the server in a later phase */}
+        <ListRow
+          icon="construct-outline"
+          title="Report an Issue"
+          subtitle="Something broken or leaking"
+          accessibilityLabel="Report an issue"
+          divider
+          onPress={() => props.navigation.navigate('NewWorkOrder')}
+        />
+        <ListRow
+          icon="chatbubble-outline"
+          title="Message Landlord"
+          subtitle={unread_total ? unread_total + ' unread' : 'All caught up'}
+          accessibilityLabel={'Messages' + (unread_total ? ', ' + unread_total + ' unread' : '')}
+          onPress={() => props.navigation.navigate('Messages')}
+        />
       </FadeInView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + SPACING.md }]}>
@@ -255,66 +227,45 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: COLORS.background,
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
     paddingTop: SPACING.md,
     width: '100%',
-    maxWidth: SIZES.content_max_width + 160,
+    maxWidth: SIZES.content_max_width,
     alignSelf: 'center',
   },
   place_row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.xs,
-    marginBottom: SPACING.md,
   },
   place: {
     ...TYPE.body_small,
     color: COLORS.text_muted,
     flexShrink: 1,
   },
-  greeting: {
-    ...TYPE.title,
+  name_line: {
+    ...TYPE.name,
     color: COLORS.text,
-    marginBottom: SPACING.xs,
+    marginBottom: SPACING.md,
   },
-  summary_row: {
+  ended: {
     flexDirection: 'row',
-    gap: SPACING.sm,
-    marginTop: SPACING.xs,
-  },
-  // two tiles to a row, they grow taller instead of squishing when the text is big
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.sm + SPACING.xs,
-  },
-  tile: {
-    flexBasis: '46%',
-    flexGrow: 1,
-  },
-  // the read-only home still uses the full-width cards
-  card_press: {
-    width: '100%',
-  },
-  pressed: {
-    opacity: OPACITY.pressed,
-  },
-  card_row: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: SPACING.md,
   },
-  card_text: {
+  ended_text: {
     flex: 1,
+    gap: SPACING.xs,
   },
-  card_title: {
+  ended_title: {
     ...TYPE.subheading,
-    fontFamily: TYPE.heading.fontFamily,
     color: COLORS.text,
   },
-  card_detail: {
+  muted: {
     ...TYPE.body_small,
     color: COLORS.text_muted,
+  },
+  rows: {
+    marginTop: SPACING.lg,
   },
   footer: {
     flex: 1,
@@ -323,22 +274,5 @@ const styles = StyleSheet.create({
   },
   logout_button: {
     marginHorizontal: 0,
-  },
-  overline: {
-    ...TYPE.overline,
-    color: COLORS.text_muted,
-  },
-  summary: {
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.sm + SPACING.xs,
-  },
-  quick_row: {
-    flexDirection: 'row',
-    gap: SPACING.xs,
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
-    padding: SPACING.sm,
   },
 });

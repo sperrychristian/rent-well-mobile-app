@@ -11,7 +11,6 @@ function SubmitButton(props) {
       <Button
         title={props.busy ? props.busy_title : props.title}
         variant="primary"
-        size="large"
         loading={props.busy}
         onPress={props.onPress}
         style={styles.button}

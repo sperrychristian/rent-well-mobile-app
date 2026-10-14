@@ -126,6 +126,23 @@ export function ownerPaymentsLine(ledgers, today) {
   };
 }
 
+// the dashboard's one line under the hero: how many current tenants are behind and by how much in total
+// gives back { count, cents }, both 0 when everyone is paid up
+export function behindSummary(ledgers, today) {
+  let count = 0;
+  let cents = 0;
+  ledgers
+    .filter((ledger) => ledger.tenancy_status !== 'ended')
+    .forEach((ledger) => {
+      const derived = deriveLedger(ledger, today);
+      if (derived.overdue_cents > 0) {
+        count++;
+        cents += derived.overdue_cents;
+      }
+    });
+  return { count: count, cents: cents };
+}
+
 // the tenant's Payments tile: overdue, due now, or the next rent date, like "Rent due Nov 1: $1,200.00"
 export function tenantRentLine(ledger, today) {
   if (!ledger) {

@@ -14,8 +14,8 @@ import { useWorkOrders } from '../../../context/WorkOrdersContext';
 // and the brand Log In, an outlined Sign Up, and the demo as a text link
 const trust_items = [
   { icon: 'construct-outline', label: 'Work orders', tone: 'brand' },
-  { icon: 'chatbubble-ellipses-outline', label: 'Messages', tone: 'info' },
-  { icon: 'receipt-outline', label: 'Expenses', tone: 'success' },
+  { icon: 'chatbubble-outline', label: 'Messages', tone: 'brand' },
+  { icon: 'receipt-outline', label: 'Expenses', tone: 'brand' },
 ];
 
 function WelcomeScreen(props) {
@@ -32,8 +32,8 @@ function WelcomeScreen(props) {
           side_by_side && styles.content_wide,
           {
             paddingBottom: insets.bottom + SPACING.lg,
-            paddingLeft: insets.left + SPACING.lg,
-            paddingRight: insets.right + SPACING.lg,
+            paddingLeft: insets.left + SIZES.screen_padding,
+            paddingRight: insets.right + SIZES.screen_padding,
           },
         ]}
       >
@@ -64,7 +64,6 @@ function WelcomeScreen(props) {
               title="Log In"
               icon="log-in-outline"
               variant="primary"
-              size="large"
               style={styles.full_button}
               onPress={async () => {
                 await exitDemo();
@@ -78,7 +77,6 @@ function WelcomeScreen(props) {
               title="Sign Up"
               icon="person-add-outline"
               variant="secondary"
-              size="large"
               style={styles.full_button}
               onPress={async () => {
                 await exitDemo();

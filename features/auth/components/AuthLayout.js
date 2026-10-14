@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Card from '../../../components/ui/Card';
 import Wordmark from '../../../components/ui/Wordmark';
 import FadeInView from '../../../components/ui/FadeInView';
-import { COLORS, SPACING, TYPE, RADIUS, SIZES, BORDER } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
 
 // the shared frame for login and both sign up screens: title, a card for the form, and room for the keyboard
 // props: title, error (a message from the server shown above the form), children, footer
@@ -30,12 +30,12 @@ function AuthLayout(props) {
       >
         {/* the title prop isn't drawn anymore, the header above already shows the same title */}
         <FadeInView index={0} style={styles.top}>
-          <Wordmark size="small" tagline={null} />
+          <Wordmark size="medium" tagline={null} />
           {props.subtitle ? <Text style={styles.subtitle}>{props.subtitle}</Text> : null}
         </FadeInView>
         {props.error ? (
           <View style={styles.error_box} accessibilityLiveRegion="polite">
-            <Ionicons name="alert-circle" size={20} color={COLORS.danger_text} />
+            <Ionicons name="alert-circle-outline" size={SIZES.icon} color={COLORS.danger_text} />
             <Text style={styles.error_text}>{props.error}</Text>
           </View>
         ) : null}
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
     // keeps the form a phone width on a tablet
     width: '100%',
     maxWidth: SIZES.content_max_width,
@@ -77,11 +77,10 @@ const styles = StyleSheet.create({
   form_card: {
     marginBottom: SPACING.lg,
   },
+  // the Hearth pass: a quiet warm note with a line icon, no red edge
   error_box: {
     backgroundColor: COLORS.danger_tint,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.danger,
-    borderRadius: RADIUS.md,
+    borderRadius: RADIUS.sm,
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,

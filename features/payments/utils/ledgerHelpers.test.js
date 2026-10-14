@@ -285,3 +285,14 @@ describe('home screen lines', () => {
     expect(tenantRentLine(null, today).text).toBe('No rent set up yet');
   });
 });
+
+describe('behindSummary', () => {
+  const { behindSummary } = require('./ledgerHelpers');
+  const { buildSampleLedgers } = require('../data/sampleLedger');
+  test('counts current tenants with overdue money and adds it up', () => {
+    const today = '2026-10-14';
+    const ledgers = buildSampleLedgers(today);
+    expect(behindSummary(ledgers, today)).toEqual({ count: 1, cents: 200000 });
+    expect(behindSummary([], today)).toEqual({ count: 0, cents: 0 });
+  });
+});
