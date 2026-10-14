@@ -320,14 +320,14 @@ function ExpensesScreen(props) {
         <PrimaryButton
           title="Mileage"
           icon="car-outline"
-          variant="secondary"
+          variant="tertiary"
           style={styles.mileage_button}
           onPress={() => props.navigation.navigate('Mileage')}
         />
         <PrimaryButton
           title="Year-End"
           icon="document-text-outline"
-          variant="secondary"
+          variant="tertiary"
           style={styles.report_button}
           onPress={() => props.navigation.navigate('YearEndReport', { yearId: year })}
         />
@@ -336,14 +336,14 @@ function ExpensesScreen(props) {
         <PrimaryButton
           title="Recurring"
           icon="repeat-outline"
-          variant="secondary"
+          variant="tertiary"
           style={styles.grey_button}
           onPress={() => setRecurringOpen(true)}
         />
         <PrimaryButton
           title="Budgets"
           icon="wallet-outline"
-          variant="secondary"
+          variant="tertiary"
           style={styles.grey_button}
           onPress={() => setBudgetsOpen(true)}
         />
@@ -352,7 +352,7 @@ function ExpensesScreen(props) {
         <PrimaryButton
           title="Export CSV"
           icon="share-outline"
-          variant="secondary"
+          variant="tertiary"
           style={styles.export_button}
           onPress={exportCsv}
         />
@@ -780,7 +780,7 @@ const styles = StyleSheet.create({
   },
   link_text: {
     ...TYPE.label,
-    color: COLORS.info_text,
+    color: COLORS.cta,
     marginTop: SPACING.xs,
     textDecorationLine: 'underline',
   },
@@ -821,8 +821,9 @@ const styles = StyleSheet.create({
     color: COLORS.danger_text,
   },
   bar_track: {
-    backgroundColor: COLORS.neutral_tint,
-    height: SPACING.sm,
+    height: SIZES.progress,
+    borderRadius: RADIUS.pill,
+    backgroundColor: COLORS.hairline,
     overflow: 'hidden',
   },
   bar_fill: {
@@ -890,26 +891,25 @@ const styles = StyleSheet.create({
     gap: SPACING.xs + SPACING.xxs,
     marginTop: SPACING.xs + SPACING.xxs,
   },
+  // the Hearth pass: tags are colored words with no pill behind them
   tag: {
     paddingVertical: SPACING.xxs,
-    paddingHorizontal: SPACING.sm,
-    borderRadius: RADIUS.pill,
-    maxWidth: 220,
+    maxWidth: SIZES.content_max_width / 2,
   },
   capital_tag: {
-    backgroundColor: COLORS.accent_tint,
+    backgroundColor: 'transparent',
   },
   billed_tag: {
-    backgroundColor: COLORS.info_tint,
+    backgroundColor: 'transparent',
   },
   recurring_tag: {
-    backgroundColor: COLORS.neutral_tint,
+    backgroundColor: 'transparent',
   },
   order_tag: {
-    backgroundColor: COLORS.brand_tint,
+    backgroundColor: 'transparent',
   },
   missing_tag: {
-    backgroundColor: COLORS.warning_tint,
+    backgroundColor: 'transparent',
   },
   tag_text: {
     ...TYPE.caption,
@@ -964,7 +964,7 @@ const styles = StyleSheet.create({
     color: COLORS.accent_text,
   },
   billed_text: {
-    color: COLORS.info_text,
+    color: COLORS.cta,
   },
   recurring_text: {
     color: COLORS.text_muted,

@@ -170,7 +170,7 @@ function ChecklistItemModal(props) {
               <Text style={styles.heading}>{props.item.name}</Text>
               {got_worse && (
                 <View style={styles.worse_tag}>
-                  <Ionicons name="trending-down" size={14} color={COLORS.text_light} />
+                  <Ionicons name="trending-down" size={14} color={COLORS.danger_text} />
                   <Text style={styles.worse_text}>Changed since move-in</Text>
                 </View>
               )}
@@ -392,7 +392,10 @@ const styles = StyleSheet.create({
     color: COLORS.text_muted,
   },
   worse_tag: {
-    backgroundColor: COLORS.danger,
+    // the Hearth pass: terracotta words in a terracotta outline, no red block
+    backgroundColor: 'transparent',
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.danger_text,
     borderRadius: RADIUS.pill,
     flexDirection: 'row',
     alignItems: 'center',

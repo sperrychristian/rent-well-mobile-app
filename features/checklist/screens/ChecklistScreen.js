@@ -7,7 +7,7 @@ import ProgressBar from '../components/ProgressBar';
 import NewChecklistModal from '../components/NewChecklistModal';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { checklistProgress, filterChecklists, worseCount } from '../utils/checklistHelpers';
-import { COLORS, SPACING, TYPE, RADIUS, SIZES, OPACITY } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES, OPACITY } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import StatusPill from '../../../components/ui/StatusPill';
@@ -116,7 +116,7 @@ function ChecklistScreen(props) {
                 <Ionicons
                   name={item.type === 'Move-In' ? 'log-in-outline' : 'log-out-outline'}
                   size={24}
-                  color={item.type === 'Move-In' ? COLORS.info_text : COLORS.accent_text}
+                  color={COLORS.cta}
                 />
               </View>
               <View style={styles.row_text}>
@@ -200,13 +200,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: SPACING.sm + SPACING.xs,
   },
+  // the Hearth pass: just the green line icon, no tinted circle
   row_icon: {
-    backgroundColor: COLORS.brand_tint,
-    borderRadius: RADIUS.pill,
-    width: SIZES.avatar,
-    height: SIZES.avatar,
+    width: SIZES.row_icon,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   row_text: {
     flex: 1,
@@ -218,7 +215,7 @@ const styles = StyleSheet.create({
   },
   row_type: {
     ...TYPE.label,
-    color: COLORS.info_text,
+    color: COLORS.text_muted,
     marginTop: SPACING.xxs,
   },
   detail: {

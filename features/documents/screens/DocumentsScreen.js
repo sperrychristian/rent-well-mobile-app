@@ -27,7 +27,7 @@ import {
 } from '../utils/documentFiles';
 import { iconFor, expiryTag, daysUntil } from '../utils/documentHelpers';
 import { document_categories, expiring_soon_days } from '../../../data/documentOptions';
-import { COLORS, SPACING, TYPE, RADIUS, SIZES, OPACITY, NUMBERS } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES, OPACITY, NUMBERS } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import StatusPill from '../../../components/ui/StatusPill';
@@ -483,13 +483,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: SPACING.sm + SPACING.xs,
   },
+  // the Hearth pass: just the green line icon, no tinted circle
   row_icon: {
-    backgroundColor: COLORS.brand_tint,
-    borderRadius: RADIUS.pill,
-    width: SIZES.avatar,
-    height: SIZES.avatar,
+    width: SIZES.row_icon,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   row_text: {
     flex: 1,
@@ -501,7 +498,7 @@ const styles = StyleSheet.create({
   },
   row_category: {
     ...TYPE.label,
-    color: COLORS.info_text,
+    color: COLORS.text_muted,
     marginTop: SPACING.xxs,
   },
   tag_row: {

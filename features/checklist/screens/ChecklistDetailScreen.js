@@ -17,7 +17,7 @@ import {
   checklist_disclaimer,
 } from '../utils/checklistHelpers';
 import { shareChecklistText } from '../utils/exportChecklist';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, OPACITY } from '../../../theme';
+import { COLORS, SPACING, TYPE, BORDER, SIZES, OPACITY } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusPill from '../../../components/ui/StatusPill';
 
@@ -437,13 +437,11 @@ const styles = StyleSheet.create({
     color: COLORS.text_muted,
     marginTop: SPACING.sm,
   },
+  // the Hearth pass: each room is a ruled section on the paper, no box
   room: {
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
+    paddingVertical: SPACING.md,
+    borderTopWidth: BORDER.hairline,
+    borderTopColor: COLORS.hairline,
   },
   room_header: {
     flexDirection: 'row',

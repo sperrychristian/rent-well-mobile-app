@@ -150,3 +150,25 @@ Branch `hearth-redesign`, made from `payments-ledger-app`. Not merged. This is a
   - Tests: 363 passed.
   - Format: clean.
   - iOS export with `--clear`: OK.
+
+## Phase 5: Expenses, Mileage, Documents, Checklist, Settings, and the rest (done)
+
+- **Expenses:**
+  - Add Expense stays the one green pill and Scan Receipt stays outlined. Mileage, Year-End, Recurring, Budgets, and Export CSV are now green text buttons, which takes the top from six outlined pills down to two pills.
+  - The tags (work order, no receipt, billed, recurring, capital) are colored words with no pill.
+  - The category and property bars are the 4pt green line on a hairline track.
+- **Documents:** the row icons have no tinted circle, and the category words are muted.
+- **Checklist:**
+  - The list icons are green line icons with no circle, and the type words are muted.
+  - The detail's rooms are ruled sections instead of white boxes.
+  - The checklist `ProgressBar` is the 4pt green line.
+  - The "worse since move-in" tag is terracotta words in a terracotta outline (it was a filled red block).
+- **Mileage, Settings, Year-End, Lease, Past Requests, My Requests, Request Detail, and the sign up screens** pick up the shared pieces and the 24 side padding. Nothing on them needed a screen-specific change.
+- **Visual QA** at 390 (Expenses, Mileage, Documents, Checklist, checklist detail, Settings, Year-End, Lease, Tenant Sign Up) found the boxes, tints, and red blocks listed above. All are fixed and re-checked, with no page errors.
+- **Comments:** none dropped.
+- **Checks:**
+  - Lint: the 13 known problems.
+  - Tests: listed in the next line.
+  - Format: clean.
+  - iOS export with `--clear`: OK.
+  - Tests: 363 passed, 363 total.
