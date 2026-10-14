@@ -45,3 +45,52 @@ Branch `payments-ledger-app`, made from `fintech-polish` because there's no `pol
   - Tests: 314 passed in 28 suites.
   - Format: clean.
   - `npx expo export --platform ios --clear`: OK.
+
+## Phase 2: owner screens (done)
+
+- New shared pieces:
+  - `components/ui/Toast.js`: `ToastProvider` is mounted once in `App.js`, and screens call `useToast().show(text, icon)`. It announces to screen readers and skips the fade when Reduce Motion is on.
+  - `utils/haptics.js`: `hapticSuccess` and `hapticWarning`.
+- **Payments and Rent** (`PaymentsScreen` → `components/OwnerPaymentsView.js`) has:
+  - a month picker with 44pt arrows that stop at the first month with charges and at next month
+  - property segments (chips once there are more than 3 properties)
+  - an indigo summary: collected in the month, of what was expected, what's still out, and a progress bar
+  - KPI tiles: overdue now, and claims to confirm
+  - the claims queue, with Confirm and Reject on each row
+  - tenant rows with a balance and a status pill, worst first, then folded past tenants
+  - a skeleton, an error state, an empty state, the offline banner, and pull to refresh
+- **Rent Ledger** (new route `TenantLedger`, param `tenancyId`) has:
+  - the balance or credit with its pill
+  - an overdue banner, and an ended-tenancy note
+  - KPI tiles for next due and deposit held
+  - Record Payment (primary), Add Charge, and Set or Edit Rent, with the schedule in one line under them
+  - claims to review
+  - charges and payments grouped by month
+  - a header add button set with `navigation.setOptions`, like Properties
+  - Tapping a charge offers Void Charge.
+- **Forms** (`features/payments/components/`) share `FormSheet` and `FormBits`. Each one has inline errors under its field, return keys that move to the next field, and Cancel on the left with the action on the right.
+  - `PaymentFormModal` (it also serves the tenant claim in Phase 3), `ChargeFormModal`, `ScheduleFormModal`, and `InstructionsModal`.
+  - `ReasonModal` handles reject and both voids. A void asks "are you sure" a second time.
+- **`hooks/useLedgerReview.js`:** confirm, reject, void payment, and void charge, shared by all three owner screens. It adds the toasts, a success haptic on confirm, and a warning haptic on reject and void. Saving a payment or a schedule also buzzes.
+- **Payment Record** (`PaymentDetail`) is a real screen now. It has:
+  - the amount and status
+  - reasons for a reject or a void
+  - a facts list and a timeline
+  - the receipt photo
+  - Share Receipt, which writes a `.txt` to the cache and opens `expo-sharing`, like the expenses CSV
+  - for owners: Confirm and Reject on a claim, Void on a confirmed payment, and a link to the ledger
+  - In real mode, a payment that isn't loaded yet is fetched (for push taps).
+- **Property Overview** has a Payment instructions card with Add or Edit.
+- **Tenant Profile** has a Rent Ledger link under each current home.
+- **Navigation:**
+  - The map has `TenantLedger` with edges from Payments, Tenant Profile, and Payment Record. Payment Record is now `built`.
+  - `App.js` registers TenantLedger in the owner group.
+  - The ledger push opens the Rent Ledger for owners.
+  - `ASSIGNMENT_NAV.md` has the table regenerated from the map (31 screens), the new header button, and `tenancyId` in the params list.
+  - The diagram was redrawn and checked.
+- **Tests:** `paymentScreens.test.js` renders Payments, the Rent Ledger, and Payment Record in the owner demo, confirms a claim from the list, and checks id-only navigation.
+- **Checks:**
+  - Lint: the 13 known problems.
+  - Tests: 320 passed in 29 suites.
+  - Format: clean.
+  - iOS export with `--clear`: OK.

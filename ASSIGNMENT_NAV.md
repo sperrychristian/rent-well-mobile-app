@@ -67,7 +67,7 @@ Requirements before the changes:
 
 ### Final screen list (generated from the map)
 
-30 screens. "Reached from" lists every screen with an arrow into it, with the id param in brackets. [header] means a header button, [reset] means the history is cleared (log in, log out, exit demo), and [demo] is a demo-only way in (a demo choice or the banner's switch, which also clear the history). "Reachable in" is the `reachable_in` field: the situations that can open the screen without logging in or out or leaving the demo (signed out, owner, tenant, demo owner, demo tenant).
+31 screens. "Reached from" lists every screen with an arrow into it, with the id param in brackets. [header] means a header button, [reset] means the history is cleared (log in, log out, exit demo), and [demo] is a demo-only way in (a demo choice or the banner's switch, which also clear the history). "Reachable in" is the `reachable_in` field: the situations that can open the screen without logging in or out or leaving the demo (signed out, owner, tenant, demo owner, demo tenant).
 
 | Route | File | Header title | Role | Status | Params | Reached from | Reachable in | Later |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -99,14 +99,15 @@ Requirements before the changes:
 | Messages | `features/messages/screens/MessagesScreen.js` | Message Inbox | shared | built | none | Dashboard, TenantHome | owner, tenant, demo owner, demo tenant | tab (owner), tab (tenant) |
 | MessageThread | `features/messages/screens/MessageThreadScreen.js` | Conversation | shared | built | conversationId | WorkOrders (conversationId), WorkOrderDetail (conversationId), TenantDetail (conversationId), Messages (conversationId) | owner, tenant, demo owner, demo tenant |  |
 | Payments | `features/payments/screens/PaymentsScreen.js` | Payments and Rent | shared | stub | none | Dashboard, TenantHome | owner, tenant, demo owner, demo tenant |  |
-| PaymentDetail | `features/payments/screens/PaymentDetailScreen.js` | Payment Record #(short paymentId) | shared | stub | paymentId | Payments (paymentId) | owner, tenant, demo owner, demo tenant |  |
+| TenantLedger | `features/payments/screens/TenantLedgerScreen.js` | Rent Ledger | owner | built | tenancyId | TenantDetail (tenancyId), Payments (tenancyId), PaymentDetail (tenancyId) | owner, demo owner |  |
+| PaymentDetail | `features/payments/screens/PaymentDetailScreen.js` | Payment Record #(short paymentId) | shared | built | paymentId | Payments (paymentId), TenantLedger (paymentId) | owner, tenant, demo owner, demo tenant |  |
 | Settings | `features/settings/screens/SettingsScreen.js` | Settings and Profile | shared | stub | none | Dashboard [header], TenantHome [header] | owner, tenant, demo owner, demo tenant | drawer (owner) |
 
 ## 2. Requirement checklist
 
 | # | Requirement | How it's met | Files |
 | --- | --- | --- | --- |
-| 1 | Every screen listed | The tables above and `navigation/navigationMap.js`, which lists all 30 with title, role, feature, params, arrows, and where each one is reachable | `navigation/navigationMap.js` |
+| 1 | Every screen listed | The tables above and `navigation/navigationMap.js`, which lists all 31 with title, role, feature, params, arrows, and where each one is reachable | `navigation/navigationMap.js` |
 | 2 | React Navigation and the native stack installed | `@react-navigation/native` and `@react-navigation/native-stack` were already there. `@react-navigation/elements` is now listed directly for `useHeaderHeight` | `package.json` |
 | 3 | One component per screen in its own file in a screens folder | Every screen lives in `features/<feature>/screens/`. The 5 new stubs use Card, PrimaryButton, and theme tokens, say what the real screen will do, and say "Coming soon" | `features/payments/screens/`, `features/settings/screens/`, `features/tenants/screens/PropertyDetailScreen.js`, `features/tenants/screens/TenantLeaseScreen.js` |
 | 4 | Every screen registered in a stack in a NavigationContainer with initialRouteName | One `Stack.Navigator` with `initialRouteName={first_route}`. `first_route` is Welcome when signed out, Dashboard for owners and the landlord demo, TenantHome for tenants and the tenant demo, and Login after a session runs out | `App.js` |
@@ -115,12 +116,12 @@ Requirements before the changes:
 | T1 | createNativeStackNavigator, Stack.Navigator, Stack.Screen | Used exactly that way | `App.js` |
 | T2 | An id param read from route.params and displayed | See section 3 | |
 | T3 | Meaningful header titles, one shared style through screenOptions with theme colors | `shared_screen_options` sets the header background, tint, title style, and content background from `theme.js`. Each screen's title comes from the map, and screens whose title depends on a param use the options function form | `navigation/screenOptions.js`, `App.js` |
-| T4 | A useful headerRight or headerLeft button | Seven, see section 4 | `navigation/headerButtons.js` |
+| T4 | A useful headerRight or headerLeft button | Eight, see section 4 | `navigation/headerButtons.js` |
 | T5 | Stack only, future tabs and drawer marked on the diagram | TAB and DRAWER tags on the diagram, from the `future` field in the map | `navigation/navigationMap.js` |
 
 ## 3. The id params
 
-Every param in the app is now an id with a name ending in `Id`: `workOrderId`, `conversationId`, `checklistId`, `tenantId`, `propertyId`, `paymentId`, and `yearId` (a year-end report is identified by its tax year). No navigation passes a whole object, and a test searches the source to keep it that way.
+Every param in the app is now an id with a name ending in `Id`: `workOrderId`, `conversationId`, `checklistId`, `tenantId`, `propertyId`, `paymentId`, `tenancyId` (added with the rent ledger), and `yearId` (a year-end report is identified by its tax year). No navigation passes a whole object, and a test searches the source to keep it that way.
 
 The main example:
 
@@ -128,7 +129,7 @@ The main example:
 - Read: `WorkOrderDetailScreen.js` does `props.route.params.workOrderId` and looks the order up with `getOrder` (in real mode it asks the server when the order isn't loaded yet, the same path push notifications use).
 - Shown: the header title is built with the options function form, `({ route }) => ({ title: headerTitle('WorkOrderDetail', route.params) })`, so it reads "Work Order #1" (or the first 8 characters of a server id).
 
-The stub example: `PaymentsScreen.js` calls `navigate('PaymentDetail', { paymentId: payment.id })` and `PaymentDetailScreen.js` reads `props.route.params.paymentId` and shows it in a big "Payment ID" card and in the header ("Payment Record #pay-1001").
+The stub example (now a real screen): `PaymentsScreen.js` calls `navigate('PaymentDetail', { paymentId: payment.id })` and `PaymentDetailScreen.js` reads `props.route.params.paymentId`, shows it in the header ("Payment Record #demo-pay"), and looks the payment up in the ledger store (or asks the server, for a push tap). The rent ledger added one more: a tenant row on Payments and the Rent Ledger link on Tenant Profile pass `tenancyId` to `TenantLedgerScreen.js`.
 
 Other changes to keep params as ids:
 
@@ -148,6 +149,7 @@ Other changes to keep params as ids:
 | Message Inbox | person add (owners and the landlord demo only) | Opens Invite a New Tenant | `InviteHeaderButton` |
 | My Repair Requests | add (hidden when the rental has ended) | Opens Report an Issue | `AddRequestHeaderButton` |
 | Your Properties | add | Opens the Add Property form on that screen | `PropertiesScreen.js` (set with `navigation.setOptions` because the form lives there) |
+| Rent Ledger | add | Opens the Record Payment form on that screen | `TenantLedgerScreen.js` (set with `navigation.setOptions`, like Properties) |
 
 Every button uses Ionicons, `COLORS.title`, a hitSlop, and an accessibility label.
 

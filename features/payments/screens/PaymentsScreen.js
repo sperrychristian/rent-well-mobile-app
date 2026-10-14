@@ -5,8 +5,10 @@ import { useAppRole } from '../../auth/hooks/useAppRole';
 import { COLORS, SPACING, TYPE } from '../../../theme';
 import EmptyState from '../../../components/ui/EmptyState';
 import ListRow from '../../../components/ui/ListRow';
+import OwnerPaymentsView from '../components/OwnerPaymentsView';
 
 // a few made-up payment ids so the detail screen has something to open, the real ones will come from the server
+// (the landlord side has real ledgers now, these only stay for the tenant side until it's built)
 const sample_payments = {
   owner: [
     { id: 'pay-1001', label: 'October rent, 123 Maple St, Unit 2' },
@@ -20,12 +22,17 @@ const sample_payments = {
 
 // stub for the assignment: one screen for both roles, the note says what each one will see
 // the demo has no account, so it gets the owner version like the rest of the demo
+// (the payments pass: still one screen for both roles, the landlord gets OwnerPaymentsView with the real ledger)
 function PaymentsScreen(props) {
   const insets = useSafeAreaInsets();
   // the demo picks a side now, so the tenant demo gets the tenant version
   const role = useAppRole();
   const is_tenant = role === 'tenant';
   const payments = is_tenant ? sample_payments.tenant : sample_payments.owner;
+
+  if (!is_tenant) {
+    return <OwnerPaymentsView navigation={props.navigation} />;
+  }
 
   return (
     <ScrollView

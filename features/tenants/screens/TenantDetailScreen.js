@@ -239,6 +239,20 @@ function TenantDetailScreen(props) {
                 <Ionicons name="chevron-forward" size={16} color={COLORS.info_text} />
               </Pressable>
               <Text style={styles.detail}>Moved in {tenancy.started_at}</Text>
+              {/* their rent: balance, charges, and payments for this home */}
+              <Pressable
+                onPress={() => props.navigation.navigate('TenantLedger', { tenancyId: tenancy.id })}
+                hitSlop={8}
+                style={styles.link_row}
+                accessibilityRole="link"
+                accessibilityLabel={
+                  'Open the rent ledger for ' +
+                  placeLabel(tenancy.property_name, tenancy.unit_label)
+                }
+              >
+                <Text style={styles.link}>Rent Ledger</Text>
+                <Ionicons name="chevron-forward" size={16} color={COLORS.info_text} />
+              </Pressable>
               <View style={styles.button_row}>
                 <PrimaryButton
                   title="Move"

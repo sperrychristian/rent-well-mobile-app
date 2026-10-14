@@ -33,6 +33,8 @@ import PropertiesScreen from './features/tenants/screens/PropertiesScreen';
 import PastRequestsScreen from './features/tenants/screens/PastRequestsScreen';
 import PaymentsScreen from './features/payments/screens/PaymentsScreen';
 import PaymentDetailScreen from './features/payments/screens/PaymentDetailScreen';
+import TenantLedgerScreen from './features/payments/screens/TenantLedgerScreen';
+import { ToastProvider } from './components/ui/Toast';
 import SettingsScreen from './features/settings/screens/SettingsScreen';
 import PropertyDetailScreen from './features/tenants/screens/PropertyDetailScreen';
 import TenantLeaseScreen from './features/tenants/screens/TenantLeaseScreen';
@@ -178,6 +180,12 @@ function AppNavigator() {
               component={PropertyDetailScreen}
               options={optionsFor('PropertyDetail')}
             />
+            {/* one tenancy's rent ledger, the header's add button is set by the screen since the form lives there */}
+            <Stack.Screen
+              name="TenantLedger"
+              component={TenantLedgerScreen}
+              options={optionsFor('TenantLedger')}
+            />
             <Stack.Screen
               name="InviteTenant"
               component={InviteTenantScreen}
@@ -288,7 +296,10 @@ export default function App() {
       {/* the fintech pass made the app light again, so the clock and battery are dark now */}
       <StatusBar style="dark" />
       <AccountData>
-        <AppNavigator />
+        {/* toasts sit above every screen so one still shows after its form closes */}
+        <ToastProvider>
+          <AppNavigator />
+        </ToastProvider>
       </AccountData>
     </AuthProvider>
   );
