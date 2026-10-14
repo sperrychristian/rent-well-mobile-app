@@ -8,7 +8,7 @@ import { useAuth } from '../../auth/context/AuthContext';
 import { useAppRole } from '../../auth/hooks/useAppRole';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { COLORS, SPACING, TYPE } from '../../../theme';
+import { SIZES, COLORS, SPACING, TYPE } from '../../../theme';
 import { formatCurrency } from '../../../utils/formatCurrency';
 
 // stub for the assignment: the future home for account details, notification settings, the mileage rate,
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
   },
   heading: {
     ...TYPE.heading,

@@ -236,7 +236,7 @@ function TenantDetailScreen(props) {
                 <Text style={[styles.place, styles.place_link]}>
                   {placeLabel(tenancy.property_name, tenancy.unit_label)}
                 </Text>
-                <Ionicons name="chevron-forward" size={16} color={COLORS.info_text} />
+                <Ionicons name="chevron-forward" size={16} color={COLORS.cta} />
               </Pressable>
               <Text style={styles.detail}>Moved in {tenancy.started_at}</Text>
               {/* their rent: balance, charges, and payments for this home */}
@@ -251,7 +251,7 @@ function TenantDetailScreen(props) {
                 }
               >
                 <Text style={styles.link}>Rent Ledger</Text>
-                <Ionicons name="chevron-forward" size={16} color={COLORS.info_text} />
+                <Ionicons name="chevron-forward" size={16} color={COLORS.cta} />
               </Pressable>
               <View style={styles.button_row}>
                 <PrimaryButton
@@ -296,7 +296,7 @@ function TenantDetailScreen(props) {
             accessibilityRole="link"
           >
             <Text style={styles.link}>View in Work Orders</Text>
-            <Ionicons name="chevron-forward" size={16} color={COLORS.info_text} />
+            <Ionicons name="chevron-forward" size={16} color={COLORS.cta} />
           </Pressable>
         </Card>
 
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
   link: {
     ...TYPE.body_small,
     fontFamily: TYPE.label.fontFamily,
-    color: COLORS.info_text,
+    color: COLORS.cta,
   },
   link_row: {
     flexDirection: 'row',
@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
   },
   place_link: {
-    color: COLORS.info_text,
+    color: COLORS.cta,
   },
   lease_button: {
     marginHorizontal: 0,

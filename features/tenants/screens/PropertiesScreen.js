@@ -16,7 +16,7 @@ import ErrorState from '../../../components/ErrorState';
 import HeaderIconButton from '../../../components/HeaderIconButton';
 import PropertyFormModal from '../components/PropertyFormModal';
 import { useTenants } from '../context/TenantsContext';
-import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
@@ -132,7 +132,7 @@ function PropertiesScreen(props) {
             >
               <View style={styles.name_row}>
                 <View style={styles.icon_square}>
-                  <Ionicons name="home-outline" size={18} color={COLORS.info_text} />
+                  <Ionicons name="home-outline" size={18} color={COLORS.cta} />
                 </View>
                 <Text style={styles.name}>{item.name}</Text>
               </View>
@@ -155,7 +155,7 @@ function PropertiesScreen(props) {
                   accessibilityRole="button"
                   accessibilityLabel={'Edit ' + item.name}
                 >
-                  <Ionicons name="create-outline" size={22} color={COLORS.info_text} />
+                  <Ionicons name="create-outline" size={22} color={COLORS.cta} />
                 </Pressable>
                 <Pressable
                   onPress={() => confirmDelete(item)}
@@ -208,7 +208,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    padding: SPACING.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
     // the fintech pass: capped and centered on a tablet so lines stay a readable length
     width: '100%',
     maxWidth: SIZES.content_max_width + 160,
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   name: {
-    ...TYPE.heading,
+    ...TYPE.subheading,
     color: COLORS.text,
     flexShrink: 1,
   },
@@ -257,21 +258,16 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     marginBottom: SPACING.xs,
   },
+  // the Hearth pass: just the green line icon, no tinted square
   icon_square: {
-    width: 32,
-    height: 32,
-    borderRadius: RADIUS.sm,
-    backgroundColor: COLORS.surface_raised,
+    width: SIZES.row_icon,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   // edit and delete are full 44pt circles so they are easy to hit
   icon_button: {
     width: SIZES.touch,
     height: SIZES.touch,
-    borderRadius: RADIUS.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.surface_raised,
   },
 });

@@ -123,3 +123,30 @@ Branch `hearth-redesign`, made from `payments-ledger-app`. Not merged. This is a
   - Format: clean.
   - iOS export with `--clear`: OK.
   - Tests: 363 passed, 363 total.
+
+## Phase 4: Properties, Tenants, Work Orders, Messages (done)
+
+- **Side padding:** every screen's container now uses the 24pt side padding (`SIZES.screen_padding`), applied to the container and content blocks of all 14 screens that had 16. This covers phase 5's screens too.
+- **Tenants:**
+  - Property names in Fraunces with no white section boxes.
+  - Unit labels as section headers.
+  - Tenant rows as ruled rows instead of tinted boxes.
+  - The work order count without its amber pill.
+  - Pending invites as ruled rows, with Resend as an outlined pill and Revoke as terracotta words in a terracotta outline (it was a filled red block).
+- **Tenant Profile:** the links and chevrons are green instead of slate. The rest comes from the shared pieces.
+- **Properties:** the home icon has no tinted square, and edit and delete are plain icons in 44pt targets with no tinted circles.
+- **Property Overview:** it's the shared pieces now, with the name in Fraunces and the instructions as plain text with an outlined pill.
+- **Work Orders:**
+  - Each order is a ruled section with a hairline on top, and the title is 17 medium.
+  - The one pill per order is the next step (Start Work or Mark Resolved, both green). Add Expense, Message, and Details became green text buttons, so a list of orders isn't a wall of outlines.
+  - Every action and its order are unchanged.
+- **Work order detail and forms:** they inherit the inputs, chips, and pills.
+- **Messages:** conversations are ruled rows, and the unread edge is gone (bold text and the badge still say it). Chat bubbles have 18 corners: mine in forest green with white words, theirs white with a hairline edge.
+- **Invite:** the pending invite is a ruled row with the code in Fraunces, and the share icon has no tinted circle.
+- **Visual QA** at 390 (Tenants, Tenant Profile, Work Orders, detail, the new work order form, Invite, Properties, Property Overview, Messages, the thread, and My Requests) found the boxes, tints, red block, and outline walls listed above. All are fixed and re-checked, with no page errors.
+- **Comments:** none dropped.
+- **Checks:**
+  - Lint: the 13 known problems.
+  - Tests: 363 passed.
+  - Format: clean.
+  - iOS export with `--clear`: OK.

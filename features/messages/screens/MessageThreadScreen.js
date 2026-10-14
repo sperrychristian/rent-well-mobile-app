@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
   },
   older_text: {
     ...TYPE.label,
-    color: COLORS.info_text,
+    color: COLORS.cta,
   },
   empty_text: {
     ...TYPE.body_small,

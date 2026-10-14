@@ -3,7 +3,7 @@ import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import RemoteImage from '../../../components/RemoteImage';
 import StatusPill from '../../../components/ui/StatusPill';
-import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../../theme';
 import { formatDate } from '../../../utils/formatDate';
 import { formatCurrency } from '../../../utils/formatCurrency';
 
@@ -32,7 +32,7 @@ function WorkOrderCard(props) {
   const over_budget = has_estimate && expense_total > order.estimate;
 
   return (
-    <Card>
+    <Card style={styles.card}>
       {/* tapping the top part of the card opens the detail screen */}
       <Pressable
         onPress={props.onOpenDetail}
@@ -107,7 +107,7 @@ function WorkOrderCard(props) {
         <PrimaryButton
           title="Add Expense"
           icon="cash-outline"
-          variant="secondary"
+          variant="tertiary"
           size="small"
           style={styles.row_button}
           onPress={props.onAddExpense}
@@ -138,7 +138,7 @@ function WorkOrderCard(props) {
         <PrimaryButton
           title="Message"
           icon="chatbubble-ellipses-outline"
-          variant="secondary"
+          variant="tertiary"
           size="small"
           style={styles.row_button}
           onPress={props.onMessage}
@@ -146,7 +146,7 @@ function WorkOrderCard(props) {
         <PrimaryButton
           title="Details"
           icon="document-text-outline"
-          variant="secondary"
+          variant="tertiary"
           size="small"
           style={styles.row_button}
           onPress={props.onOpenDetail}
@@ -159,6 +159,13 @@ function WorkOrderCard(props) {
 export default WorkOrderCard;
 
 const styles = StyleSheet.create({
+  // the Hearth pass: each order is a ruled section on the paper with a hairline on top
+  card: {
+    marginTop: 0,
+    paddingVertical: SPACING.md,
+    borderTopWidth: BORDER.hairline,
+    borderTopColor: COLORS.hairline,
+  },
   top_row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -167,7 +174,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   title: {
-    ...TYPE.heading,
+    ...TYPE.subheading,
     flex: 1,
     color: COLORS.text,
   },
@@ -212,7 +219,7 @@ const styles = StyleSheet.create({
   button_row: {
     flexDirection: 'row',
     gap: SPACING.sm,
-    marginTop: SPACING.sm + SPACING.xs,
+    marginTop: SPACING.sm,
   },
   // the next status step is the bright button, the rest are outlined so the card doesn't turn into a rainbow
   row_button: {
@@ -220,7 +227,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
   },
   resolve_button: {
-    backgroundColor: COLORS.success,
-    borderColor: COLORS.success,
+    backgroundColor: COLORS.cta,
+    borderColor: COLORS.cta,
   },
 });

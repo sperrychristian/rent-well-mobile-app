@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
   },
   content: {
     alignItems: 'center',
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
   },
   heading: {
     ...list_styles.heading,

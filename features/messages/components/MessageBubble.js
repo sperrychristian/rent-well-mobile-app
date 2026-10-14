@@ -58,8 +58,9 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     alignItems: 'flex-start',
   },
+  // the Hearth pass: 18 corners, mine in forest green with white words, theirs white with a hairline edge
   bubble: {
-    borderRadius: RADIUS.xl - 2,
+    borderRadius: RADIUS.lg + SPACING.xxs,
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.sm + SPACING.xs,
   },
@@ -68,7 +69,9 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: SPACING.xs,
   },
   bubble_theirs: {
-    backgroundColor: COLORS.neutral_tint,
+    backgroundColor: COLORS.surface,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.hairline,
     borderBottomLeftRadius: SPACING.xs,
   },
   body: {

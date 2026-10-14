@@ -125,7 +125,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    padding: SPACING.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
     // the fintech pass: capped and centered on a tablet so lines stay a readable length
     width: '100%',
     maxWidth: SIZES.content_max_width + 160,

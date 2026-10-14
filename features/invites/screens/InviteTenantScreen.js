@@ -287,7 +287,7 @@ function InviteTenantScreen() {
                 accessibilityRole="button"
                 accessibilityLabel={'Share invite for ' + invite.tenantName}
               >
-                <Ionicons name="share-outline" size={24} color={COLORS.info_text} />
+                <Ionicons name="share-outline" size={24} color={COLORS.cta} />
               </Pressable>
             </View>
           ))
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   content: {
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
     width: '100%',
     maxWidth: SIZES.content_max_width,
     alignSelf: 'center',
@@ -419,21 +419,20 @@ const styles = StyleSheet.create({
     color: COLORS.text_muted,
     marginLeft: SPACING.xs,
   },
+  // the Hearth pass: a ruled row on the paper, no box
   invite_row: {
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
+    minHeight: SIZES.row_min_height,
+    paddingVertical: SPACING.md,
+    borderTopWidth: BORDER.hairline,
+    borderTopColor: COLORS.hairline,
   },
   invite_text: {
     flex: 1,
   },
   invite_code: {
-    ...TYPE.heading,
+    ...TYPE.title,
     color: COLORS.cta,
     letterSpacing: 1,
   },
@@ -444,8 +443,6 @@ const styles = StyleSheet.create({
   share_icon: {
     width: SIZES.touch,
     height: SIZES.touch,
-    borderRadius: RADIUS.pill,
-    backgroundColor: COLORS.surface_raised,
     alignItems: 'center',
     justifyContent: 'center',
   },

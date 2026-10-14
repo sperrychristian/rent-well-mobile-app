@@ -352,7 +352,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    padding: SPACING.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
     // the fintech pass: capped and centered on a tablet so lines stay a readable length
     width: '100%',
     maxWidth: SIZES.content_max_width + 160,
@@ -380,16 +381,12 @@ const styles = StyleSheet.create({
   offline_text: {
     ...list_styles.offline_text,
   },
+  // the Hearth pass: no box, just room under each property
   section: {
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm + SPACING.xs,
+    marginBottom: SPACING.lg,
   },
   section_title: {
-    ...TYPE.heading,
+    ...TYPE.title,
     color: COLORS.text,
     marginBottom: SPACING.xs,
   },
@@ -401,21 +398,19 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
   },
   unit_label: {
-    ...TYPE.label,
+    ...TYPE.overline,
     color: COLORS.text_muted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-    marginTop: SPACING.sm,
+    marginTop: SPACING.md,
+    marginBottom: SPACING.xs,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm + SPACING.xs,
-    minHeight: SIZES.touch + SPACING.sm,
-    backgroundColor: COLORS.surface_raised,
-    borderRadius: RADIUS.md,
-    padding: SPACING.sm + SPACING.xs,
-    marginTop: SPACING.xs + SPACING.xxs,
+    gap: SPACING.md,
+    minHeight: SIZES.row_min_height,
+    paddingVertical: SPACING.sm + SPACING.xs,
+    borderTopWidth: BORDER.hairline,
+    borderTopColor: COLORS.hairline,
   },
   pressed: {
     opacity: OPACITY.pressed,
@@ -431,13 +426,9 @@ const styles = StyleSheet.create({
     ...list_styles.detail,
   },
   count_tag: {
-    backgroundColor: COLORS.warning_tint,
-    borderRadius: RADIUS.pill,
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.xxs,
-    paddingVertical: SPACING.xxs,
-    paddingHorizontal: SPACING.sm,
   },
   count_text: {
     ...TYPE.label,
@@ -447,10 +438,8 @@ const styles = StyleSheet.create({
     color: COLORS.warning_text,
   },
   group_title: {
-    ...TYPE.label,
+    ...TYPE.overline,
     color: COLORS.text_muted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
     marginTop: SPACING.lg,
     marginBottom: SPACING.sm,
   },
@@ -458,29 +447,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
+    minHeight: SIZES.row_min_height,
+    paddingVertical: SPACING.md,
+    borderTopWidth: BORDER.hairline,
+    borderTopColor: COLORS.hairline,
   },
   invite_buttons: {
     gap: SPACING.xs,
   },
   small_button: {
-    backgroundColor: COLORS.surface_raised,
+    backgroundColor: 'transparent',
     borderWidth: BORDER.hairline,
     borderColor: COLORS.border_strong,
-    borderRadius: RADIUS.md,
+    borderRadius: RADIUS.button,
     minHeight: SIZES.button_small,
     justifyContent: 'center',
-    paddingHorizontal: SPACING.sm + SPACING.xs,
+    paddingHorizontal: SPACING.md,
     alignItems: 'center',
   },
+  // the Hearth pass: Revoke is terracotta words in a terracotta outline, no red block
   revoke_button: {
-    backgroundColor: COLORS.danger,
-    borderColor: COLORS.danger,
+    borderColor: COLORS.danger_text,
   },
   small_button_text: {
     ...TYPE.label,
@@ -507,6 +494,6 @@ const styles = StyleSheet.create({
   },
   // Revoke is the red one, so its words stay white
   revoke_text: {
-    color: COLORS.text_light,
+    color: COLORS.danger_text,
   },
 });

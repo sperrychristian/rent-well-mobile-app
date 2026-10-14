@@ -3,7 +3,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import UnreadBadge from './UnreadBadge';
 import { formatMessageTime } from '../utils/messageHelpers';
-import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER, OPACITY, SIZES } from '../../../theme';
+import { COLORS, SPACING, FONTS, TYPE, BORDER, OPACITY, SIZES } from '../../../theme';
 import Avatar from '../../../components/ui/Avatar';
 
 // one thread in the inbox: who, the last message, when, and how many are unread
@@ -61,15 +61,14 @@ function ConversationRow(props) {
 export default memo(ConversationRow);
 
 const styles = StyleSheet.create({
+  // the Hearth pass: a ruled row on the paper, no box
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
-    padding: SPACING.md - SPACING.xs,
-    marginBottom: SPACING.sm,
+    minHeight: SIZES.row_min_height,
+    paddingVertical: SPACING.md,
+    borderTopWidth: BORDER.hairline,
+    borderTopColor: COLORS.hairline,
   },
   pressed: {
     opacity: OPACITY.pressed,
@@ -104,7 +103,7 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   camera: {
-    opacity: 0.8,
+    opacity: OPACITY.subtle,
   },
   preview: {
     ...TYPE.body_small,
@@ -116,8 +115,6 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   // an unread thread gets an amber edge, the bold text and the badge say it too
-  row_unread: {
-    borderLeftWidth: BORDER.thick + 1,
-    borderLeftColor: COLORS.cta,
-  },
+  // (the Hearth pass dropped the edge, the bold text and the badge carry it)
+  row_unread: {},
 });

@@ -694,7 +694,7 @@ const styles = StyleSheet.create({
   link_text: {
     ...TYPE.label,
     fontSize: TYPE.body_small.fontSize,
-    color: COLORS.info_text,
+    color: COLORS.cta,
   },
   helper: {
     ...TYPE.caption,
