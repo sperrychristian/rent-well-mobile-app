@@ -128,3 +128,24 @@ export function listenForTenancyTaps(onOpen) {
 export function listenForWorkOrderTaps(onOpen) {
   return listenForTaps(workOrderFromResponse, onOpen);
 }
+
+// rent ledger pushes: payment:claimed (to the owner), payment:confirmed and payment:rejected (to the tenant),
+// and ledger:updated, onOpen gets { payment_id } or { tenancy_id } so the provider can pick the screen
+function ledgerFromResponse(response) {
+  const data =
+    response && response.notification ? response.notification.request.content.data : null;
+  if (!data || typeof data.type !== 'string') {
+    return null;
+  }
+  if (data.type.indexOf('payment:') === 0 && data.paymentId) {
+    return { payment_id: data.paymentId };
+  }
+  if (data.type === 'ledger:updated' && data.tenancyId) {
+    return { tenancy_id: data.tenancyId };
+  }
+  return null;
+}
+
+export function listenForLedgerTaps(onOpen) {
+  return listenForTaps(ledgerFromResponse, onOpen);
+}

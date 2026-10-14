@@ -3,6 +3,10 @@ import {
   formatCurrencyShort,
   isNegativeAmount,
   minus_sign,
+  formatCents,
+  isCents,
+  parseAmountToCents,
+  centsToInputText,
 } from './formatCurrency';
 
 describe('formatCurrency', () => {
@@ -54,5 +58,62 @@ describe('isNegativeAmount', () => {
     expect(isNegativeAmount(0)).toBe(false);
     expect(isNegativeAmount(-0.001)).toBe(false);
     expect(isNegativeAmount(null)).toBe(false);
+  });
+});
+
+describe('formatCents', () => {
+  test('whole cents, commas, two decimals, no floats', () => {
+    expect(formatCents(0)).toBe('$0.00');
+    expect(formatCents(5)).toBe('$0.05');
+    expect(formatCents(120000)).toBe('$1,200.00');
+    expect(formatCents(123456789)).toBe('$1,234,567.89');
+  });
+
+  test('matches formatCurrency for the same amount', () => {
+    [0, 1, 99, 100, 145000, 999999, -2500].forEach((cents) => {
+      expect(formatCents(cents)).toBe(formatCurrency(cents / 100));
+    });
+  });
+
+  test('signs and whole dollars', () => {
+    expect(formatCents(-1200)).toBe(minus_sign + '$12.00');
+    expect(formatCents(4000, { signed: true })).toBe('+$40.00');
+    expect(formatCents(0, { signed: true })).toBe('$0.00');
+    expect(formatCents(123950, { cents: false })).toBe('$1,240');
+    expect(formatCents(-49, { cents: false })).toBe('$0');
+  });
+
+  test('anything that is not whole cents shows a dash', () => {
+    expect(formatCents(12.5)).toBe('—');
+    expect(formatCents(null)).toBe('—');
+    expect(formatCents('100')).toBe('—');
+    expect(isCents(100)).toBe(true);
+    expect(isCents(1.5)).toBe(false);
+  });
+});
+
+describe('parseAmountToCents', () => {
+  test('reads dollars and cents as two whole numbers', () => {
+    expect(parseAmountToCents('1200')).toBe(120000);
+    expect(parseAmountToCents('1,200.5')).toBe(120050);
+    expect(parseAmountToCents('$45.05')).toBe(4505);
+    expect(parseAmountToCents(' 0.99 ')).toBe(99);
+    expect(parseAmountToCents('.5')).toBe(50);
+    expect(parseAmountToCents('12.')).toBe(1200);
+    // 0.1 + 0.2 style float trouble can't happen
+    expect(parseAmountToCents('0.29')).toBe(29);
+  });
+
+  test('turns away anything that is not a plain amount', () => {
+    ['', 'abc', '1.234', '-5', '1e3', '12.3.4', '$', null, undefined].forEach((text) => {
+      expect(parseAmountToCents(text)).toBeNull();
+    });
+  });
+
+  test('centsToInputText goes back the other way', () => {
+    expect(centsToInputText(120050)).toBe('1200.50');
+    expect(centsToInputText(5)).toBe('0.05');
+    expect(centsToInputText(null)).toBe('');
+    expect(parseAmountToCents(centsToInputText(98765))).toBe(98765);
   });
 });

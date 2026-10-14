@@ -1,0 +1,352 @@
+// pure helpers for the payments screens: words for statuses, months, balances, form checks, and receipt text
+// nothing here draws anything or touches the network, so the tests can check all of it
+import { formatCents, parseAmountToCents } from '../../../utils/formatCurrency';
+import { isDate, monthOf } from './ledgerMath';
+
+// ----- choices -----
+
+export const payment_methods = [
+  { value: 'bank_transfer', label: 'Bank transfer' },
+  { value: 'zelle', label: 'Zelle' },
+  { value: 'venmo', label: 'Venmo' },
+  { value: 'check', label: 'Check' },
+  { value: 'cash', label: 'Cash' },
+  { value: 'other', label: 'Other' },
+];
+
+export const charge_kinds = [
+  { value: 'other', label: 'Other charge' },
+  { value: 'deposit', label: 'Security deposit' },
+  { value: 'late_fee', label: 'Late fee' },
+  { value: 'rent', label: 'Rent' },
+];
+
+export function methodLabel(method) {
+  const found = payment_methods.find((item) => item.value === method);
+  return found ? found.label : 'Other';
+}
+
+export function chargeKindLabel(kind) {
+  const found = charge_kinds.find((item) => item.value === kind);
+  return found ? found.label : 'Charge';
+}
+
+// ----- status words, the pills always show these with an icon so a status is never color only -----
+
+const charge_pills = {
+  paid: { label: 'Paid', tone: 'success', icon: 'checkmark-circle' },
+  partial: { label: 'Partly paid', tone: 'info', icon: 'pie-chart' },
+  due: { label: 'Due', tone: 'warning', icon: 'calendar' },
+  overdue: { label: 'Overdue', tone: 'danger', icon: 'alert-circle' },
+  upcoming: { label: 'Upcoming', tone: 'neutral', icon: 'time' },
+  voided: { label: 'Voided', tone: 'neutral', icon: 'close-circle' },
+};
+
+const payment_pills = {
+  pending: { label: 'Waiting for confirmation', tone: 'warning', icon: 'hourglass' },
+  confirmed: { label: 'Confirmed', tone: 'success', icon: 'checkmark-circle' },
+  rejected: { label: 'Rejected', tone: 'danger', icon: 'close-circle' },
+  voided: { label: 'Voided', tone: 'neutral', icon: 'remove-circle' },
+};
+
+// the owner's per-tenant row: what needs attention first
+const row_pills = {
+  overdue: { label: 'Overdue', tone: 'danger', icon: 'alert-circle' },
+  pending: { label: 'Claim to review', tone: 'warning', icon: 'hourglass' },
+  due: { label: 'Due', tone: 'warning', icon: 'calendar' },
+  credit: { label: 'Credit', tone: 'info', icon: 'wallet' },
+  paid: { label: 'All paid up', tone: 'success', icon: 'checkmark-circle' },
+};
+
+const unknown_pill = { label: 'Unknown', tone: 'neutral', icon: 'help-circle' };
+
+export function chargePill(status) {
+  return charge_pills[status] || unknown_pill;
+}
+
+export function paymentPill(status) {
+  return payment_pills[status] || unknown_pill;
+}
+
+export function rowPill(row_status) {
+  return row_pills[row_status] || unknown_pill;
+}
+
+// ----- balances -----
+
+// a balance in words: owed, all paid up, or a credit, with the tone the screens color it by
+export function formatBalance(balance_cents) {
+  if (balance_cents > 0) {
+    return { text: formatCents(balance_cents) + ' due', tone: 'danger', short: 'Due' };
+  }
+  if (balance_cents < 0) {
+    return { text: formatCents(-balance_cents) + ' credit', tone: 'success', short: 'Credit' };
+  }
+  return { text: 'All paid up', tone: 'success', short: 'Paid up' };
+}
+
+// ----- months -----
+
+const month_names = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+// 2026-10 into October 2026
+export function monthTitle(month) {
+  const number = parseInt(String(month).slice(5, 7), 10);
+  if (!(number >= 1 && number <= 12)) {
+    return String(month);
+  }
+  return month_names[number - 1] + ' ' + String(month).slice(0, 4);
+}
+
+// 2026-11-01 into Nov 1, for "Rent due Nov 1"
+export function shortDate(date) {
+  if (!isDate(date)) {
+    return '';
+  }
+  const number = parseInt(date.slice(5, 7), 10);
+  return month_names[number - 1].slice(0, 3) + ' ' + parseInt(date.slice(8, 10), 10);
+}
+
+// charges and payments mixed together, grouped by month, newest month and newest item first
+// each item is { type: 'charge' | 'payment', date, ... } and comes back as [{ month, title, items }]
+export function groupByMonth(items) {
+  const groups = {};
+  items.forEach((item) => {
+    if (!isDate(item.date)) {
+      return;
+    }
+    const month = monthOf(item.date);
+    if (!groups[month]) {
+      groups[month] = [];
+    }
+    groups[month].push(item);
+  });
+  return Object.keys(groups)
+    .sort((a, b) => b.localeCompare(a))
+    .map((month) => ({
+      month: month,
+      title: monthTitle(month),
+      items: groups[month].sort(
+        (a, b) => b.date.localeCompare(a.date) || String(b.id).localeCompare(String(a.id)),
+      ),
+    }));
+}
+
+// ----- form checks, each gives back { errors, value } where value is ready to send -----
+
+const max_cents = 10000000;
+
+function amountError(amount_text) {
+  const cents = parseAmountToCents(amount_text);
+  if (cents === null) {
+    return { error: 'Enter an amount like 1200 or 1200.50.' };
+  }
+  if (cents <= 0) {
+    return { error: 'The amount has to be more than $0.' };
+  }
+  if (cents > max_cents) {
+    return { error: 'That amount is over the ' + formatCents(max_cents) + ' limit.' };
+  }
+  return { cents: cents };
+}
+
+function dateError(date, today, allow_future) {
+  if (!isDate(date)) {
+    return 'Pick a date as YYYY-MM-DD.';
+  }
+  if (!allow_future && date > today) {
+    return "A payment can't be dated in the future.";
+  }
+  return null;
+}
+
+// a payment the owner records, or a tenant's "I paid" claim (claims can't be refunds)
+// fields: { amount_text, method, paid_on, applies_to, is_refund, note }
+export function validatePayment(fields, today, is_claim) {
+  const errors = {};
+  const amount = amountError(fields.amount_text);
+  if (amount.error) {
+    errors.amount = amount.error;
+  }
+  if (!payment_methods.some((item) => item.value === fields.method)) {
+    errors.method = 'Pick how it was paid.';
+  }
+  const date_error = dateError(fields.paid_on, today, false);
+  if (date_error) {
+    errors.paid_on = date_error;
+  }
+  if (!['rent', 'deposit'].includes(fields.applies_to)) {
+    errors.applies_to = 'Pick rent or deposit.';
+  }
+  if (is_claim && fields.is_refund) {
+    errors.is_refund = 'Only your landlord can record a refund.';
+  }
+  if ((fields.note || '').length > 500) {
+    errors.note = 'Keep the note under 500 characters.';
+  }
+  return {
+    errors: errors,
+    value: {
+      amount_cents: amount.cents,
+      method: fields.method,
+      paid_on: fields.paid_on,
+      applies_to: fields.applies_to,
+      is_refund: !is_claim && !!fields.is_refund,
+      note: (fields.note || '').trim(),
+    },
+  };
+}
+
+// fields: { kind, description, amount_text, due_date }
+export function validateCharge(fields) {
+  const errors = {};
+  const amount = amountError(fields.amount_text);
+  if (amount.error) {
+    errors.amount = amount.error;
+  }
+  if (!charge_kinds.some((item) => item.value === fields.kind)) {
+    errors.kind = 'Pick what kind of charge this is.';
+  }
+  const description = (fields.description || '').trim();
+  if (description.length === 0) {
+    errors.description = 'Say what the charge is for.';
+  } else if (description.length > 120) {
+    errors.description = 'Keep it under 120 characters.';
+  }
+  if (!isDate(fields.due_date)) {
+    errors.due_date = 'Pick a due date as YYYY-MM-DD.';
+  }
+  return {
+    errors: errors,
+    value: {
+      kind: fields.kind,
+      description: description,
+      amount_cents: amount.cents,
+      due_date: fields.due_date,
+    },
+  };
+}
+
+// fields: { amount_text, due_day_text, grace_text, late_fee_text (blank for none), start_date }
+export function validateSchedule(fields) {
+  const errors = {};
+  const amount = amountError(fields.amount_text);
+  if (amount.error) {
+    errors.amount = amount.error;
+  }
+  const due_day = /^\d{1,2}$/.test(String(fields.due_day_text || '').trim())
+    ? parseInt(fields.due_day_text, 10)
+    : null;
+  if (due_day === null || due_day < 1 || due_day > 28) {
+    errors.due_day = 'Pick a day from 1 to 28 so every month has it.';
+  }
+  const grace_text = String(fields.grace_text === undefined ? '' : fields.grace_text).trim();
+  const grace_days =
+    grace_text === '' ? 0 : /^\d{1,2}$/.test(grace_text) ? parseInt(grace_text, 10) : null;
+  if (grace_days === null || grace_days > 27) {
+    errors.grace = 'Grace days are 0 to 27.';
+  }
+  let late_fee_cents = 0;
+  if (String(fields.late_fee_text || '').trim() !== '') {
+    const fee = parseAmountToCents(fields.late_fee_text);
+    if (fee === null || fee < 0 || fee > max_cents) {
+      errors.late_fee = 'Enter a late fee like 50, or leave it blank for none.';
+    } else {
+      late_fee_cents = fee;
+    }
+  }
+  if (!isDate(fields.start_date)) {
+    errors.start_date = 'Pick a start date as YYYY-MM-DD.';
+  }
+  return {
+    errors: errors,
+    value: {
+      amount_cents: amount.cents,
+      due_day: due_day,
+      grace_days: grace_days,
+      late_fee_cents: late_fee_cents,
+      start_date: fields.start_date,
+    },
+  };
+}
+
+// a reason for voiding or rejecting, so the other side knows why
+export function validateReason(text) {
+  const reason = (text || '').trim();
+  if (reason.length < 3) {
+    return { error: 'Give a short reason (at least 3 characters).', value: reason };
+  }
+  if (reason.length > 300) {
+    return { error: 'Keep the reason under 300 characters.', value: reason };
+  }
+  return { error: null, value: reason };
+}
+
+export function hasErrors(errors) {
+  return Object.keys(errors).length > 0;
+}
+
+// ----- the receipt someone can share -----
+
+// plain text so it works in any app the share sheet offers
+export function buildReceiptText(payment, ledger, generated_on) {
+  const place = ledger.unit_label
+    ? ledger.property_name + ', ' + ledger.unit_label
+    : ledger.property_name;
+  const lines = [
+    'Rent Well payment receipt',
+    '',
+    'Tenant: ' + (ledger.tenant_name || 'Tenant'),
+    'Property: ' + (place || 'Property'),
+    'Amount: ' + (payment.is_refund ? 'Refund of ' : '') + formatCents(payment.amount_cents),
+    'Paid on: ' + payment.paid_on,
+    'Method: ' + methodLabel(payment.method),
+    'Applied to: ' + (payment.applies_to === 'deposit' ? 'Security deposit' : 'Rent'),
+    'Status: ' + paymentPill(payment.status).label,
+  ];
+  if (payment.note) {
+    lines.push('Note: ' + payment.note);
+  }
+  if (payment.status === 'rejected' && payment.reject_reason) {
+    lines.push('Rejected because: ' + payment.reject_reason);
+  }
+  if (payment.status === 'voided' && payment.void_reason) {
+    lines.push('Voided because: ' + payment.void_reason);
+  }
+  lines.push('Reference: ' + payment.id);
+  lines.push('');
+  lines.push('Made in Rent Well on ' + generated_on + '. This is a record, not a bank statement.');
+  return lines.join('\n');
+}
+
+// what happened to a payment over time, oldest first, for the timeline on the detail screen
+const event_words = {
+  recorded: 'Recorded by the landlord',
+  claimed: 'Tenant said they paid',
+  confirmed: 'Confirmed by the landlord',
+  rejected: 'Rejected by the landlord',
+  voided: 'Voided by the landlord',
+};
+
+export function timelineFor(payment) {
+  return [...(payment.events || [])]
+    .sort((a, b) => String(a.at).localeCompare(String(b.at)))
+    .map((event) => ({
+      ...event,
+      title: event_words[event.type] || 'Updated',
+      date: String(event.at).slice(0, 10),
+    }));
+}

@@ -328,6 +328,75 @@ export function addWorkOrderPhotos(work_order_id, photo_keys) {
   return patchWorkOrder(work_order_id, { addPhotoKeys: photo_keys });
 }
 
+// ----- rent ledger (draft contract, see docs/API-ledger-draft.md) -----
+// the server sends camelCase, features/payments/utils/ledgerApi.js turns it into the app's shape
+
+// owner: every tenancy's ledger, tenant: their own (current and past)
+export async function getLedgers() {
+  const data = await api_client.request('GET', '/ledgers');
+  return data.ledgers;
+}
+
+export async function getLedger(tenancy_id) {
+  const data = await api_client.request('GET', '/ledgers/' + encodeURIComponent(tenancy_id));
+  return data.ledger;
+}
+
+// every ledger action answers with the whole ledger after the change, so the app just swaps it in
+function ledgerAction(method, path, body) {
+  return api_client.request(method, path, { body: body }).then((data) => data.ledger);
+}
+
+// owner only, schedule is { amountCents, dueDay, graceDays, lateFeeCents, startDate }
+export function setRentSchedule(tenancy_id, schedule) {
+  return ledgerAction(
+    'PUT',
+    '/tenancies/' + encodeURIComponent(tenancy_id) + '/rent-schedule',
+    schedule,
+  );
+}
+
+// owner only, charge is { kind, description, amountCents, dueDate }
+export function addCharge(tenancy_id, charge) {
+  return ledgerAction('POST', '/tenancies/' + encodeURIComponent(tenancy_id) + '/charges', charge);
+}
+
+export function voidCharge(charge_id, reason) {
+  return ledgerAction('POST', '/charges/' + encodeURIComponent(charge_id) + '/void', {
+    reason: reason,
+  });
+}
+
+// an owner's payment is confirmed right away, a tenant's is a claim that waits for the owner
+export function createPayment(tenancy_id, payment) {
+  return ledgerAction(
+    'POST',
+    '/tenancies/' + encodeURIComponent(tenancy_id) + '/payments',
+    payment,
+  );
+}
+
+// a push tap can open a payment that isn't loaded yet, this answers with { ledger, paymentId }
+export async function getPayment(payment_id) {
+  return api_client.request('GET', '/payments/' + encodeURIComponent(payment_id));
+}
+
+export function confirmPayment(payment_id) {
+  return ledgerAction('POST', '/payments/' + encodeURIComponent(payment_id) + '/confirm');
+}
+
+export function rejectPayment(payment_id, reason) {
+  return ledgerAction('POST', '/payments/' + encodeURIComponent(payment_id) + '/reject', {
+    reason: reason,
+  });
+}
+
+export function voidPayment(payment_id, reason) {
+  return ledgerAction('POST', '/payments/' + encodeURIComponent(payment_id) + '/void', {
+    reason: reason,
+  });
+}
+
 // ----- uploads -----
 
 const allowed_image_types = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];

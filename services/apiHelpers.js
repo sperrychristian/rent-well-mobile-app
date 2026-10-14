@@ -29,6 +29,11 @@ const friendly_messages = {
   NO_TENANCY: "Your account isn't linked to a rental yet. Ask your landlord for an invite.",
   TENANCY_REQUIRED: 'Pick which rental this request is for.',
   INVALID_STATUS_TRANSITION: "That status change isn't allowed.",
+  PAYMENT_NOT_PENDING: 'That payment was already confirmed, rejected, or voided. Pull to refresh.',
+  PAYMENT_VOIDED: 'That payment was already voided.',
+  CHARGE_VOIDED: 'That charge was already voided.',
+  REFUND_NOT_ALLOWED: 'Only your landlord can record a refund.',
+  NO_RENT_SCHEDULE: 'Set a rent schedule for this tenancy first.',
   INTERNAL_ERROR: 'Something went wrong on the server. Try again in a moment.',
   NETWORK_ERROR: "Can't reach the server. Check your connection and try again.",
 };
