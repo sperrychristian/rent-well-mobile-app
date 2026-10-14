@@ -31,23 +31,25 @@ function Card(props) {
 
 export default Card;
 
+// the Hearth pass: flat and interactive cards aren't boxes anymore, just a stretch of the page with room
+// above and below (rows inside bring their own hairlines), raised is the one white box with a hairline edge
+// for the rare spot that really needs one
 const styles = StyleSheet.create({
   card: {
-    borderRadius: RADIUS.lg,
-    padding: SPACING.md,
-    borderWidth: BORDER.hairline,
+    paddingVertical: SPACING.sm,
   },
   flat: {
-    backgroundColor: COLORS.surface,
-    borderColor: COLORS.border,
+    backgroundColor: 'transparent',
   },
   raised: {
     backgroundColor: COLORS.surface,
     borderColor: COLORS.border,
+    borderWidth: BORDER.hairline,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
     ...SHADOWS.low,
   },
   pressed: {
     backgroundColor: COLORS.surface_raised,
-    borderColor: COLORS.border_strong,
   },
 });

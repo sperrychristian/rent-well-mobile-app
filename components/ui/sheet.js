@@ -17,8 +17,8 @@ export const sheet_styles = StyleSheet.create({
   // a sheet that comes up from the bottom
   sheet: {
     backgroundColor: COLORS.surface,
-    borderTopLeftRadius: RADIUS.xl,
-    borderTopRightRadius: RADIUS.xl,
+    borderTopLeftRadius: RADIUS.md,
+    borderTopRightRadius: RADIUS.md,
     borderWidth: BORDER.hairline,
     borderColor: COLORS.border,
     paddingHorizontal: SPACING.md,
@@ -26,9 +26,10 @@ export const sheet_styles = StyleSheet.create({
     ...SHADOWS.high,
   },
   // a box in the middle of the screen
+  // the Hearth pass: sheets and pop-ups are the one place with a shadow, on 12 corners
   dialog: {
     backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.xl,
+    borderRadius: RADIUS.md,
     borderWidth: BORDER.hairline,
     borderColor: COLORS.border,
     padding: SPACING.md,
@@ -55,8 +56,8 @@ export const sheet_styles = StyleSheet.create({
   input: {
     backgroundColor: COLORS.surface_sunken,
     borderWidth: BORDER.hairline,
-    borderColor: COLORS.border_strong,
-    borderRadius: RADIUS.md,
+    borderColor: COLORS.hairline,
+    borderRadius: RADIUS.sm,
     color: COLORS.text,
   },
 });

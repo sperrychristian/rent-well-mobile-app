@@ -32,7 +32,13 @@ const tones = {
   'In Progress': tinted('warning', 'time'),
   'Resolved': tinted('success', 'checkmark-circle'),
   // priority, an emergency stays a solid red so it can't be missed
-  'Emergency': { fill: COLORS.priority_emergency, text: COLORS.text_light, icon: 'flash' },
+  // (the Hearth pass has no fills, so label_color is the terracotta the words use on the paper)
+  'Emergency': {
+    fill: COLORS.priority_emergency,
+    text: COLORS.text_light,
+    icon: 'flash',
+    label_color: COLORS.danger_text,
+  },
   'Normal': tinted('neutral', 'remove-circle'),
   'Low': tinted('info', 'arrow-down-circle'),
   // tenants and invites

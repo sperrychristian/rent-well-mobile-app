@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
-import PixelArt from './pixel/PixelArt';
-import { COLORS, SPACING, TYPE, FONTS, RADIUS } from '../../theme';
+import { Ionicons } from '@expo/vector-icons';
+import { COLORS, SPACING, TYPE } from '../../theme';
 
 // the Rent Well lockup: the pixel house, the name in the pixel font, and a one-line tagline in Inter
 // the pixel font is only ever this big, it gets hard to read small, everything else stays Inter
@@ -8,26 +8,27 @@ import { COLORS, SPACING, TYPE, FONTS, RADIUS } from '../../theme';
 //   tagline (default "Property management made simple", pass null to hide it), style
 // the fintech pass: the name is bold Inter with tight tracking now (no pixel font), and the house is a small
 // logomark in the brand colors, sitting in a soft tinted tile next to the name
+// the Hearth pass: a small forest green line house next to the name in Fraunces, no tile and no pixels,
+// and align (center or left) so the dashboard's top bar can put it on the left
 const sizes = {
-  large: { pixel: 3, name: 34, line: 40, gap: SPACING.md, tile: 76 },
-  medium: { pixel: 2, name: 26, line: 32, gap: SPACING.sm + SPACING.xs, tile: 52 },
-  small: { pixel: 2, name: 22, line: 28, gap: SPACING.sm, tile: 48 },
+  large: { icon: 34, name: 40, line: 48, gap: SPACING.sm },
+  medium: { icon: 26, name: 30, line: 38, gap: SPACING.sm },
+  small: { icon: 20, name: 22, line: 28, gap: SPACING.xs + SPACING.xxs },
 };
 
 function Wordmark(props) {
   const size = sizes[props.size] || sizes.large;
   const tagline = props.tagline === undefined ? 'Property management made simple' : props.tagline;
+  const is_left = props.align === 'left';
   return (
     <View
-      style={[styles.lockup, props.style]}
+      style={[styles.lockup, is_left && styles.left, props.style]}
       accessible
       accessibilityRole="header"
       accessibilityLabel={'Rent Well' + (tagline ? ', ' + tagline : '')}
     >
       <View style={[styles.row, { gap: size.gap }]}>
-        <View style={[styles.tile, { width: size.tile, height: size.tile }]}>
-          <PixelArt name="house_mark" pixel={size.pixel} />
-        </View>
+        <Ionicons name="home-outline" size={size.icon} color={COLORS.cta} />
         <Text
           style={[styles.name, { fontSize: size.name, lineHeight: size.line }]}
           // it's already big, so it can grow a little with the system font size but not past the screen
@@ -36,7 +37,9 @@ function Wordmark(props) {
           Rent Well
         </Text>
       </View>
-      {tagline ? <Text style={styles.tagline}>{tagline}</Text> : null}
+      {tagline ? (
+        <Text style={[styles.tagline, is_left && styles.tagline_left]}>{tagline}</Text>
+      ) : null}
     </View>
   );
 }
@@ -47,26 +50,24 @@ const styles = StyleSheet.create({
   lockup: {
     alignItems: 'center',
   },
+  left: {
+    alignItems: 'flex-start',
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  // the logomark sits in a soft indigo tile, like an app icon
-  tile: {
-    backgroundColor: COLORS.brand_tint,
-    borderRadius: RADIUS.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   name: {
-    fontFamily: FONTS.heading,
+    ...TYPE.wordmark,
     color: COLORS.title,
-    letterSpacing: -1,
   },
   tagline: {
     ...TYPE.body,
     color: COLORS.text_muted,
     textAlign: 'center',
-    marginTop: SPACING.sm + SPACING.xs,
+    marginTop: SPACING.sm,
+  },
+  tagline_left: {
+    textAlign: 'left',
   },
 });

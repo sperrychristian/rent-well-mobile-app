@@ -8,7 +8,7 @@ import { headerTitle } from './navigationMap';
 export const shared_screen_options = {
   headerShown: true,
   // the fintech pass: a white bar with the thin line under it (headerShadowVisible draws that line)
-  headerStyle: { backgroundColor: COLORS.surface },
+  headerStyle: { backgroundColor: COLORS.background },
   headerTintColor: COLORS.title,
   // the design pass: a bolder title on the navy, the same size the system header uses
   headerTitleStyle: {
@@ -17,7 +17,8 @@ export const shared_screen_options = {
     fontSize: TYPE.heading.fontSize,
   },
   headerTitleAlign: 'center',
-  headerShadowVisible: true,
+  // the Hearth pass: the bar is the same paper as the page, with no line or shadow under it
+  headerShadowVisible: false,
   // just the arrow, the previous screen's title next to it made the bar crowded
   headerBackButtonDisplayMode: 'minimal',
   contentStyle: { backgroundColor: COLORS.background },

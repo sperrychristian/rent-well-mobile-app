@@ -3,88 +3,94 @@
 // for the main call to action, theme.test.js checks the contrast of every text and surface pair below
 // the fintech pass flipped it to a light theme: white cards on a soft cool gray, ink navy text, one indigo
 // brand color for the main action, and a soft tint behind each state color for pills and banners
+// the Hearth pass made it warm and quiet: paper background, ink text, hairlines instead of cards,
+// one forest green for actions and good news, and terracotta for anything overdue or urgent
+// the token names stayed the same so every screen picks up the new look without changes
 
 export const COLORS = {
   // ----- base -----
   // primary is the indigo brand color, selected chips and the plain buttons use it with white text
-  primary: '#4F46E5',
-  background: '#F5F7FA',
-  text: '#0F1B2D',
+  primary: '#2F5D4A',
+  background: '#F7F3EC',
+  text: '#2A2520',
   // muted is the card and input surface (same as surface), the name stayed so old styles keep working
   muted: '#FFFFFF',
   // title is the header and heading color, ink navy on the light theme
-  title: '#0F1B2D',
-  title_text: '#0F1B2D',
+  title: '#2A2520',
+  title_text: '#2A2520',
 
   // ----- surfaces and lines -----
   surface: '#FFFFFF',
   // rows and secondary buttons inside a white card, a hair grayer than the card
-  surface_raised: '#F1F4F8',
+  surface_raised: '#F1EBE0',
   // text boxes sit on this so they read as fields
-  surface_sunken: '#F8FAFC',
-  border: '#E3E8EF',
-  border_strong: '#C3CBD6',
-  text_muted: '#5B6779',
+  surface_sunken: '#FFFFFF',
+  border: '#E4DCCF',
+  border_strong: '#CFC4B2',
+  text_muted: '#6B6259',
   // ink text for the light fills (amber, yellow)
-  on_light: '#0F1B2D',
+  on_light: '#2A2520',
+
+  // Hearth: the hairline under rows and around inputs (same as border, named for what it's for)
+  hairline: '#E4DCCF',
 
   // ----- the brand call to action (the name stayed from the amber days) -----
-  cta: '#4F46E5',
-  cta_pressed: '#4338CA',
+  cta: '#2F5D4A',
+  cta_pressed: '#244A3A',
   on_cta: '#FFFFFF',
-  focus: '#4F46E5',
-  brand_tint: '#EEF0FE',
+  focus: '#2F5D4A',
+  brand_tint: '#E8EFEA',
   // the quieter text on top of the indigo summary card
-  on_brand_muted: '#E0E4FD',
+  on_brand_muted: '#DCE8E1',
 
   // ----- actions and states as fills, white text on them is AA -----
-  success: '#157A3E',
-  action: '#2563EB',
-  info: '#2563EB',
-  accent: '#7C3AED',
-  highlight: '#FACC15',
-  warning: '#F79009',
-  danger: '#D92D20',
-  secondary: '#5B6779',
+  success: '#2F5D4A',
+  action: '#3E5C76',
+  info: '#3E5C76',
+  accent: '#6B4E71',
+  highlight: '#E9C46A',
+  warning: '#D9A441',
+  danger: '#A8442A',
+  secondary: '#6B6259',
 
   // ----- the same states as text or icons on white or gray -----
-  success_text: '#157A3E',
-  info_text: '#1D4ED8',
-  accent_text: '#6D28D9',
-  warning_text: '#A95A00',
-  danger_text: '#B42318',
+  success_text: '#2F5D4A',
+  info_text: '#3E5C76',
+  accent_text: '#6B4E71',
+  warning_text: '#83560F',
+  danger_text: '#A8442A',
 
   // ----- soft tints behind each state, for pills and banners (the matching _text color sits on them) -----
-  success_tint: '#E7F6EC',
-  info_tint: '#EAF1FE',
-  accent_tint: '#F2ECFE',
-  warning_tint: '#FEF4E2',
-  danger_tint: '#FDECEA',
-  neutral_tint: '#EEF1F5',
+  success_tint: '#E8EFEA',
+  info_tint: '#E9EEF2',
+  accent_tint: '#F0EAF0',
+  warning_tint: '#F6ECD9',
+  danger_tint: '#F6E6DF',
+  neutral_tint: '#EFE9DF',
 
   // ----- text on colored buttons -----
   text_light: '#FFFFFF',
-  text_dark: '#0F1B2D',
+  text_dark: '#2A2520',
 
   // ----- other surfaces -----
   surface_light: '#FFFFFF',
-  toast_background: '#0F1B2D',
-  skeleton: '#E9EEF4',
-  skeleton_shine: '#F2F5F9',
+  toast_background: '#2A2520',
+  skeleton: '#EDE6DA',
+  skeleton_shine: '#F3EEE6',
 
   // ----- priority -----
-  priority_emergency: '#B42318',
-  priority_low: '#0E7490',
+  priority_emergency: '#A8442A',
+  priority_low: '#3E5C76',
 
   // ----- expense tags -----
-  tag_billed: '#0F766E',
-  tag_recurring: '#475569',
-  tag_missing_receipt: '#A95A00',
+  tag_billed: '#2F5D4A',
+  tag_recurring: '#5E554C',
+  tag_missing_receipt: '#83560F',
 
   // ----- overlays -----
-  backdrop: 'rgba(15,27,45,0.45)',
+  backdrop: 'rgba(42,37,32,0.40)',
   photo_backdrop: 'black',
-  shadow: '#0F1B2D',
+  shadow: '#2A2520',
   shimmer_edge: 'rgba(255,255,255,0)',
   shimmer_peak: 'rgba(255,255,255,0.22)',
 
@@ -125,6 +131,8 @@ export const SPACING = {
   lg: 24,
   xl: 32,
   xxl: 48,
+  // Hearth: the big gap above a hero number and between sections
+  xxxl: 64,
 };
 
 export const FONT_SIZES = {
@@ -138,41 +146,57 @@ export const FONT_SIZES = {
 };
 
 export const FONTS = {
-  heading: 'Inter_800ExtraBold',
-  subheading: 'Inter_600SemiBold',
-  body: 'Inter_400Regular',
-  body_bold: 'Inter_700Bold',
+  // Hearth: DM Sans for everything you read, Fraunces only for the wordmark, big numbers, and names
+  heading: 'DMSans_600SemiBold',
+  subheading: 'DMSans_600SemiBold',
+  medium: 'DMSans_500Medium',
+  body: 'DMSans_400Regular',
+  body_bold: 'DMSans_600SemiBold',
+  serif: 'Fraunces_400Regular',
+  serif_medium: 'Fraunces_500Medium',
 };
 
 // the type scale: each style has its font, size, and line height so text lines up the same everywhere
 // line heights are about 1.3 to 1.5 times the size, which keeps larger system font sizes from clipping
 // the fintech pass tightened it: bold display figures with tight tracking, semibold headings, and small caps labels
 export const TYPE = {
-  display: { fontFamily: FONTS.body_bold, fontSize: 32, lineHeight: 40, letterSpacing: -0.6 },
-  title: { fontFamily: FONTS.body_bold, fontSize: 24, lineHeight: 30, letterSpacing: -0.4 },
-  heading: { fontFamily: FONTS.subheading, fontSize: 17, lineHeight: 24, letterSpacing: -0.2 },
-  subheading: { fontFamily: FONTS.subheading, fontSize: 15, lineHeight: 21 },
+  // the Hearth pass: Fraunces for the few big moments (display, title, figure, and the new hero and number),
+  // DM Sans everywhere else, row titles at 17 medium, and section labels in spaced-out caps
+  display: { fontFamily: FONTS.serif, fontSize: 32, lineHeight: 40, letterSpacing: -0.4 },
+  title: { fontFamily: FONTS.serif_medium, fontSize: 24, lineHeight: 30, letterSpacing: -0.2 },
+  heading: { fontFamily: FONTS.subheading, fontSize: 17, lineHeight: 24 },
+  subheading: { fontFamily: FONTS.medium, fontSize: 17, lineHeight: 24 },
   body: { fontFamily: FONTS.body, fontSize: 16, lineHeight: 24 },
   body_small: { fontFamily: FONTS.body, fontSize: 14, lineHeight: 20 },
-  label: { fontFamily: FONTS.subheading, fontSize: 13, lineHeight: 18 },
+  label: { fontFamily: FONTS.medium, fontSize: 13, lineHeight: 18 },
   caption: { fontFamily: FONTS.body, fontSize: 12, lineHeight: 16 },
   // the smallest text, for tags and message times
   micro: { fontFamily: FONTS.body, fontSize: 11, lineHeight: 15 },
   // message bubbles, a touch smaller than body so a thread fits more
   body_compact: { fontFamily: FONTS.body, fontSize: 15, lineHeight: 21 },
   // the big key figure on a summary card or an invite code
-  figure: { fontFamily: FONTS.body_bold, fontSize: 36, lineHeight: 44, letterSpacing: -0.8 },
+  figure: { fontFamily: FONTS.serif, fontSize: 36, lineHeight: 44, letterSpacing: -0.6 },
   // the small uppercase label over a section or a figure
   overline: {
     fontFamily: FONTS.subheading,
-    fontSize: 12,
-    lineHeight: 16,
-    letterSpacing: 0.6,
+    fontSize: 13,
+    lineHeight: 18,
+    letterSpacing: 1.04,
     textTransform: 'uppercase',
   },
   button: { fontFamily: FONTS.subheading, fontSize: 16, lineHeight: 22 },
   // text boxes skip the line height on purpose, iOS pushes single-line input text off center when it's set
   input: { fontFamily: FONTS.body, fontSize: 16 },
+  // Hearth: the one big number at the top of a screen (collected this month, a balance)
+  hero: { fontFamily: FONTS.serif, fontSize: 58, lineHeight: 66, letterSpacing: -1 },
+  // a second big number, smaller than the hero
+  number: { fontFamily: FONTS.serif, fontSize: 30, lineHeight: 38, letterSpacing: -0.4 },
+  // a person's or property's name at the top of a detail screen
+  name: { fontFamily: FONTS.serif_medium, fontSize: 30, lineHeight: 38, letterSpacing: -0.3 },
+  // the title of an empty state
+  empty_title: { fontFamily: FONTS.serif_medium, fontSize: 22, lineHeight: 28 },
+  // the Rent Well name next to the house mark
+  wordmark: { fontFamily: FONTS.serif_medium, fontSize: 22, lineHeight: 28, letterSpacing: -0.2 },
 };
 
 // every number that lines up in a column (money, counts) uses tabular figures so the digits don't wiggle
@@ -183,6 +207,8 @@ export const RADIUS = {
   md: 12,
   lg: 16,
   xl: 20,
+  // Hearth: every button is a full pill at 52 tall
+  button: 26,
   pill: 999,
 };
 
@@ -194,29 +220,25 @@ export const BORDER = {
 
 // shadows need both the iOS shadow props and Android elevation, so each preset has both
 // the fintech pass keeps them very soft, cards get a hairline border instead, and only floating things lift
+// the Hearth pass took them off everything but the sheets and pop-ups, so low and medium are flat now
+// (the names stayed so the old styles still work)
 export const SHADOWS = {
   none: {
     shadowOpacity: 0,
     elevation: 0,
   },
   low: {
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   medium: {
-    shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   high: {
     shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
     shadowRadius: 24,
     elevation: 8,
   },
@@ -233,8 +255,8 @@ export const OPACITY = {
 export const SIZES = {
   // the smallest tap target, from Apple's 44pt guideline
   touch: 44,
-  button_small: 36,
-  button_medium: 48,
+  button_small: 40,
+  button_medium: 52,
   button_large: 56,
   icon_small: 16,
   icon: 20,
@@ -246,6 +268,14 @@ export const SIZES = {
   thumb: 56,
   // keeps forms and lists a phone width on an iPad
   content_max_width: 600,
+  // Hearth: the side padding on every screen, the shortest a list row gets, its icon and chevron,
+  // the progress line, and the outlined initials circle in the dashboard's top bar
+  screen_padding: 24,
+  row_min_height: 64,
+  row_icon: 24,
+  chevron: 18,
+  progress: 4,
+  header_avatar: 44,
 };
 
 export const MOTION = {

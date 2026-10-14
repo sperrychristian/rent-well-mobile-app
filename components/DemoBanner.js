@@ -1,9 +1,8 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import PrimaryButton from './PrimaryButton';
-import StatusPill from './ui/StatusPill';
 import { useWorkOrders } from '../context/WorkOrdersContext';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../theme';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES, OPACITY } from '../theme';
 
 // shows a strip with an exit button, and only while the demo is running
 // it also has the switch between the landlord and tenant sides, which keeps the same demo data
@@ -32,9 +31,11 @@ function DemoBanner() {
     // the design pass: a navy card with an amber edge and a Demo pill, so it reads as part of the app
     // and not as an error, with the two buttons side by side (they wrap when the text is big)
     // the fintech pass: a slim strip on the soft indigo tint, calm instead of a warning, Exit stays red
+    // the Hearth pass: a thin forest green strip with white words and two text buttons, still impossible
+    // to miss, but calm (no red block)
     <View style={styles.banner} accessibilityRole="summary">
       <View style={styles.top_row}>
-        <StatusPill label="Demo" />
+        <Ionicons name="play-circle-outline" size={SIZES.icon} color={COLORS.on_cta} />
         <Text style={styles.text}>
           {(is_tenant ? 'Demo as Sam (tenant)' : 'Demo as the landlord') +
             ': sample data, nothing is saved'}
@@ -42,23 +43,26 @@ function DemoBanner() {
       </View>
       <View style={styles.button_row}>
         {/* the short label keeps both buttons on one row, the screen reader still hears which side it goes to */}
-        <PrimaryButton
-          title="Switch view"
-          accessibilityLabel={is_tenant ? 'Switch to Landlord view' : 'Switch to Tenant view'}
-          icon="swap-horizontal-outline"
-          variant="secondary"
-          size="small"
+        <Pressable
           onPress={handleSwitch}
-          style={styles.switch_button}
-        />
-        <PrimaryButton
-          title="Exit Demo Mode"
-          icon="exit-outline"
-          variant="destructive"
-          size="small"
+          hitSlop={SPACING.xs}
+          accessibilityRole="button"
+          accessibilityLabel={is_tenant ? 'Switch to Landlord view' : 'Switch to Tenant view'}
+          style={({ pressed }) => [styles.text_button, pressed && styles.pressed]}
+        >
+          <Ionicons name="swap-horizontal-outline" size={SIZES.icon_small} color={COLORS.on_cta} />
+          <Text style={styles.button_text}>Switch view</Text>
+        </Pressable>
+        <Pressable
           onPress={handleExit}
-          style={styles.exit_button}
-        />
+          hitSlop={SPACING.xs}
+          accessibilityRole="button"
+          accessibilityLabel="Exit Demo Mode"
+          style={({ pressed }) => [styles.text_button, pressed && styles.pressed]}
+        >
+          <Ionicons name="exit-outline" size={SIZES.icon_small} color={COLORS.on_cta} />
+          <Text style={[styles.button_text, styles.exit_text]}>Exit Demo Mode</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -69,39 +73,48 @@ export default DemoBanner;
 const styles = StyleSheet.create({
   banner: {
     width: '100%',
-    backgroundColor: COLORS.brand_tint,
-    borderRadius: RADIUS.md,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.sm + SPACING.xs,
+    backgroundColor: COLORS.cta,
+    borderRadius: RADIUS.sm,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
     marginBottom: SPACING.md,
     // same width cap as the screens under it on a tablet
-    maxWidth: SIZES.content_max_width + 160,
+    maxWidth: SIZES.content_max_width + SIZES.content_max_width / 4,
     alignSelf: 'center',
   },
   text: {
-    ...TYPE.caption,
-    color: COLORS.text,
+    ...TYPE.body_small,
+    color: COLORS.on_cta,
     flex: 1,
-  },
-  switch_button: {
-    flexGrow: 1,
-    marginHorizontal: 0,
-  },
-  exit_button: {
-    flexGrow: 1,
-    marginHorizontal: 0,
   },
   top_row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    marginBottom: SPACING.sm,
+    paddingTop: SPACING.xs,
   },
   button_row: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'space-between',
     gap: SPACING.sm,
+  },
+  text_button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    minHeight: SIZES.touch,
+  },
+  pressed: {
+    opacity: OPACITY.faint,
+  },
+  button_text: {
+    ...TYPE.label,
+    fontFamily: TYPE.heading.fontFamily,
+    color: COLORS.on_cta,
+  },
+  // exit is the one thing people look for, so it's underlined
+  exit_text: {
+    textDecorationLine: 'underline',
   },
 });

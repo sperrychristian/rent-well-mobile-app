@@ -49,19 +49,23 @@ import {
 import { setupNotificationHandler } from './services/push';
 import { StatusBar } from 'expo-status-bar';
 
+import { useEffect } from 'react';
+import * as SplashScreen from 'expo-splash-screen';
+import { useFonts, Fraunces_400Regular, Fraunces_500Medium } from '@expo-google-fonts/fraunces';
 import {
-  useFonts,
-  Inter_400Regular,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  Inter_800ExtraBold,
-} from '@expo-google-fonts/inter';
+  DMSans_400Regular,
+  DMSans_500Medium,
+  DMSans_600SemiBold,
+} from '@expo-google-fonts/dm-sans';
 
 // I make the stack once out here so every screen can be registered on it
 const Stack = createNativeStackNavigator();
 
 // set once at startup so a push that arrives while the app is open still shows a banner
 setupNotificationHandler();
+
+// the splash stays up until the fonts are ready, so the first screen never flashes in the wrong font
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 // the local data is saved per account, so it needs the signed-in user's id
 function AccountData(props) {
@@ -279,14 +283,27 @@ function AppNavigator() {
 
 export default function App() {
   // load the fonts first and show nothing until they're ready
-  const [fonts_loaded] = useFonts({
-    Inter_400Regular,
-    Inter_600SemiBold,
-    Inter_700Bold,
-    Inter_800ExtraBold,
+  // the Hearth pass: Fraunces for the big moments and DM Sans for the rest, and if they fail to load
+  // the app still opens and the system font fills in for any family it doesn't have
+  const [fonts_loaded, fonts_error] = useFonts({
+    Fraunces_400Regular,
+    Fraunces_500Medium,
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_600SemiBold,
   });
+  const fonts_done = fonts_loaded || !!fonts_error;
 
-  if (!fonts_loaded) {
+  useEffect(() => {
+    if (fonts_error) {
+      console.log('Fonts did not load, using the system font', fonts_error.message);
+    }
+    if (fonts_done) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [fonts_done, fonts_error]);
+
+  if (!fonts_done) {
     return null;
   }
 

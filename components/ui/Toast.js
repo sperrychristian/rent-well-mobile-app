@@ -3,7 +3,8 @@ import { Animated, AccessibilityInfo, Text, View, StyleSheet } from 'react-nativ
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useReduceMotion } from './useReduceMotion';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SHADOWS, SIZES } from '../../theme';
+import { lineIcon } from './lineIcon';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../theme';
 
 // a short dark bar at the bottom for routine success ("Payment recorded"), it goes away by itself
 // one host at the root so a toast still shows after the form that started it closes or the screen goes back
@@ -58,7 +59,7 @@ export function ToastProvider(props) {
           ]}
         >
           <View style={styles.toast} accessibilityLiveRegion="polite">
-            <Ionicons name={toast.icon} size={SIZES.icon} color={COLORS.brand_tint} />
+            <Ionicons name={lineIcon(toast.icon)} size={SIZES.icon} color={COLORS.text_light} />
             <Text style={styles.text}>{toast.text}</Text>
           </View>
         </Animated.View>
@@ -86,13 +87,11 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     maxWidth: SIZES.content_max_width,
     minHeight: SIZES.touch,
+    // the Hearth pass: an ink pill with white words, no edge or shadow
     backgroundColor: COLORS.toast_background,
-    borderRadius: RADIUS.lg,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border_strong,
+    borderRadius: RADIUS.pill,
     paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    ...SHADOWS.high,
+    paddingHorizontal: SPACING.lg,
   },
   text: {
     ...TYPE.body_small,

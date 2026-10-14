@@ -1,5 +1,5 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, SHADOWS, NUMBERS } from '../../theme';
+import { COLORS, SPACING, TYPE, BORDER, SIZES, NUMBERS } from '../../theme';
 
 // a row of tabs in a gray track where the picked one sits on a white pill, for filters that act like tabs
 // props: options (a list of { value, label, count }), value (the picked value), onChange, style, label (for screen readers)
@@ -43,26 +43,25 @@ function SegmentedControl(props) {
 export default SegmentedControl;
 
 const styles = StyleSheet.create({
+  // the Hearth pass: plain tabs on a hairline, the picked one gets a green underline and green words
   track: {
     flexDirection: 'row',
-    backgroundColor: COLORS.neutral_tint,
-    borderRadius: RADIUS.md,
-    padding: SPACING.xs,
+    borderBottomWidth: BORDER.hairline,
+    borderBottomColor: COLORS.hairline,
     gap: SPACING.xs,
   },
   option: {
     flex: 1,
-    minHeight: SIZES.touch - SPACING.xs * 2,
-    borderRadius: RADIUS.sm,
+    minHeight: SIZES.touch,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: SPACING.sm,
+    borderBottomWidth: BORDER.thick,
+    borderBottomColor: 'transparent',
+    marginBottom: -BORDER.hairline,
   },
   option_selected: {
-    backgroundColor: COLORS.surface,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
-    ...SHADOWS.low,
+    borderBottomColor: COLORS.cta,
   },
   pressed: {
     backgroundColor: COLORS.surface_raised,
@@ -72,7 +71,8 @@ const styles = StyleSheet.create({
     color: COLORS.text_muted,
   },
   text_selected: {
-    color: COLORS.text,
+    color: COLORS.cta,
+    fontFamily: TYPE.heading.fontFamily,
   },
   count: {
     color: COLORS.text_muted,

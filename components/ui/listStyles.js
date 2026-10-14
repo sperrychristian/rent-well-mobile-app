@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { chip_styles } from './Chip';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, SHADOWS, NUMBERS } from '../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, NUMBERS } from '../../theme';
 
 // the pieces every list screen's filter bar shares (search box, segmented control, chips, offline note, empty text)
 // screens spread these into their own style names so the JSX didn't have to change, and they all match now
@@ -10,38 +10,37 @@ export const list_styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  // the Hearth pass: white boxes with a hairline edge and small corners, 52 tall like the buttons
   search_input: {
     ...TYPE.input,
     backgroundColor: COLORS.surface,
     color: COLORS.text,
-    borderRadius: RADIUS.md,
+    borderRadius: RADIUS.sm,
     borderWidth: BORDER.hairline,
-    borderColor: COLORS.border_strong,
-    minHeight: SIZES.touch,
+    borderColor: COLORS.hairline,
+    minHeight: SIZES.button_medium,
     paddingHorizontal: SPACING.md - SPACING.xs,
     paddingVertical: SPACING.sm,
     marginBottom: SPACING.sm + SPACING.xs,
   },
+  // the Hearth pass: tabs on a hairline, the picked one underlined in green, no track or pill
   segment: {
-    backgroundColor: COLORS.neutral_tint,
-    borderRadius: RADIUS.md,
+    borderBottomWidth: BORDER.hairline,
+    borderBottomColor: COLORS.hairline,
     flexDirection: 'row',
-    padding: SPACING.xs,
     marginBottom: SPACING.sm + SPACING.xs,
   },
   segment_option: {
-    borderRadius: RADIUS.sm,
     flex: 1,
-    minHeight: SIZES.touch - SPACING.xs,
+    minHeight: SIZES.touch,
+    borderBottomWidth: BORDER.thick,
+    borderBottomColor: 'transparent',
     justifyContent: 'center',
     paddingHorizontal: SPACING.xs,
     alignItems: 'center',
   },
   segment_active: {
-    backgroundColor: COLORS.surface,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
-    ...SHADOWS.low,
+    borderBottomColor: COLORS.cta,
   },
   segment_text: {
     ...TYPE.label,
@@ -62,9 +61,7 @@ export const list_styles = StyleSheet.create({
   },
   offline_banner: {
     backgroundColor: COLORS.warning_tint,
-    borderRadius: RADIUS.md,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.warning,
+    borderRadius: RADIUS.sm,
     padding: SPACING.sm + SPACING.xs,
     marginBottom: SPACING.sm + SPACING.xs,
   },
@@ -85,10 +82,10 @@ export const list_styles = StyleSheet.create({
     ...TYPE.input,
     backgroundColor: COLORS.surface_sunken,
     color: COLORS.text,
-    borderRadius: RADIUS.md,
+    borderRadius: RADIUS.sm,
     borderWidth: BORDER.hairline,
-    borderColor: COLORS.border_strong,
-    minHeight: SIZES.touch,
+    borderColor: COLORS.hairline,
+    minHeight: SIZES.button_medium,
     paddingHorizontal: SPACING.md - SPACING.xs,
     paddingVertical: SPACING.sm,
     marginBottom: SPACING.sm,
@@ -99,13 +96,12 @@ export const list_styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   // one row in a plain list, used where a screen draws its own rows instead of cards
+  // the Hearth pass: no box, a hairline on top like the shared ListRow
   row: {
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm + SPACING.xs,
+    borderTopWidth: BORDER.hairline,
+    borderTopColor: COLORS.hairline,
+    minHeight: SIZES.row_min_height,
+    paddingVertical: SPACING.md,
   },
   detail: {
     ...TYPE.body_small,

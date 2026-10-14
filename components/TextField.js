@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../theme';
 
 // a labeled text box with its error right underneath, extra props go straight to the TextInput
@@ -33,9 +34,17 @@ function TextField(props) {
         }}
       />
       {error ? (
-        <Text style={styles.error} accessibilityLiveRegion="polite">
-          {error}
-        </Text>
+        // the Hearth pass: a small alert icon next to the error so it isn't color only
+        <View style={styles.error_row}>
+          <Ionicons
+            name="alert-circle-outline"
+            size={SIZES.icon_small}
+            color={COLORS.danger_text}
+          />
+          <Text style={styles.error} accessibilityLiveRegion="polite">
+            {error}
+          </Text>
+        </View>
       ) : helper ? (
         <Text style={styles.helper}>{helper}</Text>
       ) : null}
@@ -51,17 +60,17 @@ const styles = StyleSheet.create({
   },
   label: {
     ...TYPE.label,
-    color: COLORS.text,
+    color: COLORS.text_muted,
     marginBottom: SPACING.xs + SPACING.xxs,
   },
   input: {
     ...TYPE.input,
-    minHeight: SIZES.touch + SPACING.xs,
+    minHeight: SIZES.button_medium,
     backgroundColor: COLORS.surface_sunken,
     color: COLORS.text,
-    borderRadius: RADIUS.md,
-    borderWidth: BORDER.thin,
-    borderColor: COLORS.border,
+    borderRadius: RADIUS.sm,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.hairline,
     paddingHorizontal: SPACING.md - SPACING.xs,
     paddingVertical: SPACING.sm + SPACING.xxs,
   },
@@ -71,11 +80,17 @@ const styles = StyleSheet.create({
   input_error: {
     borderColor: COLORS.danger_text,
   },
+  error_row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginTop: SPACING.xs,
+  },
   error: {
     ...TYPE.caption,
     fontFamily: TYPE.label.fontFamily,
     color: COLORS.danger_text,
-    marginTop: SPACING.xs,
+    flexShrink: 1,
   },
   helper: {
     ...TYPE.caption,

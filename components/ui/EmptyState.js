@@ -1,20 +1,35 @@
 import { View, Text, StyleSheet } from 'react-native';
-import PixelArt from './pixel/PixelArt';
+import { Ionicons } from '@expo/vector-icons';
 import Button from './Button';
 import { COLORS, SPACING, TYPE, SIZES } from '../../theme';
 
 // what a list shows when there's nothing in it: a small pixel drawing, a title, one line, and maybe a button
 // props: illustration (empty_work_orders, empty_messages, empty_tenants, empty_documents, empty_checklists,
 //   empty_expenses, empty_payments), title, message, action_label, onAction, action_icon, style
+// the Hearth pass: one muted line icon instead of the drawing (the illustration names still pick it),
+// the title in Fraunces, and the button is the one green pill
+const illustration_icons = {
+  empty_work_orders: 'construct-outline',
+  empty_messages: 'chatbubble-outline',
+  empty_tenants: 'people-outline',
+  empty_documents: 'document-text-outline',
+  empty_checklists: 'checkbox-outline',
+  empty_expenses: 'receipt-outline',
+  empty_payments: 'card-outline',
+};
+
 function EmptyState(props) {
+  const icon = illustration_icons[props.illustration] || props.icon || 'leaf-outline';
   return (
     <View style={[styles.box, props.style]}>
-      {props.illustration ? (
-        <View style={styles.art}>
-          {/* the fintech pass: the drawing is muted to two quiet tones so it's an accent, not the main thing */}
-          <PixelArt name={props.illustration} pixel={4} duotone />
-        </View>
-      ) : null}
+      <Ionicons
+        name={icon}
+        size={SIZES.icon_large + SPACING.sm}
+        color={COLORS.text_muted}
+        style={styles.art}
+        accessible={false}
+        importantForAccessibility="no"
+      />
       <Text style={styles.title} accessibilityRole="header">
         {props.title}
       </Text>
@@ -23,8 +38,7 @@ function EmptyState(props) {
         <Button
           title={props.action_label}
           icon={props.action_icon}
-          variant="secondary"
-          size="small"
+          variant="primary"
           onPress={props.onAction}
           style={styles.action}
         />
@@ -46,18 +60,18 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   title: {
-    ...TYPE.heading,
+    ...TYPE.empty_title,
     color: COLORS.text,
     textAlign: 'center',
   },
   message: {
-    ...TYPE.body_small,
+    ...TYPE.body,
     color: COLORS.text_muted,
     textAlign: 'center',
-    marginTop: SPACING.xs,
+    marginTop: SPACING.sm,
     maxWidth: SIZES.content_max_width,
   },
   action: {
-    marginTop: SPACING.md,
+    marginTop: SPACING.lg,
   },
 });

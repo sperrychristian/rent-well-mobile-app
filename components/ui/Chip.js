@@ -40,12 +40,13 @@ export const chip_styles = StyleSheet.create({
     paddingVertical: SPACING.xs + SPACING.xxs,
     paddingHorizontal: SPACING.md - SPACING.xxs,
     borderRadius: RADIUS.pill,
-    backgroundColor: COLORS.surface,
+    backgroundColor: 'transparent',
     borderWidth: BORDER.hairline,
     borderColor: COLORS.border_strong,
   },
+  // the Hearth pass: see-through chips, the picked one gets a green edge and green words, no fill
   chip_active: {
-    backgroundColor: COLORS.brand_tint,
+    backgroundColor: 'transparent',
     borderColor: COLORS.cta,
   },
   chip_text: {

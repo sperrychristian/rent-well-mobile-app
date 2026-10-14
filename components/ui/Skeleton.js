@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View, Animated, StyleSheet } from 'react-native';
 import { useReduceMotion } from './useReduceMotion';
-import { COLORS, SPACING, RADIUS, BORDER } from '../../theme';
+import { COLORS, SPACING, RADIUS, BORDER, SIZES } from '../../theme';
 
 // grey placeholder rows that stand in for a list while it loads, so the screen doesn't jump when the data shows up
 // they pulse gently, or sit still when Reduce Motion is on
@@ -50,23 +50,22 @@ export default SkeletonList;
 const styles = StyleSheet.create({
   list: {
     alignSelf: 'stretch',
-    gap: SPACING.sm,
     paddingTop: SPACING.sm,
   },
+  // the Hearth pass: placeholder rows on the paper with a hairline on top, like the real rows
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
-    padding: SPACING.md,
-    borderRadius: RADIUS.lg,
-    backgroundColor: COLORS.surface,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
+    minHeight: SIZES.row_min_height,
+    paddingVertical: SPACING.md,
+    borderTopWidth: BORDER.hairline,
+    borderTopColor: COLORS.hairline,
   },
   circle: {
-    width: 40,
-    height: 40,
-    borderRadius: RADIUS.md,
+    width: SIZES.row_icon,
+    height: SIZES.row_icon,
+    borderRadius: RADIUS.sm,
     backgroundColor: COLORS.skeleton,
   },
   lines: {
@@ -74,7 +73,7 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   line: {
-    height: 12,
+    height: SPACING.md - SPACING.xs,
     borderRadius: RADIUS.sm,
     backgroundColor: COLORS.skeleton_shine,
   },
