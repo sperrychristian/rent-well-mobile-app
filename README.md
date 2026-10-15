@@ -105,3 +105,53 @@ The full guide is in `docs/DESIGN.md`.
 | --- | --- | --- | --- |
 | ![Dashboard](docs/screenshots/dashboard.png) | ![Tenant home](docs/screenshots/tenant_home.png) | ![Work orders](docs/screenshots/work_orders.png) | ![Thread](docs/screenshots/thread.png) |
 
+## Navigation (course assignment)
+
+**How to run:** `npm install`, then `npx expo start -c`, and open it in Expo Go or a simulator. With no backend running, tap **Try the Demo**, then **Demo as Landlord** or **Demo as Tenant**. Every screen on that side is reachable by tapping, and the back arrow returns.
+
+**The diagram** (one page, drawn from `navigation/navigationMap.js` with `npm run diagram`):
+- image: `assignment/navigation/navigation-diagram.png`
+- PDF: `assignment/navigation/navigation-diagram.pdf`
+- The diagram has one box per screen and one arrow per navigation. Arrows that pass a param are labeled with its name, and TAB and DRAWER badges mark the future tabs and drawer.
+- `ASSIGNMENT_NAV.md` has the full write-up.
+
+**Code:**
+- Everything is in one native stack in `App.js`. The header titles and the shared header style are in `navigation/screenOptions.js`.
+- Every screen is exported from `screens/index.js`. The files themselves live in `features/<feature>/screens/`.
+
+**Screens** (31). Every param is an id, never an object:
+
+| Header title | Route | Who | Params |
+| --- | --- | --- | --- |
+| Welcome to Rent Well | `Welcome` | Signed out | none |
+| Pick a Demo Role | `DemoChooser` | Signed out | none |
+| Log In to Rent Well | `Login` | Signed out | none |
+| Landlord Sign Up | `RegisterOwner` | Signed out | none |
+| Tenant Sign Up | `RegisterTenant` | Signed out | none |
+| Landlord Dashboard | `Dashboard` | Landlord | none |
+| All Work Orders | `WorkOrders` | Landlord | `tenantId`, `propertyId` |
+| Work Order | `WorkOrderDetail` | Landlord | `workOrderId` |
+| Your Tenants | `Tenants` | Landlord | `propertyId` |
+| Tenant Profile | `TenantDetail` | Landlord | `tenantId` |
+| Lease and Documents | `TenantLease` | Landlord | `tenantId` |
+| Your Properties | `Properties` | Landlord | none |
+| Property Overview | `PropertyDetail` | Landlord | `propertyId` |
+| Invite a New Tenant | `InviteTenant` | Landlord | none |
+| Document Storage | `Documents` | Landlord | none |
+| Condition Checklists | `Checklist` | Landlord | none |
+| Checklist | `ChecklistDetail` | Landlord | `checklistId` |
+| Property Expenses | `Expenses` | Landlord | none |
+| Mileage Log | `Mileage` | Landlord | none |
+| Year-End Tax Report | `YearEndReport` | Landlord | `yearId` |
+| My Home | `TenantHome` | Tenant | none |
+| My Repair Requests | `MyRequests` | Tenant | none |
+| Request | `RequestDetail` | Tenant | `workOrderId` |
+| Past Repair Requests | `PastRequests` | Tenant | none |
+| Add a Work Order | `NewWorkOrder` | Both | none |
+| Message Inbox | `Messages` | Both | none |
+| Conversation | `MessageThread` | Both | `conversationId` |
+| Payments and Rent | `Payments` | Both | none |
+| Rent Ledger | `TenantLedger` | Landlord | `tenancyId` |
+| Payment Record | `PaymentDetail` | Both | `paymentId` |
+| Settings and Profile | `Settings` | Both | none |
+

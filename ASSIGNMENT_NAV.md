@@ -6,6 +6,12 @@ Diagram: `assignment/navigation/navigation-diagram.pdf` (also `.png` and `.svg`)
 
 ## 1. Screen list
 
+### Where the screens live
+
+Every screen is its own component in its own file, inside a `screens/` folder for its feature: `features/<feature>/screens/<Name>Screen.js`. For example, `features/workOrders/screens/WorkOrderDetailScreen.js`. Grouping by feature keeps each screen next to its own components and helpers.
+
+There's also a top-level `screens/index.js` that re-exports all 31 screen components from those files, so the whole list is in one `screens` folder. The files didn't move, and `App.js` still imports them from the feature folders, so nothing changed at runtime. `navigation/screensIndex.test.js` checks that `screens/index.js` lists exactly the screens in the navigation map.
+
 ### Where the list came from
 
 The project proposal's screen inventory had 12 entries: Login / Role Detection, Owner Dashboard, Tenant Dashboard, Work Orders List, Work Order Detail / New Work Order, Messages (Thread List), Message Thread, Documents, Expenses, Move-In / Move-Out Checklist, Property & Tenant Management, and Profile / Settings.
