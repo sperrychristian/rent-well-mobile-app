@@ -105,3 +105,9 @@ The full guide is in `docs/DESIGN.md`.
 | --- | --- | --- | --- |
 | ![Dashboard](docs/screenshots/dashboard.png) | ![Tenant home](docs/screenshots/tenant_home.png) | ![Work orders](docs/screenshots/work_orders.png) | ![Thread](docs/screenshots/thread.png) |
 
+## First run
+
+- **New landlords:** a signed-in landlord sees a "Get set up" checklist at the top of the Dashboard: Add a property, Invite a tenant, Set the rent. Each step opens the screen or sheet that already does it, and a progress line shows how far along you are. It goes away when you finish, or when you tap "Hide this for good".
+- **The demo:** the demo opens a short tour the first time, with four things to try on that side. Settings has a "Take the tour" row to see it again.
+- **Empty lists:** every empty list says what goes there and has the one button that adds the first one.
+

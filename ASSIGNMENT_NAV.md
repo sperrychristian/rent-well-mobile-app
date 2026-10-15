@@ -82,9 +82,9 @@ Requirements before the changes:
 | Tenants | `features/tenants/screens/TenantsScreen.js` | Your Tenants | owner | built | propertyId | Dashboard, PropertyDetail (propertyId) | owner, demo owner | tab (owner) |
 | TenantDetail | `features/tenants/screens/TenantDetailScreen.js` | Tenant Profile | owner | built | tenantId | Tenants (tenantId) | owner, demo owner |  |
 | TenantLease | `features/tenants/screens/TenantLeaseScreen.js` | Lease and Documents | owner | stub | tenantId | TenantDetail (tenantId) | owner, demo owner |  |
-| Properties | `features/tenants/screens/PropertiesScreen.js` | Your Properties | owner | built | none | Tenants | owner, demo owner | drawer (owner) |
+| Properties | `features/tenants/screens/PropertiesScreen.js` | Your Properties | owner | built | none | Dashboard, Tenants | owner, demo owner | drawer (owner) |
 | PropertyDetail | `features/tenants/screens/PropertyDetailScreen.js` | Property Overview | owner | stub | propertyId | TenantDetail (propertyId), Properties (propertyId) | owner, demo owner |  |
-| InviteTenant | `features/invites/screens/InviteTenantScreen.js` | Invite a New Tenant | owner | built | none | Tenants [header], Messages [header] | owner, demo owner |  |
+| InviteTenant | `features/invites/screens/InviteTenantScreen.js` | Invite a New Tenant | owner | built | none | Dashboard, Tenants [header], Messages [header] | owner, demo owner |  |
 | Documents | `features/documents/screens/DocumentsScreen.js` | Document Storage | owner | built | none | Dashboard, TenantLease | owner, demo owner | drawer (owner) |
 | Checklist | `features/checklist/screens/ChecklistScreen.js` | Condition Checklists | owner | built | none | Dashboard | owner, demo owner | drawer (owner) |
 | ChecklistDetail | `features/checklist/screens/ChecklistDetailScreen.js` | Checklist #(short checklistId) | owner | built | checklistId | TenantDetail (checklistId), Checklist (checklistId), ChecklistDetail (checklistId) | owner, demo owner |  |

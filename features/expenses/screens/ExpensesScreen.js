@@ -564,6 +564,9 @@ function ExpensesScreen(props) {
             illustration="empty_expenses"
             title="No expenses match"
             message="Change the year or filters, or add an expense above."
+            action_label="Add Expense"
+            action_icon="add-circle-outline"
+            onAction={openNewForm}
           />
         }
         renderItem={({ item }) => {

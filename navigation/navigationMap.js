@@ -131,6 +131,21 @@ export const navigation_map = {
       { to: 'Documents', param: null, via: 'button', label: 'Documents' },
       { to: 'Checklist', param: null, via: 'button', label: 'Checklist' },
       { to: 'Expenses', param: null, via: 'button', label: 'Expenses' },
+      // the first-run setup checklist (real landlords only, it never shows in the demo)
+      {
+        to: 'Properties',
+        param: null,
+        via: 'button',
+        label: 'Setup: Add a property',
+        roles: ['owner'],
+      },
+      {
+        to: 'InviteTenant',
+        param: null,
+        via: 'button',
+        label: 'Setup: Invite a tenant',
+        roles: ['owner'],
+      },
       { to: 'Welcome', param: null, via: 'reset', label: 'Log Out or Exit Demo' },
       // the demo banner's switch, it keeps the demo data and starts the stack over on the tenant home
       {

@@ -133,10 +133,14 @@ function PropertiesScreen(props) {
           ) : undefined
         }
         ListEmptyComponent={
+          // the onboarding pass: the same Add Property form as the button above, right in the empty state
           <EmptyState
-            illustration="house_mark"
+            illustration="empty_properties"
             title="No properties yet"
-            message="Add your first one above."
+            message="Add the first place you rent out. Tenants, rent, and repairs all hang off a property."
+            action_label="Add Property"
+            action_icon="add-circle-outline"
+            onAction={() => openForm(null)}
           />
         }
         renderItem={({ item }) => (

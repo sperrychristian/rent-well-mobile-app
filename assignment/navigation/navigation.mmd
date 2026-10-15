@@ -1,8 +1,8 @@
 flowchart LR
-  classDef auth fill:#dbdde0,stroke:#0F1B2D,stroke-width:2px;
-  classDef owner fill:#dcebe2,stroke:#157A3E,stroke-width:2px;
-  classDef tenant fill:#ebe1fc,stroke:#7C3AED,stroke-width:2px;
-  classDef shared fill:#dee8fc,stroke:#2563EB,stroke-width:2px;
+  classDef auth fill:#dfdede,stroke:#2A2520,stroke-width:2px;
+  classDef owner fill:#e0e7e4,stroke:#2F5D4A,stroke-width:2px;
+  classDef tenant fill:#e9e4ea,stroke:#6B4E71,stroke-width:2px;
+  classDef shared fill:#e2e7ea,stroke:#3E5C76,stroke-width:2px;
   classDef stub stroke-dasharray: 6 4;
   subgraph signed_out [Signed out]
     Welcome["Welcome to Rent Well"]
@@ -60,6 +60,8 @@ flowchart LR
   Dashboard --> Documents
   Dashboard --> Checklist
   Dashboard --> Expenses
+  Dashboard --> Properties
+  Dashboard --> InviteTenant
   Dashboard -.-> Welcome
   Dashboard -.->|Switch to Tenant view| TenantHome
   WorkOrders -->|header: Add| NewWorkOrder

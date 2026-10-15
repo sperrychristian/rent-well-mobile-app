@@ -132,6 +132,12 @@ The app is light and warm (the Hearth pass, see the Design system section): pape
   - `Chip`, `SegmentedControl` (underline tabs), `EmptyState` (a muted line icon, a Fraunces title, a green pill), `Toast` (an ink pill), `Wordmark` (Fraunces and a green line house, `align`), `lineIcon` (filled to outline), `sheet.js` (12 corners), `listStyles.js`, `FadeInView`, `useReduceMotion`, `Skeleton`, `Badge`, `MoneyText`, `CurrencyInput`, `ModalCard`.
   - Removed: FeatureTile, QuickAction, StatTile, Sparkline, the pixel folder and its colors, ScreenTitle, and StatusPill.
 - **Homes:** `features/home/components/HomeTopBar` and `HeroNote`.
+- **Onboarding** (branch `leases-expenses-onboarding`):
+  - `OnboardingCard` is the real-mode landlord's setup checklist on the Dashboard. Its steps come from `features/home/utils/onboarding.js`.
+  - "Set the rent" opens `ScheduleFormModal` for the first tenancy with no schedule.
+  - Hiding it is saved per account under `rent_well_onboarding_dismissed_<user id>` (`hooks/useOnboardingDismissed.js`).
+  - `DemoTourSheet` and `hooks/useDemoTour.js` show four tips the first time someone enters the demo, saved under the device-level key `rent_well_demo_tour_seen`, which is not account data. Settings has a "Take the tour" row in the demo.
+  - Every list's EmptyState has a title, a sentence, and one action.
 - **Icons:** Ionicons outline only, which a sweep enforces.
 - **Brand assets:** `npm run assets` draws the green line house on paper (`assets/hearth-*.png`).
 - **Accessibility:**

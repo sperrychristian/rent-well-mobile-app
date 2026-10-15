@@ -141,6 +141,16 @@ Contrast is AA (at least 4.5 to 1) for every pairing:
 | Use terracotta for overdue and urgent only. | Use red blocks, or terracotta for routine things. |
 | Leave whitespace between sections. | Add shadows, gradients, or borders around groups. |
 
+## Onboarding, tours, and empty states
+
+- **Setup checklist** (`features/home/components/OnboardingCard.js`): it shows at the top of a new landlord's Dashboard in real mode only.
+  - Three ruled rows: Add a property, Invite a tenant, Set the rent.
+  - A done step gets a green check, struck-through words, and "Done". A step that can't start yet shows a muted icon and says why. The step to do next has a green icon and a chevron.
+  - A section header with "1 of 3", the green progress line, and a green "Hide this for good" text button.
+  - It goes away once every step is done.
+- **Demo tour** (`features/home/components/DemoTourSheet.js`): the standard bottom sheet. A Fraunces title, one muted line, four ruled rows each with a green line icon and a sentence, and one green "Got It" pill.
+- **Empty states:** every list says what goes there in a Fraunces title and one muted sentence, with the screen's own add action as the one green pill. A list that only a server fills (Messages for a tenant, Past Requests, tenant Payments) has no button.
+
 ## Payments screens
 
 The ledger screens follow the same rules:

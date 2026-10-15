@@ -88,7 +88,13 @@ function PastRequestsScreen() {
         data={ordersForTenant(local_orders, demo_tenant.name)}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
-        ListEmptyComponent={<EmptyState illustration="empty_work_orders" title="No requests." />}
+        ListEmptyComponent={
+          <EmptyState
+            illustration="empty_work_orders"
+            title="No past requests"
+            message="Anything you reported while you lived here shows up here to read."
+          />
+        }
         renderItem={renderRow}
       />
     );
@@ -105,7 +111,13 @@ function PastRequestsScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={reload} tintColor={COLORS.title} />
         }
-        ListEmptyComponent={<EmptyState illustration="empty_work_orders" title="No requests." />}
+        ListEmptyComponent={
+          <EmptyState
+            illustration="empty_work_orders"
+            title="No past requests"
+            message="Anything you reported while you lived here shows up here to read."
+          />
+        }
         renderItem={renderRow}
       />
     );

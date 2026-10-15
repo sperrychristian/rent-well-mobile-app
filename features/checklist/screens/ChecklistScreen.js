@@ -86,11 +86,15 @@ function ChecklistScreen(props) {
         ListEmptyComponent={
           <EmptyState
             illustration="empty_checklists"
-            title={
+            title={checklists.length === 0 ? 'No checklists yet' : 'No checklists match'}
+            message={
               checklists.length === 0
-                ? 'No checklists yet, tap New Checklist to start one'
-                : 'No checklists match'
+                ? 'Walk a unit at move-in and move-out, room by room, so deposits are easy to settle.'
+                : 'Try another status above.'
             }
+            action_label="New Checklist"
+            action_icon="add-circle-outline"
+            onAction={openNewForm}
           />
         }
         renderItem={({ item }) => {

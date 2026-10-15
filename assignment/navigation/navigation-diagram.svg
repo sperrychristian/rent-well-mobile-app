@@ -1,256 +1,258 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="3400" height="2200" viewBox="0 0 3400 2200" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
 <defs>
-<marker id="arrow-plain" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5B6779"/></marker>
-<marker id="arrow-param" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F1B2D"/></marker>
-<marker id="arrow-header" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#F79009"/></marker>
-<marker id="arrow-reset" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4F46E5"/></marker>
-<marker id="arrow-demo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker>
+<marker id="arrow-plain" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6B6259"/></marker>
+<marker id="arrow-param" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2A2520"/></marker>
+<marker id="arrow-header" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#D9A441"/></marker>
+<marker id="arrow-reset" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2F5D4A"/></marker>
+<marker id="arrow-demo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2F5D4A"/></marker>
 </defs>
 <rect width="100%" height="100%" fill="#FFFFFF"/>
-<text x="50" y="72" font-size="48" font-weight="800" fill="#0F1B2D">Rent Well: navigation map</text>
-<text x="50" y="112" font-size="24" fill="#0F1B2D">31 screens in one native stack. Each arrow is one way from a screen to another.</text>
-<text x="50" y="144" font-size="20" fill="#0F1B2D">The demo landlord and demo tenant reach the same screens as the real owner and tenant.</text>
-<text x="50" y="172" font-size="20" fill="#0F1B2D">Drawn from navigation/navigationMap.js by scripts/buildNavigationDiagram.mjs (npm run diagram).</text>
-<g transform="translate(50.0,195) scale(0.6682)">
-<rect x="2615" y="1073" width="1648" height="325.6666666666667" rx="22" fill="#f1f1f2" stroke="#0F1B2D" stroke-width="2.5" stroke-dasharray="6 7"/>
-<text x="2637" y="1109" font-size="24" font-weight="800" fill="#0F1B2D">Signed out (auth screens)</text>
-<path d="M3059,1213 L3069,1213 Q3079,1213 3079,1223 L3079,1237 Q3079,1251 3093,1251 L3489,1251" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M3059,1185 L3089,1185" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M3059,1241 L3064,1241 Q3069,1241 3069,1246 L3069,1308.6666666666667 Q3069,1318.6666666666667 3079,1318.6666666666667 L3089,1318.6666666666667" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M3449,1337.3333333333333 L4255.000001076721,1337.0052910048528 Q4268,1337 4281,1337 L4281,1337 Q4294,1337 4294,1350 L4294,1478 Q4294,1492 4280,1492 L1680.5,1492 Q1680,1492 1680,1491.5 L1680,1491.5 Q1680,1491 1679.5,1491 L842,1491 Q828,1491 828,1477 L828,1071 Q828,1057 814,1057 L792,1057" fill="none" stroke="#0F766E" stroke-width="3" stroke-dasharray="10 8" marker-end="url(#arrow-demo)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M3449,1300 L4300,1300 Q4314,1300 4314,1286 L4314,1061 Q4314,1047 4300,1047 L1680.5,1047 Q1680,1047 1680,1046.5 L1680,1046.5 Q1680,1046 1679.5,1046 L1664,1046" fill="none" stroke="#0F766E" stroke-width="3" stroke-dasharray="10 8" marker-end="url(#arrow-demo)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M3849,1256.6 L3854.1,1256.6 Q3859,1256.6 3859,1261.5 L3859,1261.5 Q3859,1266.4 3863.8999976566392,1266.3952078262528 L4254.000006695316,1266.0136919249924 Q4268,1266 4282,1266 L4290,1266 Q4304,1266 4304,1280 L4304,1622 Q4304,1636 4290,1636 L822,1636 Q808,1636 808,1622 L808,1079 Q808,1071 800,1071 L792,1071" fill="none" stroke="#4F46E5" stroke-width="2.2" stroke-dasharray="10 8" marker-end="url(#arrow-reset)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M3849,1234.2 L3859,1234.2 Q3869,1234.2 3869,1244.2 L3869,1244.8000000000002 Q3869,1255.4 3879.599994673404,1255.389373438924 L4254.000007035126,1255.0140350806666 Q4268,1255 4282,1255 L4310,1255 Q4324,1255 4324,1241 L4324,1051 Q4324,1037 4310,1037 L2527.5,1037 Q2524,1037 2524,1033.5 L2524,1033.5 Q2524,1030 2520.5,1030 L2105,1030 Q2102,1030 2102,1033 L2102,1033 Q2102,1036 2099,1036 L1664,1036" fill="none" stroke="#4F46E5" stroke-width="2.2" stroke-dasharray="10 8" marker-end="url(#arrow-reset)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M3489,1223 L3479,1223 Q3469,1223 3469,1213 L3469,1206.2 Q3469,1196.2 3459,1196.2 L3449,1196.2" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M3849,1211.8 L3856.2,1211.8 Q3859,1211.8 3859,1214.6 L3859,1214.6 Q3859,1217.4 3861.8,1217.4 L3879,1217.4" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M3449,1218.6 L3454,1218.6 Q3459,1218.6 3459,1223.6 L3459,1275 Q3459,1289 3473,1289 L4270,1289 Q4284,1289 4284,1303 L4284,1468 Q4284,1482 4270,1482 L2534.5,1482 Q2534,1482 2534,1481.5 L2534,1481.5 Q2534,1481 2533.5,1481 L2105,1481 Q2102,1481 2102,1478 L2102,1478 Q2102,1475 2099,1475 L852,1475 Q838,1475 838,1461 L838,1064 Q838,1050 824,1050 L792,1050" fill="none" stroke="#4F46E5" stroke-width="2.2" stroke-dasharray="10 8" marker-end="url(#arrow-reset)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M3449,1151.4 L3854,1151.4 Q3859,1151.4 3859,1156.4 L3859,1156.4 Q3859,1161.4 3864,1161.4 L3879,1161.4" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M3449,1173.8 L3468.4,1173.8 Q3479,1173.8 3479,1184.4 L3479,1190 Q3479,1195 3484,1195 L3489,1195" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M4239,1189.4 L4260.000760890243,1189.1103343325483 Q4268,1189 4276,1189 L4276,1189 Q4284,1189 4284,1181 L4284,1071 Q4284,1057 4270,1057 L2538,1057 Q2524,1057 2524,1071 L2524,1086 Q2524,1100 2510,1100 L2109.5,1100 Q2102,1100 2102,1092.5 L2102,1092.5 Q2102,1085 2094.5,1085 L1724,1085 Q1710,1085 1710,1071 L1710,1070 Q1710,1056 1696,1056 L1664,1056" fill="none" stroke="#4F46E5" stroke-width="2.2" stroke-dasharray="10 8" marker-end="url(#arrow-reset)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M3879,1189.4 L3849,1189.4" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M792,1015 L854,1015 Q868,1015 868,1001 L868,827 Q868,813 882,813 L2107.5,813 Q2112,813 2112,817.5 L2112,817.5 Q2112,822 2116.5,822 L2148,822" fill="none" stroke="#F79009" stroke-width="3" marker-end="url(#arrow-header)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M792,987 L814,987 Q828,987 828,973 L828,660 Q828,646 842,646 L1686,646 Q1700,646 1700,632 L1700,434 Q1700,421 1713,421 L1726,421" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M792,1001 L834,1001 Q848,1001 848,987 L848,682 Q848,668 862,668 L2510,668 Q2524,668 2524,682 L2524,723 Q2524,737 2538,737 L2615,737" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M792,1008 L844,1008 Q858,1008 858,994 L858,736 Q858,722 872,722 L1726,722" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M792,973 L800,973 Q808,973 808,965 L808,638 Q808,624 822,624 L1676,624 Q1690,624 1690,610 L1690,293 Q1690,279 1704,279 L1726,279" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M792,1043 L834,1043 Q848,1043 848,1057 L848,1408 Q848,1422 862,1422 L1726,1422" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M792,980 L805,980 Q818,980 818,967 L818,649 Q818,635 832,635 L1246,635 Q1260,635 1260,621 L1260,585 Q1260,571 1274,571 L1304,571" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M792,1064 L805,1064 Q818,1064 818,1077 L818,1550 Q818,1564 832,1564 L884,1564" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M792,994 L824,994 Q838,994 838,980 L838,671 Q838,657 852,657 L1696,657 Q1710,657 1710,643 L1710,575 Q1710,567 1718,567 L1726,567" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M792,1036 L844,1036 Q858,1036 858,1050 L858,1227 Q858,1241 872,1241 L2699,1241" fill="none" stroke="#4F46E5" stroke-width="2.2" stroke-dasharray="10 8" marker-end="url(#arrow-reset)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M792,1029 L854,1029 Q868,1029 868,1043 L868,1046 Q868,1060 882,1060 L1304,1060" fill="none" stroke="#0F766E" stroke-width="3" stroke-dasharray="10 8" marker-end="url(#arrow-demo)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2086,421 L2560,421 Q2574,421 2574,435 L2574,705 Q2574,719 2588,719 L2615,719" fill="none" stroke="#F79009" stroke-width="3" marker-end="url(#arrow-header)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2086,393 L2094,393 Q2102,393 2102,385 L2102,383.5 Q2102,374 2111.5,374 L2520,374 Q2534,374 2534,360 L2534,183 Q2534,169 2548,169 L3044.3333333333335,169" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2086,365 L2094,365 Q2102,365 2102,357 L2102,337 Q2102,323 2116,323 L2510,323 Q2524,323 2524,309 L2524,79 Q2524,65 2538,65 L4509,65 Q4523,65 4523,79 L4523,152 Q4523,166 4537,166 L4567,166" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M3404.3333333333335,188 L4567,188" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2086,270 L2540,270 Q2554,270 2554,284 L2554,297 Q2554,311 2568,311 L2615,311" fill="none" stroke="#F79009" stroke-width="3" marker-end="url(#arrow-header)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2086,232 L2094,232 Q2102,232 2102,224 L2102,217 Q2102,203 2116,203 L2148,203" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M1726,223 L1694,223 Q1680,223 1680,209 L1680,142 Q1680,128 1666,128 L412,128 Q398,128 398,142 L398,352 Q398,365 385,365 L372,365" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M372,351 L380,351 Q388,351 388,343 L388,62 Q388,48 402,48 L4519,48 Q4533,48 4533,62 L4533,129 Q4533,143 4547,143 L4567,143" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M372,379 L394,379 Q408,379 408,365 L408,265 Q408,251 422,251 L884,251" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M372,421 L385,421 Q398,421 398,434 L398,1812 Q398,1826 412,1826 L2510,1826 Q2524,1826 2524,1812 L2524,1597 Q2524,1583 2538,1583 L3259,1583" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M372,393 L884,393" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M372,407 L394,407 Q408,407 408,421 L408,465 Q408,479 422,479 L1666,479 Q1680,479 1680,465 L1680,407 Q1680,393 1694,393 L1726,393" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M372,435 L380,435 Q388,435 388,443 L388,1865 Q388,1879 402,1879 L1666,1879 Q1680,1879 1680,1865 L1680,1787 Q1680,1773 1694,1773 L1726,1773" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M1244,393 L1252,393 Q1260,393 1260,401 L1260,519 Q1260,533 1274,533 L1304,533" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2148,165 L1274,165 Q1260,165 1260,179 L1260,215 Q1260,223 1252,223 L1244,223" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M1244,251 L1726,251" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M1244,279 L1252,279 Q1260,279 1260,287 L1260,351 Q1260,365 1274,365 L1726,365" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M1244,1564 L1666,1564 Q1680,1564 1680,1578 L1680,1721 Q1680,1735 1694,1735 L1726,1735" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M1846,1698 L1846,1693 Q1846,1688 1851,1688 L1961,1688 Q1966,1688 1966,1693 L1966,1698" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2086,595 L2615,595" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2086,567 L2099.5,567 Q2112,567 2112,554.5 L2112,554.5 Q2112,542 2124.5,542 L2550,542 Q2564,542 2564,528 L2564,486 Q2564,472 2578,472 L2615,472" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2086,539 L2094,539 Q2102,539 2102,531 L2102,509 Q2102,495 2116,495 L2530,495 Q2544,495 2544,481 L2544,221 Q2544,207 2558,207 L3044.3333333333335,207" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M1664,1026 L1696,1026 Q1710,1026 1710,1012 L1710,997 Q1710,983 1724,983 L2108,983 Q2122,983 2122,969 L2122,873 Q2122,860 2135,860 L2148,860" fill="none" stroke="#F79009" stroke-width="3" marker-end="url(#arrow-header)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M1664,995 L1672,995 Q1680,995 1680,987 L1680,774 Q1680,760 1694,760 L1726,760" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M1664,1016 L1686,1016 Q1700,1016 1700,1002 L1700,910 Q1700,897 1713,897 L1726,897" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M1664,1005 L1677,1005 Q1690,1005 1690,992 L1690,838 Q1690,824 1704,824 L2088,824 Q2102,824 2102,810 L2102,782 Q2102,768 2116,768 L2568,768 Q2574,768 2574,762 L2574,762 Q2574,756 2580,756 L2615,756" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M1664,1087 L1672,1087 Q1680,1087 1680,1095 L1680,1370 Q1680,1384 1694,1384 L1726,1384" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M1664,1066 L1686,1066 Q1700,1066 1700,1080 L1700,1145 Q1700,1158 1713,1158 L1726,1158" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M1664,1077 L1677,1077 Q1690,1077 1690,1090 L1690,1216 Q1690,1230 1704,1230 L2515.5,1230 Q2524,1230 2524,1221.5 L2524,1221.5 Q2524,1213 2532.5,1213 L2699,1213" fill="none" stroke="#4F46E5" stroke-width="2.2" stroke-dasharray="10 8" marker-end="url(#arrow-reset)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M1304,1022 L792,1022" fill="none" stroke="#0F766E" stroke-width="3" stroke-dasharray="10 8" marker-end="url(#arrow-demo)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2086,897 L2099,897 Q2112,897 2112,910 L2112,916 Q2112,930 2126,930 L2570,930 Q2584,930 2584,916 L2584,807 Q2584,793 2598,793 L2615,793" fill="none" stroke="#F79009" stroke-width="3" marker-end="url(#arrow-header)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2086,925 L2094,925 Q2102,925 2102,933 L2102,963 Q2102,977 2116,977 L2518,977 Q2524,977 2524,971 L2524,971 Q2524,965 2530,965 L2615,965" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2615,775 L2588,775 Q2574,775 2574,789 L2574,899 Q2574,913 2560,913 L2146,913 Q2132,913 2132,899 L2132,883 Q2132,869 2118,869 L2086,869" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2086,722 L2094,722 Q2102,722 2102,714 L2102,713 Q2102,704 2111,704 L2540,704 Q2554,704 2554,690 L2554,363 Q2554,349 2568,349 L2615,349" fill="none" stroke="#F79009" stroke-width="3" marker-end="url(#arrow-header)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2086,760 L2100.5,760 Q2102,760 2102,758.5 L2102,758.5 Q2102,757 2103.5,757 L2510,757 Q2524,757 2524,771 L2524,828 Q2524,842 2538,842 L4509,842 Q4523,842 4523,828 L4523,225 Q4523,211 4537,211 L4567,211" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2086,1384 L2094,1384 Q2102,1384 2102,1392 L2102,1397.5 Q2102,1411 2115.5,1411 L2525,1411 Q2534,1411 2534,1420 L2534,1420 Q2534,1429 2543,1429 L4509,1429 Q4523,1429 4523,1443 L4523,1503 Q4523,1517 4537,1517 L4567,1517" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2086,1422 L2099,1422 Q2102,1422 2102,1425 L2102,1425 Q2102,1428 2105,1428 L2510,1428 Q2524,1428 2524,1442 L2524,1531 Q2524,1545 2538,1545 L3259,1545" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M3619,1583 L4309,1583 Q4314,1583 4314,1578 L4314,1578 Q4314,1573 4319,1573 L4567,1573" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M4567,1545 L3619,1545" fill="none" stroke="#0F1B2D" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2508,822 L2550,822 Q2564,822 2564,808 L2564,647 Q2564,633 2578,633 L2615,633" fill="none" stroke="#5B6779" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
-<path d="M2508,860 L2580,860 Q2594,860 2594,874 L2594,1171 Q2594,1185 2608,1185 L2699,1185" fill="none" stroke="#4F46E5" stroke-width="2.2" stroke-dasharray="10 8" marker-end="url(#arrow-reset)" stroke-linejoin="round" opacity="0.92"/>
-<rect x="2699" y="1157" width="360" height="112" rx="16" fill="#dbdde0" stroke="#0F1B2D" stroke-width="7"/>
-<text x="2715" y="1191" font-size="28" font-weight="800" fill="#0F1B2D">Welcome to Rent Well</text>
-<text x="2715" y="1221" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">Welcome</text>
-<rect x="2713" y="1235" width="171" height="24" rx="12" fill="#0F1B2D"/><text x="2798.5" y="1252" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">START: signed out</text>
-<rect x="3089" y="1262.6666666666667" width="360" height="112" rx="16" fill="#dbdde0" stroke="#0F1B2D" stroke-width="3.5"/>
-<text x="3105" y="1296.6666666666667" font-size="28" font-weight="800" fill="#0F1B2D">Pick a Demo Role</text>
-<text x="3105" y="1326.6666666666667" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">DemoChooser</text>
-<rect x="3489" y="1167" width="360" height="112" rx="16" fill="#dbdde0" stroke="#0F1B2D" stroke-width="3.5"/>
-<text x="3505" y="1201" font-size="28" font-weight="800" fill="#0F1B2D">Log In to Rent Well</text>
-<text x="3505" y="1231" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">Login</text>
-<rect x="3089" y="1129" width="360" height="112" rx="16" fill="#dbdde0" stroke="#0F1B2D" stroke-width="3.5"/>
-<text x="3105" y="1163" font-size="28" font-weight="800" fill="#0F1B2D">Landlord Sign Up</text>
-<text x="3105" y="1193" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">RegisterOwner</text>
-<rect x="3879" y="1133.4" width="360" height="112" rx="16" fill="#dbdde0" stroke="#0F1B2D" stroke-width="3.5"/>
-<text x="3895" y="1167.4" font-size="28" font-weight="800" fill="#0F1B2D">Tenant Sign Up</text>
-<text x="3895" y="1197.4" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">RegisterTenant</text>
-<rect x="432" y="966" width="360" height="112" rx="16" fill="#dcebe2" stroke="#157A3E" stroke-width="7"/>
-<text x="448" y="1000" font-size="28" font-weight="800" fill="#0F1B2D">Landlord Dashboard</text>
-<text x="448" y="1030" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">Dashboard</text>
-<rect x="446" y="1044" width="189" height="24" rx="12" fill="#0F1B2D"/><text x="540.5" y="1061" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">START: owner + demo</text>
-<rect x="641" y="1044" width="99" height="24" rx="12" fill="#FACC15"/><text x="690.5" y="1061" text-anchor="middle" font-size="15" font-weight="800" fill="#0F1B2D">TAB owner</text>
-<rect x="1726" y="337" width="360" height="112" rx="16" fill="#dcebe2" stroke="#157A3E" stroke-width="3.5"/>
-<text x="1742" y="371" font-size="28" font-weight="800" fill="#0F1B2D">All Work Orders</text>
-<text x="1742" y="401" font-size="16" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">WorkOrders(tenantId, propertyId)</text>
-<rect x="1740" y="415" width="99" height="24" rx="12" fill="#FACC15"/><text x="1789.5" y="432" text-anchor="middle" font-size="15" font-weight="800" fill="#0F1B2D">TAB owner</text>
-<rect x="3044.3333333333335" y="132" width="360" height="112" rx="16" fill="#dcebe2" stroke="#157A3E" stroke-width="3.5"/>
-<text x="3060.3333333333335" y="166" font-size="28" font-weight="800" fill="#0F1B2D">Work Order</text>
-<text x="3060.3333333333335" y="196" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">WorkOrderDetail(workOrderId)</text>
-<rect x="1726" y="195" width="360" height="112" rx="16" fill="#dcebe2" stroke="#157A3E" stroke-width="3.5"/>
-<text x="1742" y="229" font-size="28" font-weight="800" fill="#0F1B2D">Your Tenants</text>
-<text x="1742" y="259" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">Tenants(propertyId)</text>
-<rect x="1740" y="273" width="99" height="24" rx="12" fill="#FACC15"/><text x="1789.5" y="290" text-anchor="middle" font-size="15" font-weight="800" fill="#0F1B2D">TAB owner</text>
-<rect x="12" y="337" width="360" height="112" rx="16" fill="#dcebe2" stroke="#157A3E" stroke-width="3.5"/>
-<text x="28" y="371" font-size="28" font-weight="800" fill="#0F1B2D">Tenant Profile</text>
-<text x="28" y="401" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">TenantDetail(tenantId)</text>
-<rect x="884" y="337" width="360" height="112" rx="16" fill="#FFFFFF" stroke="#157A3E" stroke-width="3.5" stroke-dasharray="14 8"/>
-<text x="900" y="371" font-size="28" font-weight="800" fill="#0F1B2D">Lease and Documents</text>
-<text x="900" y="401" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">TenantLease(tenantId)</text>
-<rect x="898" y="415" width="54" height="24" rx="12" fill="#F79009"/><text x="925" y="432" text-anchor="middle" font-size="15" font-weight="800" fill="#0F1B2D">STUB</text>
-<rect x="2148" y="128" width="360" height="112" rx="16" fill="#dcebe2" stroke="#157A3E" stroke-width="3.5"/>
-<text x="2164" y="162" font-size="28" font-weight="800" fill="#0F1B2D">Your Properties</text>
-<text x="2164" y="192" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">Properties</text>
-<rect x="2162" y="206" width="126" height="24" rx="12" fill="#0E7490"/><text x="2225" y="223" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">DRAWER owner</text>
-<rect x="884" y="195" width="360" height="112" rx="16" fill="#FFFFFF" stroke="#157A3E" stroke-width="3.5" stroke-dasharray="14 8"/>
-<text x="900" y="229" font-size="28" font-weight="800" fill="#0F1B2D">Property Overview</text>
-<text x="900" y="259" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">PropertyDetail(propertyId)</text>
-<rect x="898" y="273" width="54" height="24" rx="12" fill="#F79009"/><text x="925" y="290" text-anchor="middle" font-size="15" font-weight="800" fill="#0F1B2D">STUB</text>
-<rect x="2615" y="274" width="360" height="112" rx="16" fill="#dcebe2" stroke="#157A3E" stroke-width="3.5"/>
-<text x="2631" y="308" font-size="28" font-weight="800" fill="#0F1B2D">Invite a New Tenant</text>
-<text x="2631" y="338" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">InviteTenant</text>
-<rect x="1304" y="496" width="360" height="112" rx="16" fill="#dcebe2" stroke="#157A3E" stroke-width="3.5"/>
-<text x="1320" y="530" font-size="28" font-weight="800" fill="#0F1B2D">Document Storage</text>
-<text x="1320" y="560" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">Documents</text>
-<rect x="1318" y="574" width="126" height="24" rx="12" fill="#0E7490"/><text x="1381" y="591" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">DRAWER owner</text>
-<rect x="884" y="1508" width="360" height="112" rx="16" fill="#dcebe2" stroke="#157A3E" stroke-width="3.5"/>
-<text x="900" y="1542" font-size="28" font-weight="800" fill="#0F1B2D">Condition Checklists</text>
-<text x="900" y="1572" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">Checklist</text>
-<rect x="898" y="1586" width="126" height="24" rx="12" fill="#0E7490"/><text x="961" y="1603" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">DRAWER owner</text>
-<rect x="1726" y="1698" width="360" height="112" rx="16" fill="#dcebe2" stroke="#157A3E" stroke-width="3.5"/>
-<text x="1742" y="1732" font-size="28" font-weight="800" fill="#0F1B2D">Checklist</text>
-<text x="1742" y="1762" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">ChecklistDetail(checklistId)</text>
-<rect x="1726" y="511" width="360" height="112" rx="16" fill="#dcebe2" stroke="#157A3E" stroke-width="3.5"/>
-<text x="1742" y="545" font-size="28" font-weight="800" fill="#0F1B2D">Property Expenses</text>
-<text x="1742" y="575" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">Expenses</text>
-<rect x="1740" y="589" width="126" height="24" rx="12" fill="#0E7490"/><text x="1803" y="606" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">DRAWER owner</text>
-<rect x="2615" y="558" width="360" height="112" rx="16" fill="#dcebe2" stroke="#157A3E" stroke-width="3.5"/>
-<text x="2631" y="592" font-size="28" font-weight="800" fill="#0F1B2D">Mileage Log</text>
-<text x="2631" y="622" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">Mileage</text>
-<rect x="2615" y="416" width="360" height="112" rx="16" fill="#dcebe2" stroke="#157A3E" stroke-width="3.5"/>
-<text x="2631" y="450" font-size="28" font-weight="800" fill="#0F1B2D">Year-End Tax Report</text>
-<text x="2631" y="480" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">YearEndReport(yearId)</text>
-<rect x="1304" y="985" width="360" height="112" rx="16" fill="#ebe1fc" stroke="#7C3AED" stroke-width="7"/>
-<text x="1320" y="1019" font-size="28" font-weight="800" fill="#0F1B2D">My Home</text>
-<text x="1320" y="1049" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">TenantHome</text>
-<rect x="1318" y="1063" width="198" height="24" rx="12" fill="#0F1B2D"/><text x="1417" y="1080" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">START: tenant + demo</text>
-<rect x="1522" y="1063" width="108" height="24" rx="12" fill="#FACC15"/><text x="1576" y="1080" text-anchor="middle" font-size="15" font-weight="800" fill="#0F1B2D">TAB tenant</text>
-<rect x="1726" y="841" width="360" height="112" rx="16" fill="#ebe1fc" stroke="#7C3AED" stroke-width="3.5"/>
-<text x="1742" y="875" font-size="28" font-weight="800" fill="#0F1B2D">My Repair Requests</text>
-<text x="1742" y="905" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">MyRequests</text>
-<rect x="1740" y="919" width="108" height="24" rx="12" fill="#FACC15"/><text x="1794" y="936" text-anchor="middle" font-size="15" font-weight="800" fill="#0F1B2D">TAB tenant</text>
-<rect x="2615" y="909" width="360" height="112" rx="16" fill="#ebe1fc" stroke="#7C3AED" stroke-width="3.5"/>
-<text x="2631" y="943" font-size="28" font-weight="800" fill="#0F1B2D">Request</text>
-<text x="2631" y="973" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">RequestDetail(workOrderId)</text>
-<rect x="1726" y="1102" width="360" height="112" rx="16" fill="#ebe1fc" stroke="#7C3AED" stroke-width="3.5"/>
-<text x="1742" y="1136" font-size="28" font-weight="800" fill="#0F1B2D">Past Repair Requests</text>
-<text x="1742" y="1166" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">PastRequests</text>
-<rect x="2615" y="700" width="360" height="112" rx="16" fill="#dee8fc" stroke="#2563EB" stroke-width="3.5"/>
-<text x="2631" y="734" font-size="28" font-weight="800" fill="#0F1B2D">Add a Work Order</text>
-<text x="2631" y="764" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">NewWorkOrder</text>
-<rect x="1726" y="685" width="360" height="112" rx="16" fill="#dee8fc" stroke="#2563EB" stroke-width="3.5"/>
-<text x="1742" y="719" font-size="28" font-weight="800" fill="#0F1B2D">Message Inbox</text>
-<text x="1742" y="749" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">Messages</text>
-<rect x="1740" y="763" width="99" height="24" rx="12" fill="#FACC15"/><text x="1789.5" y="780" text-anchor="middle" font-size="15" font-weight="800" fill="#0F1B2D">TAB owner</text>
-<rect x="1845" y="763" width="108" height="24" rx="12" fill="#FACC15"/><text x="1899" y="780" text-anchor="middle" font-size="15" font-weight="800" fill="#0F1B2D">TAB tenant</text>
-<rect x="4567" y="121" width="360" height="112" rx="16" fill="#dee8fc" stroke="#2563EB" stroke-width="3.5"/>
-<text x="4583" y="155" font-size="28" font-weight="800" fill="#0F1B2D">Conversation</text>
-<text x="4583" y="185" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">MessageThread(conversationId)</text>
-<rect x="1726" y="1347" width="360" height="112" rx="16" fill="#dee8fc" stroke="#2563EB" stroke-width="3.5"/>
-<text x="1742" y="1381" font-size="28" font-weight="800" fill="#0F1B2D">Payments and Rent</text>
-<text x="1742" y="1411" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">Payments</text>
-<rect x="3259" y="1508" width="360" height="112" rx="16" fill="#dcebe2" stroke="#157A3E" stroke-width="3.5"/>
-<text x="3275" y="1542" font-size="28" font-weight="800" fill="#0F1B2D">Rent Ledger</text>
-<text x="3275" y="1572" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">TenantLedger(tenancyId)</text>
-<rect x="4567" y="1489" width="360" height="112" rx="16" fill="#dee8fc" stroke="#2563EB" stroke-width="3.5"/>
-<text x="4583" y="1523" font-size="28" font-weight="800" fill="#0F1B2D">Payment Record</text>
-<text x="4583" y="1553" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">PaymentDetail(paymentId)</text>
-<rect x="2148" y="785" width="360" height="112" rx="16" fill="#FFFFFF" stroke="#2563EB" stroke-width="3.5" stroke-dasharray="14 8"/>
-<text x="2164" y="819" font-size="28" font-weight="800" fill="#0F1B2D">Settings and Profile</text>
-<text x="2164" y="849" font-size="19" font-family="Menlo, Courier New, monospace" fill="#0F1B2D">Settings</text>
-<rect x="2162" y="863" width="54" height="24" rx="12" fill="#F79009"/><text x="2189" y="880" text-anchor="middle" font-size="15" font-weight="800" fill="#0F1B2D">STUB</text>
-<rect x="2222" y="863" width="126" height="24" rx="12" fill="#0E7490"/><text x="2285" y="880" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">DRAWER owner</text>
-<circle cx="2647" cy="1213" r="13" fill="#0F1B2D"/><path d="M2660,1213 L2693,1213" stroke="#0F1B2D" stroke-width="5" marker-end="url(#arrow-param)"/>
-<g><rect x="1812.5" y="1496" width="187" height="32" rx="16" fill="#FFFFFF" stroke="#0F766E" stroke-width="2.5"/><text x="1906" y="1518.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F766E">Demo as Landlord</text></g>
-<g><rect x="2244.5" y="1051" width="167" height="32" rx="16" fill="#FFFFFF" stroke="#0F766E" stroke-width="2.5"/><text x="2328" y="1073.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F766E">Demo as Tenant</text></g>
-<g><rect x="1365" y="817" width="238" height="32" rx="16" fill="#FFFFFF" stroke="#F79009" stroke-width="2.5"/><text x="1484" y="839.48" text-anchor="middle" font-size="18" font-weight="700" fill="#F79009">header: Settings gear</text></g>
-<g><rect x="945" y="1064" width="238" height="32" rx="16" fill="#FFFFFF" stroke="#0F766E" stroke-width="2.5"/><text x="1064" y="1086.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F766E">Switch to Tenant view</text></g>
-<g><rect x="2259.5" y="425" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#F79009" stroke-width="2.5"/><text x="2328" y="447.48" text-anchor="middle" font-size="18" font-weight="700" fill="#F79009">header: Add</text></g>
-<g><rect x="2259.5" y="378" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="2328" y="400.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">workOrderId</text></g>
-<g><rect x="3355.5" y="69" width="167" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="3439" y="91.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">conversationId</text></g>
-<g><rect x="4340" y="192" width="167" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="4423.5" y="214.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">conversationId</text></g>
-<g><rect x="2244.5" y="274" width="167" height="32" rx="16" fill="#FFFFFF" stroke="#F79009" stroke-width="2.5"/><text x="2328" y="296.48" text-anchor="middle" font-size="18" font-weight="700" fill="#F79009">header: Invite</text></g>
-<g><rect x="1010.5" y="132" width="107" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="1064" y="154.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">tenantId</text></g>
-<g><rect x="1822.5" y="12" width="167" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="1906" y="34.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">conversationId</text></g>
-<g><rect x="548.5" y="255" width="127" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="612" y="277.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">propertyId</text></g>
-<g><rect x="1425.5" y="1830" width="117" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="1484" y="1852.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">tenancyId</text></g>
-<g><rect x="558.5" y="397" width="107" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="612" y="419.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">tenantId</text></g>
-<g><rect x="1010.5" y="483" width="107" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="1064" y="505.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">tenantId</text></g>
-<g><rect x="995.5" y="1883" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="1064" y="1905.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">checklistId</text></g>
-<g><rect x="1420.5" y="169" width="127" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="1484" y="191.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">propertyId</text></g>
-<g><rect x="1420.5" y="255" width="127" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="1484" y="277.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">propertyId</text></g>
-<g><rect x="1420.5" y="369" width="127" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="1484" y="391.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">propertyId</text></g>
-<g><rect x="1415.5" y="1568" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="1484" y="1590.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">checklistId</text></g>
-<g><rect x="1837.5" y="1653" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="1906" y="1675.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">checklistId</text></g>
-<g><rect x="2285" y="546" width="86" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="2328" y="568.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">yearId</text></g>
-<g><rect x="2259.5" y="499" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="2328" y="521.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">workOrderId</text></g>
-<g><rect x="1787" y="987" width="238" height="32" rx="16" fill="#FFFFFF" stroke="#F79009" stroke-width="2.5"/><text x="1906" y="1009.48" text-anchor="middle" font-size="18" font-weight="700" fill="#F79009">header: Settings gear</text></g>
-<g><rect x="935" y="986" width="258" height="32" rx="16" fill="#FFFFFF" stroke="#0F766E" stroke-width="2.5"/><text x="1064" y="1008.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F766E">Switch to Landlord view</text></g>
-<g><rect x="2259.5" y="934" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#F79009" stroke-width="2.5"/><text x="2328" y="956.48" text-anchor="middle" font-size="18" font-weight="700" fill="#F79009">header: Add</text></g>
-<g><rect x="2259.5" y="981" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="2328" y="1003.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">workOrderId</text></g>
-<g><rect x="2244.5" y="708" width="167" height="32" rx="16" fill="#FFFFFF" stroke="#F79009" stroke-width="2.5"/><text x="2328" y="730.48" text-anchor="middle" font-size="18" font-weight="700" fill="#F79009">header: Invite</text></g>
-<g><rect x="3355.5" y="846" width="167" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="3439" y="868.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">conversationId</text></g>
-<g><rect x="3380.5" y="1433" width="117" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="3439" y="1455.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">paymentId</text></g>
-<g><rect x="2269.5" y="1432" width="117" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="2328" y="1454.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">tenancyId</text></g>
-<g><rect x="4365" y="1577" width="117" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="4423.5" y="1599.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">paymentId</text></g>
-<g><rect x="4365" y="1509" width="117" height="32" rx="16" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="2.5"/><text x="4423.5" y="1531.48" text-anchor="middle" font-size="18" font-weight="700" fill="#0F1B2D">tenancyId</text></g>
+<text x="50" y="72" font-size="48" font-weight="800" fill="#2A2520">Rent Well: navigation map</text>
+<text x="50" y="112" font-size="24" fill="#2A2520">31 screens in one native stack. Each arrow is one way from a screen to another.</text>
+<text x="50" y="144" font-size="20" fill="#2A2520">The demo landlord and demo tenant reach the same screens as the real owner and tenant.</text>
+<text x="50" y="172" font-size="20" fill="#2A2520">Drawn from navigation/navigationMap.js by scripts/buildNavigationDiagram.mjs (npm run diagram).</text>
+<g transform="translate(50.0,195) scale(0.6855)">
+<rect x="1113" y="1277" width="948" height="628" rx="22" fill="#f2f2f2" stroke="#2A2520" stroke-width="2.5" stroke-dasharray="6 7"/>
+<text x="1135" y="1313" font-size="24" font-weight="800" fill="#2A2520">Signed out (auth screens)</text>
+<path d="M1947,1445 L1947,1613 Q1947,1627 1933,1627 L1770,1627 Q1765,1627 1765,1632 L1765,1637" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1857,1445 L1857,1455 Q1857,1465 1847,1465 L1762,1465 Q1757,1465 1757,1470 L1757,1475" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1767,1445 L1767,1450 Q1767,1455 1762,1455 L1387,1455 Q1377,1455 1377,1465 L1377,1475" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1317,1587 L1317,1912 Q1317,1926 1303,1926 L960,1926 Q946,1926 946,1912 L946,998 Q946,984 960,984 L974,984 Q988,984 988,970 L988,458 Q988,444 1002,444 L2021,444 Q2035,444 2035,430 L2035,388" fill="none" stroke="#2F5D4A" stroke-width="3" stroke-dasharray="10 8" marker-end="url(#arrow-demo)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1437,1587 L1437,1932 Q1437,1946 1451,1946 L2073,1946 Q2087,1946 2087,1932 L2087,987 Q2087,984 2090,984 L2090,984 Q2093,984 2093,981 L2093,801 Q2093,790 2082,790 L2079,790 Q2071,790 2071,782 L2071,774" fill="none" stroke="#2F5D4A" stroke-width="3" stroke-dasharray="10 8" marker-end="url(#arrow-demo)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1567,1749 L1567,1942 Q1567,1956 1553,1956 L558,1956 Q544,1956 544,1942 L544,793 Q544,790 547,790 L547,790 Q550,790 550,787 L550,428 Q550,414 564,414 L1962,414 Q1975,414 1975,401 L1975,388" fill="none" stroke="#2F5D4A" stroke-width="2.2" stroke-dasharray="10 8" marker-end="url(#arrow-reset)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1639,1749 L1639,1754 Q1639,1759 1634,1759 L1624,1759 Q1610,1759 1610,1773 L1610,1922 Q1610,1936 1624,1936 L2083,1936 Q2097,1936 2097,1922 L2097,1239.5 Q2097,1236 2100.5,1236 L2100.5,1236 Q2104,1236 2104,1232.5 L2104,774" fill="none" stroke="#2F5D4A" stroke-width="2.2" stroke-dasharray="10 8" marker-end="url(#arrow-reset)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1675,1637 L1675,1627 Q1675,1617 1685,1617 L1779,1617 Q1793,1617 1793,1603 L1793,1587" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1783,1749 L1783,1754 Q1783,1759 1788,1759 L1796,1759 Q1801,1759 1801,1764 L1801,1769" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1649,1587 L1649,1592 Q1649,1597 1644,1597 L1498,1597 Q1484,1597 1484,1611 L1484,1922 Q1484,1936 1470,1936 L950,1936 Q936,1936 936,1922 L936,1180 Q936,1166 922,1166 L795,1166 Q781,1166 781,1152 L781,448 Q781,434 795,434 L2001,434 Q2015,434 2015,420 L2015,388" fill="none" stroke="#2F5D4A" stroke-width="2.2" stroke-dasharray="10 8" marker-end="url(#arrow-reset)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1865,1587 L1865,1746 Q1865,1759 1878,1759 L1886,1759 Q1891,1759 1891,1764 L1891,1769" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1721,1587 L1721,1597 Q1721,1607 1711,1607 L1599,1607 Q1585,1607 1585,1621 L1585,1637" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1801,1881 L1801,1912 Q1801,1926 1815,1926 L2063,1926 Q2077,1926 2077,1912 L2077,1170 Q2077,1156 2063,1156 L1836,1156 Q1822,1156 1822,1142 L1822,998 Q1822,984 1808,984 L1442,984 Q1428,984 1428,970 L1428,834 Q1428,820 1442,820 L1959,820 Q1973,820 1973,806 L1973,774" fill="none" stroke="#2F5D4A" stroke-width="2.2" stroke-dasharray="10 8" marker-end="url(#arrow-reset)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1711,1769 L1711,1749" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2075,388 L2075,450 Q2075,464 2061,464 L1667,464 Q1653,464 1653,478 L1653,776 Q1653,790 1639,790 L1420,790 Q1406,790 1406,804 L1406,980 Q1406,994 1420,994 L1552,994 Q1566,994 1566,1008 L1566,1028" fill="none" stroke="#D9A441" stroke-width="3" marker-end="url(#arrow-header)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2275,388 L2275,396 Q2275,404 2283,404 L3474,404 Q3488,404 3488,418 L3488,614 Q3488,628 3502,628 L3873,628 Q3887,628 3887,642 L3887,662" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2155,388 L2155,450 Q2155,464 2169,464 L2494,464 Q2508,464 2508,478 L2508,1172 Q2508,1186 2522,1186 L3119,1186 Q3133,1186 3133,1200 L3133,1277" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2215,388 L2215,420 Q2215,434 2229,434 L3070,434 Q3084,434 3084,448 L3084,816 Q3084,830 3070,830 L2778,830 Q2765,830 2765,843 L2765,856" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2195,388 L2195,430 Q2195,444 2209,444 L3059,444 Q3073,444 3073,458 L3073,614 Q3073,628 3087,628 L3395,628 Q3409,628 3409,642 L3409,662" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1995,388 L1995,410 Q1995,424 1981,424 L784,424 Q770,424 770,438 L770,776 Q770,790 784,790 L1125,790 Q1139,790 1139,804 L1139,856" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1955,388 L1955,396 Q1955,404 1947,404 L417,404 Q403,404 403,418 L403,490" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2255,388 L2255,401 Q2255,414 2268,414 L3278,414 Q3292,414 3292,428 L3292,490" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2175,388 L2175,440 Q2175,454 2189,454 L2874,454 Q2888,454 2888,468 L2888,662" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2135,388 L2135,460 Q2135,474 2149,474 L2359,474 Q2373,474 2373,488 L2373,776 Q2373,790 2387,790 L3268,790 Q3282,790 3282,804 L3282,856" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2235,388 L2235,410 Q2235,424 2249,424 L3081,424 Q3095,424 3095,438 L3095,786 Q3095,800 3109,800 L3161,800 Q3175,800 3175,814 L3175,970 Q3175,984 3189,984 L3280,984 Q3294,984 3294,998 L3294,1142 Q3294,1156 3308,1156 L3452,1156 Q3466,1156 3466,1170 L3466,1277" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2055,388 L2055,440 Q2055,454 2041,454 L1409,454 Q1395,454 1395,468 L1395,1242 Q1395,1256 1409,1256 L1753,1256 Q1767,1256 1767,1270 L1767,1333" fill="none" stroke="#2F5D4A" stroke-width="2.2" stroke-dasharray="10 8" marker-end="url(#arrow-reset)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2115,388 L2115,662" fill="none" stroke="#2F5D4A" stroke-width="3" stroke-dasharray="10 8" marker-end="url(#arrow-demo)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3887,774 L3887,796 Q3887,810 3901,810 L4449,810 Q4463,810 4463,824 L4463,1172 Q4463,1186 4449,1186 L3207,1186 Q3193,1186 3193,1200 L3193,1277" fill="none" stroke="#D9A441" stroke-width="3" marker-end="url(#arrow-header)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3977,774 L3977,787 Q3977,800 3990,800 L4600,800 Q4614,800 4614,814 L4614,970 Q4614,984 4600,984 L4023,984 Q4009,984 4009,998 L4009,1028" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M4067,774 L4067,782 Q4067,790 4075,790 L4617,790 Q4631,790 4631,804 L4631,1922 Q4631,1936 4617,1936 L3427,1936 Q3413,1936 3413,1950 L3413,1982" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3949,1140 L3949,1912 Q3949,1926 3935,1926 L3355,1926 Q3341,1926 3341,1940 L3341,1982" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3559,774 L3559,787 Q3559,800 3572,800 L3738,800 Q3752,800 3752,814 L3752,1182 Q3752,1196 3738,1196 L3570,1196 Q3556,1196 3556,1210 L3556,1277" fill="none" stroke="#D9A441" stroke-width="3" marker-end="url(#arrow-header)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3439,774 L3439,782 Q3439,790 3431,790 L3386,790 Q3372,790 3372,804 L3372,856" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3499,662 L3499,124" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3454,124 L3454,146 Q3454,160 3440,160 L553,160 Q539,160 539,174 L539,615 Q539,618 536,618 L536,618 Q533,618 533,621 L533,1952 Q533,1966 547,1966 L3189,1966 Q3197,1966 3197,1974 L3197,1982" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3544,124 L3544,146 Q3544,160 3558,160 L3809,160 Q3823,160 3823,174 L3823,276" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3364,124 L3364,132 Q3364,140 3356,140 L146,140 Q132,140 132,154 L132,1142 Q132,1156 146,1156 L666,1156 Q680,1156 680,1170 L680,1535" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3409,124 L3409,137 Q3409,150 3396,150 L357,150 Q343,150 343,164 L343,276" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3634,124 L3634,132 Q3634,140 3642,140 L4170,140 Q4184,140 4184,154 L4184,604 Q4184,618 4170,618 L4081,618 Q4067,618 4067,632 L4067,662" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3589,124 L3589,137 Q3589,150 3602,150 L4159,150 Q4173,150 4173,164 L4173,856" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M343,388 L343,396 Q343,404 335,404 L297,404 Q283,404 283,418 L283,490" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3462,856 L3462,804 Q3462,790 3476,790 L3681,790 Q3695,790 3695,776 L3695,418 Q3695,404 3709,404 L3725,404 Q3733,404 3733,396 L3733,388" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3823,388 L3823,397.5 Q3823,404 3829.5,404 L3829.5,404 Q3836,404 3836,410.5 L3836,604 Q3836,618 3822,618 L3603,618 Q3589,618 3589,632 L3589,662" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3913,388 L3913,396 Q3913,404 3921,404 L3963,404 Q3977,404 3977,418 L3977,662" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3292,602 L3292,616 Q3292,618 3290,618 L3290,618 Q3288,618 3288,620 L3288,806 Q3288,820 3302,820 L4039,820 Q4053,820 4053,834 L4053,856" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M3933,893.3333333333334 L3928,893.3333333333334 Q3923,893.3333333333334 3923,898.3333333333334 L3923,925.6666666666666 Q3923,930.6666666666666 3928,930.6666666666666 L3933,930.6666666666666" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2798,774 L2798,826 Q2798,840 2812,840 L2887,840 Q2901,840 2901,854 L2901,1212 Q2901,1226 2887,1226 L2757,1226 Q2743,1226 2743,1240 L2743,1277" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2888,774 L2888,806 Q2888,820 2902,820 L2993,820 Q3007,820 3007,834 L3007,970 Q3007,984 3021,984 L3084,984 Q3098,984 3098,998 L3098,1028" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2978,774 L2978,796 Q2978,810 2992,810 L3144,810 Q3158,810 3158,824 L3158,980 Q3158,994 3172,994 L3875,994 Q3889,994 3889,1008 L3889,1028" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2006,774 L2006,816 Q2006,830 1992,830 L1700,830 Q1686,830 1686,844 L1686,1028" fill="none" stroke="#D9A441" stroke-width="3" marker-end="url(#arrow-header)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2202,774 L2202,787 Q2202,800 2215,800 L2631,800 Q2645,800 2645,814 L2645,856" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2137,774 L2137,806 Q2137,820 2151,820 L2287,820 Q2301,820 2301,834 L2301,856" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2170,774 L2170,796 Q2170,810 2184,810 L2483,810 Q2497,810 2497,824 L2497,1182 Q2497,1196 2511,1196 L3059,1196 Q3073,1196 3073,1210 L3073,1277" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1908,774 L1908,787 Q1908,800 1895,800 L1273,800 Q1259,800 1259,814 L1259,856" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2039,774 L2039,826 Q2039,840 2025,840 L1905,840 Q1897,840 1897,848 L1897,856" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1940,774 L1940,796 Q1940,810 1926,810 L1431,810 Q1417,810 1417,824 L1417,1232 Q1417,1246 1431,1246 L1843,1246 Q1857,1246 1857,1260 L1857,1333" fill="none" stroke="#2F5D4A" stroke-width="2.2" stroke-dasharray="10 8" marker-end="url(#arrow-reset)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1995,662 L1995,488 Q1995,474 2009,474 L2081,474 Q2095,474 2095,460 L2095,388" fill="none" stroke="#2F5D4A" stroke-width="3" stroke-dasharray="10 8" marker-end="url(#arrow-demo)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2391,968 L2391,976 Q2391,984 2383,984 L2354,984 Q2340,984 2340,998 L2340,1192 Q2340,1206 2354,1206 L2999,1206 Q3013,1206 3013,1220 L3013,1277" fill="none" stroke="#D9A441" stroke-width="3" marker-end="url(#arrow-header)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2211,968 L2211,976 Q2211,984 2219,984 L2247,984 Q2261,984 2261,998 L2261,1222 Q2261,1236 2275,1236 L2279,1236 Q2293,1236 2293,1250 L2293,1277" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2953,1277 L2953,1230 Q2953,1216 2939,1216 L2315,1216 Q2301,1216 2301,1202 L2301,968" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2765,968 L2765,976 Q2765,984 2773,984 L2870,984 Q2884,984 2884,998 L2884,1152 Q2884,1166 2898,1166 L3362,1166 Q3376,1166 3376,1180 L3376,1277" fill="none" stroke="#D9A441" stroke-width="3" marker-end="url(#arrow-header)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M2645,968 L2645,976 Q2645,984 2653,984 L2689,984 Q2703,984 2703,998 L2703,1162 Q2703,1176 2717,1176 L3255,1176 Q3269,1176 3269,1190 L3269,1982" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1259,968 L1259,981 Q1259,994 1246,994 L1114,994 Q1100,994 1100,1008 L1100,1157 Q1100,1166 1091,1166 L1091,1166 Q1082,1166 1082,1175 L1082,2096 Q1082,2110 1068,2110 L904,2110 Q890,2110 890,2124 L890,2154" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1139,968 L1139,976 Q1139,984 1131,984 L1097,984 Q1083,984 1083,998 L1083,1142 Q1083,1156 1069,1156 L814,1156 Q800,1156 800,1170 L800,1535" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M800,1647 L800,2154" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M710,2154 L710,2124 Q710,2110 696,2110 L694,2110 Q680,2110 680,2096 L680,1647" fill="none" stroke="#2A2520" stroke-width="3" marker-end="url(#arrow-param)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1686,1140 L1686,1212 Q1686,1226 1700,1226 L2609,1226 Q2623,1226 2623,1240 L2623,1277" fill="none" stroke="#6B6259" stroke-width="2.2" marker-end="url(#arrow-plain)" stroke-linejoin="round" opacity="0.92"/>
+<path d="M1566,1140 L1566,1222 Q1566,1236 1580,1236 L1933,1236 Q1947,1236 1947,1250 L1947,1333" fill="none" stroke="#2F5D4A" stroke-width="2.2" stroke-dasharray="10 8" marker-end="url(#arrow-reset)" stroke-linejoin="round" opacity="0.92"/>
+<rect x="1677" y="1333" width="360" height="112" rx="16" fill="#dfdede" stroke="#2A2520" stroke-width="7"/>
+<text x="1693" y="1367" font-size="28" font-weight="800" fill="#2A2520">Welcome to Rent Well</text>
+<text x="1693" y="1397" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">Welcome</text>
+<rect x="1691" y="1411" width="171" height="24" rx="12" fill="#2A2520"/><text x="1776.5" y="1428" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">START: signed out</text>
+<rect x="1197" y="1475" width="360" height="112" rx="16" fill="#dfdede" stroke="#2A2520" stroke-width="3.5"/>
+<text x="1213" y="1509" font-size="28" font-weight="800" fill="#2A2520">Pick a Demo Role</text>
+<text x="1213" y="1539" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">DemoChooser</text>
+<rect x="1495" y="1637" width="360" height="112" rx="16" fill="#dfdede" stroke="#2A2520" stroke-width="3.5"/>
+<text x="1511" y="1671" font-size="28" font-weight="800" fill="#2A2520">Log In to Rent Well</text>
+<text x="1511" y="1701" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">Login</text>
+<rect x="1577" y="1475" width="360" height="112" rx="16" fill="#dfdede" stroke="#2A2520" stroke-width="3.5"/>
+<text x="1593" y="1509" font-size="28" font-weight="800" fill="#2A2520">Landlord Sign Up</text>
+<text x="1593" y="1539" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">RegisterOwner</text>
+<rect x="1621" y="1769" width="360" height="112" rx="16" fill="#dfdede" stroke="#2A2520" stroke-width="3.5"/>
+<text x="1637" y="1803" font-size="28" font-weight="800" fill="#2A2520">Tenant Sign Up</text>
+<text x="1637" y="1833" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">RegisterTenant</text>
+<rect x="1935" y="276" width="360" height="112" rx="16" fill="#e0e7e4" stroke="#2F5D4A" stroke-width="7"/>
+<text x="1951" y="310" font-size="28" font-weight="800" fill="#2A2520">Landlord Dashboard</text>
+<text x="1951" y="340" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">Dashboard</text>
+<rect x="1949" y="354" width="189" height="24" rx="12" fill="#2A2520"/><text x="2043.5" y="371" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">START: owner + demo</text>
+<rect x="2144" y="354" width="99" height="24" rx="12" fill="#E9C46A"/><text x="2193.5" y="371" text-anchor="middle" font-size="15" font-weight="800" fill="#2A2520">TAB owner</text>
+<rect x="3797" y="662" width="360" height="112" rx="16" fill="#e0e7e4" stroke="#2F5D4A" stroke-width="3.5"/>
+<text x="3813" y="696" font-size="28" font-weight="800" fill="#2A2520">All Work Orders</text>
+<text x="3813" y="726" font-size="16" font-family="Menlo, Courier New, monospace" fill="#2A2520">WorkOrders(tenantId, propertyId)</text>
+<rect x="3811" y="740" width="99" height="24" rx="12" fill="#E9C46A"/><text x="3860.5" y="757" text-anchor="middle" font-size="15" font-weight="800" fill="#2A2520">TAB owner</text>
+<rect x="3769" y="1028" width="360" height="112" rx="16" fill="#e0e7e4" stroke="#2F5D4A" stroke-width="3.5"/>
+<text x="3785" y="1062" font-size="28" font-weight="800" fill="#2A2520">Work Order</text>
+<text x="3785" y="1092" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">WorkOrderDetail(workOrderId)</text>
+<rect x="3319" y="662" width="360" height="112" rx="16" fill="#e0e7e4" stroke="#2F5D4A" stroke-width="3.5"/>
+<text x="3335" y="696" font-size="28" font-weight="800" fill="#2A2520">Your Tenants</text>
+<text x="3335" y="726" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">Tenants(propertyId)</text>
+<rect x="3333" y="740" width="99" height="24" rx="12" fill="#E9C46A"/><text x="3382.5" y="757" text-anchor="middle" font-size="15" font-weight="800" fill="#2A2520">TAB owner</text>
+<rect x="3319" y="12" width="360" height="112" rx="16" fill="#e0e7e4" stroke="#2F5D4A" stroke-width="3.5"/>
+<text x="3335" y="46" font-size="28" font-weight="800" fill="#2A2520">Tenant Profile</text>
+<text x="3335" y="76" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">TenantDetail(tenantId)</text>
+<rect x="163" y="276" width="360" height="112" rx="16" fill="#FFFFFF" stroke="#2F5D4A" stroke-width="3.5" stroke-dasharray="14 8"/>
+<text x="179" y="310" font-size="28" font-weight="800" fill="#2A2520">Lease and Documents</text>
+<text x="179" y="340" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">TenantLease(tenantId)</text>
+<rect x="177" y="354" width="54" height="24" rx="12" fill="#D9A441"/><text x="204" y="371" text-anchor="middle" font-size="15" font-weight="800" fill="#2A2520">STUB</text>
+<rect x="3192" y="856" width="360" height="112" rx="16" fill="#e0e7e4" stroke="#2F5D4A" stroke-width="3.5"/>
+<text x="3208" y="890" font-size="28" font-weight="800" fill="#2A2520">Your Properties</text>
+<text x="3208" y="920" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">Properties</text>
+<rect x="3206" y="934" width="126" height="24" rx="12" fill="#3E5C76"/><text x="3269" y="951" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">DRAWER owner</text>
+<rect x="3643" y="276" width="360" height="112" rx="16" fill="#FFFFFF" stroke="#2F5D4A" stroke-width="3.5" stroke-dasharray="14 8"/>
+<text x="3659" y="310" font-size="28" font-weight="800" fill="#2A2520">Property Overview</text>
+<text x="3659" y="340" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">PropertyDetail(propertyId)</text>
+<rect x="3657" y="354" width="54" height="24" rx="12" fill="#D9A441"/><text x="3684" y="371" text-anchor="middle" font-size="15" font-weight="800" fill="#2A2520">STUB</text>
+<rect x="3286" y="1277" width="360" height="112" rx="16" fill="#e0e7e4" stroke="#2F5D4A" stroke-width="3.5"/>
+<text x="3302" y="1311" font-size="28" font-weight="800" fill="#2A2520">Invite a New Tenant</text>
+<text x="3302" y="1341" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">InviteTenant</text>
+<rect x="163" y="490" width="360" height="112" rx="16" fill="#e0e7e4" stroke="#2F5D4A" stroke-width="3.5"/>
+<text x="179" y="524" font-size="28" font-weight="800" fill="#2A2520">Document Storage</text>
+<text x="179" y="554" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">Documents</text>
+<rect x="177" y="568" width="126" height="24" rx="12" fill="#3E5C76"/><text x="240" y="585" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">DRAWER owner</text>
+<rect x="3112" y="490" width="360" height="112" rx="16" fill="#e0e7e4" stroke="#2F5D4A" stroke-width="3.5"/>
+<text x="3128" y="524" font-size="28" font-weight="800" fill="#2A2520">Condition Checklists</text>
+<text x="3128" y="554" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">Checklist</text>
+<rect x="3126" y="568" width="126" height="24" rx="12" fill="#3E5C76"/><text x="3189" y="585" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">DRAWER owner</text>
+<rect x="3933" y="856" width="360" height="112" rx="16" fill="#e0e7e4" stroke="#2F5D4A" stroke-width="3.5"/>
+<text x="3949" y="890" font-size="28" font-weight="800" fill="#2A2520">Checklist</text>
+<text x="3949" y="920" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">ChecklistDetail(checklistId)</text>
+<rect x="2708" y="662" width="360" height="112" rx="16" fill="#e0e7e4" stroke="#2F5D4A" stroke-width="3.5"/>
+<text x="2724" y="696" font-size="28" font-weight="800" fill="#2A2520">Property Expenses</text>
+<text x="2724" y="726" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">Expenses</text>
+<rect x="2722" y="740" width="126" height="24" rx="12" fill="#3E5C76"/><text x="2785" y="757" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">DRAWER owner</text>
+<rect x="2503" y="1277" width="360" height="112" rx="16" fill="#e0e7e4" stroke="#2F5D4A" stroke-width="3.5"/>
+<text x="2519" y="1311" font-size="28" font-weight="800" fill="#2A2520">Mileage Log</text>
+<text x="2519" y="1341" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">Mileage</text>
+<rect x="2918" y="1028" width="360" height="112" rx="16" fill="#e0e7e4" stroke="#2F5D4A" stroke-width="3.5"/>
+<text x="2934" y="1062" font-size="28" font-weight="800" fill="#2A2520">Year-End Tax Report</text>
+<text x="2934" y="1092" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">YearEndReport(yearId)</text>
+<rect x="1875" y="662" width="360" height="112" rx="16" fill="#e9e4ea" stroke="#6B4E71" stroke-width="7"/>
+<text x="1891" y="696" font-size="28" font-weight="800" fill="#2A2520">My Home</text>
+<text x="1891" y="726" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">TenantHome</text>
+<rect x="1889" y="740" width="198" height="24" rx="12" fill="#2A2520"/><text x="1988" y="757" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">START: tenant + demo</text>
+<rect x="2093" y="740" width="108" height="24" rx="12" fill="#E9C46A"/><text x="2147" y="757" text-anchor="middle" font-size="15" font-weight="800" fill="#2A2520">TAB tenant</text>
+<rect x="2121" y="856" width="360" height="112" rx="16" fill="#e9e4ea" stroke="#6B4E71" stroke-width="3.5"/>
+<text x="2137" y="890" font-size="28" font-weight="800" fill="#2A2520">My Repair Requests</text>
+<text x="2137" y="920" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">MyRequests</text>
+<rect x="2135" y="934" width="108" height="24" rx="12" fill="#E9C46A"/><text x="2189" y="951" text-anchor="middle" font-size="15" font-weight="800" fill="#2A2520">TAB tenant</text>
+<rect x="2113" y="1277" width="360" height="112" rx="16" fill="#e9e4ea" stroke="#6B4E71" stroke-width="3.5"/>
+<text x="2129" y="1311" font-size="28" font-weight="800" fill="#2A2520">Request</text>
+<text x="2129" y="1341" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">RequestDetail(workOrderId)</text>
+<rect x="1717" y="856" width="360" height="112" rx="16" fill="#e9e4ea" stroke="#6B4E71" stroke-width="3.5"/>
+<text x="1733" y="890" font-size="28" font-weight="800" fill="#2A2520">Past Repair Requests</text>
+<text x="1733" y="920" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">PastRequests</text>
+<rect x="2893" y="1277" width="360" height="112" rx="16" fill="#e2e7ea" stroke="#3E5C76" stroke-width="3.5"/>
+<text x="2909" y="1311" font-size="28" font-weight="800" fill="#2A2520">Add a Work Order</text>
+<text x="2909" y="1341" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">NewWorkOrder</text>
+<rect x="2525" y="856" width="360" height="112" rx="16" fill="#e2e7ea" stroke="#3E5C76" stroke-width="3.5"/>
+<text x="2541" y="890" font-size="28" font-weight="800" fill="#2A2520">Message Inbox</text>
+<text x="2541" y="920" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">Messages</text>
+<rect x="2539" y="934" width="99" height="24" rx="12" fill="#E9C46A"/><text x="2588.5" y="951" text-anchor="middle" font-size="15" font-weight="800" fill="#2A2520">TAB owner</text>
+<rect x="2644" y="934" width="108" height="24" rx="12" fill="#E9C46A"/><text x="2698" y="951" text-anchor="middle" font-size="15" font-weight="800" fill="#2A2520">TAB tenant</text>
+<rect x="3125" y="1982" width="360" height="112" rx="16" fill="#e2e7ea" stroke="#3E5C76" stroke-width="3.5"/>
+<text x="3141" y="2016" font-size="28" font-weight="800" fill="#2A2520">Conversation</text>
+<text x="3141" y="2046" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">MessageThread(conversationId)</text>
+<rect x="1019" y="856" width="360" height="112" rx="16" fill="#e2e7ea" stroke="#3E5C76" stroke-width="3.5"/>
+<text x="1035" y="890" font-size="28" font-weight="800" fill="#2A2520">Payments and Rent</text>
+<text x="1035" y="920" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">Payments</text>
+<rect x="560" y="1535" width="360" height="112" rx="16" fill="#e0e7e4" stroke="#2F5D4A" stroke-width="3.5"/>
+<text x="576" y="1569" font-size="28" font-weight="800" fill="#2A2520">Rent Ledger</text>
+<text x="576" y="1599" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">TenantLedger(tenancyId)</text>
+<rect x="620" y="2154" width="360" height="112" rx="16" fill="#e2e7ea" stroke="#3E5C76" stroke-width="3.5"/>
+<text x="636" y="2188" font-size="28" font-weight="800" fill="#2A2520">Payment Record</text>
+<text x="636" y="2218" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">PaymentDetail(paymentId)</text>
+<rect x="1446" y="1028" width="360" height="112" rx="16" fill="#FFFFFF" stroke="#3E5C76" stroke-width="3.5" stroke-dasharray="14 8"/>
+<text x="1462" y="1062" font-size="28" font-weight="800" fill="#2A2520">Settings and Profile</text>
+<text x="1462" y="1092" font-size="19" font-family="Menlo, Courier New, monospace" fill="#2A2520">Settings</text>
+<rect x="1460" y="1106" width="54" height="24" rx="12" fill="#D9A441"/><text x="1487" y="1123" text-anchor="middle" font-size="15" font-weight="800" fill="#2A2520">STUB</text>
+<rect x="1520" y="1106" width="126" height="24" rx="12" fill="#3E5C76"/><text x="1583" y="1123" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">DRAWER owner</text>
+<circle cx="1625" cy="1389" r="13" fill="#2A2520"/><path d="M1638,1389 L1671,1389" stroke="#2A2520" stroke-width="5" marker-end="url(#arrow-param)"/>
+<g><rect x="798" y="896" width="187" height="32" rx="16" fill="#FFFFFF" stroke="#2F5D4A" stroke-width="2.5"/><text x="891.5" y="918.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2F5D4A">Demo as Landlord</text></g>
+<g><rect x="1917" y="1068" width="167" height="32" rx="16" fill="#FFFFFF" stroke="#2F5D4A" stroke-width="2.5"/><text x="2000.5" y="1090.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2F5D4A">Demo as Tenant</text></g>
+<g><rect x="1412" y="702" width="238" height="32" rx="16" fill="#FFFFFF" stroke="#D9A441" stroke-width="2.5"/><text x="1531" y="724.48" text-anchor="middle" font-size="18" font-weight="700" fill="#D9A441">header: Settings gear</text></g>
+<g><rect x="2119" y="530" width="238" height="32" rx="16" fill="#FFFFFF" stroke="#2F5D4A" stroke-width="2.5"/><text x="2238" y="552.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2F5D4A">Switch to Tenant view</text></g>
+<g><rect x="4323" y="896" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#D9A441" stroke-width="2.5"/><text x="4391.5" y="918.48" text-anchor="middle" font-size="18" font-weight="700" fill="#D9A441">header: Add</text></g>
+<g><rect x="4474" y="896" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="4542.5" y="918.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">workOrderId</text></g>
+<g><rect x="4635" y="1068" width="167" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="4718.5" y="1090.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">conversationId</text></g>
+<g><rect x="3779" y="1575" width="167" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="3862.5" y="1597.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">conversationId</text></g>
+<g><rect x="3582" y="896" width="167" height="32" rx="16" fill="#FFFFFF" stroke="#D9A441" stroke-width="2.5"/><text x="3665.5" y="918.48" text-anchor="middle" font-size="18" font-weight="700" fill="#D9A441">header: Invite</text></g>
+<g><rect x="3389" y="316" width="107" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="3442.5" y="338.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">tenantId</text></g>
+<g><rect x="363" y="702" width="167" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="446.5" y="724.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">conversationId</text></g>
+<g><rect x="3693" y="184" width="127" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="3756.5" y="206.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">propertyId</text></g>
+<g><rect x="12" y="530" width="117" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="70.5" y="552.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">tenancyId</text></g>
+<g><rect x="233" y="184" width="107" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="286.5" y="206.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">tenantId</text></g>
+<g><rect x="4188" y="316" width="107" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="4241.5" y="338.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">tenantId</text></g>
+<g><rect x="4033" y="316" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="4101.5" y="338.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">checklistId</text></g>
+<g><rect x="3565" y="530" width="127" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="3628.5" y="552.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">propertyId</text></g>
+<g><rect x="3706" y="530" width="127" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="3769.5" y="552.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">propertyId</text></g>
+<g><rect x="3847" y="530" width="127" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="3910.5" y="552.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">propertyId</text></g>
+<g><rect x="3148" y="702" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="3216.5" y="724.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">checklistId</text></g>
+<g><rect x="3783" y="896" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="3851.5" y="918.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">checklistId</text></g>
+<g><rect x="2918" y="896" width="86" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="2961" y="918.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">yearId</text></g>
+<g><rect x="3018" y="896" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="3086.5" y="918.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">workOrderId</text></g>
+<g><rect x="1445" y="896" width="238" height="32" rx="16" fill="#FFFFFF" stroke="#D9A441" stroke-width="2.5"/><text x="1564" y="918.48" text-anchor="middle" font-size="18" font-weight="700" fill="#D9A441">header: Settings gear</text></g>
+<g><rect x="1734" y="530" width="258" height="32" rx="16" fill="#FFFFFF" stroke="#2F5D4A" stroke-width="2.5"/><text x="1863" y="552.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2F5D4A">Switch to Landlord view</text></g>
+<g><rect x="2344" y="1068" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#D9A441" stroke-width="2.5"/><text x="2412.5" y="1090.48" text-anchor="middle" font-size="18" font-weight="700" fill="#D9A441">header: Add</text></g>
+<g><rect x="2121" y="1068" width="137" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="2189.5" y="1090.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">workOrderId</text></g>
+<g><rect x="2714" y="1068" width="167" height="32" rx="16" fill="#FFFFFF" stroke="#D9A441" stroke-width="2.5"/><text x="2797.5" y="1090.48" text-anchor="middle" font-size="18" font-weight="700" fill="#D9A441">header: Invite</text></g>
+<g><rect x="2533" y="1068" width="167" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="2616.5" y="1090.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">conversationId</text></g>
+<g><rect x="962" y="1575" width="117" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="1020.5" y="1597.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">paymentId</text></g>
+<g><rect x="963" y="1068" width="117" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="1021.5" y="1090.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">tenancyId</text></g>
+<g><rect x="804" y="2022" width="117" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="862.5" y="2044.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">paymentId</text></g>
+<g><rect x="560" y="2022" width="117" height="32" rx="16" fill="#FFFFFF" stroke="#2A2520" stroke-width="2.5"/><text x="618.5" y="2044.48" text-anchor="middle" font-size="18" font-weight="700" fill="#2A2520">tenancyId</text></g>
 </g>
-<rect x="1160" y="12" width="2200" height="128" rx="16" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2"/>
-<text x="1180" y="50" font-size="22" font-weight="800" fill="#0F1B2D">Legend</text>
-<rect x="1290" y="34" width="40" height="24" rx="6" fill="#dbdde0" stroke="#0F1B2D" stroke-width="3"/>
-<text x="1340" y="52" font-size="18" fill="#0F1B2D">Signed out</text>
-<rect x="1472" y="34" width="40" height="24" rx="6" fill="#dcebe2" stroke="#157A3E" stroke-width="3"/>
-<text x="1522" y="52" font-size="18" fill="#0F1B2D">Owner</text>
-<rect x="1606" y="34" width="40" height="24" rx="6" fill="#ebe1fc" stroke="#7C3AED" stroke-width="3"/>
-<text x="1656" y="52" font-size="18" fill="#0F1B2D">Tenant</text>
-<rect x="1749.6" y="34" width="40" height="24" rx="6" fill="#dee8fc" stroke="#2563EB" stroke-width="3"/>
-<text x="1799.6" y="52" font-size="18" fill="#0F1B2D">Shared</text>
-<rect x="1893.1999999999998" y="34" width="40" height="24" rx="6" fill="#FFFFFF" stroke="#5B6779" stroke-width="3" stroke-dasharray="6 4"/>
-<text x="1943.1999999999998" y="52" font-size="18" fill="#0F1B2D">New stub (dashed, STUB)</text>
-<rect x="2200" y="34" width="40" height="24" rx="6" fill="#FFFFFF" stroke="#0F1B2D" stroke-width="6"/>
-<text x="2250" y="52" font-size="18" fill="#0F1B2D">Start screen (thick, START)</text>
-<path d="M1290,106 L1338,106" stroke="#5B6779" stroke-width="3.5" marker-end="url(#arrow-plain)"/>
-<text x="1348" y="112" font-size="18" fill="#0F1B2D">Button, card, link</text>
-<path d="M1554.8,106 L1602.8,106" stroke="#0F1B2D" stroke-width="3.5" marker-end="url(#arrow-param)"/>
-<text x="1612.8" y="112" font-size="18" fill="#0F1B2D">Passes an id (label = param)</text>
-<path d="M1915.6,106 L1963.6,106" stroke="#F79009" stroke-width="3.5" marker-end="url(#arrow-header)"/>
-<text x="1973.6" y="112" font-size="18" fill="#0F1B2D">Header button</text>
-<path d="M2132.4,106 L2180.4,106" stroke="#4F46E5" stroke-width="3.5" stroke-dasharray="8 6" marker-end="url(#arrow-reset)"/>
-<text x="2190.4" y="112" font-size="18" fill="#0F1B2D">Log in/out (resets history)</text>
-<path d="M2483.6,106 L2531.6,106" stroke="#0F766E" stroke-width="3.5" stroke-dasharray="8 6" marker-end="url(#arrow-demo)"/>
-<text x="2541.6" y="112" font-size="18" fill="#0F1B2D">Demo start or switch side</text>
-<rect x="2815.6" y="94" width="162" height="24" rx="12" fill="#FACC15"/><text x="2896.6" y="111" text-anchor="middle" font-size="15" font-weight="800" fill="#0F1B2D">TAB owner/tenant</text>
-<rect x="2987.6" y="94" width="126" height="24" rx="12" fill="#0E7490"/><text x="3050.6" y="111" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">DRAWER owner</text>
-<text x="3123.6" y="112" font-size="18" fill="#0F1B2D">future tab / drawer</text>
+<rect x="1160" y="12" width="2200" height="128" rx="16" fill="#FFFFFF" stroke="#2F5D4A" stroke-width="2"/>
+<text x="1180" y="50" font-size="22" font-weight="800" fill="#2A2520">Legend</text>
+<rect x="1290" y="34" width="40" height="24" rx="6" fill="#dfdede" stroke="#2A2520" stroke-width="3"/>
+<text x="1340" y="52" font-size="18" fill="#2A2520">Signed out</text>
+<rect x="1472" y="34" width="40" height="24" rx="6" fill="#e0e7e4" stroke="#2F5D4A" stroke-width="3"/>
+<text x="1522" y="52" font-size="18" fill="#2A2520">Owner</text>
+<rect x="1606" y="34" width="40" height="24" rx="6" fill="#e9e4ea" stroke="#6B4E71" stroke-width="3"/>
+<text x="1656" y="52" font-size="18" fill="#2A2520">Tenant</text>
+<rect x="1749.6" y="34" width="40" height="24" rx="6" fill="#e2e7ea" stroke="#3E5C76" stroke-width="3"/>
+<text x="1799.6" y="52" font-size="18" fill="#2A2520">Shared</text>
+<rect x="1893.1999999999998" y="34" width="40" height="24" rx="6" fill="#FFFFFF" stroke="#6B6259" stroke-width="3" stroke-dasharray="6 4"/>
+<text x="1943.1999999999998" y="52" font-size="18" fill="#2A2520">New stub (dashed, STUB)</text>
+<rect x="2200" y="34" width="40" height="24" rx="6" fill="#FFFFFF" stroke="#2A2520" stroke-width="6"/>
+<text x="2250" y="52" font-size="18" fill="#2A2520">Start screen (thick, START)</text>
+<path d="M1290,106 L1338,106" stroke="#6B6259" stroke-width="3.5" marker-end="url(#arrow-plain)"/>
+<text x="1348" y="112" font-size="18" fill="#2A2520">Button, card, link</text>
+<path d="M1554.8,106 L1602.8,106" stroke="#2A2520" stroke-width="3.5" marker-end="url(#arrow-param)"/>
+<text x="1612.8" y="112" font-size="18" fill="#2A2520">Passes an id (label = param)</text>
+<path d="M1915.6,106 L1963.6,106" stroke="#D9A441" stroke-width="3.5" marker-end="url(#arrow-header)"/>
+<text x="1973.6" y="112" font-size="18" fill="#2A2520">Header button</text>
+<path d="M2132.4,106 L2180.4,106" stroke="#2F5D4A" stroke-width="3.5" stroke-dasharray="8 6" marker-end="url(#arrow-reset)"/>
+<text x="2190.4" y="112" font-size="18" fill="#2A2520">Log in/out (resets history)</text>
+<path d="M2483.6,106 L2531.6,106" stroke="#2F5D4A" stroke-width="3.5" stroke-dasharray="8 6" marker-end="url(#arrow-demo)"/>
+<text x="2541.6" y="112" font-size="18" fill="#2A2520">Demo start or switch side</text>
+<rect x="2815.6" y="94" width="162" height="24" rx="12" fill="#E9C46A"/><text x="2896.6" y="111" text-anchor="middle" font-size="15" font-weight="800" fill="#2A2520">TAB owner/tenant</text>
+<rect x="2987.6" y="94" width="126" height="24" rx="12" fill="#3E5C76"/><text x="3050.6" y="111" text-anchor="middle" font-size="15" font-weight="800" fill="#FFFFFF">DRAWER owner</text>
+<text x="3123.6" y="112" font-size="18" fill="#2A2520">future tab / drawer</text>
 </svg>
