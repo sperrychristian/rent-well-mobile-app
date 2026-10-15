@@ -1,6 +1,6 @@
 // the rent ledger's math, pure functions only so the demo and the tests can run it with no server
 // every amount is whole cents (an integer), and dates are plain YYYY-MM-DD text, so there's no float or timezone math
-// the draft contract (docs/API-ledger-draft.md) says the server does this same math, the shared vectors
+// the server (rent-well-api's src/ledger, docs/API.md) does this same math, the shared vectors
 // in ledgerVectors.js are what both sides should agree on
 
 // ----- dates as YYYY-MM-DD -----
@@ -113,18 +113,38 @@ export function nextScheduledDue(schedule, today) {
 }
 
 // ----- payments against charges -----
+// the real-backend pass: this is a port of rent-well-api's src/ledger (allocation.js, chargeStatus.js,
+// buildLedger.js) so the demo's numbers match what the server would say, real mode doesn't run any of it,
+// it shows the server's own statuses and balances (see ledgerApi.js)
+
+// payment statuses use the server's names now: pending_confirmation (a tenant claim), succeeded (counts),
+// rejected, voided, and the ones only a provider makes later (pending, processing, failed, returned)
+export const counting_status = 'succeeded';
+export const claim_status = 'pending_confirmation';
 
 function isActive(charge) {
   return !charge.voided_at;
 }
 
 function byDueDate(a, b) {
-  return a.due_date.localeCompare(b.due_date) || String(a.id).localeCompare(String(b.id));
+  return (
+    a.due_date.localeCompare(b.due_date) ||
+    String(a.created_at || '').localeCompare(String(b.created_at || '')) ||
+    String(a.id).localeCompare(String(b.id))
+  );
+}
+
+function byPaidOn(a, b) {
+  return (
+    a.paid_on.localeCompare(b.paid_on) ||
+    String(a.created_at || '').localeCompare(String(b.created_at || '')) ||
+    String(a.id).localeCompare(String(b.id))
+  );
 }
 
 // what one confirmed payment adds (a refund takes away), only confirmed money ever moves a balance
 export function paymentEffect(payment) {
-  if (payment.status !== 'confirmed') {
+  if (payment.status !== counting_status) {
     return 0;
   }
   return payment.is_refund ? -payment.amount_cents : payment.amount_cents;
@@ -137,35 +157,111 @@ export function confirmedTotal(payments, applies_to) {
     .reduce((sum, payment) => sum + paymentEffect(payment), 0);
 }
 
+// the server's pool walk: money in the order it happened, a payment fills the oldest unpaid charge first
+// and the rest is credit, a rent refund eats credit first and then reopens the newest paid charges,
+// a deposit refund never reopens the deposit charge, and a refund bigger than what's been paid leaves debt
+function allocatePool(charges, payments, refunds_reopen_charges) {
+  const ordered = [...charges].sort(byDueDate);
+  const remaining = new Map(ordered.map((charge) => [charge.id, charge.amount_cents]));
+  const entries = new Map(ordered.map((charge) => [charge.id, []]));
+  const credits = [];
+  let debt_cents = 0;
+  [...payments].sort(byPaidOn).forEach((payment) => {
+    let left = payment.amount_cents;
+    if (!payment.is_refund) {
+      const debt_paid = Math.min(debt_cents, left);
+      debt_cents -= debt_paid;
+      left -= debt_paid;
+      ordered.forEach((charge) => {
+        const open = remaining.get(charge.id);
+        if (!left || !open) {
+          return;
+        }
+        const take = Math.min(open, left);
+        entries.get(charge.id).push({ amount_cents: take });
+        remaining.set(charge.id, open - take);
+        left -= take;
+      });
+      if (left) {
+        credits.push({ amount_cents: left });
+      }
+      return;
+    }
+    if (!refunds_reopen_charges) {
+      return;
+    }
+    while (left && credits.length) {
+      const credit = credits[credits.length - 1];
+      const take = Math.min(credit.amount_cents, left);
+      credit.amount_cents -= take;
+      left -= take;
+      if (!credit.amount_cents) {
+        credits.pop();
+      }
+    }
+    [...ordered].reverse().forEach((charge) => {
+      [...entries.get(charge.id)].reverse().forEach((entry) => {
+        if (!left) {
+          return;
+        }
+        const take = Math.min(entry.amount_cents, left);
+        entry.amount_cents -= take;
+        remaining.set(charge.id, remaining.get(charge.id) + take);
+        left -= take;
+      });
+    });
+    debt_cents += left;
+  });
+  return {
+    remaining: remaining,
+    credit_cents: credits.reduce((sum, credit) => sum + credit.amount_cents, 0),
+    debt_cents: debt_cents,
+  };
+}
+
+function rentPool(charges) {
+  return charges.filter((charge) => charge.kind !== 'deposit');
+}
+
 // spreads money over charges oldest first and gives back what's left on each one by id
 // rent money pays rent, late fees, and other charges, deposit money only pays deposit charges
 export function allocate(charges, payments) {
+  const active = charges.filter(isActive);
+  const counted = payments.filter((payment) => payment.status === counting_status);
+  const rent = allocatePool(
+    rentPool(active),
+    counted.filter((payment) => payment.applies_to !== 'deposit'),
+    true,
+  );
+  const deposit = allocatePool(
+    active.filter((charge) => charge.kind === 'deposit'),
+    counted.filter((payment) => payment.applies_to === 'deposit'),
+    false,
+  );
   const remaining = {};
-  const active = charges.filter(isActive).sort(byDueDate);
-  [
-    ['rent', active.filter((charge) => charge.kind !== 'deposit')],
-    ['deposit', active.filter((charge) => charge.kind === 'deposit')],
-  ].forEach(([side, list]) => {
-    // a rent refund gives back an overpayment, so it comes out of the rent money, but a deposit refund
-    // happens at move-out and never makes the deposit itself owed again, so deposit charges only see payments in
-    let pool =
-      side === 'rent'
-        ? Math.max(confirmedTotal(payments, 'rent'), 0)
-        : payments
-            .filter((payment) => payment.applies_to === 'deposit' && payment.status === 'confirmed')
-            .filter((payment) => !payment.is_refund)
-            .reduce((sum, payment) => sum + payment.amount_cents, 0);
-    list.forEach((charge) => {
-      const applied = Math.min(pool, charge.amount_cents);
-      remaining[charge.id] = charge.amount_cents - applied;
-      pool -= applied;
-    });
+  rent.remaining.forEach((value, id) => {
+    remaining[id] = value;
   });
-  return remaining;
+  deposit.remaining.forEach((value, id) => {
+    remaining[id] = value;
+  });
+  return { remaining: remaining, credit_cents: rent.credit_cents, debt_cents: rent.debt_cents };
 }
 
-// a charge's status as of today: voided, paid, overdue, partial, due, or upcoming
-// overdue means money is still owed after the due date plus the grace days
+// how many days a charge waits before it's late: only rent gets the schedule's grace days
+function graceFor(charge, grace_days) {
+  return charge.kind === 'rent' ? grace_days || 0 : 0;
+}
+
+// the first day a charge counts as overdue
+export function overdueOn(charge, grace_days) {
+  return addDays(charge.due_date, graceFor(charge, grace_days) + 1);
+}
+
+export const due_soon_days = 7;
+
+// a charge's status as of today, the server's order: voided, paid, overdue, partial, due, due_soon, upcoming
+// overdue means money is still owed on or after due date + grace days + 1
 export function chargeStatus(charge, remaining_cents, today, grace_days) {
   if (charge.voided_at) {
     return 'voided';
@@ -173,34 +269,47 @@ export function chargeStatus(charge, remaining_cents, today, grace_days) {
   if (remaining_cents <= 0) {
     return 'paid';
   }
-  if (daysBetween(charge.due_date, today) > (grace_days || 0)) {
+  if (today >= overdueOn(charge, grace_days)) {
     return 'overdue';
   }
   if (remaining_cents < charge.amount_cents) {
     return 'partial';
   }
-  return charge.due_date > today ? 'upcoming' : 'due';
+  if (today >= charge.due_date) {
+    return 'due';
+  }
+  if (daysBetween(today, charge.due_date) <= due_soon_days) {
+    return 'due_soon';
+  }
+  return 'upcoming';
 }
 
 // late fees the schedule says should exist: one per rent charge still unpaid after the grace days
 // the fee is due the day after grace runs out, and fees never get fees of their own
+// (like the server's job, no fee while the tenant has a rent claim waiting on the landlord)
 export function missingLateFees(tenancy_id, schedule, charges, payments, today) {
   if (!schedule || !schedule.late_fee_cents || schedule.late_fee_cents <= 0) {
     return [];
   }
-  const remaining = allocate(charges, payments);
+  const claim_waiting = payments.some(
+    (payment) => payment.status === claim_status && payment.applies_to !== 'deposit',
+  );
+  if (claim_waiting) {
+    return [];
+  }
+  const remaining = allocate(charges, payments).remaining;
   const have = new Set(charges.map((charge) => charge.id));
   return charges
     .filter(isActive)
     .filter((charge) => charge.kind === 'rent' && remaining[charge.id] > 0)
-    .filter((charge) => daysBetween(charge.due_date, today) > (schedule.grace_days || 0))
+    .filter((charge) => today >= overdueOn(charge, schedule.grace_days))
     .map((charge) => ({
       id: 'late-' + charge.id,
       kind: 'late_fee',
       description: 'Late fee',
       amount_cents: schedule.late_fee_cents,
-      due_date: addDays(charge.due_date, (schedule.grace_days || 0) + 1),
-      created_at: addDays(charge.due_date, (schedule.grace_days || 0) + 1),
+      due_date: overdueOn(charge, schedule.grace_days),
+      created_at: overdueOn(charge, schedule.grace_days),
       voided_at: null,
       void_reason: '',
     }))
@@ -209,87 +318,104 @@ export function missingLateFees(tenancy_id, schedule, charges, payments, today) 
 
 // ----- everything a screen shows about one tenancy -----
 
+// the row status the owner's lists sort by: overdue, then a claim to review, then something due, credit, paid
+function rowStatusFor(overdue_count, pending_count, due_now_cents, balance_cents) {
+  if (overdue_count > 0) {
+    return 'overdue';
+  }
+  if (pending_count > 0) {
+    return 'pending';
+  }
+  if (due_now_cents > 0) {
+    return 'due';
+  }
+  if (balance_cents < 0) {
+    return 'credit';
+  }
+  return 'paid';
+}
+
 // ledger is { tenancy_id, schedule, charges, payments, ... }, today is YYYY-MM-DD
+// a ledger from the server already carries the server's math (ledger.server), so that wins as is,
+// a demo ledger gets the same math worked out here
 export function deriveLedger(ledger, today) {
+  if (ledger.server) {
+    return ledger.server;
+  }
   const charges = ledger.charges || [];
   const payments = ledger.payments || [];
   const grace = ledger.schedule ? ledger.schedule.grace_days || 0 : 0;
-  const remaining = allocate(charges, payments);
+  const pools = allocate(charges, payments);
   const charge_rows = charges
     .map((charge) => {
-      const left = charge.voided_at ? 0 : remaining[charge.id] || 0;
+      const left = charge.voided_at ? 0 : pools.remaining[charge.id] || 0;
       return {
         ...charge,
+        paid_cents: charge.voided_at ? 0 : charge.amount_cents - left,
         remaining_cents: left,
+        overdue_on: overdueOn(charge, grace),
         status: chargeStatus(charge, left, today, grace),
       };
     })
     .sort((a, b) => byDueDate(b, a));
   const active = charge_rows.filter((charge) => charge.status !== 'voided');
-  const rent_side = active.filter((charge) => charge.kind !== 'deposit');
-  const deposit_side = active.filter((charge) => charge.kind === 'deposit');
+  const rent_side = rentPool(active);
 
-  const owed_rent = rent_side.reduce((sum, charge) => sum + charge.amount_cents, 0);
-  const paid_rent = confirmedTotal(payments, 'rent');
-  // positive is owed, negative is a credit (they paid ahead)
-  const balance_cents = owed_rent - paid_rent;
+  // rent balance = what's left on rent-pool charges due by today, plus debt, minus unused credit,
+  // charges billed ahead aren't owed yet. negative is a credit
+  const owed_now = rent_side
+    .filter((charge) => charge.due_date <= today)
+    .reduce((sum, charge) => sum + charge.remaining_cents, 0);
+  const balance_cents = owed_now + pools.debt_cents - pools.credit_cents || 0;
   const due_now_cents = active
     .filter((charge) => charge.due_date <= today)
     .reduce((sum, charge) => sum + charge.remaining_cents, 0);
   const overdue = active.filter((charge) => charge.status === 'overdue');
-  const owed_deposit = deposit_side.reduce((sum, charge) => sum + charge.amount_cents, 0);
-  const deposit_paid = payments
-    .filter((payment) => payment.applies_to === 'deposit' && payment.status === 'confirmed')
-    .filter((payment) => !payment.is_refund)
-    .reduce((sum, payment) => sum + payment.amount_cents, 0);
-  const deposit_held_cents = Math.max(confirmedTotal(payments, 'deposit'), 0);
-  const pending = payments.filter((payment) => payment.status === 'pending');
+  const deposit_payments = payments.filter(
+    (payment) => payment.applies_to === 'deposit' && payment.status === counting_status,
+  );
+  const deposit_held_cents =
+    deposit_payments.reduce(
+      (sum, payment) => sum + (payment.is_refund ? -payment.amount_cents : payment.amount_cents),
+      0,
+    ) || 0;
+  const pending = payments.filter((payment) => payment.status === claim_status);
 
-  // the next thing to pay: the oldest charge still owed, or the schedule's next date when everything's paid
-  const open = rent_side
-    .filter((charge) => charge.remaining_cents > 0)
-    .sort((a, b) => byDueDate(a, b));
+  // next_due: the earliest date something not yet overdue is still owed, and everything owed on that date
+  const open = active
+    .filter((charge) => charge.remaining_cents > 0 && charge.status !== 'overdue')
+    .sort(byDueDate);
   let next_due = null;
   if (open.length > 0) {
-    next_due = { date: open[0].due_date, amount_cents: open[0].remaining_cents };
-  } else if (ledger.schedule) {
-    const date = nextScheduledDue(ledger.schedule, today);
-    if (date) {
-      next_due = {
-        date: date,
-        amount_cents: ledger.schedule.amount_cents + Math.min(balance_cents, 0),
-      };
-      if (next_due.amount_cents < 0) {
-        next_due.amount_cents = 0;
-      }
-    }
-  }
-
-  let row_status = 'paid';
-  if (overdue.length > 0) {
-    row_status = 'overdue';
-  } else if (pending.length > 0) {
-    row_status = 'pending';
-  } else if (due_now_cents > 0) {
-    row_status = 'due';
-  } else if (balance_cents < 0) {
-    row_status = 'credit';
+    const date = open[0].due_date;
+    next_due = {
+      date: date,
+      amount_cents: open
+        .filter((charge) => charge.due_date === date)
+        .reduce((sum, charge) => sum + charge.remaining_cents, 0),
+    };
   }
 
   return {
     charges: charge_rows,
     balance_cents: balance_cents,
+    credit_cents: pools.credit_cents,
     due_now_cents: due_now_cents,
     overdue_count: overdue.length,
     overdue_cents: overdue.reduce((sum, charge) => sum + charge.remaining_cents, 0),
     deposit_held_cents: deposit_held_cents,
-    deposit_due_cents: Math.max(owed_deposit - deposit_paid, 0),
+    deposit_due_cents: active
+      .filter((charge) => charge.kind === 'deposit')
+      .reduce((sum, charge) => sum + charge.remaining_cents, 0),
     pending_payments: pending,
     pending_cents: pending.reduce((sum, payment) => sum + payment.amount_cents, 0),
     next_due: next_due,
-    row_status: row_status,
+    row_status: rowStatusFor(overdue.length, pending.length, due_now_cents, balance_cents),
   };
 }
+
+// the row status for a ledger the server worked out, exported so ledgerApi.js uses the same order
+export { rowStatusFor };
 
 // ----- the owner's month -----
 

@@ -20,7 +20,9 @@ function PropertyDetailScreen(props) {
   // how tenants here should pay, they see it on their Payments screen
   const ledger_store = useLedger();
   const toast = useToast();
-  const instructions = ledger_store.instructionsFor(property_id);
+  const from_ledger = ledger_store.instructionsFor(property_id);
+  const instructions =
+    from_ledger !== undefined ? from_ledger : (property && property.payment_instructions) || '';
   const [editing_instructions, setEditingInstructions] = useState(false);
 
   async function saveInstructions(text) {

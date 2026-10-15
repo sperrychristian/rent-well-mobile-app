@@ -1,4 +1,5 @@
-// the demo's version of every ledger action, with the same rules and error codes as the draft server
+// the demo's version of every ledger action, with the same rules, status names, and error codes as the
+// real server in docs/API.md
 // each one takes the list of ledgers and gives back { ledgers, ledger } with the changed ledger brought up to date
 // pure, so the tests can run the whole claim, confirm, and void story with no server
 import { parseApiError } from '../../../services/apiHelpers';
@@ -45,7 +46,10 @@ export function demoCreatePayment(ledgers, tenancy_id, value, role, now, today, 
     throw demoError(403, 'NO_ACTIVE_TENANCY');
   }
   if (role === 'tenant' && value.is_refund) {
-    throw demoError(400, 'REFUND_NOT_ALLOWED');
+    // the server's claim route has no refund kind at all, so it's a validation error there
+    throw parseApiError(400, {
+      error: { code: 'VALIDATION_ERROR', message: 'Only your landlord can record a refund.' },
+    });
   }
   const is_owner = role === 'owner';
   const payment = {
@@ -57,12 +61,19 @@ export function demoCreatePayment(ledgers, tenancy_id, value, role, now, today, 
     is_refund: is_owner && !!value.is_refund,
     note: value.note || '',
     receipt_key: value.receipt_key || null,
-    status: is_owner ? 'confirmed' : 'pending',
+    reference: value.reference || '',
+    status: is_owner ? 'succeeded' : 'pending_confirmation',
     source: is_owner ? 'owner' : 'tenant',
     reject_reason: '',
     void_reason: '',
     created_at: now,
-    events: [event(is_owner ? 'recorded' : 'claimed', role, now)],
+    events: [
+      event(
+        is_owner ? (value.is_refund ? 'refund_recorded' : 'payment_recorded') : 'claimed',
+        role,
+        now,
+      ),
+    ],
   };
   const result = save(ledgers, { ...ledger, payments: [...ledger.payments, payment] }, today);
   return { ...result, payment: payment };
@@ -78,12 +89,12 @@ function changePayment(ledgers, payment_id, today, change) {
 
 export function demoConfirmPayment(ledgers, payment_id, now, today) {
   return changePayment(ledgers, payment_id, today, (payment) => {
-    if (payment.status !== 'pending') {
+    if (payment.status !== 'pending_confirmation') {
       throw demoError(409, 'PAYMENT_NOT_PENDING');
     }
     return {
       ...payment,
-      status: 'confirmed',
+      status: 'succeeded',
       events: [...payment.events, event('confirmed', 'owner', now)],
     };
   });
@@ -91,7 +102,7 @@ export function demoConfirmPayment(ledgers, payment_id, now, today) {
 
 export function demoRejectPayment(ledgers, payment_id, reason, now, today) {
   return changePayment(ledgers, payment_id, today, (payment) => {
-    if (payment.status !== 'pending') {
+    if (payment.status !== 'pending_confirmation') {
       throw demoError(409, 'PAYMENT_NOT_PENDING');
     }
     return {
@@ -106,11 +117,9 @@ export function demoRejectPayment(ledgers, payment_id, reason, now, today) {
 // voiding takes a confirmed payment back out (a bounced check, a typo), the record stays with its reason
 export function demoVoidPayment(ledgers, payment_id, reason, now, today) {
   return changePayment(ledgers, payment_id, today, (payment) => {
-    if (payment.status === 'voided') {
-      throw demoError(409, 'PAYMENT_VOIDED');
-    }
-    if (payment.status !== 'confirmed') {
-      throw demoError(409, 'PAYMENT_NOT_PENDING');
+    // the server only voids a confirmed hand-recorded payment, anything else is PAYMENT_NOT_VOIDABLE
+    if (payment.status !== 'succeeded') {
+      throw demoError(409, 'PAYMENT_NOT_VOIDABLE');
     }
     return {
       ...payment,
@@ -122,11 +131,9 @@ export function demoVoidPayment(ledgers, payment_id, reason, now, today) {
 }
 
 // value comes from validateCharge
+// (the server takes charges on ended tenancies too, like move-out damage, so the demo does as well)
 export function demoAddCharge(ledgers, tenancy_id, value, now, today, makeId) {
   const ledger = findLedger(ledgers, tenancy_id);
-  if (ledger.tenancy_status === 'ended') {
-    throw demoError(409, 'TENANCY_ENDED');
-  }
   const charge = {
     id: makeId(),
     kind: value.kind,
@@ -150,7 +157,7 @@ export function demoVoidCharge(ledgers, charge_id, reason, now, today) {
       return charge;
     }
     if (charge.voided_at) {
-      throw demoError(409, 'CHARGE_VOIDED');
+      throw demoError(409, 'ALREADY_VOIDED');
     }
     return { ...charge, voided_at: now, void_reason: reason };
   });

@@ -5,6 +5,7 @@ import { Field, MoneyField, ChipPicker, ReceiptPicker, form_styles } from './For
 import SegmentedControl from '../../../components/ui/SegmentedControl';
 import DateField from '../../../components/DateField';
 import { centsToInputText } from '../../../utils/formatCurrency';
+import { makeIdempotencyKey } from '../utils/ledgerApi';
 import { payment_methods, validatePayment, hasErrors } from '../utils/ledgerHelpers';
 import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 
@@ -27,6 +28,10 @@ function PaymentFormModal(props) {
   const [applies_to, setAppliesTo] = useState('rent');
   const [is_refund, setIsRefund] = useState(false);
   const [note, setNote] = useState('');
+  // the check number or Zelle confirmation, optional
+  const [reference, setReference] = useState('');
+  // one key per time the form opens, so tapping Save again after a failed try can't record it twice
+  const [idempotency_key] = useState(() => makeIdempotencyKey());
   const [receipt, setReceipt] = useState(null);
   const [errors, setErrors] = useState({});
   const [form_error, setFormError] = useState('');
@@ -34,7 +39,7 @@ function PaymentFormModal(props) {
   const note_ref = useRef(null);
 
   async function submit() {
-    const fields = { amount_text, method, paid_on, applies_to, is_refund, note };
+    const fields = { amount_text, method, paid_on, applies_to, is_refund, note, reference };
     const checked = validatePayment(fields, props.today, props.is_claim);
     setErrors(checked.errors);
     setFormError('');
@@ -43,7 +48,7 @@ function PaymentFormModal(props) {
     }
     setBusy(true);
     try {
-      await props.onSubmit(checked.value, receipt);
+      await props.onSubmit({ ...checked.value, idempotency_key: idempotency_key }, receipt);
     } catch (error) {
       console.log('Could not save the payment', error.message);
       setFormError(error.message);
@@ -117,6 +122,20 @@ function PaymentFormModal(props) {
           />
         </View>
       ) : null}
+
+      <Field label="Reference (optional)" error={errors.reference}>
+        <TextInput
+          value={reference}
+          onChangeText={setReference}
+          placeholder="e.g. check number or Zelle confirmation"
+          placeholderTextColor={COLORS.text_muted}
+          maxLength={100}
+          returnKeyType="next"
+          onSubmitEditing={() => note_ref.current && note_ref.current.focus()}
+          accessibilityLabel="Reference"
+          style={[form_styles.input, errors.reference && form_styles.input_error]}
+        />
+      </Field>
 
       <Field label="Note (optional)" error={errors.note}>
         <TextInput

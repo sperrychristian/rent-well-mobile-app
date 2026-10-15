@@ -9,8 +9,12 @@ import {
   demoSetSchedule,
 } from './demoLedger';
 import { deriveLedger } from './ledgerMath';
+import { apiLedger, apiPayment, apiSummary } from './ledgerApiFixtures';
 import {
   fromApiLedger,
+  fromApiSummary,
+  toApiClaim,
+  makeIdempotencyKey,
   toApiPayment,
   toApiSchedule,
   toApiCharge,
@@ -92,12 +96,12 @@ describe('demo actions', () => {
       makeId,
     );
     ledgers = claim.ledgers;
-    expect(claim.payment.status).toBe('pending');
+    expect(claim.payment.status).toBe('pending_confirmation');
     expect(claim.payment.source).toBe('tenant');
     // a claim doesn't move the balance until it's confirmed
     expect(derived(ledgers, 'demo-tenancy-sam', today).balance_cents).toBe(before);
     const confirmed = demoConfirmPayment(ledgers, claim.payment.id, now, today);
-    expect(confirmed.payment.status).toBe('confirmed');
+    expect(confirmed.payment.status).toBe('succeeded');
     expect(confirmed.payment.events.map((e) => e.type)).toEqual(['claimed', 'confirmed']);
     expect(derived(confirmed.ledgers, 'demo-tenancy-sam', today).balance_cents).toBe(
       before - 45000,
@@ -131,15 +135,16 @@ describe('demo actions', () => {
       today,
       makeId,
     );
-    expect(recorded.payment.status).toBe('confirmed');
+    expect(recorded.payment.status).toBe('succeeded');
     ledgers = recorded.ledgers;
     expect(derived(ledgers, 'demo-tenancy-priya', today).balance_cents).toBe(before - 58000);
     expect(derived(ledgers, 'demo-tenancy-priya', today).row_status).toBe('paid');
     const voided = demoVoidPayment(ledgers, recorded.payment.id, 'Check bounced', now, today);
     expect(voided.payment.void_reason).toBe('Check bounced');
     expect(derived(voided.ledgers, 'demo-tenancy-priya', today).balance_cents).toBe(before);
+    // voiding twice is the server's PAYMENT_NOT_VOIDABLE now
     expect(() => demoVoidPayment(voided.ledgers, recorded.payment.id, 'x', now, today)).toThrow(
-      /already voided/,
+      /Only a confirmed payment/,
     );
   });
 
@@ -180,16 +185,18 @@ describe('demo actions', () => {
     expect(() => demoVoidCharge(voided.ledgers, charge.id, 'again', now, today)).toThrow(
       /already voided/,
     );
-    expect(() =>
-      demoAddCharge(
-        ledgers,
-        'demo-tenancy-morgan',
-        { kind: 'other', description: 'x', amount_cents: 1, due_date: today },
-        now,
-        today,
-        makeId,
-      ),
-    ).toThrow(/already ended/);
+    // the real server takes a charge on an ended tenancy (move-out damage), so the demo does too
+    const on_ended = demoAddCharge(
+      ledgers,
+      'demo-tenancy-morgan',
+      { kind: 'other', description: 'Carpet cleaning', amount_cents: 15000, due_date: today },
+      now,
+      today,
+      makeId,
+    );
+    expect(on_ended.ledger.charges.some((item) => item.description === 'Carpet cleaning')).toBe(
+      true,
+    );
   });
 
   test('a schedule change keeps rent already charged and uses the new amount from its start', () => {
@@ -212,75 +219,115 @@ describe('demo actions', () => {
   });
 });
 
-describe('api mapping', () => {
-  test('a server ledger turns into the app shape', () => {
-    const ledger = fromApiLedger({
-      tenancyId: 't1',
-      tenancyStatus: 'active',
-      tenantId: 'u1',
-      tenantName: 'Sam',
-      propertyId: 'p1',
-      propertyName: '123 Maple St',
-      unitLabel: 'Unit 2',
-      paymentInstructions: 'Zelle',
-      schedule: {
-        amountCents: 120000,
-        dueDay: 1,
-        graceDays: 5,
-        lateFeeCents: 5000,
-        startDate: '2026-08-01',
-      },
-      charges: [
-        {
-          id: 'c1',
-          kind: 'rent',
-          description: 'Rent',
-          amountCents: 120000,
-          dueDate: '2026-10-01T00:00:00.000Z',
-          voidedAt: null,
-        },
-      ],
-      payments: [
-        {
-          id: 'p1',
-          amountCents: 120000,
-          method: 'zelle',
-          paidOn: '2026-10-02',
-          appliesTo: 'rent',
-          isRefund: false,
-          status: 'pending',
-          source: 'tenant',
-          events: [{ type: 'claimed', at: now, byRole: 'tenant' }],
-        },
-      ],
+describe('api mapping (the real server shapes in docs/API.md)', () => {
+  test('a server ledger turns into the app shape and keeps the server math as is', () => {
+    const ledger = fromApiLedger(apiLedger());
+    expect(ledger).toMatchObject({
+      tenancy_id: 'ten-1',
+      tenancy_status: 'active',
+      tenant_name: 'Tara Tenant',
+      property_id: 'prop-1',
+      property_name: 'Maple Court',
+      unit_label: 'Unit 2B',
+      payment_instructions: 'Zelle to owner@example.com',
+      today: '2026-10-14',
     });
-    expect(ledger.schedule.amount_cents).toBe(120000);
-    expect(ledger.charges[0].due_date).toBe('2026-10-01');
-    expect(ledger.payments[0].events[0].by_role).toBe('tenant');
-    expect(ledger.payment_instructions).toBe('Zelle');
-    expect(findPayment([ledger], 'p1').ledger.tenancy_id).toBe('t1');
+    expect(ledger.schedule).toMatchObject({
+      amount_cents: 120000,
+      due_day: 1,
+      grace_days: 5,
+      late_fee_cents: 5000,
+      start_date: '2026-08-01',
+    });
+    expect(ledger.charges[0]).toMatchObject({
+      due_date: '2026-10-01',
+      overdue_on: '2026-10-07',
+      status: 'overdue',
+      remaining_cents: 120000,
+    });
+    const claim = ledger.payments[0];
+    expect(claim).toMatchObject({
+      status: 'pending_confirmation',
+      source: 'tenant',
+      is_refund: false,
+      counts: false,
+    });
+    expect(ledger.payments[2].reference).toBe('1042');
+    // deriveLedger hands back the server's numbers instead of working them out again
+    const derived = deriveLedger(ledger, '2030-01-01');
+    expect(derived).toMatchObject({
+      balance_cents: 120000,
+      overdue_count: 1,
+      overdue_cents: 120000,
+      deposit_held_cents: 120000,
+      pending_cents: 7500,
+      next_due: null,
+      row_status: 'overdue',
+    });
+    expect(derived.pending_payments.map((payment) => payment.id)).toEqual(['pay-claim']);
+    expect(findPayment([ledger], 'pay-claim').ledger.tenancy_id).toBe('ten-1');
     expect(findPayment([ledger], 'nope')).toBeNull();
-    expect(replaceLedger([ledger], { ...ledger, tenant_name: 'S' })[0].tenant_name).toBe('S');
+    expect(replaceLedger([ledger], { ...ledger, tenant_name: 'T' })[0].tenant_name).toBe('T');
     expect(replaceLedger([], ledger)).toHaveLength(1);
   });
 
-  test('request bodies are camelCase', () => {
-    expect(
-      toApiPayment({
-        amount_cents: 5,
-        method: 'cash',
-        paid_on: '2026-10-01',
-        applies_to: 'rent',
-        is_refund: false,
-        note: '',
+  test('an ended tenancy, a refund, and a next due date map across', () => {
+    const ledger = fromApiLedger(
+      apiLedger({
+        isActive: false,
+        balances: { ...apiLedger().balances, nextDue: { dueOn: '2026-11-01', amountCents: 50000 } },
+        payments: [apiPayment('pay-r', { kind: 'refund', appliesTo: 'deposit' })],
       }),
-    ).toEqual({
+    );
+    expect(ledger.tenancy_status).toBe('ended');
+    expect(ledger.payments[0].is_refund).toBe(true);
+    expect(deriveLedger(ledger).next_due).toEqual({ date: '2026-11-01', amount_cents: 50000 });
+  });
+
+  test('the month summary maps to the owner screen and can pick one property', () => {
+    expect(fromApiSummary(apiSummary(), [])).toMatchObject({
+      expected_cents: 120000,
+      collected_cents: 0,
+      outstanding_cents: 120000,
+      overdue_count: 1,
+      pending_count: 1,
+    });
+    expect(fromApiSummary(apiSummary(), [], 'nope').expected_cents).toBe(0);
+    expect(fromApiSummary(apiSummary(), [], 'prop-1').overdue_cents).toBe(120000);
+  });
+
+  test('request bodies match the real routes', () => {
+    const value = {
+      amount_cents: 5,
+      method: 'cash',
+      paid_on: '2026-10-01',
+      applies_to: 'rent',
+      is_refund: false,
+      note: '',
+      reference: 'CK-1',
+      receipt_key: 'attachments/u/1.jpg',
+      idempotency_key: 'rw-abc12345',
+    };
+    expect(toApiPayment(value)).toEqual({
+      kind: 'payment',
+      appliesTo: 'rent',
       amountCents: 5,
       method: 'cash',
       paidOn: '2026-10-01',
+      reference: 'CK-1',
+      receiptPhotoKey: 'attachments/u/1.jpg',
+      idempotencyKey: 'rw-abc12345',
+    });
+    expect(toApiPayment({ ...value, is_refund: true }).kind).toBe('refund');
+    expect(toApiClaim('ten-1', value)).toEqual({
+      tenancyId: 'ten-1',
       appliesTo: 'rent',
-      isRefund: false,
-      note: '',
+      amountCents: 5,
+      method: 'cash',
+      paidOn: '2026-10-01',
+      reference: 'CK-1',
+      receiptPhotoKey: 'attachments/u/1.jpg',
+      idempotencyKey: 'rw-abc12345',
     });
     expect(
       toApiSchedule({
@@ -290,15 +337,11 @@ describe('api mapping', () => {
         late_fee_cents: 4,
         start_date: 'd',
       }),
-    ).toEqual({
-      amountCents: 1,
-      dueDay: 2,
-      graceDays: 3,
-      lateFeeCents: 4,
-      startDate: 'd',
-    });
+    ).toEqual({ amountCents: 1, dueDay: 2, graceDays: 3, lateFeeCents: 4, startsOn: 'd' });
     expect(
-      toApiCharge({ kind: 'other', description: 'x', amount_cents: 1, due_date: 'd' }).amountCents,
-    ).toBe(1);
+      toApiCharge({ kind: 'other', description: 'x', amount_cents: 1, due_date: 'd' }),
+    ).toEqual({ kind: 'other', description: 'x', amountCents: 1, dueOn: 'd' });
+    expect(makeIdempotencyKey().length).toBeGreaterThanOrEqual(8);
+    expect(makeIdempotencyKey()).not.toBe(makeIdempotencyKey());
   });
 });

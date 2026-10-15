@@ -16,6 +16,7 @@ the same commit.
 - [Former tenants (read-only mode)](#former-tenants-read-only-mode)
 - [Conversations and messages](#conversations-and-messages)
 - [Work orders](#work-orders)
+- [Rent ledger](#rent-ledger)
 - [Uploads (image attachments)](#uploads-image-attachments)
 - [Push tokens](#push-tokens)
 - [Socket.IO](#socketio)
@@ -34,11 +35,16 @@ the same commit.
 - **Timestamps** are ISO 8601 strings in UTC with milliseconds, e.g. `"2026-10-11T23:12:27.844Z"`.
   Nullable timestamps are `null`, never missing.
 - **Roles:** every user is either `"owner"` or `"tenant"`.
+- **Money:** the [rent ledger](#rent-ledger) uses **integer cents** everywhere (fields end in
+  `Cents`, e.g. `amountCents: 120000` = $1,200.00). The older work order `estimate` field is
+  the exception: it's dollars with decimals. See [Money, dates, and the append-only
+  rule](#money-dates-and-the-append-only-rule).
 - **Scoping:** every list and lookup only returns data the signed-in user is part of. Anything that
   belongs to someone else returns `404 NOT_FOUND` (the same response as an id that doesn't exist).
   A route that requires a different role returns `403 FORBIDDEN`.
 - **Notation:** in examples, `{ "...Message" }` means "a full [Message](#message) object here"
-  (same for User, Property, Invite, Tenancy, Conversation, WorkOrder). It is not literal JSON.
+  (same for User, Property, Invite, Tenancy, Conversation, WorkOrder, and the ledger objects). It
+  is not literal JSON.
 - **Token lifetimes:** access token 15 minutes, refresh token 30 days. Refresh tokens are
   single use. See [POST /auth/refresh](#post-authrefresh).
 
@@ -119,6 +125,8 @@ Returned by register, login, and refresh.
   "id": "uuid",
   "name": "Maple Court",
   "address": "12 Maple St, Springfield",
+  "paymentInstructions": "Zelle to owner@example.com or Venmo @olivia-rents",
+  "timeZone": "America/Denver",
   "createdAt": "2026-10-11T23:12:27.776Z",
   "updatedAt": "2026-10-12T09:30:00.000Z",
   "tenancies": [
@@ -138,6 +146,9 @@ Returned by register, login, and refresh.
   [GET /tenants](#get-tenants).
 - `unitLabel` can be `null`.
 - `updatedAt` changes on [PATCH /properties/:id](#patch-propertiesid). It starts equal to `createdAt`.
+- `paymentInstructions` (string or `null`) is shown to tenants on their ledger, e.g. how to pay.
+- `timeZone` is an IANA name (default `"UTC"`). It decides what "today" is for the ledgers at this
+  property (what's due and what's overdue).
 
 ### Invite
 
@@ -500,10 +511,12 @@ Request:
 { "name": "Maple Court", "address": "12 Maple St, Springfield" }
 ```
 
-| Field     | Rules                   |
-| --------- | ----------------------- |
-| `name`    | trimmed, 1 to 120 chars |
-| `address` | trimmed, 1 to 300 chars |
+| Field                 | Rules                                                             |
+| --------------------- | ----------------------------------------------------------------- |
+| `name`                | trimmed, 1 to 120 chars                                           |
+| `address`             | trimmed, 1 to 300 chars                                           |
+| `paymentInstructions` | optional, trimmed, up to 1000 chars, `null` or `""` = none        |
+| `timeZone`            | optional, IANA time zone like `"America/Denver"`, default `"UTC"` |
 
 **201**:
 
@@ -528,16 +541,23 @@ Errors: `401`, `403 FORBIDDEN`.
 
 ### `PATCH /properties/:id`
 
-Renames or re-addresses one of my properties. Send one or both fields. Unknown fields are rejected.
+Changes one of my properties. Send at least one field. Unknown fields are rejected.
 
 ```json
-{ "name": "Maple Court East", "address": "12 Maple St, Springfield" }
+{
+  "name": "Maple Court East",
+  "address": "12 Maple St, Springfield",
+  "paymentInstructions": "Zelle to owner@example.com. Put your unit in the memo.",
+  "timeZone": "America/Denver"
+}
 ```
 
-| Field     | Required | Rules                   |
-| --------- | -------- | ----------------------- |
-| `name`    | no       | trimmed, 1 to 120 chars |
-| `address` | no       | trimmed, 1 to 300 chars |
+| Field                 | Required | Rules                                                                                         |
+| --------------------- | -------- | --------------------------------------------------------------------------------------------- |
+| `name`                | no       | trimmed, 1 to 120 chars                                                                       |
+| `address`             | no       | trimmed, 1 to 300 chars                                                                       |
+| `paymentInstructions` | no       | trimmed, up to 1000 chars. `null` or `""` clears it                                           |
+| `timeZone`            | no       | IANA time zone like `"America/Denver"`. Changes "today" for the property's ledgers right away |
 
 The change also shows on past tenancies and work orders, since they point at the same property.
 
@@ -839,6 +859,8 @@ read-only everywhere.
 | `POST /conversations/:id/messages`                                                     | **no**: `403 NO_ACTIVE_TENANCY` |
 | `POST /work-orders` (with or without `tenancyId`)                                      | **no**: `403 NO_ACTIVE_TENANCY` |
 | `PATCH /work-orders/:id` with `addPhotoKeys`                                           | **no**: `403 NO_ACTIVE_TENANCY` |
+| `GET /me/ledger`, `GET /payments/:id`, receipt photo URLs                              | yes                             |
+| `POST /me/payments` ("I paid") for the ended tenancy                                   | **no**: `403 NO_ACTIVE_TENANCY` |
 
 - The rule is **per owner**. A tenant who now rents from owner B but whose tenancy with owner A
   ended can still write to B, but A's thread and A's work orders are read-only.
@@ -853,7 +875,7 @@ Suggested app behavior: when `activeTenancies` is empty, hide the message compos
 
 ---
 
-## Conversations and messages## Conversations and messages
+## Conversations and messages
 
 Auth required, any role. There is exactly one conversation per owner and tenant pair. It's created
 automatically when the tenant signs up. Owners see one conversation per tenant. Tenants see
@@ -1155,6 +1177,702 @@ Errors:
 
 ---
 
+## Rent ledger
+
+Rent schedules, charges (what the tenant owes), and payments (money in, refunds out) per
+tenancy. Payments are recorded by hand today (cash, check, Zelle, Venmo, bank transfer). The
+server is built so Stripe can plug in later without changing these routes (see
+[Stripe later](#stripe-later)).
+
+### Money, dates, and the append-only rule
+
+- **All money is integer cents**, in requests and responses. Every money field ends in `Cents`
+  (`amountCents`, `rentBalanceCents`, ...). `120000` means $1,200.00. Never send decimals: `1200.5`
+  is a `400 VALIDATION_ERROR`. Amounts are capped at `100000000` ($1M).
+- ⚠️ **This is different from the work order `estimate`**, which is a dollars number with
+  decimals (`180.5`). Don't share a money formatter between the two without converting.
+- Ledger dates (`dueOn`, `paidOn`, `startsOn`, `endsOn`, `overdueOn`) are calendar dates,
+  `"YYYY-MM-DD"`, never shifted by time zone. `period` is `"YYYY-MM"`.
+- **"Today" is the property's local date**, from the property's `timeZone` (default `"UTC"`, set it
+  with [PATCH /properties/:id](#patch-propertiesid)). Every ledger response includes the `today` it
+  used, so the app never has to work out due/overdue itself.
+- **Nothing is ever deleted.** A wrong charge or payment is voided with a reason, and it stays in
+  the ledger with `status: "voided"` so the history is complete. The database refuses deletes.
+- Statuses and balances are **computed when you read them**, never stored. A refetch is always
+  current.
+
+### How payments are applied
+
+- Two separate pools. **Rent pool:** charges of kind `rent`, `late_fee`, and `other`, paid by
+  payments with `appliesTo: "rent"`. **Deposit pool:** charges of kind `deposit`, paid by
+  `appliesTo: "deposit"`. Deposit money never pays rent and rent money never fills a deposit.
+- Only payments with `status: "succeeded"` count (`countsTowardBalance: true`). A tenant's "I paid"
+  claim counts only after the owner confirms it.
+- Payments pay the **oldest due charge first** (FIFO by `dueOn`). A payment bigger than what's owed
+  leaves **credit**, which automatically goes to the next charge when it's billed.
+- A rent **refund** first uses up unapplied credit, then reopens the most recently due paid
+  charges. A **deposit refund** lowers `depositHeldCents` but doesn't reopen the deposit charge.
+- Refunds can never be more than the money received in that pool.
+
+### Charge status
+
+| `status`   | Meaning                                                                        |
+| ---------- | ------------------------------------------------------------------------------ |
+| `paid`     | Nothing left to pay                                                            |
+| `overdue`  | Something left, and today is on or after `overdueOn` (`dueOn + graceDays + 1`) |
+| `partial`  | Some paid, the rest isn't late yet                                             |
+| `due`      | Due today, or past due but still inside the grace days                         |
+| `due_soon` | Due in the next 7 days                                                         |
+| `upcoming` | Due more than 7 days from now (rent is billed up to 30 days ahead)             |
+| `voided`   | Voided by the owner. Never counts                                              |
+
+The first match from the top wins, so a half-paid late charge is `overdue` (check `paidCents` to
+also show "partially paid"). Only rent has grace days. Every other charge is overdue the day after
+`dueOn`.
+
+### Payment status lifecycle
+
+```
+Hand-recorded (today)
+
+  tenant: POST /me/payments           owner: POST /tenancies/:id/payments
+              |                                      |
+              v                                      v
+     pending_confirmation --confirm--> succeeded <---+
+              |                            |
+            reject                       void
+              v                            v
+          rejected                      voided
+
+Provider (Stripe, later, driven by webhooks)
+
+     pending --> processing --> succeeded --> returned
+        |            |
+        |            +--------> failed
+        +--> failed
+        +--> voided (canceled)
+```
+
+| From                                       | Allowed next statuses                                       |
+| ------------------------------------------ | ----------------------------------------------------------- |
+| `pending_confirmation`                     | `succeeded` (owner confirms), `rejected` (owner rejects)    |
+| `pending`                                  | `processing`, `succeeded`, `failed`, `voided`               |
+| `processing`                               | `succeeded`, `failed`                                       |
+| `succeeded`                                | `returned` (provider only), `voided` (manual payments only) |
+| `failed`, `returned`, `rejected`, `voided` | none, final                                                 |
+
+Only `succeeded` counts toward balances. `pending`, `processing`, `failed`, and `returned` only
+happen once a provider (Stripe) exists. Today every payment is `pending_confirmation`, `succeeded`,
+`rejected`, or `voided`.
+
+### Ledger objects
+
+#### RentSchedule
+
+```json
+{
+  "id": "uuid",
+  "tenancyId": "uuid",
+  "amountCents": 145000,
+  "dueDay": 1,
+  "startsOn": "2026-07-01",
+  "endsOn": null,
+  "graceDays": 3,
+  "lateFeeCents": 5000,
+  "createdAt": "2026-06-24T18:00:00.000Z"
+}
+```
+
+- `endsOn: null` = the current schedule. A replaced schedule has `endsOn` set to the day before its
+  replacement starts. If a schedule was replaced before it billed anything, `endsOn` is the day
+  before its own `startsOn`.
+- `lateFeeCents: 0` means no late fee.
+
+#### Charge
+
+```json
+{
+  "id": "uuid",
+  "tenancyId": "uuid",
+  "propertyId": "uuid",
+  "kind": "rent",
+  "description": "Rent for October 2026",
+  "amountCents": 145000,
+  "paidCents": 50000,
+  "remainingCents": 95000,
+  "status": "partial",
+  "dueOn": "2026-10-01",
+  "overdueOn": "2026-10-05",
+  "period": "2026-10",
+  "scheduleId": "uuid",
+  "parentChargeId": null,
+  "voidedAt": null,
+  "voidReason": null,
+  "createdAt": "2026-09-01T18:00:00.000Z"
+}
+```
+
+| Field                    | Notes                                                             |
+| ------------------------ | ----------------------------------------------------------------- |
+| `kind`                   | `rent` (only from a schedule), `late_fee`, `deposit`, `other`     |
+| `paidCents`              | How much of this charge payments cover right now. `0` when voided |
+| `remainingCents`         | `amountCents - paidCents`. `0` when voided                        |
+| `overdueOn`              | First day it counts as overdue if still unpaid                    |
+| `period`                 | `"YYYY-MM"` for rent, `null` otherwise                            |
+| `scheduleId`             | The schedule that billed it (rent only), else `null`              |
+| `parentChargeId`         | For a late fee, the rent charge it's for. Otherwise `null`        |
+| `voidedAt`, `voidReason` | Both set when voided, both `null` otherwise                       |
+
+#### Payment
+
+```json
+{
+  "id": "uuid",
+  "tenancyId": "uuid",
+  "kind": "payment",
+  "appliesTo": "rent",
+  "amountCents": 150000,
+  "method": "zelle",
+  "status": "succeeded",
+  "countsTowardBalance": true,
+  "paidOn": "2026-10-03",
+  "note": "Sent from her phone",
+  "reference": "ZL-8812",
+  "receiptPhotoKey": "attachments/<userId>/<uuid>.jpg",
+  "submittedBy": "owner",
+  "confirmedAt": "2026-10-03T18:00:00.000Z",
+  "confirmedBy": "uuid",
+  "voidReason": null,
+  "rejectReason": null,
+  "failureReason": null,
+  "provider": "manual",
+  "allocation": {
+    "appliedTo": [
+      { "chargeId": "uuid", "amountCents": 145000 },
+      { "chargeId": "uuid", "amountCents": 5000 }
+    ],
+    "unappliedCents": 0
+  },
+  "createdAt": "2026-10-03T18:00:00.000Z"
+}
+```
+
+| Field                        | Notes                                                                                                                                                                                                                                            |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `kind`                       | `payment` (money from the tenant) or `refund` (money back to them). `amountCents` is always positive                                                                                                                                             |
+| `appliesTo`                  | `rent` or `deposit` (which pool)                                                                                                                                                                                                                 |
+| `method`                     | `cash`, `check`, `zelle`, `venmo`, `bank_transfer`, `other`. (`stripe_ach` is reserved for later and rejected today)                                                                                                                             |
+| `status`                     | See the [lifecycle](#payment-status-lifecycle)                                                                                                                                                                                                   |
+| `countsTowardBalance`        | `true` only for `succeeded`                                                                                                                                                                                                                      |
+| `submittedBy`                | `owner` (recorded by the owner) or `tenant` (an "I paid" claim)                                                                                                                                                                                  |
+| `confirmedAt`, `confirmedBy` | When and by whom it became `succeeded`. `null` until then                                                                                                                                                                                        |
+| `rejectReason`               | The owner's reason when a claim is `rejected`                                                                                                                                                                                                    |
+| `voidReason`                 | The owner's reason when `voided`                                                                                                                                                                                                                 |
+| `failureReason`              | Provider failures only (later)                                                                                                                                                                                                                   |
+| `provider`                   | `"manual"` today, `"stripe"` later                                                                                                                                                                                                               |
+| `allocation`                 | What this money is doing right now. `null` unless it counts. For a `payment`: `appliedTo` (charges it pays, oldest first) and `unappliedCents` (credit). For a `refund`: `{ "fromCreditCents": 0, "reopened": [{ "chargeId", "amountCents" }] }` |
+
+`allocation` can change after the fact: when next month's rent is billed, credit from an earlier
+overpayment moves into `appliedTo`.
+
+#### Balances
+
+```json
+{
+  "rentBalanceCents": 95000,
+  "creditCents": 0,
+  "overdueCents": 0,
+  "overdueCount": 0,
+  "depositHeldCents": 145000,
+  "depositOwedCents": 0,
+  "pendingConfirmationCents": 120000,
+  "nextDue": { "dueOn": "2026-10-01", "amountCents": 95000 }
+}
+```
+
+| Field                          | Notes                                                                                                                                                                                                                         |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rentBalanceCents`             | Rent-pool money owed **as of today**: what's left on charges due on or before today, minus unused credit. Charges billed ahead (next month) aren't in it yet. **Negative = credit** (`-5000` = $50 ahead). Never a hidden `0` |
+| `creditCents`                  | Overpaid rent money not applied to any charge yet (`>= 0`)                                                                                                                                                                    |
+| `overdueCents`, `overdueCount` | Left on `overdue` charges (rent pool and deposits)                                                                                                                                                                            |
+| `depositHeldCents`             | Deposit payments received minus deposit refunds                                                                                                                                                                               |
+| `depositOwedCents`             | Left on unpaid `deposit` charges                                                                                                                                                                                              |
+| `pendingConfirmationCents`     | Tenant claims waiting on the owner. Not in any balance until confirmed                                                                                                                                                        |
+| `nextDue`                      | The earliest date something not-yet-overdue is owed (including rent inside its grace days) and the total left on that date. `null` if nothing is                                                                              |
+
+#### Ledger
+
+One tenancy's whole ledger. Returned by `GET /tenancies/:id/ledger` (owner) and, one per tenancy,
+by `GET /me/ledger` (tenant).
+
+```json
+{
+  "tenancy": { "...Tenancy" },
+  "tenant": { "id": "uuid", "name": "Tara Tenant" },
+  "isActive": true,
+  "paymentInstructions": "Zelle to owner@example.com",
+  "timeZone": "America/Denver",
+  "today": "2026-10-14",
+  "schedule": { "...RentSchedule" },
+  "balances": { "...Balances" },
+  "charges": [ { "...Charge" } ],
+  "payments": [ { "...Payment" } ]
+}
+```
+
+- `isActive: false` = the tenancy ended. **The tenant side is read-only** then (no claims). The
+  owner can still record payments, refunds, and charges on it (deposit refunds, move-out
+  damage).
+- `schedule` is the current schedule or `null`.
+- `charges` are newest `dueOn` first, `payments` newest `paidOn` first. Both include voided and
+  rejected rows.
+- The tenant's `tenancy` has no `moveOutNote`, same as everywhere else.
+
+#### Receipt
+
+Only for payments with `status: "succeeded"` (else `null`).
+
+```json
+{
+  "receiptNumber": "RW-20261003-3F9A1C2B",
+  "issuedAt": "2026-10-03T18:00:00.000Z",
+  "kind": "payment",
+  "property": { "name": "Maple Court", "address": "12 Maple St, Springfield" },
+  "unitLabel": "Unit 2B",
+  "tenant": { "id": "uuid", "name": "Tara Tenant" },
+  "owner": { "id": "uuid", "name": "Olivia Owner" },
+  "amountCents": 150000,
+  "method": "zelle",
+  "paidOn": "2026-10-03",
+  "reference": "ZL-8812",
+  "appliesTo": "rent",
+  "appliedTo": [
+    {
+      "chargeId": "uuid",
+      "kind": "rent",
+      "description": "Rent for October 2026",
+      "period": "2026-10",
+      "dueOn": "2026-10-01",
+      "amountCents": 145000
+    }
+  ],
+  "unappliedCents": 5000,
+  "fromCreditCents": 0
+}
+```
+
+`receiptNumber` is `RW-<paidOn as YYYYMMDD>-<first 8 hex chars of the payment id, uppercased>`.
+For a refund receipt, `appliedTo` lists the charges the refund reopened and `fromCreditCents` is
+the part taken from credit.
+
+#### PaymentEvent
+
+The timeline of a payment, oldest first.
+
+```json
+{
+  "id": "uuid",
+  "type": "confirmed",
+  "fromStatus": "pending_confirmation",
+  "toStatus": "succeeded",
+  "actorUserId": "uuid",
+  "data": {},
+  "createdAt": "2026-10-03T18:00:00.000Z"
+}
+```
+
+| `type`             | When                                   | `data`         |
+| ------------------ | -------------------------------------- | -------------- |
+| `payment_recorded` | Owner recorded a payment               | `{}`           |
+| `refund_recorded`  | Owner recorded a refund                | `{}`           |
+| `claimed`          | Tenant said "I paid"                   | `{}`           |
+| `confirmed`        | Owner confirmed a claim                | `{}`           |
+| `rejected`         | Owner rejected a claim                 | `{ "reason" }` |
+| `voided`           | Owner voided a payment                 | `{ "reason" }` |
+| provider types     | Later, e.g. `payment_intent.succeeded` | provider data  |
+
+`fromStatus` is `null` for the first event. `actorUserId` is `null` for provider events.
+
+### Rent schedules (owner only)
+
+#### `GET /tenancies/:id/rent-schedule`
+
+**200**:
+
+```json
+{ "schedule": { "...RentSchedule" }, "history": [ { "...RentSchedule" } ] }
+```
+
+`schedule` is the current one (or `null`). `history` is every schedule, newest `startsOn` first.
+
+Errors: `401`, `403 FORBIDDEN`, `404 NOT_FOUND` (not my tenancy).
+
+#### `PUT /tenancies/:id/rent-schedule`
+
+Creates the first schedule, or replaces the current one. Unknown fields are rejected.
+
+```json
+{
+  "amountCents": 145000,
+  "dueDay": 1,
+  "graceDays": 3,
+  "lateFeeCents": 5000,
+  "startsOn": "2026-11-01"
+}
+```
+
+| Field          | Required | Rules                                               |
+| -------------- | -------- | --------------------------------------------------- |
+| `amountCents`  | yes      | integer, 1 to 100000000                             |
+| `dueDay`       | yes      | integer, 1 to 28 (so every month has the day)       |
+| `graceDays`    | no       | integer, 0 to 28, default 0                         |
+| `lateFeeCents` | no       | integer, 0 up to `amountCents`, default 0 (0 = off) |
+| `startsOn`     | no       | date, see below                                     |
+
+- **First schedule:** starts on `startsOn`, or today. It can be backdated up to 366 days (for
+  moving an existing tenant onto the app). Past months are billed on the next job run, but
+  **late fees are never added for rent that went overdue before the schedule was created**.
+- **Changing it never rewrites billed rent.** The new schedule starts at the first month the
+  current schedule hasn't billed yet (the 1st of that month), and the old one ends the day
+  before. Rent is billed up to 30 days ahead, so a change made mid-month usually takes effect the
+  month after next. You can pass a later `startsOn` (e.g. a January increase). An earlier one is
+  `409 SCHEDULE_START_TOO_EARLY`, and the message names the earliest allowed date.
+- Rent is charged per month in full. No proration at move-in or move-out.
+
+**200**:
+
+```json
+{ "schedule": { "...RentSchedule" }, "replacedSchedule": { "...RentSchedule" } }
+```
+
+`replacedSchedule` is `null` for the first schedule.
+
+Errors: `400 VALIDATION_ERROR`, `400 INVALID_START_DATE` (more than 366 days away), `401`,
+`403 FORBIDDEN`, `404 NOT_FOUND`, `409 TENANCY_ENDED`, `409 SCHEDULE_START_TOO_EARLY`.
+
+Rent charges are created by the [ledger job](#the-ledger-job), not by this route. After a `PUT`,
+charges show up on the next run (hourly when it's on, or `npm run ledger:run` in dev).
+
+### Charges (owner only)
+
+#### `POST /tenancies/:id/charges`
+
+Adds a one-off charge. Rent only comes from the schedule. Works on ended tenancies too.
+
+```json
+{
+  "kind": "other",
+  "amountCents": 7500,
+  "dueOn": "2026-10-20",
+  "description": "Replacement key fob",
+  "parentChargeId": null
+}
+```
+
+| Field            | Required | Rules                                                                                        |
+| ---------------- | -------- | -------------------------------------------------------------------------------------------- |
+| `kind`           | yes      | `other`, `deposit`, or `late_fee`                                                            |
+| `amountCents`    | yes      | integer, 1 to 100000000                                                                      |
+| `dueOn`          | yes      | date within 366 days of today                                                                |
+| `description`    | yes      | trimmed, 1 to 200 chars                                                                      |
+| `parentChargeId` | no       | `late_fee` only. A rent charge on this tenancy. It then counts as that charge's one late fee |
+
+**201**: `{ "charge": { "...Charge" } }`
+
+Errors: `400 VALIDATION_ERROR`, `400 INVALID_DUE_DATE`, `401`, `403 FORBIDDEN`,
+`404 NOT_FOUND` (not my tenancy, or `parentChargeId` isn't a rent charge on it),
+`409 LATE_FEE_EXISTS`.
+
+#### `POST /charges/:id/void`
+
+```json
+{ "reason": "Charged to the wrong unit" }
+```
+
+`reason` is required (trimmed, 1 to 500 chars). The charge stays in the ledger with
+`status: "voided"`. **Voiding a rent charge also voids its late fee**, with reason
+`"Rent charge voided: <your reason>"`. A voided rent month isn't billed again by the old schedule
+(a new schedule can bill that month again).
+
+**200**: `{ "charge": { "...Charge" } }`
+
+Errors: `400 VALIDATION_ERROR`, `401`, `403 FORBIDDEN`, `404 NOT_FOUND`, `409 ALREADY_VOIDED`.
+
+### Payments
+
+#### `POST /tenancies/:id/payments` (owner)
+
+Records money the owner received (`kind: "payment"`) or gave back (`kind: "refund"`). It's
+`succeeded` right away. Works on ended tenancies too (e.g. the deposit refund).
+
+```json
+{
+  "kind": "payment",
+  "appliesTo": "rent",
+  "amountCents": 145000,
+  "method": "zelle",
+  "paidOn": "2026-10-03",
+  "note": "Sent from her phone",
+  "reference": "ZL-8812",
+  "receiptPhotoKey": "attachments/<myUserId>/<uuid>.jpg",
+  "idempotencyKey": "6f1c3d7e-8a4b-4c2d-9e1f-0a1b2c3d4e5f"
+}
+```
+
+| Field             | Required | Rules                                                                            |
+| ----------------- | -------- | -------------------------------------------------------------------------------- |
+| `kind`            | no       | `payment` (default) or `refund`                                                  |
+| `appliesTo`       | no       | `rent` (default) or `deposit`                                                    |
+| `amountCents`     | yes      | integer, 1 to 100000000                                                          |
+| `method`          | yes      | `cash`, `check`, `zelle`, `venmo`, `bank_transfer`, `other`                      |
+| `paidOn`          | no       | date, default today. Not in the future, not more than 366 days ago               |
+| `note`            | no       | up to 500 chars                                                                  |
+| `reference`       | no       | up to 100 chars (check number, Zelle confirmation)                               |
+| `receiptPhotoKey` | no       | a key **I** uploaded through [POST /uploads/sign](#post-uploadssign)             |
+| `idempotencyKey`  | no       | 8 to 100 chars. Make one per "Save" tap (a UUID is ideal) and resend it on retry |
+
+**Idempotency:** sending the same `idempotencyKey` again with the same tenancy, `kind`,
+`appliesTo`, and `amountCents` returns the **original payment with 200** instead of creating a
+second one. The same key with different details, or a key someone else already used, is
+`409 IDEMPOTENCY_KEY_CONFLICT`. It never returns anyone else's payment.
+
+**201** (new) or **200** (idempotent replay): `{ "payment": { "...Payment" } }`
+
+Errors: `400 VALIDATION_ERROR`, `400 INVALID_PAID_ON`, `400 ATTACHMENT_INVALID`, `401`,
+`403 FORBIDDEN`, `404 NOT_FOUND`, `409 REFUND_EXCEEDS_PAYMENTS` (a refund bigger than what that
+pool has received), `409 IDEMPOTENCY_KEY_CONFLICT`.
+
+#### `POST /me/payments` (tenant)
+
+The tenant says "I paid" (outside the app, e.g. by Zelle). It's created as
+`pending_confirmation` and **changes no balance until the owner confirms it**.
+
+```json
+{
+  "tenancyId": "uuid",
+  "appliesTo": "rent",
+  "amountCents": 145000,
+  "method": "zelle",
+  "paidOn": "2026-10-01",
+  "note": "Sent this morning",
+  "reference": "ZL-4471902",
+  "receiptPhotoKey": "attachments/<myUserId>/<uuid>.jpg",
+  "idempotencyKey": "uuid"
+}
+```
+
+Same rules as the owner route, except: no `kind` (always a payment, tenants can't record
+refunds), `paidOn` is **required**, and `tenancyId` picks the tenancy. It's only needed when I have
+more than one active tenancy, like `POST /work-orders`.
+
+The owner gets a push ([Tenant says they paid](#ledger-pushes)).
+
+**201** or **200** (idempotent replay): `{ "payment": { "...Payment" } }`
+
+Errors: `400 VALIDATION_ERROR`, `400 INVALID_PAID_ON`, `400 ATTACHMENT_INVALID`,
+`400 TENANCY_REQUIRED`, `401`, `403 FORBIDDEN` (owner calling it), `403 NO_ACTIVE_TENANCY`
+(my tenancy ended, or `tenancyId` is an ended one), `404 NOT_FOUND` (`tenancyId` isn't mine),
+`409 IDEMPOTENCY_KEY_CONFLICT`.
+
+#### `POST /payments/:id/confirm` (owner)
+
+Confirms a tenant claim: `pending_confirmation` → `succeeded`. No body. Sets `confirmedAt` and
+`confirmedBy`, and the tenant gets a push.
+
+**200**: `{ "payment": { "...Payment" } }`
+
+Errors: `401`, `403 FORBIDDEN`, `404 NOT_FOUND`, `409 PAYMENT_NOT_PENDING`.
+
+#### `POST /payments/:id/reject` (owner)
+
+```json
+{ "reason": "Nothing arrived in Zelle" }
+```
+
+`pending_confirmation` → `rejected`, with `rejectReason`. It never counts. The tenant gets a push
+with the reason.
+
+**200**: `{ "payment": { "...Payment" } }`
+
+Errors: `400 VALIDATION_ERROR` (no reason), `401`, `403 FORBIDDEN`, `404 NOT_FOUND`,
+`409 PAYMENT_NOT_PENDING`.
+
+#### `POST /payments/:id/void` (owner)
+
+```json
+{ "reason": "Entered the same Zelle payment twice" }
+```
+
+For mistakes in hand-recorded money: `succeeded` → `voided`. Works on payments and refunds.
+
+- A pending tenant claim is **rejected**, not voided.
+- Provider (Stripe) payments get refunded, not voided.
+- You can't void a payment if the refunds left would be bigger than the payments left. Void the
+  refund first.
+
+**200**: `{ "payment": { "...Payment" } }`
+
+Errors: `400 VALIDATION_ERROR`, `401`, `403 FORBIDDEN`, `404 NOT_FOUND`,
+`409 PAYMENT_NOT_VOIDABLE`, `409 REFUND_EXCEEDS_PAYMENTS`.
+
+#### `GET /payments/:id` (owner or tenant)
+
+Only the owner and the tenant on that payment can see it. Everyone else gets `404`.
+
+**200**:
+
+```json
+{
+  "payment": { "...Payment" },
+  "events": [ { "...PaymentEvent" } ],
+  "receipt": { "...Receipt" }
+}
+```
+
+`receipt` is `null` unless the payment is `succeeded`.
+
+Errors: `401`, `404 NOT_FOUND`.
+
+The receipt photo itself is downloaded with [GET /uploads/url](#get-uploadsurl) using the
+payment's `receiptPhotoKey`. That works for the owner and the tenant on the payment, nobody else.
+
+### Ledgers and the owner summary
+
+#### `GET /tenancies/:id/ledger` (owner)
+
+**200**: `{ "ledger": { "...Ledger" } }`
+
+Errors: `401`, `403 FORBIDDEN`, `404 NOT_FOUND`.
+
+#### `GET /me/ledger` (tenant)
+
+Every tenancy I've had, active ones first, each with the property's `paymentInstructions`.
+Ended ones (`isActive: false`) are read-only but still show balances, the deposit, and history.
+
+**200**:
+
+```json
+{ "ledgers": [ { "...Ledger" } ] }
+```
+
+Errors: `401`, `403 FORBIDDEN` (owner calling it).
+
+#### `GET /ledger/summary?month=YYYY-MM` (owner)
+
+The dashboard for one month across my properties. `month` defaults to the current UTC month.
+
+**200**:
+
+```json
+{
+  "summary": {
+    "month": "2026-10",
+    "totals": {
+      "expectedCents": 360000,
+      "collectedCents": 50000,
+      "outstandingCents": 165000,
+      "overdueCount": 1,
+      "overdueCents": 120000,
+      "pendingConfirmationCount": 1
+    },
+    "properties": [
+      {
+        "property": { "id": "uuid", "name": "Maple Court" },
+        "expectedCents": 240000,
+        "collectedCents": 50000,
+        "outstandingCents": 45000,
+        "overdueCount": 0,
+        "overdueCents": 0,
+        "pendingConfirmationCount": 0
+      }
+    ]
+  }
+}
+```
+
+| Field                          | Meaning                                                                                                                                                  |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `expectedCents`                | Rent, late fee, and other charges due in the month (not voided). Deposits aren't income, so they're left out                                             |
+| `collectedCents`               | Rent-pool money that landed in the month (by `paidOn`), minus rent refunds in the month                                                                  |
+| `outstandingCents`             | What's still owed right now on the month's charges                                                                                                       |
+| `overdueCount`, `overdueCents` | Charges due on or before the month's last day that are overdue **right now**. For the current month that includes arrears carried in from earlier months |
+| `pendingConfirmationCount`     | Tenant claims waiting on me, from any month                                                                                                              |
+
+`properties` has every live property (zeros if it has nothing), plus a deleted property only if it
+still has ledger history.
+
+Errors: `400 VALIDATION_ERROR` (bad month), `401`, `403 FORBIDDEN`.
+
+### The ledger job
+
+A server-side job keeps the ledger current. It runs hourly when the server is started with
+`LEDGER_JOB=on`, or once with `npm run ledger:run`. Every step is idempotent:
+
+1. **Bills rent** for each schedule, for every month whose due date is between the schedule's start
+   and today + 30 days, within the schedule and the tenancy (nothing after a move-out date).
+2. **Adds late fees.** A rent charge still owed after `dueOn + graceDays`, on a schedule with
+   `lateFeeCents > 0`, gets exactly one `late_fee` charge (due on `overdueOn`,
+   `parentChargeId` = the rent charge). Never twice, not even after the fee is voided. Never for
+   rent that went overdue before the schedule existed. And not while the tenant has a rent claim
+   waiting on the owner (once the owner rejects it, the next run adds the fee).
+3. **Sends reminders** ([pushes](#ledger-pushes)): to the tenant 3 days before a charge is due and
+   on its first overdue day (each once per charge, active tenancies only), and to the owner once a
+   day while anything of theirs is overdue.
+
+The app never needs to call anything for this. Just refetch on `ledger:updated`.
+
+### Provider interface
+
+Payments are created through a provider picked by `method`. The routes and the app don't change
+when a new provider arrives.
+
+| Provider | Methods                                                     | Starts as                                                                 |
+| -------- | ----------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `manual` | `cash`, `check`, `zelle`, `venmo`, `bank_transfer`, `other` | `succeeded` (owner records) or `pending_confirmation` (tenant claims)     |
+| `stripe` | `stripe_ach`                                                | stub today. Throws `501 NOT_CONFIGURED` and no route accepts `stripe_ach` |
+
+Every status change a provider reports goes through one server function,
+`applyProviderEvent(event)`. It takes a provider event (`provider`, `event_id`, `type`,
+`provider_payment_id`, `to_status`, optional `provider_charge_id`, `failure_reason`, `data`), and:
+
+- is **idempotent** on `event_id`. A retried webhook returns `duplicate` and changes nothing.
+- checks the move against the [status transition map](#payment-status-lifecycle). An
+  out-of-order or invalid event is stored on the timeline with `data.ignored` but doesn't change
+  the payment.
+- writes a [PaymentEvent](#paymentevent), emits `ledger:updated`, and sends the provider pushes
+  (`payment:succeeded`, `payment:failed`, `payment:returned`).
+
+It isn't exposed over HTTP yet. It's fully unit tested, so the webhook only has to call it.
+
+### Stripe later
+
+Exactly what plugs in, and where. **Nothing here exists yet, and no app change is needed until the
+"pay in app" button.**
+
+1. **Provider:** implement `src/payments/providers/stripe.js` (stubbed and documented in place).
+   `startPayment` creates a PaymentIntent for `us_bank_account` (ACH), passes our idempotency key
+   to Stripe, and returns `{ status: "pending", provider: "stripe", provider_payment_id: pi.id }`.
+   `parseWebhookEvent` verifies the signature and turns a Stripe event into a provider event:
+   `payment_intent.processing` → `processing`, `payment_intent.succeeded` → `succeeded`,
+   `payment_intent.payment_failed` → `failed`, `payment_intent.canceled` → `voided`,
+   ACH return / `charge.dispute.created` → `returned`.
+2. **Webhook route:** `POST /webhooks/stripe`, mounted in `src/app.js` **before**
+   `express.json()` with `express.raw()` (signature checks need the raw bytes), no bearer auth
+   (the signature is the auth). It calls `parseWebhookEvent`, then `applyProviderEvent`, and
+   answers `200` for every handled outcome so Stripe stops retrying.
+3. **Tenant "pay in app":** `POST /me/payments` starts accepting `method: "stripe_ach"`. The
+   response is a `pending` payment plus whatever the app needs to confirm the PaymentIntent
+   (e.g. a `clientSecret`). That field will be added here when it exists.
+4. **Config:** `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` in `src/config.js` and
+   `.env.example`.
+5. **Refunds of Stripe payments** go through Stripe and come back as provider events. Owners can't
+   void provider payments (`409 PAYMENT_NOT_VOIDABLE`).
+
+What the app should already handle so this is painless: `pending`, `processing`, `failed`, and
+`returned` statuses (show "processing" or "failed", not paid), and `failureReason`.
+
+---
+
 ## Uploads (image attachments)
 
 Auth required, any role. Attaching an image takes three steps:
@@ -1212,8 +1930,12 @@ Query: `key` (required), an attachment key.
 
 Returns a short-lived download URL **only if** the key is attached to something I can see:
 
-- a message in a conversation I'm part of, or
-- a photo on a work order I can see (I'm its owner or its linked tenant).
+- a message in a conversation I'm part of,
+- a photo on a work order I can see (I'm its owner or its linked tenant), or
+- the `receiptPhotoKey` of a payment I'm on (I'm its owner or its tenant).
+
+Receipt photos use the same upload flow as message attachments: sign, `PUT` the bytes, then send
+the key as `receiptPhotoKey`.
 
 An uploaded file that isn't attached to anything yet has no download URL.
 
@@ -1368,9 +2090,33 @@ Sent to the tenant when the owner assigns, moves, or ends one of their tenancies
 
 For `moved`, `tenancyId` is the **new** tenancy.
 
+#### Ledger pushes
+
+`<place>` is `<property name>, <unitLabel>` (or just the property name), amounts are formatted
+like `$1,200.00`, and `<method>` is `cash`, `check`, `Zelle`, `Venmo`, `bank transfer`, or
+`another method`. Every one also comes with a [`ledger:updated`](#ledgerupdated) socket event.
+
+| To     | When                                 | `title`                                           | `body`                                                                                        | `data`                                                                             |
+| ------ | ------------------------------------ | ------------------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| owner  | tenant says "I paid"                 | `Tenant says they paid`                           | `<tenant name> says they paid <amount> by <method> for <place>. Tap to confirm.`              | `{ "type": "payment:claimed", "paymentId", "tenancyId" }`                          |
+| tenant | owner confirms the claim             | `Payment confirmed`                               | `Your <amount> payment for <place> was confirmed.`                                            | `{ "type": "payment:confirmed", "action": "confirmed", "paymentId", "tenancyId" }` |
+| tenant | owner rejects the claim              | `Payment not confirmed`                           | `Your <amount> payment for <place> wasn't confirmed: <reason>`                                | `{ "type": "payment:rejected", "action": "rejected", "paymentId", "tenancyId" }`   |
+| tenant | owner records a refund               | `Refund recorded`                                 | `<amount> was refunded to you for <place>.` (`<amount> of your deposit was ...` for deposits) | `{ "type": "payment:refunded", "action": "refunded", "paymentId", "tenancyId" }`   |
+| tenant | 3 days before a charge is due        | `Rent due soon` (`Payment due soon` for non-rent) | `<amount left> for <place> is due <Mon D>.`                                                   | `{ "type": "ledger:reminder", "kind": "due_soon", "tenancyId", "chargeId" }`       |
+| tenant | first overdue day                    | `Rent is overdue` (`Payment is overdue`)          | `<amount left> for <place> was due <Mon D>. Tap to see your balance.`                         | `{ "type": "ledger:reminder", "kind": "overdue", "tenancyId", "chargeId" }`        |
+| owner  | once a day while anything is overdue | `Overdue rent`                                    | `<n> charges are overdue, <total> in total.` (`1 charge is overdue, ...`)                     | `{ "type": "ledger:overdue_digest", "overdueCount", "overdueCents" }`              |
+
+An owner recording a plain payment sends no push (the tenant sees it on their next ledger fetch,
+and their open screens get `ledger:updated`). Reminders only go to tenants with an active tenancy.
+The owner's daily digest counts every overdue charge, including ended tenancies.
+
+Later, with Stripe: `Payment received` (`payment:succeeded`) to the tenant, and `Payment failed` /
+`Payment returned` (`payment:failed`, `payment:returned`) to both.
+
 Use `data.type` to route a tapped notification: `message:new` → the conversation,
 `workorder:new` / `workorder:updated` → the work order detail screen, `tenancy:updated` → refetch
-`GET /me` (tenants).
+`GET /me` (tenants), `payment:*` → `GET /payments/:paymentId`, `ledger:reminder` → the tenant's
+ledger (`GET /me/ledger`), `ledger:overdue_digest` → the owner's summary (`GET /ledger/summary`).
 
 ---
 
@@ -1505,6 +2251,36 @@ tenant side, refetch `GET /me` (or patch `activeTenancies`/`endedTenancies` loca
 to read-only mode if no active tenancy is left. On the owner side, refetch `GET /tenants` and
 `GET /properties` or update them locally.
 
+#### `ledger:updated`
+
+Sent to **both** the owner's and the tenant's personal rooms whenever anything in a tenancy's
+ledger changes: payments, claims, confirms, rejects, voids, refunds, charges, schedule changes,
+and the job's rent billing and late fees. The payload says what changed, not the new numbers. Refetch
+the ledger you're showing (`GET /tenancies/:tenancyId/ledger`, `GET /me/ledger`,
+`GET /ledger/summary`, or `GET /payments/:paymentId`).
+
+```json
+{ "tenancyId": "uuid", "reason": "payment_claimed", "paymentId": "uuid", "chargeId": null }
+```
+
+| `reason`            | `paymentId` | `chargeId`            |
+| ------------------- | ----------- | --------------------- |
+| `payment_recorded`  | yes         | `null`                |
+| `refund_recorded`   | yes         | `null`                |
+| `payment_claimed`   | yes         | `null`                |
+| `payment_confirmed` | yes         | `null`                |
+| `payment_rejected`  | yes         | `null`                |
+| `payment_voided`    | yes         | `null`                |
+| `charge_created`    | `null`      | yes                   |
+| `charge_voided`     | `null`      | yes                   |
+| `schedule_changed`  | `null`      | `null`                |
+| `rent_billed`       | `null`      | the newest one billed |
+| `late_fee_added`    | `null`      | the newest fee        |
+| `payment_<status>`  | yes         | `null`                |
+
+`payment_<status>` (e.g. `payment_succeeded`, `payment_failed`) only comes from provider events
+later.
+
 ---
 
 ## Error code index
@@ -1515,8 +2291,11 @@ to read-only mode if no active tenancy is left. On the owner side, refetch `GET 
 | 400  | `INVALID_JSON`                  | Body isn't valid JSON                                                                                                           |
 | 400  | `INVITE_INVALID`                | Invite code unknown, used, expired, or revoked                                                                                  |
 | 400  | `INVALID_CURSOR`                | Pagination cursor isn't in this conversation / one of my work orders                                                            |
-| 400  | `TENANCY_REQUIRED`              | Tenant with several active tenancies must send `tenancyId`                                                                      |
+| 400  | `TENANCY_REQUIRED`              | Tenant with several active tenancies must send `tenancyId` (work orders, payment claims)                                        |
 | 400  | `INVALID_END_DATE`              | `endedAt` is before the tenancy started or more than 30 days ahead                                                              |
+| 400  | `INVALID_PAID_ON`               | Payment `paidOn` is in the future or more than 366 days ago                                                                     |
+| 400  | `INVALID_DUE_DATE`              | Charge `dueOn` is more than 366 days from today                                                                                 |
+| 400  | `INVALID_START_DATE`            | Rent schedule `startsOn` is more than 366 days from today                                                                       |
 | 400  | `PHOTO_LIMIT`                   | Work order would have more than 10 photos                                                                                       |
 | 400  | `ATTACHMENT_INVALID`            | Attachment key isn't yours or wasn't uploaded                                                                                   |
 | 400  | `SIZE_MISMATCH`                 | Local upload: byte count differs from the signed `sizeBytes`                                                                    |
@@ -1524,18 +2303,26 @@ to read-only mode if no active tenancy is left. On the owner side, refetch `GET 
 | 401  | `TOKEN_INVALID`                 | Access token expired, malformed, or bad signature. Refresh and retry.                                                           |
 | 401  | `INVALID_CREDENTIALS`           | Login failed                                                                                                                    |
 | 401  | `REFRESH_TOKEN_INVALID`         | Refresh token unknown, expired, revoked, or reused. Sign in again.                                                              |
-| 403  | `NO_ACTIVE_TENANCY`             | Tenant has no active tenancy with this owner, so writes are blocked (read-only mode)                                            |
+| 403  | `NO_ACTIVE_TENANCY`             | Tenant has no active tenancy with this owner (or the claimed tenancy ended), so writes are blocked (read-only mode)             |
 | 403  | `FORBIDDEN`                     | Wrong role for this route or field (e.g. a tenant calling `/properties` or changing work order status, contractor, or estimate) |
 | 403  | `SIGNATURE_INVALID`             | Local upload/download URL expired or tampered with                                                                              |
 | 404  | `NOT_FOUND`                     | Unknown route, or the resource doesn't exist or isn't yours                                                                     |
 | 409  | `EMAIL_TAKEN`                   | An account with that email already exists                                                                                       |
-| 409  | `INVALID_STATUS_TRANSITION`     | Work order status move isn't allowed (none currently; reserved)                                                                 |
+| 409  | `INVALID_STATUS_TRANSITION`     | Work order or payment status move isn't allowed (reserved, the routes return the more specific codes above)                     |
 | 409  | `WORK_ORDER_NOT_OPEN`           | Tenant tried to add photos after work started                                                                                   |
 | 409  | `TENANCY_EXISTS`                | That tenant already has an active tenancy in that unit                                                                          |
-| 409  | `TENANCY_ENDED`                 | The tenancy has already ended (can't end or move it)                                                                            |
+| 409  | `TENANCY_ENDED`                 | The tenancy has already ended (can't end, move, or change its rent schedule)                                                    |
+| 409  | `SCHEDULE_START_TOO_EARLY`      | New rent schedule would start before the first month the current one hasn't billed                                              |
+| 409  | `LATE_FEE_EXISTS`               | That rent charge already has its one late fee                                                                                   |
+| 409  | `ALREADY_VOIDED`                | The charge is already voided                                                                                                    |
+| 409  | `REFUND_EXCEEDS_PAYMENTS`       | A refund (or voiding a payment) would leave refunds bigger than the money received in that pool                                 |
+| 409  | `IDEMPOTENCY_KEY_CONFLICT`      | That `idempotencyKey` was already used for a different payment (or by someone else)                                             |
+| 409  | `PAYMENT_NOT_PENDING`           | Confirm/reject on a payment that isn't `pending_confirmation`                                                                   |
+| 409  | `PAYMENT_NOT_VOIDABLE`          | Void on a payment that isn't a hand-recorded `succeeded` one (reject claims instead, provider payments get refunded)            |
 | 409  | `INVITE_USED`                   | The invite was already used (can't revoke or resend it)                                                                         |
 | 409  | `PROPERTY_HAS_ACTIVE_TENANCY`   | Can't delete: someone still actively lives there                                                                                |
 | 409  | `PROPERTY_HAS_OPEN_WORK_ORDERS` | Can't delete: a work order there isn't resolved                                                                                 |
 | 413  | `PAYLOAD_TOO_LARGE`             | JSON body over 100 KB, or local upload over the size limit                                                                      |
 | 429  | `RATE_LIMITED`                  | Too many `/auth/*` requests from this IP                                                                                        |
 | 500  | `INTERNAL_ERROR`                | Server bug. The message is always generic.                                                                                      |
+| 501  | `NOT_CONFIGURED`                | Stripe provider stub. No route can reach it today, reserved for when `stripe_ach` is enabled                                    |

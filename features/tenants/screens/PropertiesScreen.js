@@ -15,6 +15,7 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import ErrorState from '../../../components/ErrorState';
 import HeaderIconButton from '../../../components/HeaderIconButton';
 import PropertyFormModal from '../components/PropertyFormModal';
+import { useLedger } from '../../payments/context/LedgerContext';
 import { useTenants } from '../context/TenantsContext';
 import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
@@ -35,6 +36,7 @@ function PropertiesScreen(props) {
     updateProperty,
     deleteProperty,
   } = useTenants();
+  const ledger_store = useLedger();
   // the form is open when form_open is true, editing is the property it edits, null means a new one
   const [form_open, setFormOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -65,13 +67,29 @@ function PropertiesScreen(props) {
     setFormOpen(true);
   }
 
-  async function saveProperty(name, address) {
+  // the payment instructions go through the ledger store (PATCH /properties/:id with paymentInstructions in
+  // real mode, the demo's own copy in the demo), and only when they changed
+  async function saveProperty(name, address, instructions) {
+    let property_id = editing ? editing.id : null;
     if (editing) {
       await updateProperty(editing.id, { name: name, address: address });
     } else {
-      await addProperty(name, address);
+      const added = await addProperty(name, address);
+      property_id = added ? added.id : null;
+    }
+    if (property_id && instructions !== instructionsFor(editing)) {
+      await ledger_store.setPaymentInstructions(property_id, instructions);
     }
     setFormOpen(false);
+  }
+
+  // the text the form opens with: what the ledger store knows, or what the property came back with
+  function instructionsFor(property) {
+    if (!property) {
+      return '';
+    }
+    const from_ledger = ledger_store.instructionsFor(property.id);
+    return from_ledger !== undefined ? from_ledger : property.payment_instructions || '';
   }
 
   // the server says no while someone lives there or a work order is open, and its message says which
@@ -195,6 +213,7 @@ function PropertiesScreen(props) {
         key={form_key}
         visible={form_open}
         property={editing}
+        instructions={instructionsFor(editing)}
         onSave={saveProperty}
         onClose={() => setFormOpen(false)}
       />

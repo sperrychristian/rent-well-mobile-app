@@ -35,7 +35,7 @@ function ChargeFormModal(props) {
   }
 
   async function submit() {
-    const checked = validateCharge({ kind, description, amount_text, due_date });
+    const checked = validateCharge({ kind, description, amount_text, due_date }, props.today);
     setErrors(checked.errors);
     setFormError('');
     if (hasErrors(checked.errors)) {
@@ -78,7 +78,7 @@ function ChargeFormModal(props) {
           onChangeText={setDescription}
           placeholder="e.g. Replacement key fob"
           placeholderTextColor={COLORS.text_muted}
-          maxLength={120}
+          maxLength={200}
           returnKeyType="next"
           onSubmitEditing={() => amount_ref.current && amount_ref.current.focus()}
           accessibilityLabel="What it's for"

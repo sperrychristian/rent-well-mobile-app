@@ -150,7 +150,7 @@ function TenantLedgerScreen(props) {
           shortDate(charge.due_date),
       })),
     ...ledger.payments
-      .filter((payment) => payment.status === 'confirmed')
+      .filter((payment) => payment.status === 'succeeded')
       .map((payment) => ({
         type: 'payment',
         date: payment.paid_on,
@@ -287,7 +287,7 @@ function TenantLedgerScreen(props) {
           ) : null}
           {is_ended ? (
             <Text style={styles.muted_line}>
-              This tenancy has ended. You can still record a payment or a deposit refund.
+              This tenancy has ended. You can still record a payment, a deposit refund, or a charge.
             </Text>
           ) : null}
         </View>
@@ -403,13 +403,14 @@ function TenantLedgerScreen(props) {
         visible={more_open}
         title="More"
         actions={[
+          // the server takes charges on an ended tenancy too (move-out damage), but not a new rent schedule
+          {
+            label: 'Add Charge',
+            icon: 'pricetag-outline',
+            onPress: () => openForm('charge'),
+          },
           ...(!is_ended
             ? [
-                {
-                  label: 'Add Charge',
-                  icon: 'pricetag-outline',
-                  onPress: () => openForm('charge'),
-                },
                 {
                   label: ledger.schedule ? 'Edit Rent Schedule' : 'Set Rent Schedule',
                   icon: 'calendar-outline',

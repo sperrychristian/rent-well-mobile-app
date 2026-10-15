@@ -86,11 +86,18 @@ describe('deriveLedger (shared vectors)', () => {
 describe('payments and charges', () => {
   test('only confirmed payments count, refunds count backwards', () => {
     const base = { amount_cents: 1000, is_refund: false };
-    expect(paymentEffect({ ...base, status: 'confirmed' })).toBe(1000);
-    expect(paymentEffect({ ...base, status: 'confirmed', is_refund: true })).toBe(-1000);
-    ['pending', 'rejected', 'voided'].forEach((status) =>
-      expect(paymentEffect({ ...base, status })).toBe(0),
-    );
+    expect(paymentEffect({ ...base, status: 'succeeded' })).toBe(1000);
+    expect(paymentEffect({ ...base, status: 'succeeded', is_refund: true })).toBe(-1000);
+    // the server's names: only succeeded counts, a claim (pending_confirmation) and the provider ones never do
+    [
+      'pending_confirmation',
+      'pending',
+      'processing',
+      'failed',
+      'returned',
+      'rejected',
+      'voided',
+    ].forEach((status) => expect(paymentEffect({ ...base, status })).toBe(0));
   });
 
   test('allocate pays the oldest charge first', () => {
@@ -98,18 +105,34 @@ describe('payments and charges', () => {
       { id: 'b', kind: 'rent', amount_cents: 100, due_date: '2026-10-01' },
       { id: 'a', kind: 'rent', amount_cents: 100, due_date: '2026-09-01' },
     ];
-    const payments = [{ amount_cents: 150, status: 'confirmed', applies_to: 'rent' }];
-    expect(allocate(charges, payments)).toEqual({ a: 0, b: 50 });
+    const payments = [
+      {
+        id: 'p',
+        amount_cents: 150,
+        status: 'succeeded',
+        applies_to: 'rent',
+        paid_on: '2026-10-01',
+      },
+    ];
+    // allocate gives back the pools now, like the server's allocatePool
+    expect(allocate(charges, payments)).toEqual({
+      remaining: { a: 0, b: 50 },
+      credit_cents: 0,
+      debt_cents: 0,
+    });
   });
 
-  test('status order: voided, paid, overdue, partial, then due or upcoming', () => {
-    const charge = { amount_cents: 100, due_date: '2026-10-01' };
+  test('status order: voided, paid, overdue, partial, then due, due soon, or upcoming', () => {
+    // grace days only apply to rent, like the server
+    const charge = { kind: 'rent', amount_cents: 100, due_date: '2026-10-01' };
     expect(chargeStatus({ ...charge, voided_at: 'x' }, 100, '2026-10-20', 0)).toBe('voided');
     expect(chargeStatus(charge, 0, '2026-10-20', 0)).toBe('paid');
     expect(chargeStatus(charge, 40, '2026-10-20', 5)).toBe('overdue');
     expect(chargeStatus(charge, 40, '2026-10-03', 5)).toBe('partial');
     expect(chargeStatus(charge, 100, '2026-10-01', 5)).toBe('due');
     expect(chargeStatus(charge, 100, '2026-09-20', 5)).toBe('upcoming');
+    expect(chargeStatus(charge, 100, '2026-09-24', 5)).toBe('due_soon');
+    expect(chargeStatus({ ...charge, kind: 'other' }, 100, '2026-10-02', 5)).toBe('overdue');
   });
 });
 

@@ -328,73 +328,106 @@ export function addWorkOrderPhotos(work_order_id, photo_keys) {
   return patchWorkOrder(work_order_id, { addPhotoKeys: photo_keys });
 }
 
-// ----- rent ledger (draft contract, see docs/API-ledger-draft.md) -----
+// ----- rent ledger (docs/API.md, Rent ledger) -----
 // the server sends camelCase, features/payments/utils/ledgerApi.js turns it into the app's shape
+// every money field is integer cents, and every action answers with the one row it changed,
+// so the provider refetches the tenancy's ledger after it (the server's math is the truth)
 
-// owner: every tenancy's ledger, tenant: their own (current and past)
-export async function getLedgers() {
-  const data = await api_client.request('GET', '/ledgers');
-  return data.ledgers;
-}
-
-export async function getLedger(tenancy_id) {
-  const data = await api_client.request('GET', '/ledgers/' + encodeURIComponent(tenancy_id));
+// owner: one tenancy's whole ledger
+export async function getTenancyLedger(tenancy_id) {
+  const data = await api_client.request(
+    'GET',
+    '/tenancies/' + encodeURIComponent(tenancy_id) + '/ledger',
+  );
   return data.ledger;
 }
 
-// every ledger action answers with the whole ledger after the change, so the app just swaps it in
-function ledgerAction(method, path, body) {
-  return api_client.request(method, path, { body: body }).then((data) => data.ledger);
+// tenant: every tenancy I've had, active ones first
+export async function getMyLedgers() {
+  const data = await api_client.request('GET', '/me/ledger');
+  return data.ledgers;
 }
 
-// owner only, schedule is { amountCents, dueDay, graceDays, lateFeeCents, startDate }
-export function setRentSchedule(tenancy_id, schedule) {
-  return ledgerAction(
+// owner: one month across my properties, month is YYYY-MM
+export async function getLedgerSummary(month) {
+  const data = await api_client.request('GET', '/ledger/summary', { query: { month: month } });
+  return data.summary;
+}
+
+// owner only, schedule is { amountCents, dueDay, graceDays, lateFeeCents, startsOn }
+export async function setRentSchedule(tenancy_id, schedule) {
+  const data = await api_client.request(
     'PUT',
     '/tenancies/' + encodeURIComponent(tenancy_id) + '/rent-schedule',
-    schedule,
+    { body: schedule },
   );
+  return data.schedule;
 }
 
-// owner only, charge is { kind, description, amountCents, dueDate }
-export function addCharge(tenancy_id, charge) {
-  return ledgerAction('POST', '/tenancies/' + encodeURIComponent(tenancy_id) + '/charges', charge);
+// owner only, charge is { kind, amountCents, dueOn, description }
+export async function addCharge(tenancy_id, charge) {
+  const data = await api_client.request(
+    'POST',
+    '/tenancies/' + encodeURIComponent(tenancy_id) + '/charges',
+    { body: charge },
+  );
+  return data.charge;
 }
 
-export function voidCharge(charge_id, reason) {
-  return ledgerAction('POST', '/charges/' + encodeURIComponent(charge_id) + '/void', {
-    reason: reason,
-  });
+export async function voidCharge(charge_id, reason) {
+  const data = await api_client.request(
+    'POST',
+    '/charges/' + encodeURIComponent(charge_id) + '/void',
+    { body: { reason: reason } },
+  );
+  return data.charge;
 }
 
-// an owner's payment is confirmed right away, a tenant's is a claim that waits for the owner
-export function createPayment(tenancy_id, payment) {
-  return ledgerAction(
+// the owner records money in (kind payment) or back out (kind refund), it counts right away
+export async function createPayment(tenancy_id, payment) {
+  const data = await api_client.request(
     'POST',
     '/tenancies/' + encodeURIComponent(tenancy_id) + '/payments',
-    payment,
+    { body: payment },
   );
+  return data.payment;
 }
 
-// a push tap can open a payment that isn't loaded yet, this answers with { ledger, paymentId }
-export async function getPayment(payment_id) {
+// the tenant's "I paid", it waits as pending_confirmation until the owner confirms it
+export async function claimPayment(claim) {
+  const data = await api_client.request('POST', '/me/payments', { body: claim });
+  return data.payment;
+}
+
+// a push tap can open a payment that isn't loaded yet, this answers with { payment, events, receipt }
+export function getPayment(payment_id) {
   return api_client.request('GET', '/payments/' + encodeURIComponent(payment_id));
 }
 
-export function confirmPayment(payment_id) {
-  return ledgerAction('POST', '/payments/' + encodeURIComponent(payment_id) + '/confirm');
+export async function confirmPayment(payment_id) {
+  const data = await api_client.request(
+    'POST',
+    '/payments/' + encodeURIComponent(payment_id) + '/confirm',
+  );
+  return data.payment;
 }
 
-export function rejectPayment(payment_id, reason) {
-  return ledgerAction('POST', '/payments/' + encodeURIComponent(payment_id) + '/reject', {
-    reason: reason,
-  });
+export async function rejectPayment(payment_id, reason) {
+  const data = await api_client.request(
+    'POST',
+    '/payments/' + encodeURIComponent(payment_id) + '/reject',
+    { body: { reason: reason } },
+  );
+  return data.payment;
 }
 
-export function voidPayment(payment_id, reason) {
-  return ledgerAction('POST', '/payments/' + encodeURIComponent(payment_id) + '/void', {
-    reason: reason,
-  });
+export async function voidPayment(payment_id, reason) {
+  const data = await api_client.request(
+    'POST',
+    '/payments/' + encodeURIComponent(payment_id) + '/void',
+    { body: { reason: reason } },
+  );
+  return data.payment;
 }
 
 // ----- uploads -----

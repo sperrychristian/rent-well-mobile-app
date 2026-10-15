@@ -29,11 +29,18 @@ const friendly_messages = {
   NO_TENANCY: "Your account isn't linked to a rental yet. Ask your landlord for an invite.",
   TENANCY_REQUIRED: 'Pick which rental this request is for.',
   INVALID_STATUS_TRANSITION: "That status change isn't allowed.",
-  PAYMENT_NOT_PENDING: 'That payment was already confirmed, rejected, or voided. Pull to refresh.',
-  PAYMENT_VOIDED: 'That payment was already voided.',
-  CHARGE_VOIDED: 'That charge was already voided.',
-  REFUND_NOT_ALLOWED: 'Only your landlord can record a refund.',
-  NO_RENT_SCHEDULE: 'Set a rent schedule for this tenancy first.',
+  PAYMENT_NOT_PENDING: 'That payment was already confirmed or rejected. Pull to refresh.',
+  PAYMENT_NOT_VOIDABLE:
+    'Only a confirmed payment you recorded can be voided. Reject a claim instead.',
+  ALREADY_VOIDED: 'That charge was already voided.',
+  REFUND_EXCEEDS_PAYMENTS:
+    "That's more than this tenant has paid in. Void the refund first, or lower the amount.",
+  IDEMPOTENCY_KEY_CONFLICT:
+    'That payment was already saved with different details. Close the form and try again.',
+  LATE_FEE_EXISTS: 'That rent already has its late fee.',
+  INVALID_PAID_ON: "The date paid can't be in the future or more than a year ago.",
+  INVALID_DUE_DATE: 'The due date has to be within a year of today.',
+  INVALID_START_DATE: 'The start date has to be within a year of today.',
   INTERNAL_ERROR: 'Something went wrong on the server. Try again in a moment.',
   NETWORK_ERROR: "Can't reach the server. Check your connection and try again.",
 };

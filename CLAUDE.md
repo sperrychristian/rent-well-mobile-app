@@ -33,7 +33,7 @@ The code so far was written in an earlier chat session and has been run only par
       - ledgerVectors.js (shared hand-worked vectors)
       - ledgerHelpers.js (pills, labels, `groupByMonth`, form checks, `buildReceiptText`, `upcomingRent`, the home lines)
       - ledgerApi.js (camelCase mapping)
-      - demoLedger.js (the demo's version of every action, with the draft's error codes)
+      - demoLedger.js (the demo's version of every action, with the real server's rules and error codes)
       - shareReceipt.js
     - Data: sampleLedger.js (demo only, dated from today).
   - `settings/`: SettingsScreen (stub: profile, mileage rate with a link to the Mileage Log, Log Out)
@@ -58,7 +58,16 @@ The code so far was written in an earlier chat session and has been run only par
 - Tenants: `TenantsProvider` gives one interface (`tenants`, `properties`, `invites`, `refresh`, `fetchTenantDetail`, `addProperty`, `updateProperty`, `deleteProperty`, `createInvite`, `revokeInvite`, `resendInvite`, `assignTenant`, `moveTenancy`, `endTenancy`). Real owners load `GET /tenants`, `GET /properties`, and `GET /invites` together and reload quietly on `tenancy:updated`, a socket reconnect, or after a change. The demo keeps `demo_tenant_data` in `WorkOrdersContext` (set by `startDemo`, cleared by `exitDemo`, never saved) and runs the pure `demoTenants.js` actions on it, so errors read the same as the server's. It isn't keyed, server data is tagged with the account it belongs to instead.
 - Rent ledger: `LedgerProvider` (in `App.js` inside `TenantsProvider`) remounts on a mode or account change.
   - Demo: five sample ledgers live in memory, built when the demo starts and shared by both demo sides. Every change runs a pure `demoLedger.js` action and then `syncLedger`, so new rent and late fees appear. They're never saved, and they reset on exit.
-  - Real mode: the draft endpoints in `docs/API-ledger-draft.md` (the backend doesn't have them yet), a per-account cache `rent_well_ledger_cache_<user id>`, `ledger:updated` and reconnect reloads, and push taps that open Payment Record or the Rent Ledger.
+  - Real mode: the routes in the Rent ledger section of `docs/API.md` (a copy of `../rent-well-api/API.md`).
+    - Loads: owners load `GET /tenants`, then `GET /tenancies/:id/ledger` for each tenancy, plus `GET /ledger/summary`. Tenants load `GET /me/ledger`.
+    - The server's statuses and balances are the truth: `fromApiLedger` puts them in `ledger.server`, which `deriveLedger` hands back as is.
+    - Every action answers with one row, then that tenancy is refetched.
+    - Cache: per account, `rent_well_ledger_cache_<user id>` (version 2).
+    - `ledger:updated` refetches the tenancy and any open payment. A reconnect reloads everything.
+    - Push taps: `payment:*` opens Payment Record, `ledger:reminder` opens Payments (the owner's Rent Ledger when it's for one tenancy), `ledger:overdue_digest` opens Payments.
+  - Payment statuses are the server's: `pending_confirmation` (a claim), `succeeded`, `rejected`, `voided`, and the provider ones `pending`, `processing`, `failed`, `returned`.
+  - Charge statuses add `due_soon`.
+  - The demo's local math is a port of the server's (`features/payments/utils/ledgerMath.js`), and `backendVectors.js` holds the backend's own test cases, run against it in `backendParity.test.js`.
   - Money is integer cents only, and balances always come from `deriveLedger`. Only confirmed payments count. Claims stay pending until the landlord confirms them.
 - Former tenants: for a tenant, `TenantsProvider` reads `GET /me` (`activeTenancies`, `endedTenancies`) and sets `is_read_only` when there's no active one, only once that's confirmed. `tenancy:updated`, a reconnect, or any `NO_ACTIVE_TENANCY` error rechecks it, so the home and the message composer switch live without logging out.
 - Messages: `MessagesContext` remounts whenever the mode or user changes. Real mode loads `GET /conversations`, opens one socket (personal room for inbox updates, `conversation:join` while a thread is open, leave on close or background), and registers for push. Demo mode uses `sampleThreads.js` with a fake read receipt and reply. Screens call the same functions in both modes. The demo store keeps its key when the demo switches sides, so both sides share the threads: they're stored from the landlord's side, and the tenant side gets only Sam's thread with the two read times and unread counts swapped (`otherUnreadCount` keeps the tenant's unread). The fake reply comes from whoever is on the other side (`demo_replies` or `demo_landlord_replies`).
@@ -179,7 +188,7 @@ Phases:
 Bank feed import and matching, receipt scanning that fills in amount, date, and vendor, rent income and profit per property, depreciation schedules for capital improvements, durable receipt storage, document encryption, cloud storage for documents, tenant access to shared documents, e-signatures.
 
 ## Next up
-1. Review and merge `navigation-assignment` (it already contains `work-orders-api` and `tenant-management`), then fill in the stubs: Settings, Property Detail, and Lease (Payments is done on `payments-ledger-app`, which needs the ledger endpoints from `docs/API-ledger-draft.md` built in `rent-well-api`).
+1. Review and merge `navigation-assignment` (it already contains `work-orders-api` and `tenant-management`), then fill in the stubs: Settings, Property Detail, and Lease (Payments is done, and `ledger-real-mode` connects it to the real ledger API).
 2. Turn the marked screens into tabs and a drawer (owner tabs: Dashboard, Work Orders, Messages, Tenants; owner drawer: Settings, Properties, Documents, Expenses, Checklist; tenant tabs: Home, My Requests, Messages).
 3. Move expenses, mileage, documents, and checklists to the backend, one at a time.
 

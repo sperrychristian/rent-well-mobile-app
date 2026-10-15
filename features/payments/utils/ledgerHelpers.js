@@ -1,7 +1,14 @@
 // pure helpers for the payments screens: words for statuses, months, balances, form checks, and receipt text
 // nothing here draws anything or touches the network, so the tests can check all of it
 import { formatCents, parseAmountToCents } from '../../../utils/formatCurrency';
-import { isDate, monthOf, nextScheduledDue, deriveLedger, monthSummary } from './ledgerMath';
+import {
+  isDate,
+  monthOf,
+  nextScheduledDue,
+  deriveLedger,
+  monthSummary,
+  daysBetween,
+} from './ledgerMath';
 
 // ----- choices -----
 
@@ -14,12 +21,20 @@ export const payment_methods = [
   { value: 'other', label: 'Other' },
 ];
 
+// rent only ever comes from the schedule, so the server takes these three kinds for a one-off charge
 export const charge_kinds = [
   { value: 'other', label: 'Other charge' },
   { value: 'deposit', label: 'Security deposit' },
   { value: 'late_fee', label: 'Late fee' },
-  { value: 'rent', label: 'Rent' },
 ];
+
+// the label for any kind, rent included, since rent rows still show in the ledger
+const kind_labels = {
+  rent: 'Rent',
+  other: 'Other charge',
+  deposit: 'Security deposit',
+  late_fee: 'Late fee',
+};
 
 export function methodLabel(method) {
   const found = payment_methods.find((item) => item.value === method);
@@ -27,8 +42,7 @@ export function methodLabel(method) {
 }
 
 export function chargeKindLabel(kind) {
-  const found = charge_kinds.find((item) => item.value === kind);
-  return found ? found.label : 'Charge';
+  return kind_labels[kind] || 'Charge';
 }
 
 // ----- status words, the pills always show these with an icon so a status is never color only -----
@@ -37,14 +51,25 @@ const charge_pills = {
   paid: { label: 'Paid', tone: 'success', icon: 'checkmark-circle-outline' },
   partial: { label: 'Partly paid', tone: 'info', icon: 'pie-chart-outline' },
   due: { label: 'Due', tone: 'warning', icon: 'calendar-outline' },
+  due_soon: { label: 'Due soon', tone: 'warning', icon: 'time-outline' },
   overdue: { label: 'Overdue', tone: 'danger', icon: 'alert-circle-outline' },
   upcoming: { label: 'Upcoming', tone: 'neutral', icon: 'time-outline' },
   voided: { label: 'Voided', tone: 'neutral', icon: 'close-circle-outline' },
 };
 
+// every status the server can send, the provider ones (pending, processing, failed, returned) only show up
+// once card or bank payments exist, but they already read right if one comes through
 const payment_pills = {
-  pending: { label: 'Waiting for confirmation', tone: 'warning', icon: 'hourglass-outline' },
-  confirmed: { label: 'Confirmed', tone: 'success', icon: 'checkmark-circle-outline' },
+  pending_confirmation: {
+    label: 'Waiting for confirmation',
+    tone: 'warning',
+    icon: 'hourglass-outline',
+  },
+  pending: { label: 'Pending', tone: 'neutral', icon: 'time-outline' },
+  processing: { label: 'Processing', tone: 'info', icon: 'sync-outline' },
+  succeeded: { label: 'Confirmed', tone: 'success', icon: 'checkmark-circle-outline' },
+  failed: { label: 'Failed', tone: 'danger', icon: 'close-circle-outline' },
+  returned: { label: 'Returned', tone: 'danger', icon: 'arrow-undo-outline' },
   rejected: { label: 'Rejected', tone: 'danger', icon: 'close-circle-outline' },
   voided: { label: 'Voided', tone: 'neutral', icon: 'remove-circle-outline' },
 };
@@ -94,6 +119,8 @@ export function chargeStatusLine(charge) {
       return { text: left + 'due ' + due, tone: 'warning', icon: 'time-outline' };
     case 'due':
       return { text: 'Due ' + due, tone: 'warning', icon: 'time-outline' };
+    case 'due_soon':
+      return { text: 'Due soon, ' + due, tone: 'warning', icon: 'time-outline' };
     case 'upcoming':
       return { text: 'Due ' + due, tone: 'neutral', icon: 'calendar-outline' };
     case 'voided':
@@ -111,17 +138,33 @@ export function chargeStatusLine(charge) {
 export function paymentStatusLine(payment) {
   const when = shortDate(payment.paid_on) + ' by ' + methodLabel(payment.method);
   switch (payment.status) {
-    case 'confirmed':
+    case 'succeeded':
       return {
         text: (payment.is_refund ? 'Refunded ' : 'Paid ') + when,
         tone: 'success',
         icon: 'checkmark-circle-outline',
       };
-    case 'pending':
+    case 'pending_confirmation':
       return {
         text: 'Waiting for confirmation, sent ' + when,
         tone: 'warning',
         icon: 'hourglass-outline',
+      };
+    case 'pending':
+      return { text: 'Pending, started ' + when, tone: 'neutral', icon: 'time-outline' };
+    case 'processing':
+      return { text: 'Processing, started ' + when, tone: 'info', icon: 'sync-outline' };
+    case 'failed':
+      return {
+        text: 'Failed' + (payment.failure_reason ? ': ' + payment.failure_reason : ', ' + when),
+        tone: 'danger',
+        icon: 'close-circle-outline',
+      };
+    case 'returned':
+      return {
+        text: 'Returned by the bank, was ' + when,
+        tone: 'danger',
+        icon: 'arrow-undo-outline',
       };
     case 'rejected':
       return { text: 'Rejected, sent ' + when, tone: 'danger', icon: 'close-circle-outline' };
@@ -160,9 +203,17 @@ export function upcomingRent(ledger, today) {
 
 // the landlord's Payments tile: what needs doing first, overdue, then claims, otherwise all paid up
 // gives back { text, tone, claims, collected_cents, expected_cents } for this month
-export function ownerPaymentsLine(ledgers, today) {
+// server_summary (real mode's GET /ledger/summary for this month) wins over the local math when it's there
+export function ownerPaymentsLine(ledgers, today, server_summary) {
   const active = ledgers.filter((ledger) => ledger.tenancy_status !== 'ended');
-  const summary = monthSummary(ledgers, monthOf(today), today);
+  const local = monthSummary(ledgers, monthOf(today), today);
+  const summary = server_summary
+    ? {
+        ...local,
+        expected_cents: server_summary.expected_cents,
+        collected_cents: server_summary.collected_cents,
+      }
+    : local;
   const overdue_tenants = active.filter((ledger) => deriveLedger(ledger, today).overdue_count > 0);
   let text = 'All paid up';
   let tone = 'success';
@@ -289,7 +340,10 @@ export function groupByMonth(items) {
 
 // ----- form checks, each gives back { errors, value } where value is ready to send -----
 
-const max_cents = 10000000;
+// the server's cap, $1M in cents
+const max_cents = 100000000;
+// how far back a payment date can go, and how far a due or start date can be from today (the server's rule)
+const max_days = 366;
 
 function amountError(amount_text) {
   const cents = parseAmountToCents(amount_text);
@@ -312,11 +366,25 @@ function dateError(date, today, allow_future) {
   if (!allow_future && date > today) {
     return "A payment can't be dated in the future.";
   }
+  if (!allow_future && daysBetween(date, today) > max_days) {
+    return "A payment can't be more than a year old.";
+  }
+  return null;
+}
+
+// due and start dates can be ahead or behind, but within a year of today
+function nearDateError(date, today, label) {
+  if (!isDate(date)) {
+    return 'Pick ' + label + ' as YYYY-MM-DD.';
+  }
+  if (isDate(today) && Math.abs(daysBetween(today, date)) > max_days) {
+    return 'Pick ' + label + ' within a year of today.';
+  }
   return null;
 }
 
 // a payment the owner records, or a tenant's "I paid" claim (claims can't be refunds)
-// fields: { amount_text, method, paid_on, applies_to, is_refund, note }
+// fields: { amount_text, method, paid_on, applies_to, is_refund, note, reference }
 export function validatePayment(fields, today, is_claim) {
   const errors = {};
   const amount = amountError(fields.amount_text);
@@ -339,6 +407,9 @@ export function validatePayment(fields, today, is_claim) {
   if ((fields.note || '').length > 500) {
     errors.note = 'Keep the note under 500 characters.';
   }
+  if ((fields.reference || '').trim().length > 100) {
+    errors.reference = 'Keep the reference under 100 characters.';
+  }
   return {
     errors: errors,
     value: {
@@ -348,12 +419,13 @@ export function validatePayment(fields, today, is_claim) {
       applies_to: fields.applies_to,
       is_refund: !is_claim && !!fields.is_refund,
       note: (fields.note || '').trim(),
+      reference: (fields.reference || '').trim(),
     },
   };
 }
 
 // fields: { kind, description, amount_text, due_date }
-export function validateCharge(fields) {
+export function validateCharge(fields, today) {
   const errors = {};
   const amount = amountError(fields.amount_text);
   if (amount.error) {
@@ -365,11 +437,12 @@ export function validateCharge(fields) {
   const description = (fields.description || '').trim();
   if (description.length === 0) {
     errors.description = 'Say what the charge is for.';
-  } else if (description.length > 120) {
-    errors.description = 'Keep it under 120 characters.';
+  } else if (description.length > 200) {
+    errors.description = 'Keep it under 200 characters.';
   }
-  if (!isDate(fields.due_date)) {
-    errors.due_date = 'Pick a due date as YYYY-MM-DD.';
+  const due_error = nearDateError(fields.due_date, today, 'a due date');
+  if (due_error) {
+    errors.due_date = due_error;
   }
   return {
     errors: errors,
@@ -383,7 +456,7 @@ export function validateCharge(fields) {
 }
 
 // fields: { amount_text, due_day_text, grace_text, late_fee_text (blank for none), start_date }
-export function validateSchedule(fields) {
+export function validateSchedule(fields, today) {
   const errors = {};
   const amount = amountError(fields.amount_text);
   if (amount.error) {
@@ -398,20 +471,23 @@ export function validateSchedule(fields) {
   const grace_text = String(fields.grace_text === undefined ? '' : fields.grace_text).trim();
   const grace_days =
     grace_text === '' ? 0 : /^\d{1,2}$/.test(grace_text) ? parseInt(grace_text, 10) : null;
-  if (grace_days === null || grace_days > 27) {
-    errors.grace = 'Grace days are 0 to 27.';
+  if (grace_days === null || grace_days > 28) {
+    errors.grace = 'Grace days are 0 to 28.';
   }
   let late_fee_cents = 0;
   if (String(fields.late_fee_text || '').trim() !== '') {
     const fee = parseAmountToCents(fields.late_fee_text);
     if (fee === null || fee < 0 || fee > max_cents) {
       errors.late_fee = 'Enter a late fee like 50, or leave it blank for none.';
+    } else if (amount.cents && fee > amount.cents) {
+      errors.late_fee = "The late fee can't be more than the rent.";
     } else {
       late_fee_cents = fee;
     }
   }
-  if (!isDate(fields.start_date)) {
-    errors.start_date = 'Pick a start date as YYYY-MM-DD.';
+  const start_error = nearDateError(fields.start_date, today, 'a start date');
+  if (start_error) {
+    errors.start_date = start_error;
   }
   return {
     errors: errors,
@@ -431,8 +507,8 @@ export function validateReason(text) {
   if (reason.length < 3) {
     return { error: 'Give a short reason (at least 3 characters).', value: reason };
   }
-  if (reason.length > 300) {
-    return { error: 'Keep the reason under 300 characters.', value: reason };
+  if (reason.length > 500) {
+    return { error: 'Keep the reason under 500 characters.', value: reason };
   }
   return { error: null, value: reason };
 }
@@ -459,6 +535,9 @@ export function buildReceiptText(payment, ledger, generated_on) {
     'Applied to: ' + (payment.applies_to === 'deposit' ? 'Security deposit' : 'Rent'),
     'Status: ' + paymentPill(payment.status).label,
   ];
+  if (payment.reference) {
+    lines.push('Reference number: ' + payment.reference);
+  }
   if (payment.note) {
     lines.push('Note: ' + payment.note);
   }
@@ -468,15 +547,18 @@ export function buildReceiptText(payment, ledger, generated_on) {
   if (payment.status === 'voided' && payment.void_reason) {
     lines.push('Voided because: ' + payment.void_reason);
   }
-  lines.push('Reference: ' + payment.id);
+  lines.push('Reference: ' + (payment.receipt_number || payment.id));
   lines.push('');
   lines.push('Made in Rent Well on ' + generated_on + '. This is a record, not a bank statement.');
   return lines.join('\n');
 }
 
 // what happened to a payment over time, oldest first, for the timeline on the detail screen
+// the server's event types, plus recorded from before the real-backend pass
 const event_words = {
   recorded: 'Recorded by the landlord',
+  payment_recorded: 'Recorded by the landlord',
+  refund_recorded: 'Refund recorded by the landlord',
   claimed: 'Tenant said they paid',
   confirmed: 'Confirmed by the landlord',
   rejected: 'Rejected by the landlord',

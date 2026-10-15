@@ -131,6 +131,10 @@ export function listenForWorkOrderTaps(onOpen) {
 
 // rent ledger pushes: payment:claimed (to the owner), payment:confirmed and payment:rejected (to the tenant),
 // and ledger:updated, onOpen gets { payment_id } or { tenancy_id } so the provider can pick the screen
+// the real-backend pass: the server's pushes are payment:claimed, payment:confirmed, payment:rejected,
+// payment:refunded (and later payment:succeeded, failed, returned), all with paymentId and tenancyId,
+// ledger:reminder (to the tenant, with tenancyId), and ledger:overdue_digest (to the owner, no ids)
+// onOpen gets { payment_id }, { tenancy_id }, or { digest: true }
 function ledgerFromResponse(response) {
   const data =
     response && response.notification ? response.notification.request.content.data : null;
@@ -138,10 +142,13 @@ function ledgerFromResponse(response) {
     return null;
   }
   if (data.type.indexOf('payment:') === 0 && data.paymentId) {
-    return { payment_id: data.paymentId };
+    return { payment_id: data.paymentId, tenancy_id: data.tenancyId || null };
   }
-  if (data.type === 'ledger:updated' && data.tenancyId) {
+  if (data.type === 'ledger:reminder' && data.tenancyId) {
     return { tenancy_id: data.tenancyId };
+  }
+  if (data.type === 'ledger:overdue_digest') {
+    return { digest: true };
   }
   return null;
 }

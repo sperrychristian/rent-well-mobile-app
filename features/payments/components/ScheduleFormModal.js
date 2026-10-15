@@ -32,13 +32,16 @@ function ScheduleFormModal(props) {
   const fee_ref = useRef(null);
 
   async function submit() {
-    const checked = validateSchedule({
-      amount_text,
-      due_day_text,
-      grace_text,
-      late_fee_text,
-      start_date,
-    });
+    const checked = validateSchedule(
+      {
+        amount_text,
+        due_day_text,
+        grace_text,
+        late_fee_text,
+        start_date,
+      },
+      props.today,
+    );
     setErrors(checked.errors);
     setFormError('');
     if (hasErrors(checked.errors)) {

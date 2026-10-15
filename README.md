@@ -86,7 +86,7 @@ A rent ledger for each tenancy, in both roles. Rent Well never takes payments: t
 
 Try it in the demo: as the landlord, open Payments and Rent, confirm Jordan's $75 claim, then open Sam's ledger and record a payment. As the tenant (Sam), tap I Paid. Then switch to the landlord view and confirm it.
 
-The backend doesn't have the ledger yet. Real mode calls the draft endpoints in `docs/API-ledger-draft.md`, and until they exist it says rent tracking isn't on the server yet.
+Real mode uses the backend's rent ledger (the Rent ledger section of `docs/API.md`). The server works out every status and balance, and the app shows them as is. New rent from a schedule shows up after the server's ledger job runs (hourly, or `npm run ledger:run` in `rent-well-api`).
 
 | Landlord | Rent Ledger | Tenant | Payment Record |
 | --- | --- | --- | --- |

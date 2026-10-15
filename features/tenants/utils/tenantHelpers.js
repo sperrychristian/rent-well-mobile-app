@@ -68,6 +68,9 @@ export function fromApiProperty(api_property) {
     id: api_property.id,
     name: api_property.name,
     address: api_property.address,
+    // how tenants should pay, and the time zone that decides "today" for this property's ledgers
+    payment_instructions: api_property.paymentInstructions || '',
+    time_zone: api_property.timeZone || 'UTC',
     tenancies: (api_property.tenancies || []).map((tenancy) => ({
       id: tenancy.id,
       unit_label: tenancy.unitLabel || '',

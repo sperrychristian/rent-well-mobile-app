@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -66,7 +66,33 @@ function OwnerPaymentsView(props) {
     () => (picked === 'all' ? ledgers : ledgers.filter((ledger) => ledger.property_id === picked)),
     [ledgers, picked],
   );
-  const summary = useMemo(() => monthSummary(shown, month, today), [shown, month, today]);
+  const local_summary = useMemo(() => monthSummary(shown, month, today), [shown, month, today]);
+  // real mode takes the month's numbers from the server (GET /ledger/summary), the claims queue still
+  // comes from the ledgers since the summary only counts them, and the local numbers fill in until it answers
+  const [server_summary, setServerSummary] = useState(null);
+  const is_demo = ledger_store.is_demo;
+  const getMonthSummary = ledger_store.getMonthSummary;
+  useEffect(() => {
+    if (is_demo) {
+      return undefined;
+    }
+    let active = true;
+    getMonthSummary(month, picked === 'all' ? null : picked)
+      .then((result) => {
+        if (active && result) {
+          setServerSummary({ key: month + ':' + picked, value: result });
+        }
+      })
+      .catch((error) => console.log('Could not load the month summary', error.message));
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [is_demo, month, picked, ledgers]);
+  const summary =
+    server_summary && server_summary.key === month + ':' + picked
+      ? { ...server_summary.value, pending: local_summary.pending }
+      : local_summary;
   const rows = useMemo(
     () =>
       shown

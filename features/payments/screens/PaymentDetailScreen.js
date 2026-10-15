@@ -44,8 +44,10 @@ function PaymentDetailScreen(props) {
   const [sharing, setSharing] = useState(false);
   const is_owner = ledger_store.role === 'owner';
 
+  // real mode always asks GET /payments/:id once, for the timeline and the receipt number (and for a push tap
+  // that opened a payment the list hasn't loaded yet)
   useEffect(() => {
-    if (found || ledger_store.mode !== 'real' || !payment_id) {
+    if (ledger_store.mode !== 'real' || !payment_id) {
       return undefined;
     }
     let active = true;
@@ -109,6 +111,15 @@ function PaymentDetailScreen(props) {
     { label: 'Applied to', value: payment.applies_to === 'deposit' ? 'Security deposit' : 'Rent' },
     { label: 'Sent in by', value: payment.source === 'tenant' ? 'Tenant' : 'Landlord' },
   ];
+  if (payment.reference) {
+    facts.push({ label: 'Reference', value: payment.reference });
+  }
+  if (payment.receipt_number) {
+    facts.push({ label: 'Receipt number', value: payment.receipt_number });
+  }
+  if (payment.failure_reason) {
+    facts.push({ label: 'Why it failed', value: payment.failure_reason });
+  }
   if (payment.note) {
     facts.push({ label: 'Note', value: payment.note });
   }
@@ -143,7 +154,7 @@ function PaymentDetailScreen(props) {
             </Text>
           </View>
         ) : null}
-        {payment.status === 'pending' && !is_owner ? (
+        {payment.status === 'pending_confirmation' && !is_owner ? (
           <View style={[styles.banner, styles.banner_warning]}>
             <Ionicons name="hourglass-outline" size={SIZES.icon} color={COLORS.warning_text} />
             <Text style={[styles.banner_text, styles.warning_text]}>
@@ -220,7 +231,7 @@ function PaymentDetailScreen(props) {
         />
 
         {/* the landlord's choices depend on where the payment is: a claim gets confirm or reject, a counted one can be voided */}
-        {is_owner && payment.status === 'pending' ? (
+        {is_owner && payment.status === 'pending_confirmation' ? (
           <View style={styles.button_row}>
             <Button
               variant="secondary"
@@ -239,7 +250,7 @@ function PaymentDetailScreen(props) {
             />
           </View>
         ) : null}
-        {is_owner && payment.status === 'confirmed' ? (
+        {is_owner && payment.status === 'succeeded' ? (
           <Button
             variant="destructive"
             icon="remove-circle-outline"

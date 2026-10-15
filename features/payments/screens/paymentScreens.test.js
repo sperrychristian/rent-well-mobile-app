@@ -66,11 +66,13 @@ describe('owner screens in the demo', () => {
 
   test('confirming a claim from the list moves it out of the queue', async () => {
     renderScreen(<PaymentsScreen navigation={fakeNavigation()} />);
-    expect(peek.store.findPayment('demo-pay-jordan-claim').payment.status).toBe('pending');
+    expect(peek.store.findPayment('demo-pay-jordan-claim').payment.status).toBe(
+      'pending_confirmation',
+    );
     await act(async () => {
       fireEvent.press(screen.getByLabelText(/^Confirm \$75\.00 from Jordan Lee/));
     });
-    expect(peek.store.findPayment('demo-pay-jordan-claim').payment.status).toBe('confirmed');
+    expect(peek.store.findPayment('demo-pay-jordan-claim').payment.status).toBe('succeeded');
     expect(screen.queryByText(/^Claims to review/)).toBeNull();
   });
 

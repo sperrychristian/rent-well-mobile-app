@@ -1,5 +1,5 @@
 // shared test vectors for the ledger math, worked out by hand
-// the draft contract asks the server to run these same cases so the app and the backend always agree
+// the backend's own cases are copied in backendVectors.js, these are the app's extra ones
 // money is whole cents, dates are YYYY-MM-DD
 
 const schedule = {
@@ -33,7 +33,7 @@ function payment(id, amount_cents, paid_on, extra) {
     is_refund: false,
     note: '',
     receipt_key: null,
-    status: 'confirmed',
+    status: 'succeeded',
     source: 'owner',
     reject_reason: '',
     void_reason: '',
@@ -65,6 +65,8 @@ export const rent_due_date_vectors = [
   },
 ];
 
+// the real-backend pass: next_due is the server's now (the earliest date something not yet overdue is still
+// owed, or null), the balance only counts charges due by today, and a charge due within 7 days is due_soon
 export const ledger_vectors = [
   {
     name: 'all paid on time',
@@ -86,7 +88,7 @@ export const ledger_vectors = [
       overdue_cents: 0,
       deposit_held_cents: 0,
       row_status: 'paid',
-      next_due: { date: '2026-11-01', amount_cents: 120000 },
+      next_due: null,
       statuses: { 'rent-t1-2026-08': 'paid', 'rent-t1-2026-09': 'paid', 'rent-t1-2026-10': 'paid' },
     },
   },
@@ -106,7 +108,7 @@ export const ledger_vectors = [
       overdue_cents: 120000,
       deposit_held_cents: 0,
       row_status: 'overdue',
-      next_due: { date: '2026-10-01', amount_cents: 120000 },
+      next_due: null,
       statuses: {
         'rent-t1-2026-08': 'paid',
         'rent-t1-2026-09': 'paid',
@@ -142,7 +144,7 @@ export const ledger_vectors = [
       schedule,
       charges: [rent('2026-10')],
       payments: [
-        payment('p1', 120000, '2026-10-02', { status: 'pending', source: 'tenant' }),
+        payment('p1', 120000, '2026-10-02', { status: 'pending_confirmation', source: 'tenant' }),
         payment('p2', 120000, '2026-10-01', { status: 'rejected' }),
         payment('p3', 120000, '2026-10-01', { status: 'voided' }),
       ],
@@ -177,7 +179,7 @@ export const ledger_vectors = [
       overdue_cents: 0,
       deposit_held_cents: 0,
       row_status: 'credit',
-      next_due: { date: '2026-11-01', amount_cents: 100000 },
+      next_due: null,
       statuses: { 'rent-t1-2026-10': 'paid' },
     },
   },
@@ -204,14 +206,14 @@ export const ledger_vectors = [
       ],
     },
     expect: {
-      balance_cents: 2500,
+      balance_cents: 0,
       due_now_cents: 0,
       overdue_count: 0,
       overdue_cents: 0,
       deposit_held_cents: 100000,
       row_status: 'paid',
       next_due: { date: '2026-10-20', amount_cents: 2500 },
-      statuses: { 'c-dep': 'paid', 'c-other': 'upcoming' },
+      statuses: { 'c-dep': 'paid', 'c-other': 'due_soon' },
     },
   },
   {
@@ -232,7 +234,7 @@ export const ledger_vectors = [
       overdue_cents: 0,
       deposit_held_cents: 0,
       row_status: 'paid',
-      next_due: { date: '2026-11-01', amount_cents: 120000 },
+      next_due: null,
       statuses: { 'rent-t1-2026-10': 'voided' },
     },
   },
@@ -270,7 +272,7 @@ export const month_summary_vector = {
       charges: [{ ...rent('2026-10'), id: 'rent-t2-2026-10' }],
       payments: [
         payment('p2', 40000, '2026-10-03'),
-        payment('p3', 80000, '2026-10-12', { status: 'pending', source: 'tenant' }),
+        payment('p3', 80000, '2026-10-12', { status: 'pending_confirmation', source: 'tenant' }),
       ],
     },
   ],

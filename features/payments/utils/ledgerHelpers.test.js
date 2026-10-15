@@ -30,7 +30,25 @@ describe('status words', () => {
       const tone = toneColors(pill.tone);
       expect(meetsAA(tone.text, tone.tint)).toBe(true);
     });
-    expect(paymentPill('pending').label).toBe('Waiting for confirmation');
+    expect(paymentPill('pending_confirmation').label).toBe('Waiting for confirmation');
+    // every status the server can send has words, a line icon, and a readable tone, even the provider ones
+    [
+      'pending_confirmation',
+      'pending',
+      'processing',
+      'succeeded',
+      'failed',
+      'returned',
+      'rejected',
+      'voided',
+    ].forEach((status) => {
+      const pill = paymentPill(status);
+      expect(pill.label).not.toBe('Unknown');
+      expect(pill.icon).toMatch(/-outline$/);
+      const tone = toneColors(pill.tone);
+      expect(meetsAA(tone.text, tone.tint)).toBe(true);
+    });
+    expect(chargePill('due_soon').label).toBe('Due soon');
     expect(paymentPill('rejected').tone).toBe('danger');
     expect(rowPill('paid').label).toBe('All paid up');
     expect(rowPill('overdue').label).toBe('Overdue');
@@ -93,6 +111,7 @@ describe('form checks', () => {
       applies_to: 'rent',
       is_refund: false,
       note: 'October',
+      reference: '',
     });
   });
 
@@ -112,7 +131,7 @@ describe('form checks', () => {
       /more than/,
     );
     expect(
-      validatePayment({ ...good_payment, amount_text: '100001' }, today).errors.amount,
+      validatePayment({ ...good_payment, amount_text: '1000001' }, today).errors.amount,
     ).toMatch(/limit/);
   });
 
@@ -174,11 +193,12 @@ describe('form checks', () => {
     ]);
   });
 
-  test('reasons are 3 to 300 characters', () => {
+  test('reasons are 3 to 500 characters (the server allows 500)', () => {
     expect(validateReason('no').error).toBeTruthy();
     expect(validateReason('  Bounced check ').value).toBe('Bounced check');
     expect(validateReason('Bounced check').error).toBeNull();
-    expect(validateReason('x'.repeat(301)).error).toBeTruthy();
+    expect(validateReason('x'.repeat(500)).error).toBeNull();
+    expect(validateReason('x'.repeat(501)).error).toBeTruthy();
     expect(hasErrors({})).toBe(false);
     expect(hasErrors({ a: 'b' })).toBe(true);
   });
@@ -193,7 +213,7 @@ describe('receipts and timelines', () => {
     paid_on: '2026-10-02',
     applies_to: 'rent',
     is_refund: false,
-    status: 'confirmed',
+    status: 'succeeded',
     note: 'October rent',
     events: [
       { type: 'confirmed', at: '2026-10-03T10:00:00.000Z' },
@@ -321,11 +341,19 @@ describe('status lines for the Hearth rows', () => {
 
   test('payments say how and when', () => {
     const payment = { paid_on: '2026-09-02', method: 'zelle', is_refund: false };
-    expect(paymentStatusLine({ ...payment, status: 'confirmed' }).text).toBe('Paid Sep 2 by Zelle');
-    expect(paymentStatusLine({ ...payment, status: 'confirmed', is_refund: true }).text).toBe(
+    expect(paymentStatusLine({ ...payment, status: 'succeeded' }).text).toBe('Paid Sep 2 by Zelle');
+    expect(paymentStatusLine({ ...payment, status: 'succeeded', is_refund: true }).text).toBe(
       'Refunded Sep 2 by Zelle',
     );
-    expect(paymentStatusLine({ ...payment, status: 'pending' }).tone).toBe('warning');
+    expect(paymentStatusLine({ ...payment, status: 'pending_confirmation' }).tone).toBe('warning');
+    expect(paymentStatusLine({ ...payment, status: 'processing' }).text).toBe(
+      'Processing, started Sep 2 by Zelle',
+    );
+    expect(
+      paymentStatusLine({ ...payment, status: 'failed', failure_reason: 'Insufficient funds' })
+        .text,
+    ).toBe('Failed: Insufficient funds');
+    expect(paymentStatusLine({ ...payment, status: 'returned' }).tone).toBe('danger');
     expect(paymentStatusLine({ ...payment, status: 'rejected' }).tone).toBe('danger');
   });
 });

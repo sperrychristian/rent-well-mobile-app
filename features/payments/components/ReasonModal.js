@@ -63,7 +63,7 @@ function ReasonModal(props) {
           placeholder={props.placeholder}
           placeholderTextColor={COLORS.text_muted}
           multiline
-          maxLength={300}
+          maxLength={500}
           autoFocus
           accessibilityLabel="Reason"
           style={[form_styles.input, form_styles.note, error && form_styles.input_error]}

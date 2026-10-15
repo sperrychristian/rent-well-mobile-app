@@ -63,7 +63,7 @@ export const ChargeRow = memo(function ChargeRow(props) {
 export const PaymentRow = memo(function PaymentRow(props) {
   const payment = props.payment;
   const line = paymentStatusLine(payment);
-  const counts = payment.status === 'confirmed';
+  const counts = payment.status === 'succeeded';
   const amount = formatCents(payment.is_refund ? -payment.amount_cents : payment.amount_cents, {
     signed: counts,
   });

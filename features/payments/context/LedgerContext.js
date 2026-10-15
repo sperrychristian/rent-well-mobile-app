@@ -3,10 +3,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../auth/context/AuthContext';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import {
-  getLedgers,
-  getLedger as getLedgerRequest,
+  getTenants,
+  getTenancyLedger,
+  getMyLedgers,
+  getLedgerSummary,
   getPayment,
   createPayment,
+  claimPayment as claimPaymentRequest,
   confirmPayment as confirmPaymentRequest,
   rejectPayment as rejectPaymentRequest,
   voidPayment as voidPaymentRequest,
@@ -24,12 +27,17 @@ import { storageKey } from '../../../utils/storageKeys';
 import { todayString } from '../../../utils/formatDate';
 import {
   fromApiLedger,
+  fromApiPayment,
+  fromApiEvent,
+  fromApiSummary,
   toApiPayment,
+  toApiClaim,
   toApiCharge,
   toApiSchedule,
   replaceLedger,
   findPayment as findPaymentIn,
 } from '../utils/ledgerApi';
+import { monthSummary, monthOf } from '../utils/ledgerMath';
 import {
   demoCreatePayment,
   demoConfirmPayment,
@@ -44,12 +52,14 @@ import { demo_tenant } from '../../tenants/data/sampleTenants';
 
 // the rent ledger for both modes behind one useLedger(), screens never check which one they got
 // demo: sample ledgers in memory only, never saved, and a fresh set every time the demo starts
-// real: the server's ledgers (draft contract, docs/API-ledger-draft.md), with a saved copy for offline
+// real: the server's ledgers (the Rent ledger section of docs/API.md), with a saved copy for offline,
+// and real mode shows the server's own statuses and balances instead of working them out here
 const LedgerContext = createContext(null);
 
 // the last ledgers from the server, so the screen isn't empty when the server can't be reached
 const cache_key = 'rent_well_ledger_cache';
-const cache_version = 1;
+// version 2 is the real API's shape, an older saved copy is skipped
+const cache_version = 2;
 
 // what useLedger() hands back while signed out, so a screen that renders anyway doesn't crash
 function offValue() {
@@ -70,7 +80,9 @@ function offValue() {
     is_read_only: true,
     getLedger: () => null,
     findPayment: () => null,
-    instructionsFor: () => '',
+    current_summary: null,
+    getMonthSummary: () => Promise.resolve(null),
+    instructionsFor: () => undefined,
     ensurePayment: () => Promise.resolve(null),
     recordPayment: turnedAway,
     claimPayment: turnedAway,
@@ -193,7 +205,15 @@ function DemoLedgerStore(props) {
     is_read_only: role === 'tenant' && !split.current_ledger,
     getLedger: (tenancy_id) => visible.find((ledger) => ledger.tenancy_id === tenancy_id) || null,
     findPayment: (payment_id) => findPaymentIn(visible, payment_id),
-    instructionsFor: (property_id) => instructions[property_id] || '',
+    instructionsFor: (property_id) => instructions[property_id],
+    // the demo works its month out here, real mode asks the server
+    current_summary: null,
+    getMonthSummary: async (month, property_id) =>
+      monthSummary(
+        visible.filter((ledger) => !property_id || ledger.property_id === property_id),
+        month,
+        todayString(),
+      ),
     ensurePayment: async (payment_id) => findPaymentIn(visible, payment_id),
     recordPayment: (tenancy_id, fields, receipt) => createIn(tenancy_id, fields, receipt, 'owner'),
     claimPayment: (tenancy_id, fields, receipt) => createIn(tenancy_id, fields, receipt, 'tenant'),
@@ -239,7 +259,6 @@ function DemoLedgerStore(props) {
 function RemoteLedgerStore(props) {
   const user = props.user;
   const role = user.role === 'tenant' ? 'tenant' : 'owner';
-  const today = todayString();
   const [ledgers, setLedgers] = useState([]);
   // loading, ready, or error for the first load
   const [status, setStatus] = useState('loading');
@@ -249,9 +268,15 @@ function RemoteLedgerStore(props) {
   const [refreshing, setRefreshing] = useState(false);
   // instructions saved this session show right away, before the ledgers reload with them
   const [saved_instructions, setSavedInstructions] = useState({});
+  // this month's GET /ledger/summary for the owner, so the dashboard shows the server's collected number
+  const [current_summary, setCurrentSummary] = useState(null);
+  // the timeline and receipt number for payments that have been opened (GET /payments/:id), by id
+  const [details, setDetails] = useState({});
   const ledgers_ref = useRef(ledgers);
   // only save the cache once the server has answered, so an old cache never overwrites itself with less
   const synced = useRef(false);
+  // "today" is the property's own date on the server, so the screens use the date the ledgers came back with
+  const today = ledgers.length > 0 && ledgers[0].today ? ledgers[0].today : todayString();
 
   useEffect(() => {
     ledgers_ref.current = ledgers;
@@ -264,25 +289,50 @@ function RemoteLedgerStore(props) {
     return ledger;
   }
 
+  // the owner has one ledger per tenancy (current and past), the tenant gets all of theirs in one call
+  async function fetchAll() {
+    if (role === 'tenant') {
+      return (await getMyLedgers()).map(fromApiLedger);
+    }
+    const tenants = await getTenants();
+    const tenancy_ids = [];
+    tenants.forEach((tenant) => {
+      [...(tenant.activeTenancies || []), ...(tenant.endedTenancies || [])].forEach((tenancy) => {
+        if (!tenancy_ids.includes(tenancy.id)) {
+          tenancy_ids.push(tenancy.id);
+        }
+      });
+    });
+    const api_ledgers = await Promise.all(tenancy_ids.map((id) => getTenancyLedger(id)));
+    return api_ledgers.map(fromApiLedger);
+  }
+
+  // the owner's month from the server, quietly, a failure just leaves the last one
+  async function loadCurrentSummary() {
+    if (role !== 'owner') {
+      return;
+    }
+    try {
+      setCurrentSummary(await getLedgerSummary(monthOf(todayString())));
+    } catch (error) {
+      console.log('Could not load the rent summary', error.message);
+    }
+  }
+
   // a full reload, quiet ones keep the list on screen if they fail
   async function loadLedgers(quiet) {
     try {
-      const api_ledgers = await getLedgers();
+      const next = await fetchAll();
       synced.current = true;
-      const next = api_ledgers.map(fromApiLedger);
       ledgers_ref.current = next;
       setLedgers(next);
       setStatus('ready');
       setFromCache(false);
       setErrorMessage('');
+      loadCurrentSummary();
     } catch (error) {
       console.log('Could not load the rent ledger', error.message);
-      // the ledger endpoints are still a draft, so a server without them answers 404 for the whole list
-      setErrorMessage(
-        error.code === 'NOT_FOUND'
-          ? "Rent tracking isn't on the server yet. It works in the demo for now."
-          : error.message,
-      );
+      setErrorMessage(error.message);
       if (ledgers_ref.current.length > 0) {
         setFromCache(true);
         setStatus('ready');
@@ -290,6 +340,33 @@ function RemoteLedgerStore(props) {
         setStatus('error');
       }
     }
+  }
+
+  // after a change (or a ledger:updated) only the one tenancy is fetched again
+  async function reloadTenancy(tenancy_id) {
+    if (role === 'tenant') {
+      const next = (await getMyLedgers()).map(fromApiLedger);
+      ledgers_ref.current = next;
+      setLedgers(next);
+      return next.find((ledger) => ledger.tenancy_id === tenancy_id) || null;
+    }
+    const ledger = upsert(await getTenancyLedger(tenancy_id));
+    loadCurrentSummary();
+    return ledger;
+  }
+
+  // GET /payments/:id: the payment, its timeline, and the receipt number once it's confirmed
+  async function loadDetail(payment_id) {
+    const data = await getPayment(payment_id);
+    const payment = fromApiPayment(data.payment);
+    setDetails((current) => ({
+      ...current,
+      [payment_id]: {
+        events: (data.events || []).map(fromApiEvent),
+        receipt_number: data.receipt ? data.receipt.receiptNumber : null,
+      },
+    }));
+    return payment;
   }
 
   // the saved copy shows first, then the server's replaces it
@@ -314,6 +391,7 @@ function RemoteLedgerStore(props) {
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.id]);
 
   useEffect(() => {
@@ -328,28 +406,31 @@ function RemoteLedgerStore(props) {
 
   // ledger:updated says which tenancy changed (and may carry the whole ledger), a reconnect reloads quietly,
   // and a tapped push opens the payment or the ledger it's about
-  const latest = useRef({ upsert, loadLedgers });
+  // (the real server only says what changed, { tenancyId, reason, paymentId, chargeId }, so I refetch that
+  // tenancy and any payment that's open on screen)
+  const latest = useRef({ reloadTenancy, loadLedgers, loadDetail, details });
   useEffect(() => {
-    latest.current = { upsert, loadLedgers };
+    latest.current = { reloadTenancy, loadLedgers, loadDetail, details };
   });
   useEffect(() => {
     const stop_updated = onSocketEvent('ledger:updated', (payload) => {
-      if (!payload) {
+      if (!payload || !payload.tenancyId) {
         return;
       }
-      if (payload.ledger) {
-        latest.current.upsert(payload.ledger);
-      } else if (payload.tenancyId) {
-        getLedgerRequest(payload.tenancyId)
-          .then((ledger) => latest.current.upsert(ledger))
-          .catch((error) => console.log('Could not reload a ledger', error.message));
+      latest.current
+        .reloadTenancy(payload.tenancyId)
+        .catch((error) => console.log('Could not reload a ledger', error.message));
+      if (payload.paymentId && latest.current.details[payload.paymentId]) {
+        latest.current
+          .loadDetail(payload.paymentId)
+          .catch((error) => console.log('Could not reload a payment', error.message));
       }
     });
     const stop_connect = onSocketEvent('connect', () => latest.current.loadLedgers(true));
     const stop_taps = listenForLedgerTaps((target) => {
       if (target.payment_id) {
         navigateWhenReady('PaymentDetail', { paymentId: target.payment_id });
-      } else if (role === 'owner') {
+      } else if (role === 'owner' && target.tenancy_id) {
         navigateWhenReady('TenantLedger', { tenancyId: target.tenancy_id });
       } else {
         navigateWhenReady('Payments');
@@ -363,22 +444,26 @@ function RemoteLedgerStore(props) {
   }, [role]);
 
   // uploads the receipt photo first when there is one, the payment just carries its key
-  async function sendPayment(tenancy_id, fields, receipt) {
+  async function sendPayment(tenancy_id, fields, receipt, is_claim) {
     const receipt_key = receipt ? await uploadImage(receipt.uri, receipt.mime_type) : null;
-    const before = new Set(
-      (
-        ledgers_ref.current.find((ledger) => ledger.tenancy_id === tenancy_id) || { payments: [] }
-      ).payments.map((payment) => payment.id),
-    );
-    const ledger = upsert(
-      await createPayment(tenancy_id, toApiPayment({ ...fields, receipt_key: receipt_key })),
-    );
-    // the new one is the payment that wasn't there before
-    return ledger.payments.find((payment) => !before.has(payment.id)) || null;
+    const value = { ...fields, receipt_key: receipt_key };
+    const api_payment = is_claim
+      ? await claimPaymentRequest(toApiClaim(tenancy_id, value))
+      : await createPayment(tenancy_id, toApiPayment(value));
+    await reloadTenancy(tenancy_id);
+    return fromApiPayment(api_payment);
   }
 
-  function paymentAfter(ledger, payment_id) {
-    return ledger.payments.find((payment) => payment.id === payment_id) || null;
+  // confirm, reject, and void answer with the payment, then its tenancy gets refetched for the new balances
+  async function changePayment(request) {
+    const payment = fromApiPayment(await request);
+    if (payment.tenancy_id) {
+      await reloadTenancy(payment.tenancy_id);
+    }
+    if (details[payment.id]) {
+      loadDetail(payment.id).catch(() => {});
+    }
+    return payment;
   }
 
   const split = splitTenantLedgers(ledgers);
@@ -388,7 +473,20 @@ function RemoteLedgerStore(props) {
       return saved_instructions[property_id];
     }
     const ledger = ledgers.find((item) => item.property_id === property_id);
-    return ledger ? ledger.payment_instructions : '';
+    // undefined means no ledger here has said, so the screen can fall back to the property's own copy
+    return ledger ? ledger.payment_instructions : undefined;
+  }
+
+  // a payment with its timeline filled in once it's been opened
+  function withDetail(found) {
+    if (!found || !details[found.payment.id]) {
+      return found;
+    }
+    const detail = details[found.payment.id];
+    return {
+      ...found,
+      payment: { ...found.payment, events: detail.events, receipt_number: detail.receipt_number },
+    };
   }
 
   const value = {
@@ -415,32 +513,47 @@ function RemoteLedgerStore(props) {
     // a tenant with no active tenancy only gets history, and only once the server has said so
     is_read_only: role === 'tenant' && status === 'ready' && !split.current_ledger,
     getLedger: (tenancy_id) => ledgers.find((ledger) => ledger.tenancy_id === tenancy_id) || null,
-    findPayment: (payment_id) => findPaymentIn(ledgers, payment_id),
+    findPayment: (payment_id) => withDetail(findPaymentIn(ledgers, payment_id)),
     instructionsFor: instructionsFor,
-    // a push tap can open a payment that isn't loaded yet
+    current_summary: current_summary ? fromApiSummary(current_summary, []) : null,
+    // the owner's month from the server, pending claims come from the ledgers already on hand
+    getMonthSummary: async (month, property_id) => {
+      const pending = [];
+      ledgers_ref.current
+        .filter((ledger) => !property_id || ledger.property_id === property_id)
+        .forEach((ledger) =>
+          ledger.payments
+            .filter((payment) => payment.status === 'pending_confirmation')
+            .forEach((payment) => pending.push({ payment, ledger })),
+        );
+      return fromApiSummary(await getLedgerSummary(month), pending, property_id);
+    },
+    // a push tap can open a payment that isn't loaded yet, and an open payment wants its timeline
     ensurePayment: async (payment_id) => {
-      const found = findPaymentIn(ledgers_ref.current, payment_id);
-      if (found) {
-        return found;
+      const payment = await loadDetail(payment_id);
+      if (!findPaymentIn(ledgers_ref.current, payment_id) && payment.tenancy_id) {
+        await reloadTenancy(payment.tenancy_id);
       }
-      const data = await getPayment(payment_id);
-      upsert(data.ledger);
       return findPaymentIn(ledgers_ref.current, payment_id);
     },
-    recordPayment: (tenancy_id, fields, receipt) => sendPayment(tenancy_id, fields, receipt),
-    claimPayment: (tenancy_id, fields, receipt) =>
-      sendPayment(tenancy_id, { ...fields, is_refund: false }, receipt),
-    confirmPayment: async (payment_id) =>
-      paymentAfter(upsert(await confirmPaymentRequest(payment_id)), payment_id),
-    rejectPayment: async (payment_id, reason) =>
-      paymentAfter(upsert(await rejectPaymentRequest(payment_id, reason)), payment_id),
-    voidPayment: async (payment_id, reason) =>
-      paymentAfter(upsert(await voidPaymentRequest(payment_id, reason)), payment_id),
-    addCharge: async (tenancy_id, fields) =>
-      upsert(await addChargeRequest(tenancy_id, toApiCharge(fields))),
-    voidCharge: async (charge_id, reason) => upsert(await voidChargeRequest(charge_id, reason)),
-    setRentSchedule: async (tenancy_id, fields) =>
-      upsert(await setRentScheduleRequest(tenancy_id, toApiSchedule(fields))),
+    recordPayment: (tenancy_id, fields, receipt) => sendPayment(tenancy_id, fields, receipt, false),
+    claimPayment: (tenancy_id, fields, receipt) => sendPayment(tenancy_id, fields, receipt, true),
+    confirmPayment: (payment_id) => changePayment(confirmPaymentRequest(payment_id)),
+    rejectPayment: (payment_id, reason) => changePayment(rejectPaymentRequest(payment_id, reason)),
+    voidPayment: (payment_id, reason) => changePayment(voidPaymentRequest(payment_id, reason)),
+    addCharge: async (tenancy_id, fields) => {
+      await addChargeRequest(tenancy_id, toApiCharge(fields));
+      return reloadTenancy(tenancy_id);
+    },
+    voidCharge: async (charge_id, reason) => {
+      const charge = await voidChargeRequest(charge_id, reason);
+      return reloadTenancy(charge.tenancyId);
+    },
+    // the server bills the new rent on its next ledger job run, so the charges show up a bit later
+    setRentSchedule: async (tenancy_id, fields) => {
+      await setRentScheduleRequest(tenancy_id, toApiSchedule(fields));
+      return reloadTenancy(tenancy_id);
+    },
     setPaymentInstructions: async (property_id, text) => {
       await updatePropertyRequest(property_id, { paymentInstructions: text.trim() });
       setSavedInstructions((current) => ({ ...current, [property_id]: text.trim() }));

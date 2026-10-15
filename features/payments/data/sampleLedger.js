@@ -31,7 +31,7 @@ function payment(id, fields) {
     is_refund: false,
     note: '',
     receipt_key: null,
-    status: 'confirmed',
+    status: 'succeeded',
     source: 'owner',
     reject_reason: '',
     void_reason: '',
@@ -41,14 +41,19 @@ function payment(id, fields) {
   // the timeline: how it came in, then what the landlord did with it
   const events = [
     {
-      type: base.source === 'tenant' ? 'claimed' : 'recorded',
+      type:
+        base.source === 'tenant'
+          ? 'claimed'
+          : base.is_refund
+            ? 'refund_recorded'
+            : 'payment_recorded',
       at: created,
       by_role: base.source === 'tenant' ? 'tenant' : 'owner',
       reason: '',
     },
   ];
   const later = stamp(addDays(base.paid_on, 1));
-  if (base.source === 'tenant' && base.status === 'confirmed') {
+  if (base.source === 'tenant' && base.status === 'succeeded') {
     events.push({ type: 'confirmed', at: later, by_role: 'owner', reason: '' });
   }
   if (base.status === 'rejected') {
@@ -211,7 +216,7 @@ export function buildSampleLedgers(today) {
         method: 'venmo',
         paid_on: today,
         source: 'tenant',
-        status: 'pending',
+        status: 'pending_confirmation',
         note: 'For the new key fob',
         created_at: stamp(today),
       }),

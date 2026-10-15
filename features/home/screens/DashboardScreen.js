@@ -40,7 +40,11 @@ function DashboardScreen(props) {
   const active_tenants = tenants.filter((tenant) => tenant.is_active).length;
   // rent this month from the ledger already in memory: what needs doing first, and what's come in
   const ledger_store = useLedger();
-  const rent = ownerPaymentsLine(ledger_store.ledgers, ledger_store.today);
+  const rent = ownerPaymentsLine(
+    ledger_store.ledgers,
+    ledger_store.today,
+    ledger_store.current_summary,
+  );
   const behind = behindSummary(ledger_store.ledgers, ledger_store.today);
   // this month's spending and the five months before it, from the expenses already loaded on the phone
   const months = monthlyTotals(expenses, new Date(), 6);
