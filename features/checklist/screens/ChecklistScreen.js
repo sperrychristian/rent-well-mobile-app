@@ -1,14 +1,17 @@
 import { useState } from 'react';
-import { StyleSheet, View, Text, FlatList, Pressable, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, FlatList, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import PrimaryButton from '../../../components/PrimaryButton';
 import ProgressBar from '../components/ProgressBar';
 import NewChecklistModal from '../components/NewChecklistModal';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { checklistProgress, filterChecklists, worseCount } from '../utils/checklistHelpers';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES, OPACITY } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import EmptyState from '../../../components/ui/EmptyState';
+import StatusLabel from '../../../components/ui/StatusLabel';
+import SegmentedControl from '../../../components/ui/SegmentedControl';
 
 const status_filters = ['All', 'In progress', 'Complete'];
 
@@ -50,7 +53,7 @@ function ChecklistScreen(props) {
     setNewOpen(false);
     // I clear the filter so the new one is in the list when coming back
     setStatusFilter('All');
-    props.navigation.navigate('ChecklistDetail', { checklist_id: new_id });
+    props.navigation.navigate('ChecklistDetail', { checklistId: new_id });
   }
 
   const list_header = (
@@ -58,59 +61,64 @@ function ChecklistScreen(props) {
       <PrimaryButton
         title="New Checklist"
         icon="add-circle-outline"
+        variant="primary"
         style={styles.new_button}
         onPress={openNewForm}
       />
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.chip_row}
-      >
-        {status_filters.map((option) => (
-          <Pressable
-            key={option}
-            onPress={() => setStatusFilter(option)}
-            hitSlop={{ top: 8, bottom: 8 }}
-            style={[styles.chip, status_filter === option && styles.chip_active]}
-          >
-            <Text style={styles.chip_text}>{option}</Text>
-          </Pressable>
-        ))}
-      </ScrollView>
+      {/* the status filter acts like tabs, so it's the shared segmented control now */}
+      <SegmentedControl
+        label="Show checklists"
+        value={status_filter}
+        onChange={setStatusFilter}
+        options={status_filters.map((option) => ({ value: option, label: option }))}
+        style={styles.segment}
+      />
     </View>
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
-      <ScreenTitle>Checklist</ScreenTitle>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
       <FlatList
         data={list_checklists}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
         ListHeaderComponent={list_header}
         ListEmptyComponent={
-          <Text style={styles.empty_text}>
-            {checklists.length === 0
-              ? 'No checklists yet, tap New Checklist to start one'
-              : 'No checklists match'}
-          </Text>
+          <EmptyState
+            illustration="empty_checklists"
+            title={
+              checklists.length === 0
+                ? 'No checklists yet, tap New Checklist to start one'
+                : 'No checklists match'
+            }
+          />
         }
         renderItem={({ item }) => {
           const progress = checklistProgress(item);
           const worse = worseCount(item);
           return (
             <Pressable
-              style={styles.row}
-              onPress={() =>
-                props.navigation.navigate('ChecklistDetail', { checklist_id: item.id })
+              style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+              onPress={() => props.navigation.navigate('ChecklistDetail', { checklistId: item.id })}
+              accessibilityRole="button"
+              accessibilityLabel={
+                item.type +
+                ' checklist, ' +
+                item.property +
+                ', ' +
+                progress.done +
+                ' of ' +
+                progress.total +
+                ' done'
               }
             >
-              <Ionicons
-                name={item.type === 'Move-In' ? 'log-in-outline' : 'log-out-outline'}
-                size={28}
-                color={COLORS.text}
-                style={styles.row_icon}
-              />
+              <View style={styles.row_icon}>
+                <Ionicons
+                  name={item.type === 'Move-In' ? 'log-in-outline' : 'log-out-outline'}
+                  size={24}
+                  color={COLORS.cta}
+                />
+              </View>
               <View style={styles.row_text}>
                 <Text style={styles.row_name} numberOfLines={2}>
                   {item.property}
@@ -129,19 +137,15 @@ function ChecklistScreen(props) {
                   </Text>
                 </View>
                 <View style={styles.tag_row}>
-                  <View
-                    style={[styles.tag, item.completed ? styles.complete_tag : styles.progress_tag]}
-                  >
-                    <Text style={styles.tag_text}>
-                      {item.completed ? 'Complete' : 'In progress'}
-                    </Text>
-                  </View>
+                  <StatusLabel
+                    label={item.completed ? 'Complete' : 'In progress'}
+                    tone={item.completed ? 'Signed' : 'In progress'}
+                  />
                   {worse > 0 && (
-                    <View style={[styles.tag, styles.worse_tag]}>
-                      <Text style={styles.tag_text}>
-                        {worse + (worse === 1 ? ' item' : ' items') + ' worse since move-in'}
-                      </Text>
-                    </View>
+                    <StatusLabel
+                      label={worse + (worse === 1 ? ' item' : ' items') + ' worse since move-in'}
+                      tone="Late"
+                    />
                   )}
                 </View>
               </View>
@@ -168,106 +172,81 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    padding: SPACING.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
+    // the fintech pass: capped and centered on a tablet so lines stay a readable length
+    width: '100%',
+    maxWidth: SIZES.content_max_width + 160,
+    alignSelf: 'center',
   },
   new_button: {
-    backgroundColor: COLORS.success,
     marginHorizontal: 0,
     marginBottom: SPACING.sm,
   },
   chip_row: {
-    gap: SPACING.sm,
-    paddingBottom: SPACING.sm,
+    ...list_styles.chip_row,
   },
   chip: {
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.muted,
+    ...list_styles.chip,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   row: {
+    ...list_styles.row,
     flexDirection: 'row',
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
+    gap: SPACING.sm + SPACING.xs,
   },
+  // the Hearth pass: just the green line icon, no tinted circle
   row_icon: {
-    marginRight: SPACING.sm,
-    marginTop: 2,
+    width: SIZES.row_icon,
+    alignItems: 'center',
   },
   row_text: {
     flex: 1,
   },
   row_name: {
+    ...TYPE.subheading,
+    fontFamily: TYPE.heading.fontFamily,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
   },
   row_type: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 14,
-    marginTop: 2,
+    ...TYPE.label,
+    color: COLORS.text_muted,
+    marginTop: SPACING.xxs,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...list_styles.detail,
   },
   progress_row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    marginTop: 6,
+    marginTop: SPACING.sm,
   },
   progress_bar: {
     flex: 1,
   },
   progress_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 12,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
   },
   tag_row: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
-    marginTop: 6,
-  },
-  tag: {
-    paddingVertical: 3,
-    paddingHorizontal: SPACING.sm,
-    borderRadius: 10,
-  },
-  complete_tag: {
-    backgroundColor: COLORS.success,
-  },
-  progress_tag: {
-    backgroundColor: COLORS.action,
-  },
-  worse_tag: {
-    backgroundColor: COLORS.danger,
-  },
-  tag_text: {
-    color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
-    fontSize: 11,
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
   },
   empty_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    textAlign: 'center',
-    marginTop: SPACING.lg,
-    opacity: 0.7,
+    ...list_styles.empty_text,
+  },
+  pressed: {
+    opacity: OPACITY.pressed,
+  },
+  segment: {
+    marginBottom: SPACING.sm + SPACING.xs,
   },
 });

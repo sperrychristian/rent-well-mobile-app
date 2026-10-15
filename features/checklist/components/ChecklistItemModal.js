@@ -15,17 +15,26 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { conditions } from '../data/checklistTemplates';
 import { itemGotWorse } from '../utils/checklistHelpers';
 import { getPhotoUri, saveChecklistPhoto, deleteChecklistPhoto } from '../utils/checklistPhotos';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 const max_photos = 3;
 
 // one color per condition so they're easy to spot
+// (the fintech pass: soft tints, the picked chip also gets its condition's darker border and ink text)
 const condition_colors = {
+  Good: COLORS.success_tint,
+  Fair: COLORS.warning_tint,
+  Poor: COLORS.danger_tint,
+};
+const condition_borders = {
   Good: COLORS.success,
   Fair: COLORS.warning,
   Poor: COLORS.danger,
@@ -34,6 +43,8 @@ const condition_colors = {
 // props: visible, item, locked, in_demo, onSave, onDelete, onClose
 // onSave gets the changed fields, a locked (signed) checklist only shows the item and can't change it
 function ChecklistItemModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   // the screen gives it a new key each time it opens, so these start from the item without an effect
   const [done, setDone] = useState(props.item ? props.item.done : false);
   const [condition, setCondition] = useState(props.item ? props.item.condition : null);
@@ -142,7 +153,7 @@ function ChecklistItemModal(props) {
     <Modal
       visible={props.visible}
       transparent
-      animationType="slide"
+      animationType={reduce_motion ? 'none' : 'slide'}
       onRequestClose={locked ? props.onClose : handleCancel}
     >
       <View style={styles.root}>
@@ -159,7 +170,7 @@ function ChecklistItemModal(props) {
               <Text style={styles.heading}>{props.item.name}</Text>
               {got_worse && (
                 <View style={styles.worse_tag}>
-                  <Ionicons name="trending-down" size={14} color={COLORS.text_light} />
+                  <Ionicons name="trending-down-outline" size={14} color={COLORS.danger_text} />
                   <Text style={styles.worse_text}>Changed since move-in</Text>
                 </View>
               )}
@@ -188,7 +199,12 @@ function ChecklistItemModal(props) {
 
               <View style={styles.switch_row}>
                 <Text style={[styles.label, styles.switch_text]}>Done</Text>
-                <Switch value={done} onValueChange={setDone} disabled={locked} />
+                <Switch
+                  value={done}
+                  onValueChange={setDone}
+                  trackColor={{ false: COLORS.border_strong, true: COLORS.success }}
+                  disabled={locked}
+                />
               </View>
 
               <Text style={styles.label}>Condition</Text>
@@ -201,11 +217,22 @@ function ChecklistItemModal(props) {
                     hitSlop={{ top: 8, bottom: 8 }}
                     style={[
                       styles.chip,
-                      condition === option && { backgroundColor: condition_colors[option] },
+                      condition === option && {
+                        backgroundColor: condition_colors[option],
+                        borderColor: condition_borders[option],
+                      },
                     ]}
+                    accessibilityRole="button"
+                    accessibilityLabel={option + ' condition'}
+                    accessibilityState={{ selected: condition === option, disabled: locked }}
                   >
                     <Text
-                      style={[styles.chip_text, condition === option && styles.chip_text_active]}
+                      style={[
+                        styles.chip_text,
+                        condition === option && styles.chip_text_active,
+                        // Fair fills orange, so its words go dark to stay readable
+                        condition === option && option === 'Fair' && styles.chip_text_on_light,
+                      ]}
                     >
                       {option}
                     </Text>
@@ -217,7 +244,7 @@ function ChecklistItemModal(props) {
               <TextInput
                 style={[styles.input, styles.notes_input]}
                 placeholder="Damage, reading, key count, anything worth noting"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 multiline
                 editable={!locked}
                 value={note}
@@ -234,6 +261,7 @@ function ChecklistItemModal(props) {
                       <Pressable
                         onPress={() => setFullPhoto(stored_name)}
                         accessibilityLabel="View photo"
+                        accessibilityRole="button"
                       >
                         <Image
                           source={{ uri: getPhotoUri(stored_name, props.in_demo) }}
@@ -244,9 +272,15 @@ function ChecklistItemModal(props) {
                         <Pressable
                           style={styles.remove_button}
                           onPress={() => removePhoto(stored_name)}
+                          hitSlop={12}
+                          accessibilityRole="button"
                           accessibilityLabel="Remove photo"
                         >
-                          <Ionicons name="close-circle" size={22} color={COLORS.danger} />
+                          <Ionicons
+                            name="close-circle-outline"
+                            size={22}
+                            color={COLORS.danger_text}
+                          />
                         </Pressable>
                       )}
                     </View>
@@ -256,12 +290,14 @@ function ChecklistItemModal(props) {
               {!locked && photos.length < max_photos && (
                 <View style={styles.button_row}>
                   <PrimaryButton
+                    variant="secondary"
                     title="Camera"
                     icon="camera-outline"
                     onPress={takePhoto}
                     style={styles.small_button}
                   />
                   <PrimaryButton
+                    variant="secondary"
                     title="Library"
                     icon="image-outline"
                     onPress={choosePhotos}
@@ -273,6 +309,7 @@ function ChecklistItemModal(props) {
               {locked ? (
                 <View style={styles.button_row}>
                   <PrimaryButton
+                    variant="secondary"
                     title="Close"
                     onPress={props.onClose}
                     style={styles.cancel_button}
@@ -282,16 +319,22 @@ function ChecklistItemModal(props) {
                 <View>
                   <View style={styles.button_row}>
                     <PrimaryButton
+                      variant="secondary"
                       title="Cancel"
                       onPress={handleCancel}
                       style={styles.cancel_button}
                     />
-                    <PrimaryButton title="Save" onPress={handleSave} style={styles.save_button} />
+                    <PrimaryButton
+                      variant="primary"
+                      title="Save"
+                      onPress={handleSave}
+                      style={styles.save_button}
+                    />
                   </View>
                   <PrimaryButton
+                    variant="destructive"
                     title="Delete Item"
                     icon="trash-outline"
-                    text_color={COLORS.text_light}
                     onPress={confirmDelete}
                     style={styles.delete_button}
                   />
@@ -303,7 +346,12 @@ function ChecklistItemModal(props) {
 
         {/* the full size photo sits on top of the form instead of opening a second modal */}
         {full_photo && (
-          <Pressable style={styles.full_backdrop} onPress={() => setFullPhoto(null)}>
+          <Pressable
+            style={styles.full_backdrop}
+            onPress={() => setFullPhoto(null)}
+            accessibilityRole="button"
+            accessibilityLabel="Close photo"
+          >
             <Image
               source={{ uri: getPhotoUri(full_photo, props.in_demo) }}
               style={styles.full_image}
@@ -334,38 +382,37 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.sm,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
   },
   worse_tag: {
+    // the Hearth pass: terracotta words in a terracotta outline, no red block
+    backgroundColor: 'transparent',
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.danger_text,
+    borderRadius: RADIUS.pill,
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    gap: 4,
-    backgroundColor: COLORS.danger,
-    borderRadius: 10,
-    paddingVertical: 3,
+    gap: SPACING.xs,
+    paddingVertical: SPACING.xs,
     paddingHorizontal: SPACING.sm,
     marginBottom: SPACING.sm,
   },
   worse_text: {
+    ...TYPE.caption,
+    fontFamily: TYPE.label.fontFamily,
     color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
-    fontSize: 11,
   },
   compare_row: {
     flexDirection: 'row',
@@ -373,19 +420,21 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   compare_box: {
+    backgroundColor: COLORS.surface_sunken,
+    borderRadius: RADIUS.md,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
     flex: 1,
-    backgroundColor: COLORS.background,
-    borderRadius: 8,
     padding: SPACING.sm,
   },
   compare_value: {
+    ...TYPE.subheading,
+    fontFamily: TYPE.heading.fontFamily,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
-    marginBottom: 2,
+    marginBottom: SPACING.xxs,
   },
   worse_value: {
-    color: COLORS.danger,
+    color: COLORS.danger_text,
   },
   switch_row: {
     flexDirection: 'row',
@@ -394,6 +443,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   switch_text: {
+    ...TYPE.body_small,
+    color: COLORS.text,
     flex: 1,
     marginBottom: 0,
   },
@@ -404,45 +455,39 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   chip: {
-    paddingVertical: 6,
+    ...list_styles.chip,
+    paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.background,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   chip_text_active: {
-    color: COLORS.text_light,
+    color: COLORS.text,
   },
   input: {
-    backgroundColor: COLORS.background,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
+    ...list_styles.field_input,
     padding: SPACING.sm,
     marginBottom: SPACING.sm,
   },
   notes_input: {
-    minHeight: 70,
+    minHeight: SIZES.touch + SPACING.lg + SPACING.xs,
     textAlignVertical: 'top',
   },
   photo_wrap: {
     position: 'relative',
   },
   photo_thumb: {
+    borderRadius: RADIUS.md,
     width: 72,
     height: 72,
-    borderRadius: 8,
   },
   remove_button: {
+    backgroundColor: COLORS.surface_raised,
+    borderRadius: RADIUS.pill,
     position: 'absolute',
-    top: -8,
-    right: -8,
-    backgroundColor: COLORS.surface_light,
-    borderRadius: 11,
+    top: -SPACING.sm,
+    right: -SPACING.sm,
   },
   button_row: {
     flexDirection: 'row',
@@ -456,17 +501,14 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
   delete_button: {
     marginHorizontal: 0,
     marginTop: SPACING.sm,
-    backgroundColor: COLORS.danger,
   },
   full_backdrop: {
     ...StyleSheet.absoluteFillObject,
@@ -482,5 +524,8 @@ const styles = StyleSheet.create({
     color: COLORS.text_light,
     fontFamily: FONTS.body,
     marginTop: SPACING.sm,
+  },
+  chip_text_on_light: {
+    color: COLORS.on_light,
   },
 });

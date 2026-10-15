@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -13,24 +13,34 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
+import { useHeaderHeight } from '@react-navigation/elements';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TextField from '../../../components/TextField';
 import ErrorState from '../../../components/ErrorState';
-import { getProperties, getInvites, createProperty, createInvite } from '../../../services/api';
+import { useTenants } from '../../tenants/context/TenantsContext';
 import { pendingInvites, formatInviteCode, inviteShareText } from '../utils/inviteHelpers';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
 
 function InviteTenantScreen() {
   const insets = useSafeAreaInsets();
+  // the header sits above this screen now, so the keyboard lift has to count its height too
+  const header_height = useHeaderHeight();
 
+  // properties and invites come from the shared tenants data, so this works the same in the demo and for real
+  const {
+    status: tenants_status,
+    error_message,
+    properties,
+    invites,
+    refresh,
+    addProperty,
+    createInvite,
+  } = useTenants();
   // loading, ready, or error for the first load of properties and invites
-  const [status, setStatus] = useState('loading');
-  const [error_message, setErrorMessage] = useState('');
-  const [properties, setProperties] = useState([]);
-  const [invites, setInvites] = useState([]);
-  const [property_id, setPropertyId] = useState(null);
+  const status = tenants_status;
+  const [picked_property_id, setPropertyId] = useState(null);
   // the add property form shows on its own when there are no properties yet
   const [adding_property, setAddingProperty] = useState(false);
   const [property_name, setPropertyName] = useState('');
@@ -40,37 +50,18 @@ function InviteTenantScreen() {
   const [field_errors, setFieldErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const [created_invite, setCreatedInvite] = useState(null);
-  // goes up on Try Again so the load runs again
-  const [load_count, setLoadCount] = useState(0);
 
-  useEffect(() => {
-    let active = true;
-    Promise.all([getProperties(), getInvites()])
-      .then(([property_list, invite_list]) => {
-        if (!active) {
-          return;
-        }
-        setProperties(property_list);
-        setInvites(invite_list);
-        setPropertyId(property_list.length > 0 ? property_list[0].id : null);
-        setAddingProperty(property_list.length === 0);
-        setStatus('ready');
-      })
-      .catch((error) => {
-        console.log('Could not load properties and invites', error.message);
-        if (active) {
-          setErrorMessage(error.message);
-          setStatus('error');
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, [load_count]);
+  // the first property is picked until another one is tapped
+  const property_id =
+    picked_property_id && properties.some((property) => property.id === picked_property_id)
+      ? picked_property_id
+      : properties.length > 0
+        ? properties[0].id
+        : null;
+  const show_property_form = adding_property || properties.length === 0;
 
   function retry() {
-    setStatus('loading');
-    setLoadCount((current) => current + 1);
+    refresh();
   }
 
   function propertyName(id) {
@@ -92,8 +83,7 @@ function InviteTenantScreen() {
     }
     setBusy(true);
     try {
-      const property = await createProperty(property_name.trim(), property_address.trim());
-      setProperties((current) => [...current, property]);
+      const property = await addProperty(property_name.trim(), property_address.trim());
       setPropertyId(property.id);
       setAddingProperty(false);
       setPropertyName('');
@@ -127,7 +117,6 @@ function InviteTenantScreen() {
         tenant_name: tenant_name.trim(),
         unit_label: unit_label.trim(),
       });
-      setInvites((current) => [invite, ...current]);
       setCreatedInvite(invite);
       setTenantName('');
       setUnitLabel('');
@@ -168,7 +157,7 @@ function InviteTenantScreen() {
             <PrimaryButton
               title="Share Code"
               icon="share-outline"
-              text_color={COLORS.text_light}
+              variant="primary"
               onPress={() => shareInvite(created_invite)}
               style={styles.share_button}
             />
@@ -176,8 +165,8 @@ function InviteTenantScreen() {
         )}
 
         <Card>
-          <Text style={styles.heading}>{adding_property ? 'Add a Property' : 'New Invite'}</Text>
-          {adding_property ? (
+          <Text style={styles.heading}>{show_property_form ? 'Add a Property' : 'New Invite'}</Text>
+          {show_property_form ? (
             <View>
               {properties.length === 0 && (
                 <Text style={styles.helper_block}>
@@ -202,6 +191,7 @@ function InviteTenantScreen() {
                 {properties.length > 0 && (
                   <PrimaryButton
                     title="Cancel"
+                    variant="secondary"
                     onPress={() => {
                       setAddingProperty(false);
                       setFieldErrors({});
@@ -211,7 +201,8 @@ function InviteTenantScreen() {
                 )}
                 <PrimaryButton
                   title={busy ? 'Saving...' : 'Add Property'}
-                  text_color={COLORS.text_light}
+                  variant="primary"
+                  loading={busy}
                   onPress={busy ? undefined : handleAddProperty}
                   style={styles.save_button}
                 />
@@ -265,7 +256,8 @@ function InviteTenantScreen() {
               <PrimaryButton
                 title={busy ? 'Creating...' : 'Create Invite'}
                 icon="person-add-outline"
-                text_color={COLORS.text_light}
+                variant="primary"
+                loading={busy}
                 onPress={busy ? undefined : handleCreateInvite}
                 style={styles.create_button}
               />
@@ -290,11 +282,12 @@ function InviteTenantScreen() {
               </View>
               <Pressable
                 onPress={() => shareInvite(invite)}
-                hitSlop={8}
+                hitSlop={4}
+                style={styles.share_icon}
                 accessibilityRole="button"
                 accessibilityLabel={'Share invite for ' + invite.tenantName}
               >
-                <Ionicons name="share-outline" size={24} color={COLORS.action} />
+                <Ionicons name="share-outline" size={24} color={COLORS.cta} />
               </Pressable>
             </View>
           ))
@@ -306,17 +299,14 @@ function InviteTenantScreen() {
   return (
     // iOS needs padding to lift the form, Android already resizes the window
     <KeyboardAvoidingView
+      keyboardVerticalOffset={header_height}
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={[
-          styles.content,
-          { paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + SPACING.lg },
-        ]}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + SPACING.lg }]}
       >
-        <ScreenTitle>Invite a Tenant</ScreenTitle>
         {content}
       </ScrollView>
     </KeyboardAvoidingView>
@@ -331,49 +321,51 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   content: {
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
+    width: '100%',
+    maxWidth: SIZES.content_max_width,
+    alignSelf: 'center',
   },
   spinner: {
     marginTop: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.md,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 13,
-    opacity: 0.7,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
     textAlign: 'center',
   },
   helper_block: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 13,
-    opacity: 0.7,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
     marginBottom: SPACING.sm,
   },
   code: {
-    color: COLORS.title,
-    fontFamily: FONTS.heading,
-    fontSize: 34,
-    letterSpacing: 3,
+    fontFamily: TYPE.display.fontFamily,
+    fontSize: TYPE.figure.fontSize,
+    lineHeight: TYPE.figure.lineHeight,
+    color: COLORS.cta,
+    backgroundColor: COLORS.surface_sunken,
+    borderRadius: RADIUS.md,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
+    overflow: 'hidden',
+    paddingVertical: SPACING.sm,
     textAlign: 'center',
     marginVertical: SPACING.sm,
   },
   share_button: {
     marginTop: SPACING.md,
     marginHorizontal: 0,
-    backgroundColor: COLORS.action,
   },
   wrap_row: {
     flexDirection: 'row',
@@ -382,23 +374,18 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   chip: {
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.background,
+    ...list_styles.chip,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   error: {
-    color: COLORS.danger,
-    fontFamily: FONTS.body_bold,
-    fontSize: 12,
+    ...TYPE.caption,
+    fontFamily: TYPE.label.fontFamily,
+    color: COLORS.danger_text,
     marginBottom: SPACING.sm,
   },
   button_row: {
@@ -409,53 +396,54 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
   create_button: {
     marginHorizontal: 0,
     marginTop: SPACING.sm,
-    backgroundColor: COLORS.success,
   },
   section_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
+    ...TYPE.label,
+    color: COLORS.text_muted,
+    textTransform: 'uppercase',
+    letterSpacing: TYPE.overline.letterSpacing,
     marginTop: SPACING.sm,
     marginBottom: SPACING.sm,
     marginLeft: SPACING.xs,
   },
   empty_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    opacity: 0.7,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
     marginLeft: SPACING.xs,
   },
+  // the Hearth pass: a ruled row on the paper, no box
   invite_row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
+    minHeight: SIZES.row_min_height,
+    paddingVertical: SPACING.md,
+    borderTopWidth: BORDER.hairline,
+    borderTopColor: COLORS.hairline,
   },
   invite_text: {
     flex: 1,
   },
   invite_code: {
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
+    ...TYPE.title,
+    color: COLORS.cta,
     letterSpacing: 1,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...list_styles.detail,
+  },
+  // a full 44pt circle so share is easy to hit
+  share_icon: {
+    width: SIZES.touch,
+    height: SIZES.touch,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

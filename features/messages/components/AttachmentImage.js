@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { View, Image, Pressable, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useMessages } from '../context/MessagesContext';
-import { COLORS, SPACING, FONTS } from '../../../theme';
+import { COLORS, SPACING, FONTS, TYPE, RADIUS } from '../../../theme';
 
 // shows a message photo, the key gets swapped for a short-lived url first
 // props: attachment_key, onPress (gets the url for the full size view)
@@ -50,7 +50,7 @@ function AttachmentImage(props) {
   if (failed) {
     return (
       <Pressable style={[styles.frame, styles.center]} onPress={retry} accessibilityRole="button">
-        <Ionicons name="image-outline" size={28} color={COLORS.secondary} />
+        <Ionicons name="image-outline" size={28} color={COLORS.text_muted} />
         <Text style={styles.retry_text}>Tap to reload photo</Text>
       </Pressable>
     );
@@ -59,7 +59,7 @@ function AttachmentImage(props) {
   if (!url) {
     return (
       <View style={[styles.frame, styles.center]}>
-        <ActivityIndicator color={COLORS.secondary} />
+        <ActivityIndicator color={COLORS.text_muted} />
       </View>
     );
   }
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   frame: {
     width: 200,
     height: 150,
-    borderRadius: 10,
+    borderRadius: RADIUS.md,
     backgroundColor: COLORS.muted,
     marginBottom: SPACING.xs,
   },
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   retry_text: {
     color: COLORS.text,
     fontFamily: FONTS.body,
-    fontSize: 12,
-    marginTop: 4,
+    fontSize: TYPE.caption.fontSize,
+    marginTop: SPACING.xs,
   },
 });

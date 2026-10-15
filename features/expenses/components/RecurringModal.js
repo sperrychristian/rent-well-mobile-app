@@ -1,12 +1,16 @@
 import { Modal, View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../../theme';
 import { formatDate } from '../../../utils/formatDate';
-import { formatMoney } from '../utils/expenseStats';
+import { formatCurrency } from '../../../utils/formatCurrency';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // props: visible, rules, onToggle, onDelete, onClose
 function RecurringModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   // ask first so a stray tap doesn't remove a rule, expenses it already made stay
   function confirmDelete(rule) {
     Alert.alert('Delete recurring expense', 'Expenses it already added stay in your list.', [
@@ -16,7 +20,12 @@ function RecurringModal(props) {
   }
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={props.onClose}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={props.onClose}
+    >
       <View style={styles.backdrop}>
         <ScrollView contentContainerStyle={styles.scroll_content}>
           <Card>
@@ -29,7 +38,7 @@ function RecurringModal(props) {
             {props.rules.map((rule) => (
               <View key={rule.id} style={styles.rule_block}>
                 <Text style={styles.rule_title}>
-                  {formatMoney(rule.template.amount)} · {rule.frequency}
+                  {formatCurrency(rule.template.amount)} · {rule.frequency}
                 </Text>
                 <Text style={styles.detail}>{rule.template.category}</Text>
                 <Text style={styles.detail}>{rule.template.property}</Text>
@@ -41,11 +50,13 @@ function RecurringModal(props) {
                 </Text>
                 <View style={styles.button_row}>
                   <PrimaryButton
+                    variant="secondary"
                     title={rule.active ? 'Pause' : 'Resume'}
                     onPress={() => props.onToggle(rule.id)}
                     style={styles.pause_button}
                   />
                   <PrimaryButton
+                    variant="destructive"
                     title="Delete"
                     onPress={() => confirmDelete(rule)}
                     style={styles.delete_button}
@@ -54,7 +65,12 @@ function RecurringModal(props) {
               </View>
             ))}
             <View style={styles.button_row}>
-              <PrimaryButton title="Close" onPress={props.onClose} style={styles.close_button} />
+              <PrimaryButton
+                variant="secondary"
+                title="Close"
+                onPress={props.onClose}
+                style={styles.close_button}
+              />
             </View>
           </Card>
         </ScrollView>
@@ -77,27 +93,26 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.sm,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
   },
   rule_block: {
-    backgroundColor: COLORS.background,
-    borderRadius: 12,
+    backgroundColor: COLORS.surface_sunken,
+    borderRadius: RADIUS.md,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
     padding: SPACING.md,
     marginTop: SPACING.sm,
   },
   rule_title: {
+    ...TYPE.subheading,
+    fontFamily: TYPE.heading.fontFamily,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: FONT_SIZES.body,
   },
   button_row: {
     flexDirection: 'row',
@@ -107,16 +122,13 @@ const styles = StyleSheet.create({
   pause_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.warning,
   },
   delete_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.danger,
   },
   close_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
 });

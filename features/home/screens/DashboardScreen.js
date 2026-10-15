@@ -1,73 +1,186 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, SPACING } from '../../../theme';
-import ScreenTitle from '../../../components/ScreenTitle';
+import { COLORS, SPACING, SIZES } from '../../../theme';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DemoBanner from '../../../components/DemoBanner';
-import UnreadBadge from '../../messages/components/UnreadBadge';
+import SummaryBlock from '../../../components/ui/SummaryBlock';
+import ProgressLine from '../../../components/ui/ProgressLine';
+import ListRow from '../../../components/ui/ListRow';
+import FadeInView from '../../../components/ui/FadeInView';
 import LogoutButton from '../../auth/components/LogoutButton';
+import HomeTopBar from '../components/HomeTopBar';
+import HeroNote from '../components/HeroNote';
 import { useMessages } from '../../messages/context/MessagesContext';
+import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useAuth } from '../../auth/context/AuthContext';
+import { useTenants } from '../../tenants/context/TenantsContext';
+import { openCount, activeCount } from '../../workOrders/utils/workOrderHelpers';
+import { monthlyTotals, shortMonth } from '../utils/overviewStats';
+import { formatCurrency, formatCents } from '../../../utils/formatCurrency';
+import { useLedger } from '../../payments/context/LedgerContext';
+import { ownerPaymentsLine, behindSummary, monthTitle } from '../../payments/utils/ledgerHelpers';
+import { collectedShare, monthOf } from '../../payments/utils/ledgerMath';
+import { demo_landlord } from '../../messages/data/sampleThreads';
 
+// the fintech pass: an overview like a bank's home screen, a hello, one indigo summary card with this month's
+// spending and its trend, three key numbers, the four things landlords open most, then everything else
+// the Hearth pass: the wordmark and your initials on top, then one big number (rent collected this month)
+// with a thin progress line and one line about who's behind, then every place to go as plain rows
 function DashboardScreen(props) {
   // need the insets so the demo banner clears the notch and status bar
   const insets = useSafeAreaInsets();
   const { unread_total } = useMessages();
+  // open_count only exists in real mode, so the badge stays hidden in the demo
+  const { orders, expenses, documents, checklists, demo_mode, is_remote } = useWorkOrders();
+  const { user } = useAuth();
+  const { tenants } = useTenants();
+  // the summary row counts from the lists already on hand, the same numbers the list screens show
+  const open_orders = openCount(orders);
+  const in_progress_orders = activeCount(orders) - open_orders;
+  const active_tenants = tenants.filter((tenant) => tenant.is_active).length;
+  // rent this month from the ledger already in memory: what needs doing first, and what's come in
+  const ledger_store = useLedger();
+  const rent = ownerPaymentsLine(
+    ledger_store.ledgers,
+    ledger_store.today,
+    ledger_store.current_summary,
+  );
+  const behind = behindSummary(ledger_store.ledgers, ledger_store.today);
+  // this month's spending and the five months before it, from the expenses already loaded on the phone
+  const months = monthlyTotals(expenses, new Date(), 6);
+  const this_month = months[months.length - 1];
+  const open_checklists = checklists.filter((checklist) => !checklist.completed).length;
+  const name = user && user.name ? user.name : demo_mode ? demo_landlord.name : '';
+
+  let note = { text: 'Everyone is paid up', tone: 'success', icon: 'checkmark-circle-outline' };
+  if (behind.count > 0) {
+    note = {
+      text:
+        (behind.count === 1 ? '1 tenant is behind, ' : behind.count + ' tenants are behind, ') +
+        formatCents(behind.cents) +
+        ' in total',
+      tone: 'danger',
+      icon: 'time-outline',
+    };
+  } else if (rent.claims > 0) {
+    note = { text: rent.text, tone: 'warning', icon: 'hourglass-outline' };
+  } else if (ledger_store.ledgers.length === 0) {
+    note = { text: 'Set up rent to start tracking', tone: 'neutral', icon: 'card-outline' };
+  }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
-      {/* only shows while the demo is running */}
-      <DemoBanner />
-      <View style={styles.content}>
-        <View>
-          <ScreenTitle>Dashboard</ScreenTitle>
-        </View>
-        <View style={styles.options_container}>
-          <PrimaryButton
-            title="Work Orders"
+    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+      {/* it scrolls now, the header takes some room and a small phone can't fit every button */}
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        {/* only shows while the demo is running */}
+        <DemoBanner />
+        <HomeTopBar name={name} onProfile={() => props.navigation.navigate('Settings')} />
+
+        {/* the hero: the big title, a hello, and the numbers worth a glance */}
+        <FadeInView index={0}>
+          <SummaryBlock
+            label={'Collected in ' + monthTitle(monthOf(ledger_store.today)).split(' ')[0]}
+            value={formatCents(rent.collected_cents)}
+            caption={'of ' + formatCents(rent.expected_cents) + ' expected'}
+          >
+            <ProgressLine
+              share={collectedShare(rent.collected_cents, rent.expected_cents)}
+              label={
+                Math.round(collectedShare(rent.collected_cents, rent.expected_cents) * 100) +
+                ' percent of expected rent collected'
+              }
+              style={styles.progress}
+            />
+          </SummaryBlock>
+          <HeroNote
+            text={note.text}
+            tone={note.tone}
+            icon={note.icon}
+            accessibilityHint="Opens Payments and Rent"
+            onPress={() => props.navigation.navigate('Payments')}
+          />
+        </FadeInView>
+
+        <FadeInView index={1} style={styles.rows}>
+          <ListRow
+            icon="card-outline"
+            title="Payments"
+            subtitle={rent.text}
+            subtitle_tone={rent.tone === 'danger' ? 'danger' : undefined}
+            divider
+            onPress={() => props.navigation.navigate('Payments')}
+          />
+          {/* counts the orders nobody has started yet */}
+          <ListRow
             icon="construct-outline"
-            style={styles.work_order_button}
+            title="Work orders"
+            subtitle={
+              open_orders === 0 && in_progress_orders <= 0
+                ? 'Nothing open'
+                : open_orders +
+                  ' open' +
+                  (in_progress_orders > 0 ? ', ' + in_progress_orders + ' in progress' : '')
+            }
+            divider
             onPress={() => props.navigation.navigate('WorkOrders')}
           />
-          <PrimaryButton
-            title="New Work Order"
-            icon="add-circle-outline"
-            style={styles.new_order_button}
-            onPress={() => props.navigation.navigate('NewWorkOrder')}
+          <ListRow
+            icon="chatbubble-outline"
+            title="Messages"
+            subtitle={unread_total ? unread_total + ' unread' : 'All caught up'}
+            divider
+            onPress={() => props.navigation.navigate('Messages')}
           />
-          {/* the badge sits on the corner of the button and hides itself at zero */}
-          <View>
-            <PrimaryButton
-              title="Messages"
-              icon="chatbubble-ellipses-outline"
-              style={styles.messages_button}
-              onPress={() => props.navigation.navigate('Messages')}
-            />
-            <UnreadBadge count={unread_total} style={styles.unread_badge} />
-          </View>
-          <PrimaryButton
-            title="Documents"
-            icon="document-text-outline"
-            style={styles.documents_button}
-            text_color={COLORS.text_dark}
-            onPress={() => props.navigation.navigate('Documents')}
+          <ListRow
+            icon="people-outline"
+            title="Tenants"
+            subtitle={
+              active_tenants + (active_tenants === 1 ? ' current tenant' : ' current tenants')
+            }
+            divider
+            onPress={() => props.navigation.navigate('Tenants')}
           />
-          <PrimaryButton
-            title="Checklist"
-            icon="checkbox-outline"
-            style={styles.checklist_button}
-            onPress={() => props.navigation.navigate('Checklist')}
-          />
-          <PrimaryButton
-            title="Expenses"
+          <ListRow
             icon="receipt-outline"
-            style={styles.expenses_button}
-            text_color={COLORS.text_dark}
+            title="Expenses"
+            subtitle={
+              formatCurrency(this_month.total) + ' spent in ' + shortMonth(this_month.month)
+            }
+            divider
             onPress={() => props.navigation.navigate('Expenses')}
           />
+          <ListRow
+            icon="document-text-outline"
+            title="Documents"
+            subtitle={documents.length + (documents.length === 1 ? ' file' : ' files')}
+            divider
+            onPress={() => props.navigation.navigate('Documents')}
+          />
+          <ListRow
+            icon="checkbox-outline"
+            title="Checklist"
+            subtitle={
+              open_checklists === 0
+                ? 'Move-in and move-out'
+                : open_checklists + (open_checklists === 1 ? ' in progress' : ' in progress')
+            }
+            onPress={() => props.navigation.navigate('Checklist')}
+          />
+
+          {/* the temporary tenant form, real mode hides it since only tenants can file requests there */}
+          {!is_remote && (
+            <PrimaryButton
+              title="New Work Order"
+              icon="add-circle-outline"
+              variant="secondary"
+              style={styles.new_order_button}
+              onPress={() => props.navigation.navigate('NewWorkOrder')}
+            />
+          )}
           {/* only shows for a signed-in account, not in the demo */}
-          <LogoutButton />
-        </View>
-      </View>
+          <LogoutButton style={styles.logout_button} />
+        </FadeInView>
+      </ScrollView>
     </View>
   );
 }
@@ -78,44 +191,29 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    alignItems: 'center',
-    padding: SPACING.lg,
   },
-
-  content: {
+  scroll: {
     flex: 1,
+  },
+  content: {
+    paddingTop: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
+    paddingBottom: SPACING.xl,
     width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
+    maxWidth: SIZES.content_max_width,
+    alignSelf: 'center',
   },
-
-  options_container: {
-    width: '100%',
-    gap: SPACING.md,
-    backgroundColor: COLORS.background,
+  progress: {
+    marginTop: SPACING.sm,
   },
-
-  work_order_button: {
-    backgroundColor: COLORS.success,
-  },
-  messages_button: {
-    backgroundColor: COLORS.action,
-  },
-  documents_button: {
-    backgroundColor: COLORS.surface_light,
-  },
-  checklist_button: {
-    backgroundColor: COLORS.accent,
-  },
-  expenses_button: {
-    backgroundColor: COLORS.highlight,
+  rows: {
+    marginTop: SPACING.lg,
   },
   new_order_button: {
-    backgroundColor: COLORS.danger,
+    marginHorizontal: 0,
+    marginTop: SPACING.lg,
   },
-  unread_badge: {
-    position: 'absolute',
-    top: -8,
-    right: 0,
+  logout_button: {
+    marginTop: SPACING.md,
   },
 });

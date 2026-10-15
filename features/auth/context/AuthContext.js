@@ -8,6 +8,7 @@ import {
 } from '../../../services/api';
 import { unregisterForPush } from '../../../services/push';
 import { resetTo } from '../../../services/navigationRef';
+import { clearAttachmentUrls } from '../../../services/attachmentUrls';
 
 const AuthContext = createContext(null);
 
@@ -20,6 +21,8 @@ export function AuthProvider(props) {
   // restoring until the saved session has been read, then signed_in or signed_out
   const [status, setStatus] = useState('restoring');
   const [user, setUser] = useState(null);
+  // set when the session ran out on its own, so the app opens on Login with a note instead of Welcome
+  const [session_expired, setSessionExpired] = useState(false);
 
   useEffect(() => {
     // a refresh brings a fresh user, and a dead refresh token means logging in again
@@ -27,10 +30,12 @@ export function AuthProvider(props) {
       if (event_name === 'session') {
         setUser(payload.user);
         setStatus('signed_in');
+        setSessionExpired(false);
       } else if (event_name === 'expired') {
         setUser(null);
         setStatus('signed_out');
-        resetTo('Login', { expired: true });
+        setSessionExpired(true);
+        resetTo('Login');
       }
     });
 
@@ -85,13 +90,16 @@ export function AuthProvider(props) {
     } catch (error) {
       console.log('Could not clear the saved session', error);
     }
+    clearAttachmentUrls();
     setUser(null);
     setStatus('signed_out');
+    setSessionExpired(false);
   }
 
   const value = {
     status,
     user,
+    session_expired,
     role: user ? user.role : null,
     login,
     registerOwner,

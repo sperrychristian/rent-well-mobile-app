@@ -1,19 +1,27 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import PrimaryButton from './PrimaryButton';
-import { COLORS, SPACING, FONTS } from '../theme';
+import { COLORS, SPACING, TYPE, SIZES } from '../theme';
+import IconCircle from './ui/IconCircle';
 
 // shown instead of a blank screen when something couldn't load, like being offline or the server being down
 // props: message, onRetry
 function ErrorState(props) {
   return (
-    <View style={styles.box}>
-      <Ionicons name="cloud-offline-outline" size={40} color={COLORS.secondary} />
+    <View style={styles.box} accessibilityLiveRegion="polite">
+      <IconCircle
+        icon="cloud-offline-outline"
+        tone="warning"
+        size={64}
+        style={styles.icon_circle}
+      />
+      <Text style={styles.title} accessibilityRole="header">
+        Something went wrong
+      </Text>
       <Text style={styles.message}>{props.message}</Text>
       <PrimaryButton
         title="Try Again"
-        icon="refresh"
-        text_color={COLORS.text_light}
+        icon="refresh-outline"
+        variant="secondary"
         onPress={props.onRetry}
         style={styles.retry_button}
       />
@@ -26,16 +34,26 @@ export default ErrorState;
 const styles = StyleSheet.create({
   box: {
     alignItems: 'center',
+    alignSelf: 'stretch',
     padding: SPACING.lg,
-    gap: SPACING.md,
+    gap: SPACING.sm,
   },
-  message: {
+  icon_circle: {
+    marginBottom: SPACING.xs,
+  },
+  title: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 15,
     textAlign: 'center',
   },
+  message: {
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
+    textAlign: 'center',
+    maxWidth: SIZES.content_max_width,
+  },
   retry_button: {
-    backgroundColor: COLORS.action,
+    marginTop: SPACING.sm,
+    minWidth: SIZES.content_max_width / 4 + SPACING.sm,
   },
 });

@@ -3,6 +3,9 @@
 
 export const demo_user_id = 'demo-owner';
 
+// the landlord the demo tenant talks to, it's the same account as demo_user_id seen from the other side
+export const demo_landlord = { id: demo_user_id, name: 'Taylor Brooks', role: 'owner' };
+
 function minutesAgo(now, minutes) {
   return new Date(now.getTime() - minutes * 60000).toISOString();
 }
@@ -80,12 +83,18 @@ export function buildSampleThreads(now) {
     const unread = messages.filter(
       (message) => message.senderId !== demo_user_id && message.createdAt > last_read,
     ).length;
+    // the tenant's side of the same thread, for when the demo switches to the tenant view
+    const other_last_read = minutesAgo(current, thread.other_read_minutes);
+    const other_unread = messages.filter(
+      (message) => message.senderId === demo_user_id && message.createdAt > other_last_read,
+    ).length;
     messages_by_id[thread.id] = messages;
     conversations.push({
       id: thread.id,
       otherUser: thread.other,
       lastMessage: messages[0],
       unreadCount: unread,
+      otherUnreadCount: other_unread,
       lastReadAt: last_read,
       otherUserLastReadAt: minutesAgo(current, thread.other_read_minutes),
       createdAt: minutesAgo(current, thread.lines[0][2] + 1),
@@ -102,4 +111,12 @@ export const demo_replies = [
   'Got it, thank you for the quick reply.',
   'Perfect, I will keep an eye out.',
   'Thanks! I will let you know if anything changes.',
+];
+
+// the fake landlord picks one of these when the demo tenant sends something
+export const demo_landlord_replies = [
+  'Thanks for letting me know, I will take a look.',
+  'Got it. I will set something up and let you know.',
+  'Thanks! I will reach out to the plumber today.',
+  'Appreciate the heads up, I am on it.',
 ];

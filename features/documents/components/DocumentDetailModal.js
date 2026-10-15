@@ -1,13 +1,18 @@
 import { Modal, View, Text, Image, ScrollView, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
 import { getDocumentUri } from '../utils/documentFiles';
 import { isImage, iconFor, expiryTag, daysUntil, formatSize } from '../utils/documentHelpers';
+import StatusLabel from '../../../components/ui/StatusLabel';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // props: visible, document, in_demo, onOpen, onEdit, onDelete, onClose, and onDismiss (iOS calls it once the modal is fully gone)
 function DocumentDetailModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const document = props.document;
 
   // the screen keeps the document around while the modal slides away, so this only guards the very first render
@@ -34,7 +39,7 @@ function DocumentDetailModal(props) {
     <Modal
       visible={props.visible}
       transparent
-      animationType="slide"
+      animationType={reduce_motion ? 'none' : 'slide'}
       onRequestClose={props.onClose}
       onDismiss={props.onDismiss}
     >
@@ -47,20 +52,19 @@ function DocumentDetailModal(props) {
             </View>
 
             <View style={styles.tag_row}>
+              {/* the fintech pass: soft tinted pills, red when it's expired and amber when it's close */}
               {tag && (
-                <View style={[styles.tag, tag.expired ? styles.expired_tag : styles.expiring_tag]}>
-                  <Text style={styles.tag_text}>{tag.text}</Text>
-                </View>
+                <StatusLabel
+                  label={tag.text}
+                  tone={tag.expired ? 'danger' : 'warning'}
+                  icon={tag.expired ? 'alert-circle' : 'time'}
+                />
               )}
               {document.shared_with_tenant && (
-                <View style={[styles.tag, styles.shared_tag]}>
-                  <Text style={styles.tag_text}>Shared with tenant</Text>
-                </View>
+                <StatusLabel label="Shared with tenant" tone="info" icon="people-outline" />
               )}
               {document.sample && (
-                <View style={[styles.tag, styles.sample_tag]}>
-                  <Text style={styles.tag_text}>Sample</Text>
-                </View>
+                <StatusLabel label="Sample" tone="neutral" icon="document-outline" />
               )}
             </View>
 
@@ -94,12 +98,14 @@ function DocumentDetailModal(props) {
 
             <View style={styles.button_row}>
               <PrimaryButton
+                variant="primary"
                 title="Open / Share"
                 icon="share-outline"
                 onPress={props.onOpen}
                 style={styles.open_button}
               />
               <PrimaryButton
+                variant="secondary"
                 title="Edit"
                 icon="create-outline"
                 onPress={props.onEdit}
@@ -108,12 +114,18 @@ function DocumentDetailModal(props) {
             </View>
             <View style={styles.button_row}>
               <PrimaryButton
+                variant="destructive"
                 title="Delete"
                 icon="trash-outline"
                 onPress={props.onDelete}
                 style={styles.delete_button}
               />
-              <PrimaryButton title="Close" onPress={props.onClose} style={styles.close_button} />
+              <PrimaryButton
+                variant="secondary"
+                title="Close"
+                onPress={props.onClose}
+                style={styles.close_button}
+              />
             </View>
           </Card>
         </ScrollView>
@@ -140,57 +152,31 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   heading: {
-    flex: 1,
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
+    flex: 1,
   },
   tag_row: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: SPACING.sm,
     marginTop: SPACING.sm,
     marginBottom: SPACING.sm,
   },
-  tag: {
-    paddingVertical: 3,
-    paddingHorizontal: SPACING.sm,
-    borderRadius: 10,
-  },
-  expiring_tag: {
-    backgroundColor: COLORS.warning,
-  },
-  expired_tag: {
-    backgroundColor: COLORS.danger,
-  },
-  shared_tag: {
-    backgroundColor: COLORS.action,
-  },
-  sample_tag: {
-    backgroundColor: COLORS.secondary,
-  },
-  tag_text: {
-    color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
-    fontSize: 11,
-  },
   preview: {
+    borderRadius: RADIUS.md,
     width: '100%',
     height: 220,
-    borderRadius: 8,
     marginBottom: SPACING.sm,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
     marginTop: SPACING.sm,
   },
   value: {
+    ...TYPE.body,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
   },
   button_row: {
     flexDirection: 'row',
@@ -200,21 +186,17 @@ const styles = StyleSheet.create({
   open_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.action,
   },
   edit_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   delete_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.danger,
   },
   close_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
 });

@@ -12,7 +12,7 @@ module.exports = defineConfig([
   },
   // Jest puts these on every test file, so ESLint needs to know they exist
   {
-    files: ['**/__tests__/**/*.js', '**/*.test.js'],
+    files: ['**/__tests__/**/*.js', '**/*.test.js', 'jest.setup.js'],
     languageOptions: {
       globals: {
         describe: 'readonly',
@@ -24,6 +24,8 @@ module.exports = defineConfig([
         afterEach: 'readonly',
         beforeAll: 'readonly',
         afterAll: 'readonly',
+        // the navigation tests read App.js and the source files from disk
+        __dirname: 'readonly',
       },
     },
   },

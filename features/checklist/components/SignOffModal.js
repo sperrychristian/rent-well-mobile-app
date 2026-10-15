@@ -10,17 +10,22 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
 import { todayString } from '../../../utils/formatDate';
 import { checklist_disclaimer } from '../utils/checklistHelpers';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // props: visible, default_name, not_done (how many items aren't checked), onSign, onClose
 // onSign gets the typed name and the date
 // the screen gives it a new key each time it opens, so the name and date start fresh without an effect
 function SignOffModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const [signed_by, setSignedBy] = useState(props.default_name || '');
   const [signed_on, setSignedOn] = useState(todayString());
 
@@ -43,7 +48,12 @@ function SignOffModal(props) {
   }
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={props.onClose}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={props.onClose}
+    >
       <View style={styles.root}>
         {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
         <KeyboardAvoidingView
@@ -61,7 +71,7 @@ function SignOffModal(props) {
               <TextInput
                 style={styles.input}
                 placeholder="Tenant types their full name"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={signed_by}
                 onChangeText={setSignedBy}
               />
@@ -73,11 +83,13 @@ function SignOffModal(props) {
 
               <View style={styles.button_row}>
                 <PrimaryButton
+                  variant="secondary"
                   title="Cancel"
                   onPress={props.onClose}
                   style={styles.cancel_button}
                 />
                 <PrimaryButton
+                  variant="primary"
                   title="Sign"
                   icon="create-outline"
                   onPress={handleSign}
@@ -109,30 +121,23 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.md,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   input: {
-    backgroundColor: COLORS.background,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
+    ...list_styles.field_input,
     padding: SPACING.sm,
     marginBottom: SPACING.sm,
   },
   disclaimer: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginVertical: SPACING.sm,
   },
   button_row: {
@@ -143,11 +148,9 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
 });

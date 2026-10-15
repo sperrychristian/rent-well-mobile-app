@@ -7,15 +7,23 @@ import {
   ScrollView,
   Pressable,
   TextInput,
+  RefreshControl,
 } from 'react-native';
 import ExpenseDetailsModal from '../../expenses/components/ExpenseDetailsModal';
-import { COLORS, SPACING, FONTS } from '../../../theme';
-import ScreenTitle from '../../../components/ScreenTitle';
+import { COLORS, SPACING, FONTS, SIZES } from '../../../theme';
 import WorkOrderCard from '../components/WorkOrderCard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import AddExpenseModal from '../../expenses/components/AddExpenseModal';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import ErrorState from '../../../components/ErrorState';
+import { useTenants } from '../../tenants/context/TenantsContext';
+import { useMessages } from '../../messages/context/MessagesContext';
+import { openConversationFor } from '../../messages/utils/openConversation';
+import { list_styles } from '../../../components/ui/listStyles';
+import EmptyState from '../../../components/ui/EmptyState';
+import SkeletonList from '../../../components/ui/Skeleton';
+import SegmentedControl from '../../../components/ui/SegmentedControl';
 
 // lower number sorts first, so emergencies come out on top
 const priority_rank = { Emergency: 0, Normal: 1, Low: 2 };
@@ -31,6 +39,12 @@ function WorkOrdersScreen(props) {
     resolveWorkOrder,
     addExpense,
     properties: known_properties,
+    is_remote,
+    orders_status,
+    orders_error,
+    orders_from_cache,
+    refreshing_orders,
+    refreshOrders,
   } = useWorkOrders();
   // track whether the toggle is showing resolved orders or active ones
   const [show_resolved, setShowResolved] = useState(false);
@@ -41,14 +55,46 @@ function WorkOrdersScreen(props) {
   // track which property chip is selected, All means no property filter
   const [property_filter, setPropertyFilter] = useState('All');
   // what's typed in the search box and which sort chip is picked
-  const [search_text, setSearchText] = useState('');
+  // the tenant detail screen can open this with their name already searched
+  // it passes the tenant's id, and I look up the name here so only ids travel between screens
+  const route_params = props.route && props.route.params ? props.route.params : {};
+  const { getTenantById, properties: tenant_properties } = useTenants();
+  const { conversations } = useMessages();
+  const linked_tenant = route_params.tenantId ? getTenantById(route_params.tenantId) : null;
+  const [search_text, setSearchText] = useState(linked_tenant ? linked_tenant.name : '');
+  // a property's detail screen can open this showing only that property, the chip up top clears it
+  const [only_property_id, setOnlyPropertyId] = useState(route_params.propertyId || null);
+  const only_property = only_property_id
+    ? tenant_properties.find((property) => property.id === only_property_id)
+    : null;
   const [sort_by, setSortBy] = useState('Newest');
+
+  // in real mode the actions go to the server and can fail, so I show why (the local ones never throw)
+  async function tryAction(action) {
+    try {
+      await action();
+    } catch (error) {
+      Alert.alert('Could not update the work order', error.message);
+    }
+  }
+
+  // server orders know their property id, local ones only have the label, so those match by the property name
+  function inOnlyProperty(order) {
+    if (!only_property_id) {
+      return true;
+    }
+    if (order.property_id) {
+      return order.property_id === only_property_id;
+    }
+    const name = only_property ? only_property.name : null;
+    return !!name && (order.property === name || order.property.startsWith(name + ','));
+  }
 
   // ask first so a stray tap doesn't close out a request
   function confirmResolve(order_id) {
     Alert.alert('Resolve work order', 'Mark this request as resolved?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Resolve', onPress: () => resolveWorkOrder(order_id) },
+      { text: 'Resolve', onPress: () => tryAction(() => resolveWorkOrder(order_id)) },
     ]);
   }
 
@@ -69,10 +115,12 @@ function WorkOrdersScreen(props) {
       (order) =>
         (show_resolved ? order.status === 'Resolved' : order.status !== 'Resolved') &&
         (property_filter === 'All' || order.property === property_filter) &&
+        inOnlyProperty(order) &&
+        // a server order can have no tenant, so every field falls back to empty text
         (search_lower === '' ||
-          order.title.toLowerCase().includes(search_lower) ||
-          order.tenant.toLowerCase().includes(search_lower) ||
-          order.property.toLowerCase().includes(search_lower)),
+          (order.title || '').toLowerCase().includes(search_lower) ||
+          (order.tenant || '').toLowerCase().includes(search_lower) ||
+          (order.property || '').toLowerCase().includes(search_lower)),
     )
     .sort((a, b) => {
       // priority sort uses the rank first and falls back to newest for ties
@@ -82,10 +130,17 @@ function WorkOrdersScreen(props) {
           return rank_difference;
         }
       }
+      // server orders also have the full time, which breaks ties between orders from the same day
       if (sort_by === 'Oldest') {
-        return a.created_at.localeCompare(b.created_at);
+        return (
+          a.created_at.localeCompare(b.created_at) ||
+          (a.created_at_iso || '').localeCompare(b.created_at_iso || '')
+        );
       }
-      return b.created_at.localeCompare(a.created_at);
+      return (
+        b.created_at.localeCompare(a.created_at) ||
+        (b.created_at_iso || '').localeCompare(a.created_at_iso || '')
+      );
     });
 
   // find the order for the details modal, undefined when it's closed
@@ -101,28 +156,48 @@ function WorkOrdersScreen(props) {
   // the controls scroll with the list so they don't eat the screen in landscape
   const list_header = (
     <View>
+      {/* the saved list is showing because the server didn't answer, pulling down tries again */}
+      {is_remote && orders_from_cache && orders_error ? (
+        <View style={styles.offline_banner}>
+          <Text style={styles.offline_text}>
+            {orders_error + ' Showing the last saved list, pull down to try again.'}
+          </Text>
+        </View>
+      ) : null}
+      {only_property_id ? (
+        <Pressable
+          onPress={() => setOnlyPropertyId(null)}
+          style={[styles.chip, styles.chip_active, styles.only_chip]}
+          hitSlop={{ top: 8, bottom: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel="Show work orders for every property"
+        >
+          <Text style={styles.chip_text}>
+            {'Only ' + (only_property ? only_property.name : only_property_id) + '  ✕'}
+          </Text>
+        </Pressable>
+      ) : null}
       <TextInput
         style={styles.search_input}
+        accessibilityLabel="Search work orders"
+        keyboardAppearance="light"
         placeholder="Search by issue, tenant, or property"
-        placeholderTextColor={COLORS.text}
+        placeholderTextColor={COLORS.text_muted}
         value={search_text}
         onChangeText={setSearchText}
         autoCorrect={false}
       />
-      <View style={styles.segment}>
-        <Pressable
-          onPress={() => setShowResolved(false)}
-          style={[styles.segment_option, !show_resolved && styles.segment_active]}
-        >
-          <Text style={styles.segment_text}>Active ({active_count})</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setShowResolved(true)}
-          style={[styles.segment_option, show_resolved && styles.segment_active]}
-        >
-          <Text style={styles.segment_text}>Resolved ({resolved_count})</Text>
-        </Pressable>
-      </View>
+      {/* the fintech pass: the shared segmented control, the counts sit next to each tab's name */}
+      <SegmentedControl
+        label="Show work orders"
+        value={show_resolved}
+        onChange={setShowResolved}
+        options={[
+          { value: false, label: 'Active', count: active_count },
+          { value: true, label: 'Resolved', count: resolved_count },
+        ]}
+        style={styles.segment}
+      />
       {/* chips scroll sideways so a long list of properties doesn't wrap */}
       <ScrollView
         horizontal
@@ -134,6 +209,9 @@ function WorkOrdersScreen(props) {
             key={name}
             onPress={() => setPropertyFilter(name)}
             style={[styles.chip, property_filter === name && styles.chip_active]}
+            hitSlop={{ top: 8, bottom: 8 }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: property_filter === name }}
           >
             <Text style={styles.chip_text}>{name}</Text>
           </Pressable>
@@ -146,6 +224,10 @@ function WorkOrdersScreen(props) {
             key={option}
             onPress={() => setSortBy(option)}
             style={[styles.chip, sort_by === option && styles.chip_active]}
+            hitSlop={{ top: 8, bottom: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel={'Sort by ' + option}
+            accessibilityState={{ selected: sort_by === option }}
           >
             <Text style={styles.chip_text}>{option}</Text>
           </Pressable>
@@ -155,32 +237,58 @@ function WorkOrdersScreen(props) {
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
-      <ScreenTitle>Work Orders</ScreenTitle>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
       {/* FlatList only renders what's on screen, so it scales when the list gets long */}
-      <FlatList
-        data={visible_orders}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        keyboardShouldPersistTaps="handled"
-        ListHeaderComponent={list_header}
-        ListEmptyComponent={
-          <Text style={styles.empty_text}>
-            {show_resolved ? 'No resolved work orders found' : 'No open work orders found'}
-          </Text>
-        }
-        renderItem={({ item }) => (
-          <WorkOrderCard
-            order={item}
-            onAddExpense={() => setExpenseOrderId(item.id)}
-            onViewExpenses={() => setDetailsOrderId(item.id)}
-            onStart={() => startWorkOrder(item.id)}
-            onResolve={() => confirmResolve(item.id)}
-            onMessage={() => props.navigation.navigate('Messages', { tenant: item.tenant })}
-            onOpenDetail={() => props.navigation.navigate('WorkOrderDetail', { order_id: item.id })}
-          />
-        )}
-      />
+      {/* real mode can still be loading or have failed with nothing saved, so those get their own screens */}
+      {is_remote && orders_status === 'loading' && orders.length === 0 ? (
+        // grey placeholder cards while the first load is out, instead of a lone spinner
+        <SkeletonList rows={4} />
+      ) : is_remote && orders_status === 'error' && orders.length === 0 ? (
+        <ErrorState message={orders_error} onRetry={refreshOrders} />
+      ) : (
+        <FlatList
+          data={visible_orders}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + SPACING.lg }]}
+          keyboardShouldPersistTaps="handled"
+          refreshControl={
+            is_remote ? (
+              <RefreshControl
+                refreshing={!!refreshing_orders}
+                onRefresh={refreshOrders}
+                tintColor={COLORS.title}
+              />
+            ) : undefined
+          }
+          ListHeaderComponent={list_header}
+          ListEmptyComponent={
+            <EmptyState
+              illustration="empty_work_orders"
+              title={show_resolved ? 'No resolved work orders found' : 'No open work orders found'}
+              message={
+                search_text || property_filter !== 'All'
+                  ? 'Try a different search or property.'
+                  : 'New requests show up here as soon as they come in.'
+              }
+            />
+          }
+          renderItem={({ item }) => (
+            <WorkOrderCard
+              order={item}
+              onAddExpense={() => setExpenseOrderId(item.id)}
+              onViewExpenses={() => setDetailsOrderId(item.id)}
+              onStart={() => tryAction(() => startWorkOrder(item.id))}
+              onResolve={() => confirmResolve(item.id)}
+              onMessage={() =>
+                openConversationFor(props.navigation, conversations, item.tenant, item.tenant_id)
+              }
+              onOpenDetail={() =>
+                props.navigation.navigate('WorkOrderDetail', { workOrderId: item.id })
+              }
+            />
+          )}
+        />
+      )}
       <AddExpenseModal
         visible={expense_order_id !== null}
         default_property={expense_order ? expense_order.property : ''}
@@ -203,50 +311,39 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    padding: SPACING.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
+    // the fintech pass: capped and centered on a tablet so lines stay a readable length
+    width: '100%',
+    maxWidth: SIZES.content_max_width + 160,
+    alignSelf: 'center',
   },
   list: {
     gap: SPACING.sm,
   },
   search_input: {
-    backgroundColor: COLORS.muted,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
-    padding: SPACING.sm,
-    marginBottom: SPACING.sm,
+    ...list_styles.search_input,
   },
   segment: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: SPACING.sm,
-  },
-  segment_option: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 9,
-    alignItems: 'center',
-  },
-  segment_active: {
-    backgroundColor: COLORS.primary,
-  },
-  segment_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 14,
+    marginBottom: SPACING.sm + SPACING.xs,
   },
   toggle_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
+    ...list_styles.label,
   },
   sort_row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
     marginBottom: SPACING.sm,
+  },
+  spinner: {
+    marginTop: SPACING.lg,
+  },
+  offline_banner: {
+    ...list_styles.offline_banner,
+  },
+  offline_text: {
+    ...list_styles.offline_text,
   },
   empty_text: {
     color: COLORS.text,
@@ -256,21 +353,19 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   chip_row: {
-    gap: SPACING.sm,
-    paddingBottom: SPACING.sm,
+    ...list_styles.chip_row,
   },
   chip: {
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.muted,
+    ...list_styles.chip,
+  },
+  only_chip: {
+    alignSelf: 'flex-start',
+    marginBottom: SPACING.sm,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
 });

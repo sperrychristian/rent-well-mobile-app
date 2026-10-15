@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Alert, StyleSheet } from 'react-native';
+import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { useAuth } from '../context/AuthContext';
-import { COLORS } from '../../../theme';
 
 // only shows for a signed-in account, the demo has its own exit button in the banner
 function LogoutButton(props) {
@@ -33,17 +32,13 @@ function LogoutButton(props) {
     <PrimaryButton
       title={busy ? 'Logging out...' : 'Log Out'}
       icon="log-out-outline"
-      text_color={COLORS.text_light}
+      // the design pass: an outlined secondary button, it's an exit and shouldn't look like the main action
+      variant="secondary"
+      loading={busy}
       onPress={busy ? undefined : confirmLogout}
-      style={[styles.button, props.style]}
+      style={props.style}
     />
   );
 }
 
 export default LogoutButton;
-
-const styles = StyleSheet.create({
-  button: {
-    backgroundColor: COLORS.secondary,
-  },
-});

@@ -1,11 +1,19 @@
 import { Modal, Pressable, Image, Text, StyleSheet } from 'react-native';
 import { COLORS, SPACING, FONTS } from '../../../theme';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // the full size photo, tap anywhere to close
 // props: url (null hides it), onClose
 function ImageViewerModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   return (
-    <Modal visible={!!props.url} transparent animationType="fade" onRequestClose={props.onClose}>
+    <Modal
+      visible={!!props.url}
+      transparent
+      animationType={reduce_motion ? 'none' : 'fade'}
+      onRequestClose={props.onClose}
+    >
       <Pressable
         style={styles.backdrop}
         onPress={props.onClose}

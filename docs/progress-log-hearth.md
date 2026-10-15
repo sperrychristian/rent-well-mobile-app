@@ -1,0 +1,218 @@
+# Hearth redesign: progress log
+
+Branch `hearth-redesign`, made from `payments-ledger-app`. Not merged. This is a visual pass only: no routes, params, titles, data, API calls, or business logic change.
+
+## Phase 1: tokens, fonts, shared components (done)
+
+- **New packages** (named in the brief): `@expo-google-fonts/fraunces` and `@expo-google-fonts/dm-sans` through `npx expo install`. `expo-font` and `expo-splash-screen` were already there.
+- **`App.js`:**
+  - Loads Fraunces 400 and 500 and DM Sans 400, 500, and 600.
+  - Holds the splash with `SplashScreen.preventAutoHideAsync()` and hides it once the fonts load or fail.
+  - If loading fails, it logs, and the app opens anyway with the system font filling in.
+  - Inter isn't loaded anymore.
+- **`theme.js`:**
+  - Every color token was remapped to Hearth with the same names: paper `#F7F3EC`, ink `#2A2520`, muted `#6B6259`, hairline `#E4DCCF`, strong border `#CFC4B2`, forest green `#2F5D4A`, terracotta `#A8442A`, and amber `#83560F`.
+  - The tints are quiet warm versions, and the backdrop is warm.
+  - New tokens:
+    - `COLORS.hairline`
+    - `FONTS.medium`, `serif`, and `serif_medium`
+    - `TYPE.hero` (58), `number` (30), `name`, `empty_title`, and `wordmark`
+    - `SPACING.xxxl` (64)
+    - `RADIUS.button` (26)
+    - `SIZES.screen_padding` (24), `row_min_height` (64), `row_icon`, `chevron`, `progress`, and `header_avatar`
+  - The TYPE keys stayed, now in DM Sans and Fraunces.
+  - Buttons are 52 tall.
+  - `SHADOWS.low` and `medium` are flat now, and only `high` (sheets) has a shadow.
+  - All the old comments are kept.
+- **Contrast:** every pair is AA. The lowest are `danger_text` on `danger_tint` at 4.91 and `text_muted` on `neutral_tint` at 4.95.
+- **Components:**
+  - New: `StatusLabel` (an icon and colored words), `ProgressLine`, and `lineIcon` (filled to outline Ionicons, checked against the glyph map).
+  - `StatusPill` now renders a StatusLabel, so every caller keeps working.
+  - Changed:
+    - `Button`: pills, a see-through secondary, and an outlined terracotta destructive.
+    - `ListRow`: hairline rows, 64 tall, a 24 line icon, a 17 medium title, `subtitle_tone`, and an 18 chevron.
+    - `IconCircle`: the line icon only, with no circle.
+    - `Avatar`: a hairline ring.
+    - `KpiTile`: no tile. Label, then a Fraunces figure, then the caption.
+    - `SummaryBlock`: no card, a Fraunces hero, and `size="small"`.
+    - `Card`: flat and interactive are no longer boxes. Raised is a white box with a hairline edge.
+    - `Chip`: see-through, and picked chips have a green edge.
+    - `SegmentedControl` and the `listStyles` segment: tabs on a hairline with a green underline.
+    - Inputs (`TextField`, `DateField`, `listStyles`, `sheet.input`): white, a hairline edge, 8 corners, 52 tall. TextField errors get an alert icon.
+    - `sheet.js`: 12 corners.
+    - `Toast`: an ink pill with no shadow.
+    - `EmptyState`: a muted line icon, a Fraunces title, and a primary pill.
+    - `Skeleton`: hairline rows.
+    - `Wordmark`: Fraunces 500 next to a green line house. No pixels, and there's an `align` prop.
+    - `DemoBanner`: a thin green strip with Switch view and an underlined Exit Demo Mode as text buttons.
+    - `navigation/screenOptions.js`: a paper header with no line or shadow. Only the look changed.
+- **Dropped comments** (their code was removed):
+  - Wordmark: "the logomark sits in a soft indigo tile, like an app icon".
+  - SummaryBlock: "the one floating card on a home screen, so it gets the soft shadow".
+  - DemoBanner's `PrimaryButton` and `StatusPill` imports had no comments.
+- **Tests:** `components/ui/hearth.test.js` covers the Button variants, the Row, StatusLabel, the hero amount block with the ProgressLine, `lineIcon`, and every new text and background pair (23 tests).
+- **`docs/DESIGN.md`** is rewritten for Hearth.
+- **Checks:**
+  - Lint: the 13 known problems.
+  - Tests: 360 passed in 31 suites.
+  - Format: clean.
+  - iOS export with `--clear`: OK.
+
+## Phase 2: Welcome, Login, both Dashboards (done)
+
+- **New pieces** in `features/home/components/`:
+  - `HomeTopBar`: the wordmark on the left and a 44pt outlined initials circle on the right, which opens Settings, the same place the gear already goes.
+  - `HeroNote`: the one colored line under a hero, made of a line icon, words, and a chevron.
+- **Landlord Dashboard:**
+  - Top to bottom: the top bar, "Collected in October", the Fraunces hero amount, "of $X expected", the green progress line, then one line that opens Payments. The line reads "1 tenant is behind, $2,000.00 in total" in terracotta with a clock, or claims to review in amber, or "Everyone is paid up" in green.
+  - Then plain rows with live subtitles: Payments, Work orders, Messages, Tenants, Expenses, Documents, Checklist.
+  - The temporary demo New Work Order button is now a secondary pill. Log Out stays.
+  - Removed: the spending card and its Sparkline, the KPI tiles, the quick actions, and the feature tiles.
+  - New helper `behindSummary` (tested).
+- **Decision:** there are no Properties or Mileage rows on the Dashboard. The brief lists them, but they'd add new navigation edges, and the map, its tests, and the diagram must stay the same. Properties is one tap away under Tenants, and Mileage under Expenses or Settings.
+- **My Home (tenant):**
+  - The top bar, the address, "Due now" as the hero, "Next rent $1,450.00 on Nov 1", and one line: "$2,000.00 is overdue" (terracotta), "Due now" (amber), or "You're all paid up" (green).
+  - Then rows: Payments, My Requests, Report an Issue, Message Landlord.
+  - The read-only home uses a Fraunces "No Active Rental" in place of the shimmer ScreenTitle, and its three cards are now rows.
+- **Welcome:** pill buttons, the three trust icons all in green line icons, and 24 side padding.
+- **Login and sign up** (`AuthLayout`): the medium wordmark, 24 side padding, and a quiet error note with a line icon. `SubmitButton` is the 52 pill.
+- **Demo chooser:** the two choices are ruled rows with green line icons.
+- **Dropped comments** (their code was removed):
+  - Dashboard: "the badge sits on the corner of the button and hides itself at zero", "an empty half next to the odd third tile, so it stays the same size instead of stretching", "capped so the tiles don't stretch across a whole iPad", and "two tiles to a row, they grow taller instead of squishing when the text is big".
+  - Tenant home: "two tiles to a row, they grow taller instead of squishing when the text is big" and "the read-only home still uses the full-width cards".
+- **Visual QA** (web render at 390, 360 by 640, and 820 by 1180): Welcome, Login, the chooser, and both homes. There were no page errors, and nothing was clipped or cramped. At 360 the hero note wraps to two lines, which reads fine.
+- **Phase 2 checks:** lint at the 13 known problems, 361 tests passed, format clean, iOS export OK.
+
+## Phase 3: Payments and ledger screens (done)
+
+- **New shared piece:** `components/ui/ActionSheet` slides up from the bottom. It's a white sheet with 12 corners and the shadow, with ruled rows that each have a line icon, and Cancel at the bottom.
+- **New helpers** (tested): `chargeStatusLine` and `paymentStatusLine` give lines like "Overdue, was due Oct 1", "Overdue, $450.00 left, was due Sep 1", "Paid Sep 2 by Zelle", "Waiting for confirmation, sent Oct 14 by Venmo", and "Rejected, sent Sep 20 by Venmo".
+- **`LedgerRows`:**
+  - Charge and payment rows are plain ruled rows: the title on top, the status as a line icon and colored words under it, and the amount at 17 medium on the right.
+  - Claim rows have Reject as a secondary pill and Confirm as a primary pill.
+  - `ProgressBar` now draws the shared `ProgressLine`.
+- **Rent Ledger:**
+  - The tenant's name in Fraunces 30 with the address muted under it.
+  - A status label: Overdue in terracotta, Paid up in green, or Credit.
+  - The balance in Fraunces 58.
+  - "Next rent $1,450.00 on Nov 1. Deposit held $1,450.00." muted, and the overdue sentence in terracotta.
+  - One green "Record Payment" pill with a plus, and a secondary "More" pill. More opens an action sheet with Add Charge, Edit or Set Rent Schedule, and Void a Charge or Payment. Void opens a second sheet with the 8 newest things that can be voided, then the reason sheet.
+  - Then the schedule line, then month section headers over plain rows.
+  - Tapping a charge still offers Void Charge, and the header add button still opens Record Payment.
+- **Payments (owner):**
+  - The hero is "Collected in October 2026" in Fraunces with the green progress line.
+  - The two KPI figures have no tiles.
+  - The claims queue is rows.
+  - Tenant rows show the address and balance, with the status as a label under them through the new `ListRow` `detail` prop, so it never squeezes the name.
+  - Tabs are on a hairline.
+- **Payments (tenant):**
+  - A Fraunces "You owe" hero, and the overdue note as terracotta words with no fill.
+  - Next rent and deposit as plain figures.
+  - "I Paid" is a 52 pill.
+  - "How to pay" with a Copy pill, and the waiting and rejected sections as rows.
+- **Payment Record:** a hero amount, a status label, banners turned into plain icon-and-words lines, hairline facts, the timeline, a secondary Share Receipt, Confirm as primary and Reject as secondary, an outlined terracotta Void, and the ledger link as a text button.
+- **Forms** (`FormBits`): muted labels above white inputs (hairline edge, 8 corners, 52 tall), and 24 between field groups.
+- **Test copy changes** (the visible copy really changed): `paymentScreens.test.js` and `paymentFlows.test.js` now tap More before Add Charge or Edit Rent Schedule, since those moved into the More sheet.
+- **Visual QA** (web render at 390, 360 by 640, and 820 by 1180): Payments, Rent Ledger, tenant Payments, Payment Record, the More sheet, and Record Payment. No page errors.
+  - Fixed: the status label on the owner's tenant rows squeezed the address ("Unit / 1" on two lines). It moved under the subtitle.
+  - Fixed: the address turned red along with an overdue balance. It's muted now, and the label carries the color.
+  - Fixed: the rejected-claim reason was still indented for the old icon circle.
+- **Checks:**
+  - Lint: the 13 known problems.
+  - Tests: listed in the next line.
+  - Format: clean.
+  - iOS export with `--clear`: OK.
+  - Tests: 363 passed, 363 total.
+
+## Phase 4: Properties, Tenants, Work Orders, Messages (done)
+
+- **Side padding:** every screen's container now uses the 24pt side padding (`SIZES.screen_padding`), applied to the container and content blocks of all 14 screens that had 16. This covers phase 5's screens too.
+- **Tenants:**
+  - Property names in Fraunces with no white section boxes.
+  - Unit labels as section headers.
+  - Tenant rows as ruled rows instead of tinted boxes.
+  - The work order count without its amber pill.
+  - Pending invites as ruled rows, with Resend as an outlined pill and Revoke as terracotta words in a terracotta outline (it was a filled red block).
+- **Tenant Profile:** the links and chevrons are green instead of slate. The rest comes from the shared pieces.
+- **Properties:** the home icon has no tinted square, and edit and delete are plain icons in 44pt targets with no tinted circles.
+- **Property Overview:** it's the shared pieces now, with the name in Fraunces and the instructions as plain text with an outlined pill.
+- **Work Orders:**
+  - Each order is a ruled section with a hairline on top, and the title is 17 medium.
+  - The one pill per order is the next step (Start Work or Mark Resolved, both green). Add Expense, Message, and Details became green text buttons, so a list of orders isn't a wall of outlines.
+  - Every action and its order are unchanged.
+- **Work order detail and forms:** they inherit the inputs, chips, and pills.
+- **Messages:** conversations are ruled rows, and the unread edge is gone (bold text and the badge still say it). Chat bubbles have 18 corners: mine in forest green with white words, theirs white with a hairline edge.
+- **Invite:** the pending invite is a ruled row with the code in Fraunces, and the share icon has no tinted circle.
+- **Visual QA** at 390 (Tenants, Tenant Profile, Work Orders, detail, the new work order form, Invite, Properties, Property Overview, Messages, the thread, and My Requests) found the boxes, tints, red block, and outline walls listed above. All are fixed and re-checked, with no page errors.
+- **Comments:** none dropped.
+- **Checks:**
+  - Lint: the 13 known problems.
+  - Tests: 363 passed.
+  - Format: clean.
+  - iOS export with `--clear`: OK.
+
+## Phase 5: Expenses, Mileage, Documents, Checklist, Settings, and the rest (done)
+
+- **Expenses:**
+  - Add Expense stays the one green pill and Scan Receipt stays outlined. Mileage, Year-End, Recurring, Budgets, and Export CSV are now green text buttons, which takes the top from six outlined pills down to two pills.
+  - The tags (work order, no receipt, billed, recurring, capital) are colored words with no pill.
+  - The category and property bars are the 4pt green line on a hairline track.
+- **Documents:** the row icons have no tinted circle, and the category words are muted.
+- **Checklist:**
+  - The list icons are green line icons with no circle, and the type words are muted.
+  - The detail's rooms are ruled sections instead of white boxes.
+  - The checklist `ProgressBar` is the 4pt green line.
+  - The "worse since move-in" tag is terracotta words in a terracotta outline (it was a filled red block).
+- **Mileage, Settings, Year-End, Lease, Past Requests, My Requests, Request Detail, and the sign up screens** pick up the shared pieces and the 24 side padding. Nothing on them needed a screen-specific change.
+- **Visual QA** at 390 (Expenses, Mileage, Documents, Checklist, checklist detail, Settings, Year-End, Lease, Tenant Sign Up) found the boxes, tints, and red blocks listed above. All are fixed and re-checked, with no page errors.
+- **Comments:** none dropped.
+- **Checks:**
+  - Lint: the 13 known problems.
+  - Tests: listed in the next line.
+  - Format: clean.
+  - iOS export with `--clear`: OK.
+  - Tests: 363 passed, 363 total.
+
+## Phase 6: sweeps and final QA (done)
+
+- **Removed dead code:**
+  - Components: `FeatureTile`, `QuickAction`, `StatTile`, `Sparkline`, `components/ui/pixel/` (PixelArt, the drawings, the duotone, the helpers and their test), `ScreenTitle`, and `StatusPill` (its 10 callers now use `StatusLabel`).
+  - Helpers and tokens: `sparklinePoints` and its tests, and the `pixel_` colors in `theme.js`.
+  - Assets: the old `assets/pixel-*.png` files.
+  - Packages: `expo-linear-gradient` (only ScreenTitle used it) and `@expo-google-fonts/inter`.
+- **Dropped comments** (their code was removed):
+  - `theme.js`: "pixel art palette, only the PixelArt drawings use these", "the house logomark is recolored into the brand: indigo roof, soft indigo walls, ink door", and "the two quiet tones every empty-state drawing is redrawn in, so they read as accents and not as art".
+  - `uiHelpers.js`: the three-line sparklinePoints comment.
+  - `buildAppAssets.mjs`: "the pixel squares of one drawing as svg rects, placed at x, y with each square `pixel` big" and "a drawing centered on a square canvas, pixel is picked so it fills `fraction` of the width".
+  - The deleted files took their own comments with them.
+- **App icon, splash, favicon, and Android adaptive layers:** `scripts/buildAppAssets.mjs` now draws a forest green line house (the Ionicons home-outline shape, stroke about 1.6) on the paper. `npm run assets` wrote `assets/hearth-*.png`, and `app.json` points at them, with a paper background and splash. It needs a new native build to show on a device.
+- **Line icon sweep:** every literal Ionicons name in features and components went to its outline twin where one exists (21 files), checked against the glyph map. The shared components also run names through `lineIcon` at render.
+- **Hex sweep:** no hex colors outside `theme.js`.
+- **Magic number sweep:**
+  - Note box heights, badge offsets, the 600 width cap, letter spacing, Welcome's line width, and ErrorState's button width now come from tokens.
+  - What's left are one-off photo and thumbnail sizes (48, 56, 72, 110, 120, 150, 160, 200, 220), the sheet handle, and the badge bubble. Those are sizes, not spacing, so they stay.
+- **Contrast:** `theme.test.js`, `stylePairs.test.js`, and `hearth.test.js` all pass.
+- **Touch targets and accessibility:**
+  - Every Pressable in features and components has an `accessibilityRole` (I checked with a brace-aware scan).
+  - The ones without an explicit label wrap visible text, which screen readers read.
+  - The new pieces (top bar avatar, hero note, action sheet rows, demo banner text buttons, ledger pills) are all 44 or more.
+- **Font scaling:** I rendered the Dashboard, Rent Ledger, and Record Payment form with every type size times 1.6 (in the scratch copy only).
+  - Fixed: "Record Payment" broke mid-word. The ledger's pills now wrap onto two lines.
+  - Fixed: status icons centered against wrapped words. They sit on the first line now.
+  - Fixed: the hero numbers now cap at 1.2 times and shrink to fit (`maxFontSizeMultiplier` and `adjustsFontSizeToFit`, which iOS honors). The web render can't shrink to fit, so it shows an ellipsis there.
+  - Everything else wrapped cleanly with no clipping.
+- **Reduce Motion:** the sheets (FormSheet, ActionSheet, the existing modals), the toast, and FadeInView all check `useReduceMotion()`.
+- **Final visual QA** at 360 by 640, 390 by 844, and 820 by 1180 (Dashboard, Ledger, Payments, Record Payment, Work Orders, and the chat): no page errors, and nothing cluttered or clipped.
+  - Note: on the tablet, Work Orders and the chat run wider than the other screens because of their older width caps (`content_max_width + 160` or none). I left it, since it's a layout cap and not the look.
+- **Screenshots:** all of `docs/screenshots/` was re-shot at 2x from the demo, and `documents.png` replaced `documents_empty.png`. The README has a new "The look" section with four of them, and its payments section shows the new payments shots.
+- **CLAUDE.md:** the Design system section is rewritten for Hearth, plus the stack, assets, colors, and status lines.
+- **Navigation:** `navigation/navigationMap.js`, its tests, and `assignment/navigation/` are unchanged from `payments-ledger-app`.
+- **Test changes:**
+  - New: `components/ui/hearth.test.js` (23 tests) and the ledger helper tests for `behindSummary`, `chargeStatusLine`, and `paymentStatusLine`.
+  - Removed with their code: the pixel and sparkline tests.
+  - Copy changes: two ledger tests tap More first, and the hearth test's chevron is `chevron-forward-outline`.
+- **Checks:**
+  - Lint: the 13 known problems.
+  - Tests: 346 passed in 30 suites.
+  - Format: clean.
+  - iOS export with `--clear`: OK.

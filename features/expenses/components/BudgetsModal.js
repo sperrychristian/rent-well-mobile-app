@@ -3,19 +3,24 @@ import {
   Modal,
   View,
   Text,
-  TextInput,
   ScrollView,
   StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import CurrencyInput from '../../../components/ui/CurrencyInput';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // props: visible, properties (list of names), budgets (name to amount), onSave, onClose
 function BudgetsModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   // one text box per property, kept as text until I tap save
   const [budget_texts, setBudgetTexts] = useState({});
 
@@ -50,7 +55,12 @@ function BudgetsModal(props) {
   }
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={props.onClose}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={props.onClose}
+    >
       {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
       <KeyboardAvoidingView
         style={styles.backdrop}
@@ -68,11 +78,9 @@ function BudgetsModal(props) {
             {props.properties.map((name) => (
               <View key={name}>
                 <Text style={styles.label}>{name}</Text>
-                <TextInput
+                <CurrencyInput
                   style={styles.input}
                   placeholder="No budget"
-                  placeholderTextColor={COLORS.text}
-                  keyboardType="decimal-pad"
                   value={budget_texts[name] || ''}
                   onChangeText={(text) =>
                     setBudgetTexts((current) => ({ ...current, [name]: text }))
@@ -81,8 +89,18 @@ function BudgetsModal(props) {
               </View>
             ))}
             <View style={styles.button_row}>
-              <PrimaryButton title="Cancel" onPress={props.onClose} style={styles.cancel_button} />
-              <PrimaryButton title="Save" onPress={handleSave} style={styles.save_button} />
+              <PrimaryButton
+                variant="secondary"
+                title="Cancel"
+                onPress={props.onClose}
+                style={styles.cancel_button}
+              />
+              <PrimaryButton
+                variant="primary"
+                title="Save"
+                onPress={handleSave}
+                style={styles.save_button}
+              />
             </View>
           </Card>
         </ScrollView>
@@ -105,29 +123,22 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.sm,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginBottom: SPACING.md,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   input: {
-    backgroundColor: COLORS.background,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
+    ...list_styles.field_input,
     padding: SPACING.sm,
     marginBottom: SPACING.sm,
   },
@@ -139,11 +150,9 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
 });

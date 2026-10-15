@@ -14,6 +14,7 @@ import { storageKey } from '../utils/storageKeys';
 import { addPeriod } from '../utils/recurring';
 import { deleteDocumentFile, clearDemoFiles } from '../features/documents/utils/documentFiles';
 import { sample_checklists } from '../features/checklist/data/sampleChecklists';
+import { buildSampleTenantData } from '../features/tenants/data/sampleTenants';
 import { checklist_templates } from '../features/checklist/data/checklistTemplates';
 import {
   copyTemplate,
@@ -29,6 +30,7 @@ import {
   deleteChecklistPhoto,
   clearDemoChecklistPhotos,
 } from '../features/checklist/utils/checklistPhotos';
+import { RemoteWorkOrdersContext } from '../features/workOrders/context/remoteWorkOrdersContext';
 
 const orders_key = 'rent_well_work_orders';
 const expenses_key = 'rent_well_expenses';
@@ -78,6 +80,8 @@ export function WorkOrdersProvider(props) {
   const [documents, setDocuments] = useState(seed_documents);
   // checklists start empty, the samples only show up in the demo
   const [checklists, setChecklists] = useState([]);
+  // the demo's properties, tenants, and invites, null outside the demo since real mode gets them from the server
+  const [demo_tenant_data, setDemoTenantData] = useState(null);
   // I wait for the saved data to load before saving anything, so the mock data can't overwrite it
   // loaded_user is whose data is in memory (null for the original keys), so switching accounts counts as not loaded yet
   const [loaded_user, setLoadedUser] = useState(undefined);
@@ -91,6 +95,8 @@ export function WorkOrdersProvider(props) {
   const [demo_mode, setDemoMode] = useState(false);
   // the ref changes right away, which the async load needs to check, state only updates on the next render
   const demo_ref = useRef(false);
+  // which side of the demo is showing, owner (landlord) or tenant, both read and change the same demo data
+  const [demo_role, setDemoRole] = useState('owner');
 
   // reads whatever was saved on the device, used on startup and when leaving the demo
   // user_id picks which account's keys to read, gives back false if a newer load or the demo took over
@@ -289,8 +295,10 @@ export function WorkOrdersProvider(props) {
   }, [loaded]);
 
   // every demo starts from the same fresh sample data, and nothing in it gets saved
-  function startDemo() {
+  // role picks which side it opens on, owner (landlord) or tenant, the landlord when it's left out
+  function startDemo(role) {
     demo_ref.current = true;
+    setDemoRole(role === 'tenant' ? 'tenant' : 'owner');
     setOrders(default_orders);
     setExpenses(seed_expenses);
     setTrips(seed_trips);
@@ -299,10 +307,19 @@ export function WorkOrdersProvider(props) {
     setMileageRate(default_mileage_rate);
     setDocuments(seed_documents);
     setChecklists(sample_checklists);
+    setDemoTenantData(buildSampleTenantData());
     // clears out files left behind if the app was closed in the middle of a demo
     clearDemoFiles();
     clearDemoChecklistPhotos();
     setDemoMode(true);
+  }
+
+  // flips the demo to the other side without touching its data, App.js rebuilds the screens on that role's home
+  function switchDemoRole(role) {
+    if (!demo_ref.current) {
+      return;
+    }
+    setDemoRole(role === 'tenant' ? 'tenant' : 'owner');
   }
 
   // I put the real data back first and only then turn demo mode off, so demo data can't get saved over it
@@ -317,6 +334,8 @@ export function WorkOrdersProvider(props) {
     // files added during the demo lived in the cache and go away with it
     clearDemoFiles();
     clearDemoChecklistPhotos();
+    setDemoTenantData(null);
+    setDemoRole('owner');
     setDemoMode(false);
   }
 
@@ -634,8 +653,10 @@ export function WorkOrdersProvider(props) {
     documents,
     properties,
     demo_mode,
+    demo_role,
     startDemo,
     exitDemo,
+    switchDemoRole,
     getOrder,
     startWorkOrder,
     resolveWorkOrder,
@@ -667,12 +688,17 @@ export function WorkOrdersProvider(props) {
     deleteChecklistRoom,
     signChecklist,
     deleteChecklist,
+    demo_tenant_data,
+    setDemoTenantData,
   };
 
   return <WorkOrdersContext.Provider value={value}>{props.children}</WorkOrdersContext.Provider>;
 }
 
 // screens call this to get the shared orders, expenses, and actions
+// in real mode the work order provider hands back the same shape with the orders coming from the server
 export function useWorkOrders() {
-  return useContext(WorkOrdersContext);
+  const local = useContext(WorkOrdersContext);
+  const remote = useContext(RemoteWorkOrdersContext);
+  return remote || local;
 }

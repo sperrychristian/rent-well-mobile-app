@@ -1,7 +1,7 @@
 import { View, Text, Pressable, Platform, StyleSheet } from 'react-native';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { stringToDate, dateToString } from '../utils/dateInput';
-import { COLORS, SPACING, FONTS } from '../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../theme';
 
 // value is a date text like 2026-10-07 and onChange gets the new date text back
 function DateField(props) {
@@ -26,6 +26,11 @@ function DateField(props) {
           value={stringToDate(props.value)}
           mode="date"
           display="compact"
+          // the app is navy now, so the compact picker uses its dark look to stay readable
+          // (the fintech pass went back to a light app, so the picker is light again)
+          themeVariant="light"
+          accentColor={COLORS.cta}
+          accessibilityLabel={'Date, ' + props.value}
           onChange={(event, selected) => {
             if (selected) {
               props.onChange(dateToString(selected));
@@ -37,7 +42,12 @@ function DateField(props) {
   }
 
   return (
-    <Pressable style={styles.android_button} onPress={openAndroidPicker}>
+    <Pressable
+      style={styles.android_button}
+      onPress={openAndroidPicker}
+      accessibilityRole="button"
+      accessibilityLabel={'Date, ' + props.value + ', tap to change'}
+    >
       <Text style={styles.android_text}>{props.value}</Text>
     </Pressable>
   );
@@ -51,13 +61,17 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   android_button: {
-    backgroundColor: COLORS.background,
-    borderRadius: 8,
-    padding: SPACING.sm,
+    backgroundColor: COLORS.surface_sunken,
+    borderRadius: RADIUS.sm,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.hairline,
+    minHeight: SIZES.button_medium,
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.md - SPACING.xs,
     marginBottom: SPACING.sm,
   },
   android_text: {
+    ...TYPE.body,
     color: COLORS.text,
-    fontFamily: FONTS.body,
   },
 });

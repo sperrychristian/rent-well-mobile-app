@@ -15,18 +15,24 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
 import { expense_categories, payment_methods } from '../../../data/expenseOptions';
 import { todayString } from '../../../utils/formatDate';
+import { list_styles } from '../../../components/ui/listStyles';
+import CurrencyInput from '../../../components/ui/CurrencyInput';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 const repeat_options = ['None', 'Monthly', 'Yearly'];
 
 // props: visible, onSave, onClose, plus optional expense (edit mode), onDelete, default_property, property_names,
 // initial_receipts (a receipt photo taken first), and allow_extras (shows repeat and split, only the Expenses screen turns it on)
 function AddExpenseModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const expense_id = props.expense ? props.expense.id : null;
   const is_editing = !!props.expense;
 
@@ -164,7 +170,12 @@ function AddExpenseModal(props) {
   const splitting = show_extras && split_on;
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={handleCancel}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={handleCancel}
+    >
       <View style={styles.root}>
         {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
         <KeyboardAvoidingView
@@ -180,11 +191,9 @@ function AddExpenseModal(props) {
               <Text style={styles.heading}>{is_editing ? 'Edit Expense' : 'Add Expense'}</Text>
 
               <Text style={styles.label}>Amount</Text>
-              <TextInput
+              <CurrencyInput
                 style={styles.input}
                 placeholder="e.g. 45.00"
-                placeholderTextColor={COLORS.text}
-                keyboardType="decimal-pad"
                 value={amount}
                 onChangeText={setAmount}
               />
@@ -199,7 +208,10 @@ function AddExpenseModal(props) {
                   <Pressable
                     key={option}
                     onPress={() => setCategory(option)}
+                    hitSlop={{ top: 8, bottom: 8 }}
                     style={[styles.chip, category === option && styles.chip_active]}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: category === option }}
                   >
                     <Text style={styles.chip_text}>{option}</Text>
                   </Pressable>
@@ -215,7 +227,11 @@ function AddExpenseModal(props) {
                     are not sure.
                   </Text>
                 </View>
-                <Switch value={is_capital} onValueChange={setIsCapital} />
+                <Switch
+                  value={is_capital}
+                  onValueChange={setIsCapital}
+                  trackColor={{ false: COLORS.border_strong, true: COLORS.success }}
+                />
               </View>
 
               {show_extras && (
@@ -226,7 +242,11 @@ function AddExpenseModal(props) {
                       Splits the amount equally. Each property gets its own expense.
                     </Text>
                   </View>
-                  <Switch value={split_on} onValueChange={setSplitOn} />
+                  <Switch
+                    value={split_on}
+                    onValueChange={setSplitOn}
+                    trackColor={{ false: COLORS.border_strong, true: COLORS.success }}
+                  />
                 </View>
               )}
 
@@ -247,7 +267,10 @@ function AddExpenseModal(props) {
                       <Pressable
                         key={name}
                         onPress={() => (splitting ? toggleSplitProperty(name) : setProperty(name))}
+                        hitSlop={{ top: 8, bottom: 8 }}
                         style={[styles.chip, selected && styles.chip_active]}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: selected }}
                       >
                         <Text style={styles.chip_text}>{name}</Text>
                       </Pressable>
@@ -259,7 +282,7 @@ function AddExpenseModal(props) {
                 <TextInput
                   style={[styles.input, styles.input_after_chips]}
                   placeholder="Pick one above or type a property"
-                  placeholderTextColor={COLORS.text}
+                  placeholderTextColor={COLORS.text_muted}
                   value={property}
                   onChangeText={setProperty}
                 />
@@ -276,7 +299,10 @@ function AddExpenseModal(props) {
                       <Pressable
                         key={option}
                         onPress={() => setRepeat(option)}
+                        hitSlop={{ top: 8, bottom: 8 }}
                         style={[styles.chip, repeat === option && styles.chip_active]}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: repeat === option }}
                       >
                         <Text style={styles.chip_text}>{option}</Text>
                       </Pressable>
@@ -295,7 +321,7 @@ function AddExpenseModal(props) {
               <TextInput
                 style={styles.input}
                 placeholder="Who was paid?"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={vendor}
                 onChangeText={setVendor}
               />
@@ -306,7 +332,10 @@ function AddExpenseModal(props) {
                   <Pressable
                     key={option}
                     onPress={() => setPaymentMethod(option)}
+                    hitSlop={{ top: 8, bottom: 8 }}
                     style={[styles.chip, payment_method === option && styles.chip_active]}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: payment_method === option }}
                   >
                     <Text style={styles.chip_text}>{option}</Text>
                   </Pressable>
@@ -322,14 +351,16 @@ function AddExpenseModal(props) {
                         For damage or extra costs you charge to a tenant or their deposit.
                       </Text>
                     </View>
-                    <Switch value={billed_to_tenant} onValueChange={setBilledToTenant} />
+                    <Switch
+                      value={billed_to_tenant}
+                      onValueChange={setBilledToTenant}
+                      trackColor={{ false: COLORS.border_strong, true: COLORS.success }}
+                    />
                   </View>
                   {billed_to_tenant && (
-                    <TextInput
+                    <CurrencyInput
                       style={styles.input}
                       placeholder="Amount recovered so far (e.g. 50.00)"
-                      placeholderTextColor={COLORS.text}
-                      keyboardType="decimal-pad"
                       value={recovered_text}
                       onChangeText={setRecoveredText}
                     />
@@ -341,7 +372,7 @@ function AddExpenseModal(props) {
               <TextInput
                 style={[styles.input, styles.notes_input]}
                 placeholder="What was it for?"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 multiline
                 value={notes}
                 onChangeText={setNotes}
@@ -352,15 +383,25 @@ function AddExpenseModal(props) {
                 <View style={styles.wrap_row}>
                   {receipts.map((uri, index) => (
                     <View key={uri + index} style={styles.receipt_wrap}>
-                      <Pressable onPress={() => setFullReceipt(uri)}>
+                      <Pressable
+                        onPress={() => setFullReceipt(uri)}
+                        accessibilityRole="imagebutton"
+                        accessibilityLabel="Open photo"
+                      >
                         <Image source={{ uri: uri }} style={styles.receipt_thumb} />
                       </Pressable>
                       <Pressable
                         style={styles.remove_button}
                         onPress={() => removeReceipt(index)}
+                        hitSlop={12}
+                        accessibilityRole="button"
                         accessibilityLabel="Remove receipt"
                       >
-                        <Ionicons name="close-circle" size={22} color={COLORS.danger} />
+                        <Ionicons
+                          name="close-circle-outline"
+                          size={22}
+                          color={COLORS.danger_text}
+                        />
                       </Pressable>
                     </View>
                   ))}
@@ -368,12 +409,14 @@ function AddExpenseModal(props) {
               )}
               <View style={styles.button_row}>
                 <PrimaryButton
+                  variant="secondary"
                   title="Camera"
                   icon="camera-outline"
                   onPress={takePhoto}
                   style={styles.small_button}
                 />
                 <PrimaryButton
+                  variant="secondary"
                   title="Library"
                   icon="image-outline"
                   onPress={choosePhotos}
@@ -382,13 +425,24 @@ function AddExpenseModal(props) {
               </View>
 
               <View style={styles.button_row}>
-                <PrimaryButton title="Cancel" onPress={handleCancel} style={styles.cancel_button} />
-                <PrimaryButton title="Save" onPress={handleSave} style={styles.save_button} />
+                <PrimaryButton
+                  variant="secondary"
+                  title="Cancel"
+                  onPress={handleCancel}
+                  style={styles.cancel_button}
+                />
+                <PrimaryButton
+                  variant="primary"
+                  title="Save"
+                  onPress={handleSave}
+                  style={styles.save_button}
+                />
               </View>
               {/* delete only shows when editing, and the screen offers an undo right after */}
               {is_editing && props.onDelete && (
                 <View style={styles.button_row}>
                   <PrimaryButton
+                    variant="destructive"
                     title="Delete Expense"
                     icon="trash-outline"
                     onPress={props.onDelete}
@@ -401,7 +455,12 @@ function AddExpenseModal(props) {
         </KeyboardAvoidingView>
         {/* full size receipt sits on top of the form, tapping anywhere closes it */}
         {full_receipt && (
-          <Pressable style={styles.full_overlay} onPress={() => setFullReceipt(null)}>
+          <Pressable
+            style={styles.full_overlay}
+            onPress={() => setFullReceipt(null)}
+            accessibilityRole="button"
+            accessibilityLabel="Close photo"
+          >
             <Image source={{ uri: full_receipt }} style={styles.full_photo} resizeMode="contain" />
           </Pressable>
         )}
@@ -427,39 +486,30 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.md,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   label_gap: {
     marginTop: SPACING.sm,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginRight: SPACING.sm,
   },
   helper_block: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginBottom: SPACING.sm,
   },
   input: {
-    backgroundColor: COLORS.background,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
+    ...list_styles.field_input,
     padding: SPACING.sm,
     marginBottom: SPACING.sm,
   },
@@ -467,7 +517,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
   notes_input: {
-    minHeight: 70,
+    minHeight: SIZES.touch + SPACING.lg + SPACING.xs,
     textAlignVertical: 'top',
   },
   chip_row: {
@@ -481,18 +531,15 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   chip: {
-    paddingVertical: 6,
+    ...list_styles.chip,
+    paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.background,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   switch_row: {
     flexDirection: 'row',
@@ -501,20 +548,24 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   switch_text: {
+    ...TYPE.body_small,
+    color: COLORS.text,
     flex: 1,
   },
   receipt_wrap: {
     position: 'relative',
   },
   receipt_thumb: {
+    borderRadius: RADIUS.md,
     width: 72,
     height: 72,
-    borderRadius: 8,
   },
   remove_button: {
+    backgroundColor: COLORS.surface_raised,
+    borderRadius: RADIUS.pill,
     position: 'absolute',
-    top: -8,
-    right: -8,
+    top: -SPACING.sm,
+    right: -SPACING.sm,
   },
   button_row: {
     flexDirection: 'row',
@@ -528,17 +579,14 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
   delete_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.danger,
   },
   full_overlay: {
     ...StyleSheet.absoluteFillObject,

@@ -11,15 +11,20 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { checklist_types } from '../data/checklistTemplates';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // props: visible, property_names, move_ins (signed move-in checklists), onCreate, onClose
 // onCreate gets property, type, tenant, and move_in_id (null for a blank template)
 // the screen gives it a new key each time it opens, so it starts as a blank form without an effect
 function NewChecklistModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const [type, setType] = useState('Move-In');
   const [property, setProperty] = useState('');
   const [tenant, setTenant] = useState('');
@@ -61,7 +66,12 @@ function NewChecklistModal(props) {
   const move_ins = props.move_ins || [];
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={props.onClose}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={props.onClose}
+    >
       <View style={styles.root}>
         {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
         <KeyboardAvoidingView
@@ -83,6 +93,8 @@ function NewChecklistModal(props) {
                     onPress={() => chooseType(option)}
                     hitSlop={{ top: 8, bottom: 8 }}
                     style={[styles.chip, type === option && styles.chip_active]}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: type === option }}
                   >
                     <Text style={styles.chip_text}>{option}</Text>
                   </Pressable>
@@ -98,6 +110,8 @@ function NewChecklistModal(props) {
                       onPress={() => chooseMoveIn(null)}
                       hitSlop={{ top: 8, bottom: 8 }}
                       style={[styles.chip, move_in_id === null && styles.chip_active]}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: move_in_id === null }}
                     >
                       <Text style={styles.chip_text}>Blank template</Text>
                     </Pressable>
@@ -107,6 +121,8 @@ function NewChecklistModal(props) {
                         onPress={() => chooseMoveIn(move_in)}
                         hitSlop={{ top: 8, bottom: 8 }}
                         style={[styles.chip, move_in_id === move_in.id && styles.chip_active]}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: move_in_id === move_in.id }}
                       >
                         <Text style={styles.chip_text}>
                           {'Move-in, ' +
@@ -140,6 +156,8 @@ function NewChecklistModal(props) {
                       onPress={() => setProperty(option)}
                       hitSlop={{ top: 8, bottom: 8 }}
                       style={[styles.chip, property === option && styles.chip_active]}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: property === option }}
                     >
                       <Text style={styles.chip_text}>{option}</Text>
                     </Pressable>
@@ -149,7 +167,7 @@ function NewChecklistModal(props) {
               <TextInput
                 style={styles.input}
                 placeholder="Pick one above or type an address"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={property}
                 onChangeText={setProperty}
               />
@@ -158,18 +176,24 @@ function NewChecklistModal(props) {
               <TextInput
                 style={styles.input}
                 placeholder="Tenant name"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={tenant}
                 onChangeText={setTenant}
               />
 
               <View style={styles.button_row}>
                 <PrimaryButton
+                  variant="secondary"
                   title="Cancel"
                   onPress={props.onClose}
                   style={styles.cancel_button}
                 />
-                <PrimaryButton title="Create" onPress={handleCreate} style={styles.save_button} />
+                <PrimaryButton
+                  variant="primary"
+                  title="Create"
+                  onPress={handleCreate}
+                  style={styles.save_button}
+                />
               </View>
             </Card>
           </ScrollView>
@@ -196,29 +220,22 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.md,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   helper_block: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginBottom: SPACING.sm,
   },
   input: {
-    backgroundColor: COLORS.background,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
+    ...list_styles.field_input,
     padding: SPACING.sm,
     marginBottom: SPACING.sm,
   },
@@ -237,18 +254,15 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   chip: {
-    paddingVertical: 6,
+    ...list_styles.chip,
+    paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.background,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   button_row: {
     flexDirection: 'row',
@@ -258,11 +272,9 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
 });

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import ProgressBar from '../components/ProgressBar';
@@ -18,14 +17,9 @@ import {
   checklist_disclaimer,
 } from '../utils/checklistHelpers';
 import { shareChecklistText } from '../utils/exportChecklist';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
-
-// same colors as the item form so a condition looks the same everywhere
-const condition_colors = {
-  Good: COLORS.success,
-  Fair: COLORS.warning,
-  Poor: COLORS.danger,
-};
+import { COLORS, SPACING, TYPE, BORDER, SIZES, OPACITY } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import StatusLabel from '../../../components/ui/StatusLabel';
 
 function ChecklistDetailScreen(props) {
   // need the insets so the title clears the notch and status bar
@@ -43,7 +37,7 @@ function ChecklistDetailScreen(props) {
     deleteChecklist,
   } = useWorkOrders();
 
-  const checklist_id = props.route.params.checklist_id;
+  const checklist_id = props.route.params.checklistId;
   const checklist = checklists.find((current) => current.id === checklist_id);
 
   // the ids stay set while the item modal slides away, item_open is what shows or hides it
@@ -140,7 +134,7 @@ function ChecklistDetailScreen(props) {
       tenant: checklist.tenant,
       move_in_id: checklist.id,
     });
-    props.navigation.push('ChecklistDetail', { checklist_id: new_id });
+    props.navigation.push('ChecklistDetail', { checklistId: new_id });
   }
 
   function confirmDelete() {
@@ -162,8 +156,8 @@ function ChecklistDetailScreen(props) {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
-      <ScreenTitle>{checklist.type}</ScreenTitle>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
+      <Text style={styles.name_line}>{checklist.type}</Text>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}>
         <Card>
           <Text style={styles.info_name}>{checklist.property}</Text>
@@ -181,15 +175,15 @@ function ChecklistDetailScreen(props) {
             </Text>
           </View>
           <View style={styles.tag_row}>
-            <View style={[styles.tag, locked ? styles.complete_tag : styles.progress_tag]}>
-              <Text style={styles.tag_text}>{locked ? 'Complete' : 'In progress'}</Text>
-            </View>
+            <StatusLabel
+              label={locked ? 'Complete' : 'In progress'}
+              tone={locked ? 'Signed' : 'In progress'}
+            />
             {worse > 0 && (
-              <View style={[styles.tag, styles.worse_tag]}>
-                <Text style={styles.tag_text}>
-                  {worse + (worse === 1 ? ' item' : ' items') + ' worse since move-in'}
-                </Text>
-              </View>
+              <StatusLabel
+                label={worse + (worse === 1 ? ' item' : ' items') + ' worse since move-in'}
+                tone="Late"
+              />
             )}
           </View>
         </Card>
@@ -198,7 +192,7 @@ function ChecklistDetailScreen(props) {
         {locked && (
           <Card>
             <View style={styles.signed_row}>
-              <Ionicons name="lock-closed" size={18} color={COLORS.text} />
+              <Ionicons name="lock-closed-outline" size={18} color={COLORS.success_text} />
               <Text style={styles.signed_text}>
                 Signed by {checklist.signed_by} on {checklist.signed_on}
               </Text>
@@ -219,11 +213,12 @@ function ChecklistDetailScreen(props) {
                 {!locked && (
                   <Pressable
                     onPress={() => confirmDeleteRoom(room)}
-                    hitSlop={8}
+                    hitSlop={4}
+                    accessibilityRole="button"
                     accessibilityLabel={'Delete ' + room.name}
                     style={styles.room_delete}
                   >
-                    <Ionicons name="trash-outline" size={18} color={COLORS.danger} />
+                    <Ionicons name="trash-outline" size={18} color={COLORS.danger_text} />
                   </Pressable>
                 )}
               </View>
@@ -232,8 +227,11 @@ function ChecklistDetailScreen(props) {
               {room.items.map((item) => (
                 <Pressable
                   key={item.id}
-                  style={styles.item_row}
+                  style={({ pressed }) => [styles.item_row, pressed && styles.pressed]}
                   onPress={() => openItem(room.id, item.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={item.name + (item.condition ? ', ' + item.condition : '')}
+                  accessibilityHint="Opens the item's condition, note, and photos"
                 >
                   <Pressable
                     onPress={() => toggleDone(room.id, item)}
@@ -244,9 +242,9 @@ function ChecklistDetailScreen(props) {
                     accessibilityLabel={item.name}
                   >
                     <Ionicons
-                      name={item.done ? 'checkbox' : 'square-outline'}
+                      name={item.done ? 'checkbox-outline' : 'square-outline'}
                       size={24}
-                      color={item.done ? COLORS.success : COLORS.text}
+                      color={item.done ? COLORS.success_text : COLORS.text_muted}
                     />
                   </Pressable>
                   <View style={styles.item_text}>
@@ -258,34 +256,24 @@ function ChecklistDetailScreen(props) {
                     ) : null}
                     {(item.condition || item.move_in_condition || item.photos.length > 0) && (
                       <View style={styles.tag_row}>
-                        {item.condition && (
-                          <View
-                            style={[
-                              styles.tag,
-                              { backgroundColor: condition_colors[item.condition] },
-                            ]}
-                          >
-                            <Text style={styles.tag_text}>{item.condition}</Text>
-                          </View>
-                        )}
+                        {/* the pill uses the same condition colors as the item form */}
+                        {item.condition && <StatusLabel label={item.condition} />}
                         {item.move_in_condition && (
                           <Text style={styles.item_note}>Move-in: {item.move_in_condition}</Text>
                         )}
                         {itemGotWorse(item) && (
-                          <View style={[styles.tag, styles.worse_tag]}>
-                            <Text style={styles.tag_text}>Changed since move-in</Text>
-                          </View>
+                          <StatusLabel label="Changed since move-in" tone="Late" />
                         )}
                         {item.photos.length > 0 && (
                           <View style={styles.photo_count}>
-                            <Ionicons name="camera-outline" size={14} color={COLORS.text} />
+                            <Ionicons name="camera-outline" size={14} color={COLORS.text_muted} />
                             <Text style={styles.item_note}>{item.photos.length}</Text>
                           </View>
                         )}
                       </View>
                     )}
                   </View>
-                  <Ionicons name="chevron-forward" size={18} color={COLORS.text} />
+                  <Ionicons name="chevron-forward-outline" size={18} color={COLORS.text_muted} />
                 </Pressable>
               ))}
 
@@ -295,8 +283,10 @@ function ChecklistDetailScreen(props) {
                   onPress={() => openName({ kind: 'item', room_id: room.id })}
                   hitSlop={{ top: 8, bottom: 8 }}
                   style={styles.add_item}
+                  accessibilityRole="button"
+                  accessibilityLabel={'Add an item to ' + room.name}
                 >
-                  <Ionicons name="add" size={18} color={COLORS.action} />
+                  <Ionicons name="add-outline" size={18} color={COLORS.info_text} />
                   <Text style={styles.add_item_text}>Add item</Text>
                 </Pressable>
               )}
@@ -309,6 +299,7 @@ function ChecklistDetailScreen(props) {
             <PrimaryButton
               title="Add Room"
               icon="add-circle-outline"
+              variant="secondary"
               onPress={() => openName({ kind: 'room' })}
               style={styles.action_button}
             />
@@ -317,7 +308,7 @@ function ChecklistDetailScreen(props) {
             <PrimaryButton
               title="Sign Off"
               icon="create-outline"
-              text_color={COLORS.text_light}
+              variant="primary"
               onPress={openSign}
               style={[styles.action_button, styles.sign_button]}
             />
@@ -326,7 +317,7 @@ function ChecklistDetailScreen(props) {
             <PrimaryButton
               title="Export Summary"
               icon="share-outline"
-              text_color={COLORS.text_light}
+              variant="secondary"
               onPress={handleExport}
               style={[styles.action_button, styles.export_button]}
             />
@@ -335,7 +326,7 @@ function ChecklistDetailScreen(props) {
             <PrimaryButton
               title="Start Move-Out"
               icon="log-out-outline"
-              text_color={COLORS.text_light}
+              variant="secondary"
               onPress={startMoveOut}
               style={[styles.action_button, styles.move_out_button]}
             />
@@ -343,7 +334,7 @@ function ChecklistDetailScreen(props) {
           <PrimaryButton
             title="Delete Checklist"
             icon="trash-outline"
-            text_color={COLORS.text_light}
+            variant="destructive"
             onPress={confirmDelete}
             style={[styles.action_button, styles.delete_button]}
           />
@@ -385,22 +376,29 @@ function ChecklistDetailScreen(props) {
 export default ChecklistDetailScreen;
 
 const styles = StyleSheet.create({
+  // the header has the screen's title now, so the name gets its own plain line instead of the big card
+  name_line: {
+    ...TYPE.title,
+    color: COLORS.title,
+    textAlign: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    padding: SPACING.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
+    // the fintech pass: capped and centered on a tablet so lines stay a readable length
+    width: '100%',
+    maxWidth: SIZES.content_max_width + 160,
+    alignSelf: 'center',
   },
   info_name: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
-    marginBottom: 2,
+    marginBottom: SPACING.xxs,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...list_styles.detail,
   },
   progress_row: {
     flexDirection: 'row',
@@ -412,35 +410,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   progress_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 12,
+    ...TYPE.caption,
+    fontFamily: TYPE.label.fontFamily,
+    color: COLORS.text_muted,
   },
   tag_row: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
-    gap: 6,
-    marginTop: 6,
-  },
-  tag: {
-    paddingVertical: 3,
-    paddingHorizontal: SPACING.sm,
-    borderRadius: 10,
-  },
-  complete_tag: {
-    backgroundColor: COLORS.success,
-  },
-  progress_tag: {
-    backgroundColor: COLORS.action,
-  },
-  worse_tag: {
-    backgroundColor: COLORS.danger,
-  },
-  tag_text: {
-    color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
-    fontSize: 11,
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
   },
   signed_row: {
     flexDirection: 'row',
@@ -448,23 +427,21 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   signed_text: {
-    flex: 1,
+    ...TYPE.body_small,
+    fontFamily: TYPE.label.fontFamily,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 14,
+    flex: 1,
   },
   disclaimer: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginTop: SPACING.sm,
   },
+  // the Hearth pass: each room is a ruled section on the paper, no box
   room: {
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
+    paddingVertical: SPACING.md,
+    borderTopWidth: BORDER.hairline,
+    borderTopColor: COLORS.hairline,
   },
   room_header: {
     flexDirection: 'row',
@@ -473,59 +450,59 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   room_name: {
-    flex: 1,
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
+    flex: 1,
   },
   room_delete: {
     marginLeft: SPACING.xs,
+    width: SIZES.touch,
+    height: SIZES.touch,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   item_row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
+    gap: SPACING.sm + SPACING.xs,
+    minHeight: SIZES.touch + SPACING.sm,
     paddingVertical: SPACING.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: COLORS.primary,
+    borderBottomWidth: BORDER.hairline,
+    borderBottomColor: COLORS.border,
   },
   item_text: {
     flex: 1,
   },
   item_name: {
+    ...TYPE.subheading,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 14,
   },
   item_note: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.8,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
   },
   photo_count: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: SPACING.xxs,
   },
   empty_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 13,
-    opacity: 0.7,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
     marginTop: SPACING.sm,
   },
   add_item: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    marginTop: SPACING.sm,
+    gap: SPACING.xs,
+    minHeight: SIZES.touch,
+    marginTop: SPACING.xs,
     alignSelf: 'flex-start',
   },
   add_item_text: {
-    color: COLORS.action,
-    fontFamily: FONTS.body_bold,
-    fontSize: 14,
+    ...TYPE.label,
+    fontSize: TYPE.body_small.fontSize,
+    color: COLORS.info_text,
   },
   actions: {
     gap: SPACING.sm,
@@ -535,15 +512,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
   },
   sign_button: {
-    backgroundColor: COLORS.success,
+    marginHorizontal: 0,
   },
   export_button: {
-    backgroundColor: COLORS.action,
+    marginHorizontal: 0,
   },
   move_out_button: {
-    backgroundColor: COLORS.accent,
+    marginHorizontal: 0,
   },
   delete_button: {
-    backgroundColor: COLORS.danger,
+    marginHorizontal: 0,
+  },
+  pressed: {
+    opacity: OPACITY.pressed,
   },
 });

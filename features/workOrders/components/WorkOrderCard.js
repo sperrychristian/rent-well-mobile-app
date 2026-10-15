@@ -1,18 +1,21 @@
 import { Text, View, Image, Pressable, StyleSheet } from 'react-native';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import RemoteImage from '../../../components/RemoteImage';
+import StatusLabel from '../../../components/ui/StatusLabel';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../../theme';
 import { formatDate } from '../../../utils/formatDate';
+import { formatCurrency } from '../../../utils/formatCurrency';
 
 // I keep one color per status so the badge is readable at a glance
-const status_colors = {
+export const status_colors = {
   'Open': COLORS.danger,
   'In Progress': COLORS.warning,
   'Resolved': COLORS.success,
 };
 
 // one color per priority so emergencies stand out in the list
-const priority_colors = {
+export const priority_colors = {
   'Emergency': COLORS.priority_emergency,
   'Normal': COLORS.secondary,
   'Low': COLORS.priority_low,
@@ -29,18 +32,22 @@ function WorkOrderCard(props) {
   const over_budget = has_estimate && expense_total > order.estimate;
 
   return (
-    <Card>
+    <Card style={styles.card}>
       {/* tapping the top part of the card opens the detail screen */}
-      <Pressable onPress={props.onOpenDetail}>
+      <Pressable
+        onPress={props.onOpenDetail}
+        accessibilityRole="button"
+        accessibilityLabel={order.title + ', ' + order.status + ', ' + priority + ' priority'}
+        accessibilityHint="Opens the work order details"
+      >
         <View style={styles.top_row}>
           <Text style={styles.title}>{order.title}</Text>
-          <View style={[styles.badge, { backgroundColor: status_colors[order.status] }]}>
-            <Text style={styles.badge_text}>{order.status}</Text>
-          </View>
+          <StatusLabel label={order.status} />
         </View>
         <Text style={styles.detail}>{order.property}</Text>
+        {/* an owner-made order can have no tenant, so the name can be empty */}
         <Text style={styles.detail}>
-          {order.tenant} · {formatDate(order.created_at)}
+          {order.tenant || 'No tenant'} · {formatDate(order.created_at)}
         </Text>
         {order.description ? (
           <Text style={styles.detail} numberOfLines={2}>
@@ -48,9 +55,7 @@ function WorkOrderCard(props) {
           </Text>
         ) : null}
         <View style={styles.tag_row}>
-          <View style={[styles.badge, { backgroundColor: priority_colors[priority] }]}>
-            <Text style={styles.badge_text}>{priority}</Text>
-          </View>
+          <StatusLabel label={priority} />
         </View>
       </Pressable>
       {/* only show the landlord note, contractor, and estimate when they've been filled in */}
@@ -62,16 +67,31 @@ function WorkOrderCard(props) {
       {order.contractor ? <Text style={styles.detail}>Contractor: {order.contractor}</Text> : null}
       {has_estimate && (
         <Text style={[styles.detail, over_budget && styles.over_budget]}>
-          Estimate: ${order.estimate.toFixed(2)} · Actual: ${expense_total.toFixed(2)}
+          Estimate: {formatCurrency(order.estimate)} · Actual: {formatCurrency(expense_total)}
         </Text>
       )}
       {/* I only show the issue photo if the work order has one */}
       {order.photo && <Image source={order.photo} style={styles.issue_photo} />}
+      {/* server orders have a list of photos instead, the card shows the first one */}
+      {order.photos && order.photos.length > 0 && (
+        <View>
+          <RemoteImage attachment_key={order.photos[0]} style={styles.issue_photo} />
+          {order.photos.length > 1 && (
+            <Text style={styles.detail}>+{order.photos.length - 1} more in Details</Text>
+          )}
+        </View>
+      )}
       {/* I only show the expense summary once at least one expense exists, tapping it opens the details */}
       {expenses.length > 0 && (
-        <Pressable style={styles.expense_section} onPress={props.onViewExpenses}>
+        <Pressable
+          style={styles.expense_section}
+          onPress={props.onViewExpenses}
+          hitSlop={{ top: 8, bottom: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel={'Expenses, ' + expenses.length + ', tap to view'}
+        >
           <Text style={styles.detail}>
-            Expenses: ${expense_total.toFixed(2)} ({expenses.length}) · Tap to view
+            Expenses: {formatCurrency(expense_total)} ({expenses.length}) · Tap to view
           </Text>
           <View style={styles.thumb_row}>
             {expenses
@@ -87,7 +107,9 @@ function WorkOrderCard(props) {
         <PrimaryButton
           title="Add Expense"
           icon="cash-outline"
-          style={styles.expense_button}
+          variant="tertiary"
+          size="small"
+          style={styles.row_button}
           onPress={props.onAddExpense}
         />
         {/* open orders get a start button, in progress orders get the resolve button, resolved get neither */}
@@ -95,7 +117,9 @@ function WorkOrderCard(props) {
           <PrimaryButton
             title="Start Work"
             icon="play-circle-outline"
-            style={styles.start_button}
+            variant="primary"
+            size="small"
+            style={styles.row_button}
             onPress={props.onStart}
           />
         )}
@@ -103,7 +127,9 @@ function WorkOrderCard(props) {
           <PrimaryButton
             title="Mark Resolved"
             icon="checkmark-circle-outline"
-            style={styles.resolve_button}
+            text_color={COLORS.text_light}
+            size="small"
+            style={[styles.row_button, styles.resolve_button]}
             onPress={props.onResolve}
           />
         )}
@@ -112,13 +138,17 @@ function WorkOrderCard(props) {
         <PrimaryButton
           title="Message"
           icon="chatbubble-ellipses-outline"
-          style={styles.message_button}
+          variant="tertiary"
+          size="small"
+          style={styles.row_button}
           onPress={props.onMessage}
         />
         <PrimaryButton
           title="Details"
           icon="document-text-outline"
-          style={styles.details_button}
+          variant="tertiary"
+          size="small"
+          style={styles.row_button}
           onPress={props.onOpenDetail}
         />
       </View>
@@ -129,54 +159,47 @@ function WorkOrderCard(props) {
 export default WorkOrderCard;
 
 const styles = StyleSheet.create({
+  // the Hearth pass: each order is a ruled section on the paper with a hairline on top
+  card: {
+    marginTop: 0,
+    paddingVertical: SPACING.md,
+    borderTopWidth: BORDER.hairline,
+    borderTopColor: COLORS.hairline,
+  },
   top_row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
     marginBottom: SPACING.sm,
   },
   title: {
+    ...TYPE.subheading,
     flex: 1,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: FONT_SIZES.body,
-    marginRight: SPACING.sm,
-  },
-  badge: {
-    paddingVertical: 4,
-    paddingHorizontal: SPACING.sm,
-    borderRadius: 12,
-  },
-  badge_text: {
-    color: COLORS.text_light,
-    fontFamily: FONTS.body_bold,
-    fontSize: 12,
   },
   tag_row: {
     flexDirection: 'row',
     marginTop: SPACING.sm,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
   },
   note: {
+    ...TYPE.body_small,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
     fontStyle: 'italic',
     marginTop: SPACING.sm,
   },
   over_budget: {
-    color: COLORS.danger,
+    color: COLORS.danger_text,
     opacity: 1,
   },
   issue_photo: {
     width: '100%',
     height: 160,
-    borderRadius: 8,
+    borderRadius: RADIUS.md,
     marginTop: SPACING.sm,
   },
   expense_section: {
@@ -191,36 +214,20 @@ const styles = StyleSheet.create({
   thumb: {
     width: 48,
     height: 48,
-    borderRadius: 6,
+    borderRadius: RADIUS.sm,
   },
   button_row: {
     flexDirection: 'row',
     gap: SPACING.sm,
-    marginTop: SPACING.md,
+    marginTop: SPACING.sm,
   },
-  expense_button: {
+  // the next status step is the bright button, the rest are outlined so the card doesn't turn into a rainbow
+  row_button: {
     flex: 1,
-    backgroundColor: COLORS.action,
-    marginHorizontal: 0,
-  },
-  start_button: {
-    flex: 1,
-    backgroundColor: COLORS.warning,
     marginHorizontal: 0,
   },
   resolve_button: {
-    flex: 1,
-    backgroundColor: COLORS.success,
-    marginHorizontal: 0,
-  },
-  message_button: {
-    flex: 1,
-    backgroundColor: COLORS.accent,
-    marginHorizontal: 0,
-  },
-  details_button: {
-    flex: 1,
-    backgroundColor: COLORS.secondary,
-    marginHorizontal: 0,
+    backgroundColor: COLORS.cta,
+    borderColor: COLORS.cta,
   },
 });

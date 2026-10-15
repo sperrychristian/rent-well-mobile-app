@@ -13,20 +13,25 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Card from '../../../components/Card';
+// the pop-up forms share the sheet look from components/ui, the JSX still says Card
+import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
 import { document_categories, dated_categories } from '../../../data/documentOptions';
 import { todayString } from '../../../utils/formatDate';
 import { addPeriod } from '../../../utils/recurring';
 import { pickDocument } from '../utils/documentFiles';
 import { nameFromFile, iconFor, formatSize } from '../utils/documentHelpers';
+import { list_styles } from '../../../components/ui/listStyles';
+import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 
 // props: visible, onSave, onClose, plus optional document (edit mode), initial_file (a scan taken first),
 // default_name, default_category, default_property, and property_names
 // onSave gets the document fields and the newly picked file, which is null when the file didn't change
 function DocumentFormModal(props) {
+  // with Reduce Motion on the sheet just appears, no slide or fade
+  const reduce_motion = useReduceMotion();
   const document_id = props.document ? props.document.id : null;
   const is_editing = !!props.document;
 
@@ -131,7 +136,12 @@ function DocumentFormModal(props) {
   const is_sample = is_editing && props.document.sample && !new_file;
 
   return (
-    <Modal visible={props.visible} transparent animationType="slide" onRequestClose={props.onClose}>
+    <Modal
+      visible={props.visible}
+      transparent
+      animationType={reduce_motion ? 'none' : 'slide'}
+      onRequestClose={props.onClose}
+    >
       <View style={styles.root}>
         {/* iOS needs padding to lift the form, Android already resizes the window so it uses height */}
         <KeyboardAvoidingView
@@ -164,6 +174,7 @@ function DocumentFormModal(props) {
                 </Text>
               )}
               <PrimaryButton
+                variant="secondary"
                 title={shown_file ? 'Replace File' : 'Choose File'}
                 icon="folder-open-outline"
                 onPress={chooseFile}
@@ -175,7 +186,7 @@ function DocumentFormModal(props) {
               <TextInput
                 style={styles.input}
                 placeholder="e.g. Lease, Unit 2"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={name}
                 onChangeText={setName}
               />
@@ -186,7 +197,10 @@ function DocumentFormModal(props) {
                   <Pressable
                     key={option}
                     onPress={() => chooseCategory(option)}
+                    hitSlop={{ top: 8, bottom: 8 }}
                     style={[styles.chip, category === option && styles.chip_active]}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: category === option }}
                   >
                     <Text style={styles.chip_text}>{option}</Text>
                   </Pressable>
@@ -205,7 +219,10 @@ function DocumentFormModal(props) {
                     <Pressable
                       key={option}
                       onPress={() => setProperty(option)}
+                      hitSlop={{ top: 8, bottom: 8 }}
                       style={[styles.chip, property === option && styles.chip_active]}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: property === option }}
                     >
                       <Text style={styles.chip_text}>{option}</Text>
                     </Pressable>
@@ -215,7 +232,7 @@ function DocumentFormModal(props) {
               <TextInput
                 style={styles.input}
                 placeholder="Pick one above or type an address"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={property}
                 onChangeText={setProperty}
               />
@@ -224,7 +241,7 @@ function DocumentFormModal(props) {
               <TextInput
                 style={styles.input}
                 placeholder="Tenant name"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 value={tenant}
                 onChangeText={setTenant}
               />
@@ -234,7 +251,11 @@ function DocumentFormModal(props) {
                 <View>
                   <View style={styles.switch_row}>
                     <Text style={[styles.label, styles.switch_text]}>Has an end date</Text>
-                    <Switch value={has_end_date} onValueChange={setHasEndDate} />
+                    <Switch
+                      value={has_end_date}
+                      onValueChange={setHasEndDate}
+                      trackColor={{ false: COLORS.border_strong, true: COLORS.success }}
+                    />
                   </View>
                   {has_end_date && <DateField value={expires_on} onChange={setExpiresOn} />}
                 </View>
@@ -244,7 +265,7 @@ function DocumentFormModal(props) {
               <TextInput
                 style={[styles.input, styles.notes_input]}
                 placeholder="Anything worth remembering"
-                placeholderTextColor={COLORS.text}
+                placeholderTextColor={COLORS.text_muted}
                 multiline
                 value={notes}
                 onChangeText={setNotes}
@@ -253,16 +274,26 @@ function DocumentFormModal(props) {
               {/* just a flag for now, the tenant side will read it later */}
               <View style={styles.switch_row}>
                 <Text style={[styles.label, styles.switch_text]}>Share with tenant</Text>
-                <Switch value={shared_with_tenant} onValueChange={setSharedWithTenant} />
+                <Switch
+                  value={shared_with_tenant}
+                  onValueChange={setSharedWithTenant}
+                  trackColor={{ false: COLORS.border_strong, true: COLORS.success }}
+                />
               </View>
 
               <View style={styles.button_row}>
                 <PrimaryButton
+                  variant="secondary"
                   title="Cancel"
                   onPress={props.onClose}
                   style={styles.cancel_button}
                 />
-                <PrimaryButton title="Save" onPress={handleSave} style={styles.save_button} />
+                <PrimaryButton
+                  variant="primary"
+                  title="Save"
+                  onPress={handleSave}
+                  style={styles.save_button}
+                />
               </View>
             </Card>
           </ScrollView>
@@ -289,36 +320,32 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
   },
   heading: {
+    ...TYPE.heading,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
     marginBottom: SPACING.md,
   },
   label: {
+    ...TYPE.label,
     color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
   },
   helper_block: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginBottom: SPACING.sm,
   },
   file_row: {
+    backgroundColor: COLORS.surface_sunken,
+    borderRadius: RADIUS.md,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    backgroundColor: COLORS.background,
-    borderRadius: 8,
     padding: SPACING.sm,
     marginBottom: SPACING.sm,
   },
@@ -328,22 +355,19 @@ const styles = StyleSheet.create({
   file_name: {
     color: COLORS.text,
     fontFamily: FONTS.body_bold,
-    fontSize: 14,
+    fontSize: TYPE.body_small.fontSize,
   },
   file_button: {
     marginHorizontal: 0,
-    marginBottom: 6,
+    marginBottom: SPACING.sm,
   },
   input: {
-    backgroundColor: COLORS.background,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
+    ...list_styles.field_input,
     padding: SPACING.sm,
     marginBottom: SPACING.sm,
   },
   notes_input: {
-    minHeight: 70,
+    minHeight: SIZES.touch + SPACING.lg + SPACING.xs,
     textAlignVertical: 'top',
   },
   // without this the horizontal list grows to fill the spare height and the chips stretch with it
@@ -361,18 +385,15 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   chip: {
-    paddingVertical: 6,
+    ...list_styles.chip,
+    paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.background,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   switch_row: {
     flexDirection: 'row',
@@ -381,6 +402,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   switch_text: {
+    ...TYPE.body_small,
+    color: COLORS.text,
     flex: 1,
     marginBottom: 0,
   },
@@ -392,11 +415,9 @@ const styles = StyleSheet.create({
   cancel_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.secondary,
   },
   save_button: {
     flex: 1,
     marginHorizontal: 0,
-    backgroundColor: COLORS.success,
   },
 });

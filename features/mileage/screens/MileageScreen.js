@@ -1,23 +1,18 @@
 import { useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  FlatList,
-  Pressable,
-  ScrollView,
-  TextInput,
-  Alert,
-} from 'react-native';
+import { StyleSheet, View, Text, FlatList, Pressable, ScrollView, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TripModal from '../components/TripModal';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { formatDate } from '../../../utils/formatDate';
-import { sumMiles, formatMoney } from '../../expenses/utils/expenseStats';
-import { COLORS, SPACING, FONT_SIZES, FONTS } from '../../../theme';
+import { sumMiles } from '../../expenses/utils/expenseStats';
+import { COLORS, SPACING, TYPE, OPACITY, NUMBERS, SIZES } from '../../../theme';
+import { list_styles } from '../../../components/ui/listStyles';
+import EmptyState from '../../../components/ui/EmptyState';
+import { formatCurrency } from '../../../utils/formatCurrency';
+import IconCircle from '../../../components/ui/IconCircle';
+import CurrencyInput from '../../../components/ui/CurrencyInput';
 
 function MileageScreen(props) {
   // need the insets so the title clears the notch and status bar
@@ -99,6 +94,7 @@ function MileageScreen(props) {
       <PrimaryButton
         title="Add Trip"
         icon="add-circle-outline"
+        variant="primary"
         style={styles.add_button}
         onPress={openNewForm}
       />
@@ -114,6 +110,9 @@ function MileageScreen(props) {
             key={option}
             onPress={() => setYear(option)}
             style={[styles.chip, year === option && styles.chip_active]}
+            hitSlop={{ top: 8, bottom: 8 }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: year === option }}
           >
             <Text style={styles.chip_text}>{option}</Text>
           </Pressable>
@@ -122,7 +121,7 @@ function MileageScreen(props) {
 
       <Card>
         <Text style={styles.summary_label}>Mileage deduction in {year}</Text>
-        <Text style={styles.summary_total}>{formatMoney(total_miles * mileage_rate)}</Text>
+        <Text style={styles.summary_total}>{formatCurrency(total_miles * mileage_rate)}</Text>
         <Text style={styles.detail}>
           {total_miles.toFixed(1)} miles over {year_trips.length} trips
         </Text>
@@ -135,39 +134,60 @@ function MileageScreen(props) {
           site. The rate applies to every year in this log.
         </Text>
         <View style={styles.rate_row}>
-          <TextInput
+          <CurrencyInput
             style={styles.rate_input}
+            accessibilityLabel="Rate per mile"
             placeholder="0.70"
-            placeholderTextColor={COLORS.text}
-            keyboardType="decimal-pad"
             value={rate_text}
             onChangeText={setRateText}
           />
-          <PrimaryButton title="Save Rate" onPress={saveRate} style={styles.rate_button} />
+          <PrimaryButton
+            title="Save Rate"
+            variant="secondary"
+            onPress={saveRate}
+            style={styles.rate_button}
+          />
         </View>
       </Card>
     </View>
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + SPACING.md }]}>
-      <ScreenTitle>Mileage</ScreenTitle>
+    <View style={[styles.container, { paddingTop: SPACING.md }]}>
       <FlatList
         data={year_trips}
         keyExtractor={(item) => item.id}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
         ListHeaderComponent={list_header}
-        ListEmptyComponent={<Text style={styles.empty_text}>No trips logged for {year}</Text>}
+        ListEmptyComponent={
+          <EmptyState
+            illustration="empty_expenses"
+            title={'No trips logged for ' + year}
+            message="Tap Add Trip after a drive to a property."
+          />
+        }
         renderItem={({ item }) => (
-          <Pressable style={styles.row} onPress={() => openEditForm(item.id)}>
-            <View style={styles.row_top}>
-              <Text style={styles.row_miles}>{item.miles.toFixed(1)} miles</Text>
-              <Text style={styles.detail}>{formatDate(item.date)}</Text>
+          <Pressable
+            style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+            onPress={() => openEditForm(item.id)}
+            accessibilityRole="button"
+            accessibilityLabel={item.miles.toFixed(1) + ' miles on ' + item.date + ', edit trip'}
+          >
+            {/* the fintech pass: a tinted car on the left, miles and the deduction on one line */}
+            <IconCircle icon="car-outline" tone="info" />
+            <View style={styles.row_body}>
+              <View style={styles.row_top}>
+                <Text style={styles.row_miles}>{item.miles.toFixed(1)} miles</Text>
+                <Text style={styles.row_money}>{formatCurrency(item.miles * mileage_rate)}</Text>
+              </View>
+              <View style={styles.row_top}>
+                <Text style={styles.detail}>{formatDate(item.date)}</Text>
+                <Text style={styles.detail}>deduction</Text>
+              </View>
+              <Text style={styles.detail}>{item.property}</Text>
+              {item.purpose ? <Text style={styles.detail}>{item.purpose}</Text> : null}
             </View>
-            <Text style={styles.detail}>{formatMoney(item.miles * mileage_rate)} deduction</Text>
-            <Text style={styles.detail}>{item.property}</Text>
-            {item.purpose ? <Text style={styles.detail}>{item.purpose}</Text> : null}
           </Pressable>
         )}
       />
@@ -189,67 +209,54 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    padding: SPACING.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SIZES.screen_padding,
+    // the fintech pass: capped and centered on a tablet so lines stay a readable length
+    width: '100%',
+    maxWidth: SIZES.content_max_width + 160,
+    alignSelf: 'center',
   },
   add_button: {
-    backgroundColor: COLORS.success,
     marginHorizontal: 0,
     marginBottom: SPACING.md,
   },
   section_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
-    marginBottom: 6,
+    ...TYPE.label,
+    color: COLORS.text_muted,
+    marginBottom: SPACING.xs + SPACING.xxs,
   },
   chip_row: {
-    gap: SPACING.sm,
-    paddingBottom: SPACING.sm,
+    ...list_styles.chip_row,
   },
   chip: {
-    paddingVertical: 6,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 16,
-    backgroundColor: COLORS.muted,
+    ...list_styles.chip,
   },
   chip_active: {
-    backgroundColor: COLORS.primary,
+    ...list_styles.chip_active,
   },
   chip_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...list_styles.chip_text,
   },
   heading: {
-    color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
-    marginBottom: SPACING.sm,
+    ...list_styles.heading,
   },
   detail: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...list_styles.detail,
   },
   helper: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 12,
-    opacity: 0.7,
+    ...TYPE.caption,
+    color: COLORS.text_muted,
     marginBottom: SPACING.sm,
   },
   summary_label: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
-    opacity: 0.8,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
   },
   summary_total: {
+    ...TYPE.display,
+    ...NUMBERS,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: 32,
-    marginVertical: 4,
+    marginVertical: SPACING.xs,
   },
   rate_row: {
     flexDirection: 'row',
@@ -257,38 +264,42 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   rate_input: {
+    ...list_styles.field_input,
     flex: 1,
-    backgroundColor: COLORS.background,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    borderRadius: 8,
-    padding: SPACING.sm,
+    marginBottom: 0,
   },
   rate_button: {
-    backgroundColor: COLORS.success,
     marginHorizontal: 0,
   },
   row: {
-    backgroundColor: COLORS.muted,
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
+    ...list_styles.row,
+    flexDirection: 'row',
+    gap: SPACING.sm + SPACING.xs,
   },
   row_top: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'baseline',
+    gap: SPACING.sm,
   },
   row_miles: {
+    ...TYPE.subheading,
+    ...NUMBERS,
     color: COLORS.text,
-    fontFamily: FONTS.heading,
-    fontSize: FONT_SIZES.body,
   },
   empty_text: {
+    ...list_styles.empty_text,
+  },
+  pressed: {
+    opacity: OPACITY.pressed,
+  },
+  row_body: {
+    flex: 1,
+  },
+  row_money: {
+    ...TYPE.subheading,
+    ...NUMBERS,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    textAlign: 'center',
-    marginTop: SPACING.lg,
-    opacity: 0.7,
+    textAlign: 'right',
   },
 });

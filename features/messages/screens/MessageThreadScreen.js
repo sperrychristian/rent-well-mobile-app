@@ -16,13 +16,20 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenTitle from '../../../components/ScreenTitle';
+import { useHeaderHeight } from '@react-navigation/elements';
 import ErrorState from '../../../components/ErrorState';
 import MessageBubble from '../components/MessageBubble';
 import ImageViewerModal from '../components/ImageViewerModal';
 import { useMessages } from '../context/MessagesContext';
-import { mergeMessages, lastSeenMessageId, messageBodyToSend } from '../utils/messageHelpers';
-import { COLORS, SPACING, FONTS } from '../../../theme';
+import { useTenants } from '../../tenants/context/TenantsContext';
+import {
+  mergeMessages,
+  lastSeenMessageId,
+  messageBodyToSend,
+  dayDividerLabel,
+  showsTime,
+} from '../utils/messageHelpers';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, OPACITY } from '../../../theme';
 
 // the server takes photos up to 10 MB and message text up to 2000 characters
 const max_photo_bytes = 10485760;
@@ -30,7 +37,9 @@ const max_body_length = 2000;
 
 function MessageThreadScreen(props) {
   const insets = useSafeAreaInsets();
-  const conversation_id = props.route.params.conversation_id;
+  // the header sits above this screen now, so the keyboard lift has to count its height too
+  const header_height = useHeaderHeight();
+  const conversation_id = props.route.params.conversationId;
   const {
     is_demo,
     my_user_id,
@@ -204,6 +213,8 @@ function MessageThreadScreen(props) {
     conversation ? conversation.otherUserLastReadAt : null,
   );
   const can_send = (draft.trim() !== '' || !!photo) && !sending;
+  // a tenant whose rental ended can still read the thread, but not write (owners can always write)
+  const { is_read_only } = useTenants();
 
   let list;
   if (status === 'error' && messages.length === 0) {
@@ -245,12 +256,14 @@ function MessageThreadScreen(props) {
           // the list is flipped, so the empty text gets flipped back
           <Text style={[styles.empty_text, styles.flip]}>No messages yet. Say hello!</Text>
         }
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <MessageBubble
             message={item}
             is_mine={item.senderId === my_user_id}
             show_seen={item.id === seen_id}
             onOpenImage={setViewerUrl}
+            day_label={dayDividerLabel(messages, index)}
+            show_time={showsTime(messages, index)}
           />
         )}
       />
@@ -260,11 +273,14 @@ function MessageThreadScreen(props) {
   return (
     // iOS needs padding to lift the composer, Android already resizes the window
     <KeyboardAvoidingView
+      keyboardVerticalOffset={header_height}
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={[styles.inner, { paddingTop: insets.top + SPACING.md }]}>
-        <ScreenTitle>{conversation ? conversation.otherUser.name : 'Messages'}</ScreenTitle>
+      <View style={[styles.inner, { paddingTop: SPACING.md }]}>
+        <Text style={styles.name_line}>
+          {conversation ? conversation.otherUser.name : 'Messages'}
+        </Text>
         {is_demo && (
           <View style={styles.demo_strip}>
             <Text style={styles.demo_text}>Demo mode: replies are automatic, nothing is sent</Text>
@@ -272,7 +288,15 @@ function MessageThreadScreen(props) {
         )}
         {list}
 
-        {photo && (
+        {is_read_only ? (
+          <View style={[styles.read_only, { marginBottom: insets.bottom + SPACING.sm }]}>
+            <Text style={styles.read_only_text}>
+              Your tenancy has ended, so this conversation is read-only now.
+            </Text>
+          </View>
+        ) : null}
+
+        {!is_read_only && photo && (
           <View style={styles.photo_preview}>
             <Image source={{ uri: photo.uri }} style={styles.photo_thumb} />
             <Text style={styles.photo_text}>Photo ready to send</Text>
@@ -282,47 +306,51 @@ function MessageThreadScreen(props) {
               accessibilityRole="button"
               accessibilityLabel="Remove photo"
             >
-              <Ionicons name="close-circle" size={24} color={COLORS.danger} />
+              <Ionicons name="close-circle-outline" size={24} color={COLORS.danger_text} />
             </Pressable>
           </View>
         )}
 
-        <View style={[styles.composer, { paddingBottom: insets.bottom + SPACING.sm }]}>
-          <Pressable
-            onPress={pickPhoto}
-            disabled={sending}
-            hitSlop={8}
-            style={styles.icon_button}
-            accessibilityRole="button"
-            accessibilityLabel="Attach a photo"
-          >
-            <Ionicons name="camera-outline" size={26} color={COLORS.title} />
-          </Pressable>
-          <TextInput
-            style={styles.input}
-            placeholder="Message"
-            placeholderTextColor={COLORS.secondary}
-            value={draft}
-            onChangeText={setDraft}
-            multiline
-            maxLength={max_body_length}
-            editable={!sending}
-          />
-          <Pressable
-            onPress={handleSend}
-            disabled={!can_send}
-            hitSlop={8}
-            style={[styles.send_button, !can_send && styles.send_disabled]}
-            accessibilityRole="button"
-            accessibilityLabel="Send message"
-          >
-            {sending ? (
-              <ActivityIndicator color={COLORS.text_light} />
-            ) : (
-              <Ionicons name="send" size={20} color={COLORS.text_light} />
-            )}
-          </Pressable>
-        </View>
+        {!is_read_only && (
+          <View style={[styles.composer, { paddingBottom: insets.bottom + SPACING.sm }]}>
+            <Pressable
+              onPress={pickPhoto}
+              disabled={sending}
+              hitSlop={8}
+              style={styles.icon_button}
+              accessibilityRole="button"
+              accessibilityLabel="Attach a photo"
+            >
+              <Ionicons name="camera-outline" size={26} color={COLORS.title} />
+            </Pressable>
+            <TextInput
+              style={styles.input}
+              placeholder="Message"
+              keyboardAppearance="light"
+              accessibilityLabel="Message"
+              placeholderTextColor={COLORS.text_muted}
+              value={draft}
+              onChangeText={setDraft}
+              multiline
+              maxLength={max_body_length}
+              editable={!sending}
+            />
+            <Pressable
+              onPress={handleSend}
+              disabled={!can_send}
+              hitSlop={8}
+              style={[styles.send_button, !can_send && styles.send_disabled]}
+              accessibilityRole="button"
+              accessibilityLabel="Send message"
+            >
+              {sending ? (
+                <ActivityIndicator color={COLORS.text_light} />
+              ) : (
+                <Ionicons name="send-outline" size={20} color={COLORS.text_light} />
+              )}
+            </Pressable>
+          </View>
+        )}
       </View>
 
       <ImageViewerModal url={viewer_url} onClose={() => setViewerUrl(null)} />
@@ -333,6 +361,14 @@ function MessageThreadScreen(props) {
 export default MessageThreadScreen;
 
 const styles = StyleSheet.create({
+  // the header has the screen's title now, so the name gets its own plain line instead of the big card
+  name_line: {
+    ...TYPE.subheading,
+    fontFamily: TYPE.heading.fontFamily,
+    color: COLORS.title,
+    textAlign: 'center',
+    marginBottom: SPACING.sm,
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -354,85 +390,108 @@ const styles = StyleSheet.create({
   },
   older: {
     padding: SPACING.md,
+    minHeight: SIZES.touch,
     alignItems: 'center',
   },
   older_text: {
-    color: COLORS.action,
-    fontFamily: FONTS.body_bold,
-    fontSize: 13,
+    ...TYPE.label,
+    color: COLORS.cta,
   },
   empty_text: {
-    color: COLORS.text,
-    fontFamily: FONTS.body,
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
     textAlign: 'center',
     marginTop: SPACING.lg,
-    opacity: 0.7,
   },
   flip: {
     transform: [{ scaleY: -1 }],
   },
   demo_strip: {
-    backgroundColor: COLORS.warning,
-    borderRadius: 8,
-    padding: SPACING.xs,
+    backgroundColor: COLORS.warning_tint,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.xs + SPACING.xxs,
+    paddingHorizontal: SPACING.sm,
     marginBottom: SPACING.sm,
   },
   demo_text: {
-    color: COLORS.text_dark,
-    fontFamily: FONTS.body_bold,
-    fontSize: 12,
+    ...TYPE.caption,
+    fontFamily: TYPE.label.fontFamily,
+    color: COLORS.warning_text,
     textAlign: 'center',
   },
   photo_preview: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    backgroundColor: COLORS.muted,
-    borderRadius: 10,
+    backgroundColor: COLORS.surface,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
+    borderRadius: RADIUS.md,
     padding: SPACING.sm,
     marginBottom: SPACING.xs,
   },
   photo_thumb: {
     width: 48,
     height: 48,
-    borderRadius: 6,
+    borderRadius: RADIUS.sm,
   },
   photo_text: {
+    ...TYPE.body_small,
     flex: 1,
     color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 14,
   },
   composer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: SPACING.sm,
     paddingTop: SPACING.sm,
+    borderTopWidth: BORDER.hairline,
+    borderTopColor: COLORS.border,
   },
   icon_button: {
-    paddingBottom: 8,
-  },
-  input: {
-    flex: 1,
-    maxHeight: 120,
-    backgroundColor: COLORS.surface_light,
-    color: COLORS.text,
-    fontFamily: FONTS.body,
-    fontSize: 15,
-    borderRadius: 20,
-    paddingHorizontal: SPACING.md,
-    paddingTop: 10,
-    paddingBottom: 10,
-  },
-  send_button: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: COLORS.action,
+    width: SIZES.touch,
+    height: SIZES.touch,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  input: {
+    ...TYPE.input,
+    fontSize: TYPE.body_compact.fontSize,
+    backgroundColor: COLORS.surface,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border_strong,
+    color: COLORS.text,
+    borderRadius: RADIUS.xl + SPACING.xxs,
+    flex: 1,
+    minHeight: SIZES.touch,
+    maxHeight: 120,
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.sm + SPACING.xxs + 1,
+    paddingBottom: SPACING.sm + SPACING.xxs + 1,
+  },
+  send_button: {
+    backgroundColor: COLORS.cta,
+    borderRadius: RADIUS.pill,
+    width: SIZES.touch,
+    height: SIZES.touch,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  read_only: {
+    backgroundColor: COLORS.surface,
+    borderWidth: BORDER.hairline,
+    borderColor: COLORS.border,
+    borderRadius: RADIUS.md,
+    padding: SPACING.sm + SPACING.xs,
+    marginTop: SPACING.sm,
+  },
+  read_only_text: {
+    ...TYPE.body_small,
+    fontFamily: TYPE.label.fontFamily,
+    color: COLORS.text_muted,
+    textAlign: 'center',
+  },
   send_disabled: {
-    opacity: 0.4,
+    opacity: OPACITY.disabled,
   },
 });
