@@ -105,7 +105,9 @@ describe('navigation calls in the source', () => {
   test('every route name used in a navigation call is a registered screen', () => {
     const app_source = fs.readFileSync(path.join(root, 'App.js'), 'utf8');
     const registered = new Set(
-      [...app_source.matchAll(/<Stack\.Screen\s+name="(\w+)"/g)].map((match) => match[1]),
+      [...app_source.matchAll(/<(?:Stack|Tab|Drawer)\.Screen\s+name="(\w+)"/g)].map(
+        (match) => match[1],
+      ),
     );
     const unknown = all_calls
       .map((call) => ({ ...call, route: (call.text.match(/^['"](\w+)['"]/) || [])[1] }))
@@ -117,7 +119,9 @@ describe('navigation calls in the source', () => {
   test('every reset goes to a registered screen and passes no params', () => {
     const app_source = fs.readFileSync(path.join(root, 'App.js'), 'utf8');
     const registered = new Set(
-      [...app_source.matchAll(/<Stack\.Screen\s+name="(\w+)"/g)].map((match) => match[1]),
+      [...app_source.matchAll(/<(?:Stack|Tab|Drawer)\.Screen\s+name="(\w+)"/g)].map(
+        (match) => match[1],
+      ),
     );
     const reset_pattern = /(?:\bnavigation(?:_ref)?\.reset|\bresetTo)\(/g;
     const resets = files.flatMap((file) => {
