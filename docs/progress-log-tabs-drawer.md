@@ -15,4 +15,12 @@ Branch made from `master` after `git pull origin master` (already up to date). `
 - `navigation/tabBadges.js`: unread count on Messages, terracotta dot on Payments (anything overdue) and Work Orders (owner, anything still Open).
 - `theme.js`: new `SIZES` tokens `tab_icon`, `tab_dot`, `drawer_width`, `drawer_row`, `drawer_swipe_edge`, `wide_layout`.
 - Tests changed because they asserted the old single stack: the registration regex (now Stack, Tab and Drawer screens), the role guard tests (now any `shows_owner`/`shows_tenant` block in all three navigators), the navigator key test (now includes the role), and the old `future` test (now the real tabs and drawer). New: navigator per place, tab order per role, drawer contents per role, initialRouteName on all three navigators, "can get back" from every reached screen, hubs one tap apart.
-- Checks: lint 13 problems (the known 13), 386 tests (380 before the test updates plus the new ones, all passing in the navigation suites), format clean, iOS bundle exported with `--clear`.
+- Checks: lint 13 problems (the known 13), 396 tests passing, format clean, iOS bundle exported with `--clear`.
+
+## Phase 2: tests
+
+- `jest.setup.js`: test stand-ins for `react-native-worklets`, `react-native-reanimated` and `react-native-gesture-handler` (the drawer imports them).
+- `navigation/hubRouter.test.js` (13 tests): the root stack router with the override, run on small states: navigate, push, replace and reset to a tab or drawer screen, plain stack actions untouched, the drawer's menu history trim, the back arrow rule, the role label, and the badge rules.
+- `navigation/appNavigation.test.js` (11 tests): renders the real `App` signed out, taps Try the Demo and a side, then presses every tab, opens the drawer and presses every item, drills into a detail and goes back, follows a link between sections and uses the back arrow, navigates by name from a detail screen (what push taps do), switches the demo side both ways, and exits the demo. Every step checks that exactly one header is showing and that its title is the map's title. The badges are checked by their spoken labels.
+- How "one header" is checked: the root stack's native bars that aren't hidden, plus the tab and drawer headers a screen reader can reach. A double header (the drawer's and the tab's, or the stack's over Main) would show up as two titles.
+- Checks: lint 13 (known), 420 tests passing, format clean, iOS bundle exported with `--clear`. The only console output in the render tests is a deprecation warning from inside the drawer library (InteractionManager).

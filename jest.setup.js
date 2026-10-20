@@ -22,3 +22,8 @@ jest.mock('expo-haptics', () => ({
 jest.mock('expo-clipboard', () => ({
   setStringAsync: jest.fn(() => Promise.resolve(true)),
 }));
+
+// the drawer pulls in Reanimated and the gesture handler, these are their own test stand-ins
+jest.mock('react-native-worklets', () => require('react-native-worklets/src/mock'));
+jest.mock('react-native-reanimated', () => require('react-native-reanimated/mock'));
+require('react-native-gesture-handler/jestSetup');
