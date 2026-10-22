@@ -24,6 +24,7 @@ import { useLedger } from '../../payments/context/LedgerContext';
 import { ownerPaymentsLine, behindSummary, monthTitle } from '../../payments/utils/ledgerHelpers';
 import { collectedShare, monthOf } from '../../payments/utils/ledgerMath';
 import { demo_landlord } from '../../messages/data/sampleThreads';
+import { leasesSummary, urgentLease } from '../../leases/utils/leaseHelpers';
 
 // the fintech pass: an overview like a bank's home screen, a hello, one indigo summary card with this month's
 // spending and its trend, three key numbers, the four things landlords open most, then everything else
@@ -41,6 +42,9 @@ function DashboardScreen(props) {
   const open_orders = openCount(orders);
   const in_progress_orders = activeCount(orders) - open_orders;
   const active_tenants = tenants.filter((tenant) => tenant.is_active).length;
+  // leases come with the tenants, the row says how many end soon and the terracotta line names the soonest
+  const leases_line = leasesSummary(tenants);
+  const urgent_lease = urgentLease(tenants);
   // rent this month from the ledger already in memory: what needs doing first, and what's come in
   const ledger_store = useLedger();
   const rent = ownerPaymentsLine(
@@ -106,6 +110,18 @@ function DashboardScreen(props) {
             accessibilityHint="Opens Payments and Rent"
             onPress={() => props.navigation.navigate('Payments')}
           />
+          {/* only when a lease ends within 30 days, so it stays quiet the rest of the year */}
+          {urgent_lease ? (
+            <HeroNote
+              text={urgent_lease.text}
+              tone="danger"
+              icon="document-text-outline"
+              accessibilityHint="Opens the lease"
+              onPress={() =>
+                props.navigation.navigate('TenantLease', { tenancyId: urgent_lease.tenancy_id })
+              }
+            />
+          ) : null}
         </FadeInView>
 
         <FadeInView index={1} style={styles.rows}>
@@ -146,6 +162,13 @@ function DashboardScreen(props) {
             }
             divider
             onPress={() => props.navigation.navigate('Tenants')}
+          />
+          <ListRow
+            icon="document-outline"
+            title="Leases"
+            subtitle={leases_line.text}
+            divider
+            onPress={() => props.navigation.navigate('Leases')}
           />
           <ListRow
             icon="receipt-outline"

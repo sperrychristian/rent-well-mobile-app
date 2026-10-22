@@ -41,6 +41,17 @@ const friendly_messages = {
   INVALID_PAID_ON: "The date paid can't be in the future or more than a year ago.",
   INVALID_DUE_DATE: 'The due date has to be within a year of today.',
   INVALID_START_DATE: 'The start date has to be within a year of today.',
+  INVALID_LEASE_DATES:
+    'Lease dates have to be within 20 years, and a renewal has to end after today and after the current end.',
+  LATE_FEE_EXCEEDS_RENT: "The new rent can't be less than the late fee. Lower the late fee first.",
+  NO_LEASE: 'There is no lease to renew yet. Set the lease first.',
+  NO_RENT_SCHEDULE: 'This tenant has no rent schedule, so the rent can only change from Payments.',
+  INVALID_SPENT_ON: "The date can't be in the future or before 2000.",
+  WORK_ORDER_PROPERTY_MISMATCH: 'That work order is at a different property than this expense.',
+  DUPLICATE_CLIENT_ID: 'That expense was listed twice.',
+  NOTHING_OWED:
+    "This tenant doesn't owe anything right now, so there's nothing to remind them about.",
+  REMINDER_TOO_SOON: 'You can send one reminder every 24 hours.',
   INTERNAL_ERROR: 'Something went wrong on the server. Try again in a moment.',
   NETWORK_ERROR: "Can't reach the server. Check your connection and try again.",
 };
@@ -82,7 +93,12 @@ export function parseApiError(status, body) {
   }
 
   const message = friendly_messages[error.code] || error.message || 'Something went wrong.';
-  return new ApiError(status, error.code, message, details);
+  const api_error = new ApiError(status, error.code, message, details);
+  // REMINDER_TOO_SOON sends its details as an object ({ canSendAt }), so it's kept here as is
+  if (error.details && !Array.isArray(error.details) && typeof error.details === 'object') {
+    api_error.info = error.details;
+  }
+  return api_error;
 }
 
 // fetch throws when the server can't be reached at all, this gives that the same shape as a server error

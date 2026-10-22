@@ -17,9 +17,12 @@ import {
   assignTenancy,
   moveTenancy as moveTenancyRequest,
   endTenancy as endTenancyRequest,
+  getLease,
+  putLease,
+  renewLease as renewLeaseRequest,
 } from '../../../services/api';
 import { onSocketEvent } from '../../../services/socket';
-import { listenForTenancyTaps } from '../../../services/push';
+import { listenForTenancyTaps, listenForLeaseTaps } from '../../../services/push';
 import { navigateWhenReady } from '../../../services/navigationRef';
 import { todayString } from '../../../utils/formatDate';
 import { fromApiTenant, fromApiTenancy, fromApiProperty } from '../utils/tenantHelpers';
@@ -38,6 +41,8 @@ import {
   makeInviteCode,
 } from '../utils/demoTenants';
 import { demo_tenant } from '../data/sampleTenants';
+import { fromApiLease, fromApiLeaseEvent, toApiLease } from '../../leases/utils/leaseHelpers';
+import { demoSetLease, demoRenewLease, demoLeaseEvents } from '../../leases/utils/demoLeases';
 
 const TenantsContext = createContext(null);
 
@@ -179,11 +184,21 @@ export function TenantsProvider(props) {
         navigateWhenReady('Tenants');
       }
     });
+    // a lease reminder opens that tenancy's lease for owners, tenants go home where their lease line is
+    const stop_lease_taps = listenForLeaseTaps((tenancy_id) => {
+      reload();
+      if (role === 'tenant') {
+        navigateWhenReady('TenantHome');
+        return;
+      }
+      navigateWhenReady('TenantLease', { tenancyId: tenancy_id });
+    });
     return () => {
       stop_updated();
       stop_connect();
       stop_read_only();
       stop_taps();
+      stop_lease_taps();
     };
   }, [mode, role, session_key]);
 
@@ -337,6 +352,46 @@ export function TenantsProvider(props) {
     await loadOwnerData(session_key, true);
   }
 
+  // ----- leases (owner only) -----
+
+  // the lease and its timeline, oldest event first, the demo reads both from its own data
+  async function fetchLease(tenancy_id) {
+    if (mode === 'demo') {
+      return {
+        events: demoLeaseEvents(local.demo_tenant_data, tenancy_id).map(fromApiLeaseEvent),
+      };
+    }
+    const result = await getLease(tenancy_id);
+    return { lease: fromApiLease(result.lease), events: result.events.map(fromApiLeaseEvent) };
+  }
+
+  // value: { lease_start_on, lease_end_on, lease_term, renewal_notice_days, lease_notes }
+  async function setLease(tenancy_id, value) {
+    if (mode === 'demo') {
+      runDemo((data) => demoSetLease(data, tenancy_id, value, todayString(), new Date(), makeId));
+      return;
+    }
+    await putLease(tenancy_id, toApiLease(value));
+    await loadOwnerData(session_key, true);
+  }
+
+  // value: { new_end_on, new_rent_cents (or null) }, has_schedule is only used by the demo,
+  // since its rent schedule lives in the ledger store (the renew hook changes it there)
+  async function renewLease(tenancy_id, value, has_schedule) {
+    if (mode === 'demo') {
+      runDemo((data) =>
+        demoRenewLease(data, tenancy_id, value, todayString(), new Date(), makeId, has_schedule),
+      );
+      return;
+    }
+    const body = { newEndOn: value.new_end_on };
+    if (value.new_rent_cents !== null && value.new_rent_cents !== undefined) {
+      body.newRentCents = value.new_rent_cents;
+    }
+    await renewLeaseRequest(tenancy_id, body);
+    await loadOwnerData(session_key, true);
+  }
+
   // the detail screen gets the tenant fresh plus their recent work orders
   // the demo has no server, so its work orders come from the local ones with the same name
   async function fetchTenantDetail(tenant_id) {
@@ -399,6 +454,21 @@ export function TenantsProvider(props) {
     assignTenant,
     moveTenancy,
     endTenancy,
+    fetchLease,
+    setLease,
+    renewLease,
+    // finds one tenancy (active or past) and its tenant, for the lease screens
+    findTenancy: (tenancy_id) => {
+      for (const tenant of view.tenants) {
+        const tenancy = [...tenant.active_tenancies, ...tenant.ended_tenancies].find(
+          (item) => item.id === tenancy_id,
+        );
+        if (tenancy) {
+          return { tenant, tenancy };
+        }
+      }
+      return null;
+    },
     // the tenant side
     is_read_only: demo_me ? demo_me.active_tenancies.length === 0 : is_read_only,
     my_active_tenancies: demo_me ? demo_me.active_tenancies : me_ready ? me.active : [],

@@ -9,6 +9,7 @@ export { default as DemoChooserScreen } from '../features/home/screens/DemoChoos
 export { default as DocumentsScreen } from '../features/documents/screens/DocumentsScreen';
 export { default as ExpensesScreen } from '../features/expenses/screens/ExpensesScreen';
 export { default as InviteTenantScreen } from '../features/invites/screens/InviteTenantScreen';
+export { default as LeasesScreen } from '../features/leases/screens/LeasesScreen';
 export { default as LoginScreen } from '../features/auth/screens/LoginScreen';
 export { default as MessageThreadScreen } from '../features/messages/screens/MessageThreadScreen';
 export { default as MessagesScreen } from '../features/messages/screens/MessagesScreen';

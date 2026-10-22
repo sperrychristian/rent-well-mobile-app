@@ -6,6 +6,7 @@ import {
   checkEndDate,
   checkUnitLabel,
 } from './tenantHelpers';
+import { deriveLease } from '../../leases/utils/leaseHelpers';
 
 // the demo's version of every tenant and property action, run on the local data with the server's rules
 // each one gives back new data (never changes the old) or throws the same error the server would
@@ -58,7 +59,8 @@ function liveProperty(data, property_id) {
   return property;
 }
 
-function tenancyView(data, tenancy) {
+// today is a YYYY-MM-DD, so the lease status is worked out the same way the server does it
+function tenancyView(data, tenancy, today) {
   const property = data.properties.find((item) => item.id === tenancy.property_id);
   return {
     id: tenancy.id,
@@ -71,22 +73,24 @@ function tenancyView(data, tenancy) {
     started_at: localDateString(tenancy.started_at),
     ended_at: tenancy.ended_at,
     move_out_note: tenancy.move_out_note || '',
+    lease: deriveLease(tenancy.lease, today),
   };
 }
 
 // turns the demo data into the same tenant and property shapes the api ones get mapped to
 // orders are the local work orders, matched by tenant name for the open count
 export function buildDemoView(data, orders, now) {
+  const today = localDateString(now.toISOString());
   const tenants = data.tenants.map((tenant) => {
     const mine = data.tenancies.filter((tenancy) => tenancy.tenant_id === tenant.id);
     const active = mine
       .filter((tenancy) => tenancy.status === 'active')
       .sort((a, b) => a.started_at.localeCompare(b.started_at))
-      .map((tenancy) => tenancyView(data, tenancy));
+      .map((tenancy) => tenancyView(data, tenancy, today));
     const ended = mine
       .filter((tenancy) => tenancy.status === 'ended')
       .sort((a, b) => b.ended_at.localeCompare(a.ended_at))
-      .map((tenancy) => tenancyView(data, tenancy));
+      .map((tenancy) => tenancyView(data, tenancy, today));
     return {
       id: tenant.id,
       name: tenant.name,

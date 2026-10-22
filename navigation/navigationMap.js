@@ -135,6 +135,9 @@ export const navigation_map = {
       { to: 'Documents', param: null, via: 'button', label: 'Documents' },
       { to: 'Checklist', param: null, via: 'button', label: 'Checklist' },
       { to: 'Expenses', param: null, via: 'button', label: 'Expenses' },
+      { to: 'Leases', param: null, via: 'button', label: 'Leases' },
+      // the terracotta line when a lease ends within 30 days opens that lease
+      { to: 'TenantLease', param: 'tenancyId', via: 'link', label: 'Lease ending soon line' },
       // the first-run setup checklist (real landlords only, it never shows in the demo)
       {
         to: 'Properties',
@@ -238,10 +241,28 @@ export const navigation_map = {
     reachable_in: ['owner', 'demo_owner'],
     feature: 'tenants',
     file: 'features/tenants/screens/TenantLeaseScreen.js',
-    status: 'stub',
-    params: ['tenantId'],
+    status: 'built',
+    // tenancyId from Leases or a lease push tap, tenantId from Tenant Profile (it opens their current tenancy)
+    params: ['tenancyId', 'tenantId'],
     edges: [{ to: 'Documents', param: null, via: 'button', label: 'Open Documents' }],
     place: 'drill',
+  },
+  // every lease in one list, a row opens that tenancy's lease
+  Leases: {
+    title: 'Leases',
+    role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
+    feature: 'leases',
+    file: 'features/leases/screens/LeasesScreen.js',
+    status: 'built',
+    place: 'drawer',
+    nav_label: 'Leases',
+    nav_icon: 'document-outline',
+    params: [],
+    edges: [
+      { to: 'TenantLease', param: 'tenancyId', via: 'list item', label: 'a lease' },
+      { to: 'Tenants', param: null, via: 'button', label: 'Open Tenants (empty list)' },
+    ],
   },
   Properties: {
     title: 'Your Properties',
@@ -569,7 +590,7 @@ export const hubs = {
   owner: {
     tabs: ['Dashboard', 'Payments', 'WorkOrders', 'Messages'],
     drawer: [
-      { title: 'Rentals', screens: ['Properties', 'Tenants'] },
+      { title: 'Rentals', screens: ['Properties', 'Tenants', 'Leases'] },
       { title: 'Money', screens: ['Expenses', 'Mileage'] },
       { title: 'Records', screens: ['Documents', 'Checklist'] },
       { title: 'Account', screens: ['Settings'] },

@@ -46,6 +46,11 @@ export function createApiClient(options) {
       throw networkError();
     }
 
+    // the tax summary CSV comes back as plain text, so as_text hands back the body as is when it worked
+    if (settings.as_text && response.ok) {
+      return response.text();
+    }
+
     // 204 has no body, and a broken server might send something that isn't JSON
     let data = null;
     if (response.status !== 204) {

@@ -319,13 +319,17 @@ describe('edges and params', () => {
   });
 
   test('every screen has a title that is more than its route name', () => {
-    mapped.forEach((route_name) => {
-      const title = navigation_map[route_name].title;
-      // "Work Orders" for WorkOrders counts as just the route name too, so I compare letters only
-      const letters = (text) => text.toLowerCase().replace(/[^a-z]/g, '');
-      expect(title.length).toBeGreaterThan(2);
-      expect(letters(title)).not.toBe(letters(route_name));
-    });
+    // Leases and Profit are drawer sections where the one word is the clearest title (Christian's call)
+    const one_word_titles = ['Leases', 'Profit'];
+    mapped
+      .filter((route_name) => !one_word_titles.includes(route_name))
+      .forEach((route_name) => {
+        const title = navigation_map[route_name].title;
+        // "Work Orders" for WorkOrders counts as just the route name too, so I compare letters only
+        const letters = (text) => text.toLowerCase().replace(/[^a-z]/g, '');
+        expect(title.length).toBeGreaterThan(2);
+        expect(letters(title)).not.toBe(letters(route_name));
+      });
   });
 
   test('the tabs and drawer match the plan', () => {
@@ -333,6 +337,7 @@ describe('edges and params', () => {
     expect(drawerScreens('owner')).toEqual([
       'Properties',
       'Tenants',
+      'Leases',
       'Expenses',
       'Mileage',
       'Documents',

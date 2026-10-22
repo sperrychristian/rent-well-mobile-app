@@ -18,6 +18,8 @@ const illustration_icons = {
   empty_expenses: 'receipt-outline',
   empty_payments: 'card-outline',
   empty_properties: 'home-outline',
+  empty_leases: 'document-outline',
+  empty_profit: 'trending-up-outline',
   empty_mileage: 'car-outline',
 };
 

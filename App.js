@@ -35,6 +35,7 @@ import { LedgerProvider } from './features/payments/context/LedgerContext';
 import TenantsScreen from './features/tenants/screens/TenantsScreen';
 import TenantDetailScreen from './features/tenants/screens/TenantDetailScreen';
 import PropertiesScreen from './features/tenants/screens/PropertiesScreen';
+import LeasesScreen from './features/leases/screens/LeasesScreen';
 import PastRequestsScreen from './features/tenants/screens/PastRequestsScreen';
 import PaymentsScreen from './features/payments/screens/PaymentsScreen';
 import PaymentDetailScreen from './features/payments/screens/PaymentDetailScreen';
@@ -212,6 +213,11 @@ function MainDrawer() {
             name="Tenants"
             component={TenantsScreen}
             options={drawerOptionsFor('Tenants', { headerRight: () => <InviteHeaderButton /> })}
+          />
+          <Drawer.Screen
+            name="Leases"
+            component={LeasesScreen}
+            options={drawerOptionsFor('Leases')}
           />
           <Drawer.Screen
             name="Expenses"

@@ -18,6 +18,7 @@ import SummaryBlock from '../../../components/ui/SummaryBlock';
 import ListRow from '../../../components/ui/ListRow';
 import FadeInView from '../../../components/ui/FadeInView';
 import HomeTopBar from '../components/HomeTopBar';
+import { tenantLeaseLine, leaseStatusLabel, shortLeaseDate } from '../../leases/utils/leaseHelpers';
 import HeroNote from '../components/HeroNote';
 import DemoTourSheet from '../components/DemoTourSheet';
 import { useDemoTour } from '../hooks/useDemoTour';
@@ -64,6 +65,17 @@ function TenantHomeScreen(props) {
     };
   } else if (due_now > 0) {
     note = { text: 'Due now', tone: 'warning', icon: 'time-outline' };
+  }
+
+  // their lease, read only: the line under the hero shows up within 90 days of the end
+  const my_lease = my_active_tenancies.length > 0 ? my_active_tenancies[0].lease : null;
+  const lease_line = tenantLeaseLine(my_lease, ledger_store.today);
+  let lease_subtitle = 'Not recorded yet';
+  if (my_lease && my_lease.lease_status === 'month_to_month') {
+    lease_subtitle = 'Month to month';
+  } else if (my_lease && my_lease.lease_end_on) {
+    lease_subtitle =
+      leaseStatusLabel(my_lease).label + ', ends ' + shortLeaseDate(my_lease.lease_end_on);
   }
 
   if (is_read_only) {
@@ -169,6 +181,9 @@ function TenantHomeScreen(props) {
           accessibilityHint="Opens Payments and Rent"
           onPress={() => props.navigation.navigate('Payments')}
         />
+        {lease_line ? (
+          <HeroNote text={lease_line.text} tone={lease_line.tone} icon="document-text-outline" />
+        ) : null}
       </FadeInView>
 
       <FadeInView index={1} style={styles.rows}>
@@ -209,7 +224,15 @@ function TenantHomeScreen(props) {
           title="Message Landlord"
           subtitle={unread_total ? unread_total + ' unread' : 'All caught up'}
           accessibilityLabel={'Messages' + (unread_total ? ', ' + unread_total + ' unread' : '')}
+          divider
           onPress={() => props.navigation.navigate('Messages')}
+        />
+        {/* read only, the landlord sets and renews the lease */}
+        <ListRow
+          icon="document-outline"
+          title="Your Lease"
+          subtitle={lease_subtitle}
+          accessibilityLabel={'Your lease, ' + lease_subtitle}
         />
       </FadeInView>
 

@@ -430,6 +430,105 @@ export async function voidPayment(payment_id, reason) {
   return data.payment;
 }
 
+// ----- leases (owner only, docs/API.md, Leases) -----
+
+// the lease block plus its timeline, oldest event first
+export async function getLease(tenancy_id) {
+  const data = await api_client.request(
+    'GET',
+    '/tenancies/' + encodeURIComponent(tenancy_id) + '/lease',
+  );
+  return { lease: data.lease, events: data.events || [] };
+}
+
+// a PUT replaces the whole lease, so the body always has every field (toApiLease builds it)
+export async function putLease(tenancy_id, body) {
+  const data = await api_client.request(
+    'PUT',
+    '/tenancies/' + encodeURIComponent(tenancy_id) + '/lease',
+    { body: body },
+  );
+  return data.lease;
+}
+
+// body is { newEndOn, newRentCents (left out to keep the rent) }
+export async function renewLease(tenancy_id, body) {
+  const data = await api_client.request(
+    'POST',
+    '/tenancies/' + encodeURIComponent(tenancy_id) + '/lease/renew',
+    { body: body },
+  );
+  return data;
+}
+
+// ----- expenses (owner only, docs/API.md, Expenses) -----
+
+// one page, filters is { propertyId, category, from, to, limit, cursor } and empty ones are skipped
+export async function getExpenses(filters) {
+  return api_client.request('GET', '/expenses', { query: filters || {} });
+}
+
+export async function createExpense(body) {
+  const data = await api_client.request('POST', '/expenses', { body: body });
+  return data.expense;
+}
+
+export async function updateExpense(expense_id, body) {
+  const data = await api_client.request('PATCH', '/expenses/' + encodeURIComponent(expense_id), {
+    body: body,
+  });
+  return data.expense;
+}
+
+// a soft delete on the server, it stays there for tax history but leaves every list
+export function deleteExpense(expense_id) {
+  return api_client.request('DELETE', '/expenses/' + encodeURIComponent(expense_id));
+}
+
+// up to 500 old phone expenses at once, each with its clientId so a retry never makes doubles
+export function importExpenses(items) {
+  return api_client.request('POST', '/expenses/import', { body: { expenses: items } });
+}
+
+// ----- reports (owner only, docs/API.md, Reports) -----
+
+export async function getProfitReport(year, property_id) {
+  const data = await api_client.request('GET', '/reports/profit', {
+    query: { year: year, propertyId: property_id },
+  });
+  return data.report;
+}
+
+// the Schedule E summary as CSV text, ready to save and share
+export function getTaxSummaryCsv(year) {
+  return api_client.request('GET', '/reports/tax-summary', {
+    query: { year: year, format: 'csv' },
+    as_text: true,
+  });
+}
+
+// ----- rent reminders (owner only, docs/API.md, Rent reminders) -----
+
+// kind is friendly or overdue_notice, gives back the suggested text and whether it can go now
+export async function getReminderPreview(tenancy_id, kind) {
+  const data = await api_client.request(
+    'GET',
+    '/tenancies/' + encodeURIComponent(tenancy_id) + '/reminders/preview',
+    { query: { kind: kind } },
+  );
+  return data.preview;
+}
+
+// message is the owner's edited text, the server posts it in the thread and pushes the tenant
+export async function sendReminder(tenancy_id, kind, message) {
+  const data = await api_client.request(
+    'POST',
+    '/tenancies/' + encodeURIComponent(tenancy_id) + '/reminders',
+    { body: { kind: kind, message: message } },
+  );
+  return data;
+}
+
 // ----- uploads -----
 
 const allowed_image_types = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
