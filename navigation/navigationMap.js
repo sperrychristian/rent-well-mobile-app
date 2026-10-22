@@ -136,6 +136,7 @@ export const navigation_map = {
       { to: 'Checklist', param: null, via: 'button', label: 'Checklist' },
       { to: 'Expenses', param: null, via: 'button', label: 'Expenses' },
       { to: 'Leases', param: null, via: 'button', label: 'Leases' },
+      { to: 'Profit', param: null, via: 'button', label: 'Profit' },
       // the terracotta line when a lease ends within 30 days opens that lease
       { to: 'TenantLease', param: 'tenancyId', via: 'link', label: 'Lease ending soon line' },
       // the first-run setup checklist (real landlords only, it never shows in the demo)
@@ -367,6 +368,20 @@ export const navigation_map = {
     nav_label: 'Expenses',
     nav_icon: 'receipt-outline',
   },
+  // the year's profit: rent collected minus expenses, by month and by property, and the tax summary sheet
+  Profit: {
+    title: 'Profit',
+    role: 'owner',
+    reachable_in: ['owner', 'demo_owner'],
+    feature: 'profit',
+    file: 'features/profit/screens/ProfitScreen.js',
+    status: 'built',
+    place: 'drawer',
+    nav_label: 'Profit',
+    nav_icon: 'trending-up-outline',
+    params: [],
+    edges: [],
+  },
   Mileage: {
     title: 'Mileage Log',
     role: 'owner',
@@ -591,7 +606,7 @@ export const hubs = {
     tabs: ['Dashboard', 'Payments', 'WorkOrders', 'Messages'],
     drawer: [
       { title: 'Rentals', screens: ['Properties', 'Tenants', 'Leases'] },
-      { title: 'Money', screens: ['Expenses', 'Mileage'] },
+      { title: 'Money', screens: ['Expenses', 'Mileage', 'Profit'] },
       { title: 'Records', screens: ['Documents', 'Checklist'] },
       { title: 'Account', screens: ['Settings'] },
     ],

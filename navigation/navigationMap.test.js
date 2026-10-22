@@ -340,6 +340,7 @@ describe('edges and params', () => {
       'Leases',
       'Expenses',
       'Mileage',
+      'Profit',
       'Documents',
       'Checklist',
       'Settings',

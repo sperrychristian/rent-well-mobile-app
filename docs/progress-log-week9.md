@@ -54,3 +54,23 @@
 - **Filters:** the existing year, property, and category filters work on the server list. The year is the date range.
 - **Tests:** `features/expenses/utils/expenseApi.test.js` (9) and `features/expenses/context/expensesRealMode.test.js` (7, the api mocked as docs/API.md answers: every page, the offline copy, add with a work order link, rollback with an alert, an unknown property never sent, delete and a failed delete, the import clearing only what the server confirmed and retrying the rest, and a failed import clearing nothing).
 - **Checks:** lint 13 (known), 478 tests passing, format clean, iOS bundle exported with `--clear`.
+
+## Phase 3: profit
+
+- **Math:** `features/profit/utils/profitMath.js` is a port of the server's `src/reports/profit.js` and `taxSummary.js`.
+  - It uses the same input rows and one definition of rent collected: succeeded rent-pool payments, refunds taken off, deposits and claims left out, bucketed by `paid_on`.
+  - Expenses count by `spent_on` whether or not they're deductible.
+  - Every property gets a row, plus general and total. A one-property report drops general.
+  - The tax summary uses Schedule E lines, deductible expenses only, with non-deductible on its own line. The CSV is byte for byte the server's format.
+  - Adapters turn the demo ledgers and the app's expenses into server rows, and the server's camelCase responses into the same output.
+- **Parity:** `features/profit/utils/profitParity.test.js` (12) runs the backend's own `tests/reportMath.test.js` cases against the port, the same way `backendParity.test.js` does for the ledger. It also checks that the demo's rent collected for this month equals the ledger month summary, and the response mapping.
+- **`useProfitReport(year, property_id)`:** for a real landlord it calls `GET /reports/profit` and refetches on `ledger:updated` or a reconnect. Everywhere else it builds the report from the demo's tenants, ledgers, and expenses. `useTaxSummary()` gives CSV and text: the server's (`format=csv` and `json`) or the local port.
+- **`Profit` screen** (new, landlord drawer, Money section, title "Profit"):
+  - A year picker (`SegmentedControl`, this year and the two before).
+  - The hero net profit in Fraunces (`SummaryBlock`), with muted "Rent collected" and "Expenses" lines.
+  - `ProfitChart`: one set of forest green bars by month on the paper, hairline gridlines, a zero line with losses hanging under it, month initials, and a spoken summary.
+  - "By property" as plain rows (name, net on the right, "$X in, $Y out"). Tapping a row puts that property in the chart, and "Show all" goes back. General expenses get their own row.
+  - A Tax Summary button that opens the shared sheet.
+- **Dashboard:** a Profit row with a live subtitle ("$2,340 net this month", terracotta when it's a loss).
+- **Navigation:** `Profit` is in the map (drawer, owner, Money) and registered once as a `Drawer.Screen`, with a new edge Dashboard → Profit. The drawer plan test lists it, and the diagram was regenerated.
+- **Checks:** lint 13 (known), 490 tests passing, format clean, iOS bundle exported with `--clear`.

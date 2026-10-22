@@ -37,6 +37,7 @@ import TenantsScreen from './features/tenants/screens/TenantsScreen';
 import TenantDetailScreen from './features/tenants/screens/TenantDetailScreen';
 import PropertiesScreen from './features/tenants/screens/PropertiesScreen';
 import LeasesScreen from './features/leases/screens/LeasesScreen';
+import ProfitScreen from './features/profit/screens/ProfitScreen';
 import PastRequestsScreen from './features/tenants/screens/PastRequestsScreen';
 import PaymentsScreen from './features/payments/screens/PaymentsScreen';
 import PaymentDetailScreen from './features/payments/screens/PaymentDetailScreen';
@@ -232,6 +233,11 @@ function MainDrawer() {
             name="Mileage"
             component={MileageScreen}
             options={drawerOptionsFor('Mileage')}
+          />
+          <Drawer.Screen
+            name="Profit"
+            component={ProfitScreen}
+            options={drawerOptionsFor('Profit')}
           />
           <Drawer.Screen
             name="Documents"

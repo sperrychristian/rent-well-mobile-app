@@ -18,6 +18,7 @@ flowchart LR
     Leases["Leases"]
     Expenses["Property Expenses"]
     Mileage["Mileage Log"]
+    Profit["Profit"]
     Documents["Document Storage"]
     Checklist["Condition Checklists"]
     Settings["Settings and Profile (stub)"]
@@ -67,6 +68,7 @@ flowchart LR
   Dashboard --> Checklist
   Dashboard --> Expenses
   Dashboard --> Leases
+  Dashboard --> Profit
   Dashboard -->|tenancyId| TenantLease
   Dashboard --> Properties
   Dashboard --> InviteTenant

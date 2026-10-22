@@ -19,6 +19,7 @@ export { default as NewWorkOrderScreen } from '../features/workOrders/screens/Ne
 export { default as PastRequestsScreen } from '../features/tenants/screens/PastRequestsScreen';
 export { default as PaymentDetailScreen } from '../features/payments/screens/PaymentDetailScreen';
 export { default as PaymentsScreen } from '../features/payments/screens/PaymentsScreen';
+export { default as ProfitScreen } from '../features/profit/screens/ProfitScreen';
 export { default as PropertiesScreen } from '../features/tenants/screens/PropertiesScreen';
 export { default as PropertyDetailScreen } from '../features/tenants/screens/PropertyDetailScreen';
 export { default as RegisterOwnerScreen } from '../features/auth/screens/RegisterOwnerScreen';

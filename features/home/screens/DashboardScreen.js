@@ -25,6 +25,7 @@ import { ownerPaymentsLine, behindSummary, monthTitle } from '../../payments/uti
 import { collectedShare, monthOf } from '../../payments/utils/ledgerMath';
 import { demo_landlord } from '../../messages/data/sampleThreads';
 import { leasesSummary, urgentLease } from '../../leases/utils/leaseHelpers';
+import { useProfitReport } from '../../profit/hooks/useProfitReport';
 
 // the fintech pass: an overview like a bank's home screen, a hello, one indigo summary card with this month's
 // spending and its trend, three key numbers, the four things landlords open most, then everything else
@@ -45,6 +46,11 @@ function DashboardScreen(props) {
   // leases come with the tenants, the row says how many end soon and the terracotta line names the soonest
   const leases_line = leasesSummary(tenants);
   const urgent_lease = urgentLease(tenants);
+  // this month's net from the profit report (the server's in real mode), like "$2,340 net this month"
+  const profit = useProfitReport(String(new Date().getFullYear()), null);
+  const this_profit_month = profit.report
+    ? profit.report.total.months[new Date().getMonth()]
+    : null;
   // rent this month from the ledger already in memory: what needs doing first, and what's come in
   const ledger_store = useLedger();
   const rent = ownerPaymentsLine(
@@ -169,6 +175,20 @@ function DashboardScreen(props) {
             subtitle={leases_line.text}
             divider
             onPress={() => props.navigation.navigate('Leases')}
+          />
+          <ListRow
+            icon="trending-up-outline"
+            title="Profit"
+            subtitle={
+              this_profit_month
+                ? formatCents(this_profit_month.net_cents, { cents: false }) + ' net this month'
+                : 'Rent in, expenses out'
+            }
+            subtitle_tone={
+              this_profit_month && this_profit_month.net_cents < 0 ? 'danger' : undefined
+            }
+            divider
+            onPress={() => props.navigation.navigate('Profit')}
           />
           <ListRow
             icon="receipt-outline"
