@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import ProgressLine from '../../../components/ui/ProgressLine';
@@ -12,6 +12,7 @@ import {
   chargeKindLabel,
 } from '../utils/ledgerHelpers';
 import { COLORS, SPACING, TYPE, BORDER, SIZES, NUMBERS } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // the rows the payments screens list: a charge, a payment, a pending claim with its review buttons,
 // and a progress bar for collected over expected
@@ -174,7 +175,7 @@ export function ProgressBar(props) {
   return <ProgressLine share={props.share} label={props.label} />;
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -241,4 +242,4 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 0,
   },
-});
+}));

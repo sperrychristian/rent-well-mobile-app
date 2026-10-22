@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Button from '../../../components/ui/Button';
 import ProgressLine from '../../../components/ui/ProgressLine';
@@ -7,6 +7,7 @@ import { useToast } from '../../../components/ui/Toast';
 import { hapticSuccess } from '../../../utils/haptics';
 import { useExpenses } from '../context/ExpensesContext';
 import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // a quiet card on Expenses for a real landlord who still has expenses saved only on this phone
 // one tap uploads them (with their receipts), the phone's copy is only cleared once the server has each one,
@@ -76,7 +77,7 @@ function ImportExpensesCard() {
 
 export default ImportExpensesCard;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   card: {
     paddingVertical: SPACING.md,
     borderTopWidth: BORDER.hairline,
@@ -113,4 +114,4 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
     alignSelf: 'flex-start',
   },
-});
+}));

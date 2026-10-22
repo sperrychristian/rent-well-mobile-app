@@ -1,4 +1,4 @@
-import { View, Text, FlatList, RefreshControl, StyleSheet } from 'react-native';
+import { View, Text, FlatList, RefreshControl } from 'react-native';
 import ListRow from '../../../components/ui/ListRow';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import SectionHeader from '../../../components/ui/SectionHeader';
@@ -9,7 +9,8 @@ import { useTenants } from '../../tenants/context/TenantsContext';
 import { placeLabel } from '../../tenants/utils/tenantHelpers';
 import { leaseRows, leaseStatusLabel, daysLine, shortLeaseDate } from '../utils/leaseHelpers';
 import { todayString } from '../../../utils/formatDate';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { SPACING, TYPE, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // every lease in one list, soonest end first: current tenancies, then past ones that had a lease
 // each row says the tenant, the place, the status in words and color, and the days left
@@ -116,7 +117,7 @@ function LeasesScreen(props) {
 
 export default LeasesScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -140,4 +141,4 @@ const styles = StyleSheet.create({
     ...TYPE.body_small,
     color: COLORS.text_muted,
   },
-});
+}));

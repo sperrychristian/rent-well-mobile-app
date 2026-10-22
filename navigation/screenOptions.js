@@ -1,14 +1,15 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, TYPE, FONTS, SIZES, BORDER, SPACING } from '../theme';
+import { TYPE, FONTS, SIZES, BORDER, SPACING, themed } from '../theme';
 import { headerTitle, navigation_map } from './navigationMap';
 import { HeaderMenuButton, DrawerHeaderLeft } from './headerButtons';
+import { themedStyles } from '../utils/themedStyles';
 
 // one header style for every screen, all from theme.js
 // the header blends into the screen background so the ScreenTitle card stays the big title
 // and the header is the slim bar with the back arrow, the plain title, and any buttons
 // (the card is only on the Dashboard and the tenant home now, everywhere else the header title is the only title)
-export const shared_screen_options = {
+export const shared_screen_options = themed((COLORS) => ({
   headerShown: true,
   // the fintech pass: a white bar with the thin line under it (headerShadowVisible draws that line)
   headerStyle: { backgroundColor: COLORS.background },
@@ -25,7 +26,7 @@ export const shared_screen_options = {
   // just the arrow, the previous screen's title next to it made the bar crowded
   headerBackButtonDisplayMode: 'minimal',
   contentStyle: { backgroundColor: COLORS.background },
-};
+}));
 
 // each screen's options: the title comes from the navigation map (with a short id when it depends on a param)
 // extra is for screen-specific things like headerRight
@@ -38,7 +39,7 @@ export function optionsFor(route_name, extra) {
 
 // the tabs and drawer draw their own header (not the native stack's), so they get the same look here:
 // the same paper bar, ink title and no line, and the page color goes on sceneStyle instead of contentStyle
-const hub_header_options = {
+const hub_header_options = themed((COLORS) => ({
   headerShown: true,
   headerStyle: shared_screen_options.headerStyle,
   headerTintColor: shared_screen_options.headerTintColor,
@@ -46,11 +47,11 @@ const hub_header_options = {
   headerTitleAlign: shared_screen_options.headerTitleAlign,
   headerShadowVisible: false,
   sceneStyle: { backgroundColor: COLORS.background },
-};
+}));
 
 // the tab bar: paper with one hairline on top, green for the tab you're on and muted for the rest,
 // line icons only, and DM Sans labels that never go under 12
-export const shared_tab_options = {
+export const shared_tab_options = themed((COLORS) => ({
   ...hub_header_options,
   headerLeft: () => <HeaderMenuButton />,
   tabBarActiveTintColor: COLORS.cta,
@@ -70,12 +71,12 @@ export const shared_tab_options = {
     color: COLORS.on_cta,
     fontFamily: FONTS.heading,
   },
-};
+}));
 
 // the drawer: paper, no shadow, a soft ink backdrop over the screen, and a swipe that only starts close
 // to the left edge so it doesn't grab the horizontal chip rows on the screens
 // (the iOS back swipe lives on the root stack's detail screens, which sit above the drawer, so they never meet)
-export const shared_drawer_options = {
+export const shared_drawer_options = themed((COLORS) => ({
   ...hub_header_options,
   headerLeft: () => <DrawerHeaderLeft />,
   drawerStyle: {
@@ -86,7 +87,7 @@ export const shared_drawer_options = {
   },
   overlayColor: COLORS.backdrop,
   swipeEdgeWidth: SIZES.drawer_swipe_edge,
-};
+}));
 
 // the line icon under a tab, the same outline icon whether it's picked or not, only the color changes
 // dot is the small terracotta mark for "something here needs you"
@@ -141,7 +142,7 @@ export function drawerOptionsFor(route_name, extra) {
   });
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   label: {
     fontFamily: FONTS.medium,
     fontSize: TYPE.caption.fontSize,
@@ -157,4 +158,4 @@ const styles = StyleSheet.create({
     borderRadius: SIZES.tab_dot / 2,
     backgroundColor: COLORS.danger,
   },
-});
+}));

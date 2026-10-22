@@ -7,7 +7,9 @@
 // one forest green for actions and good news, and terracotta for anything overdue or urgent
 // the token names stayed the same so every screen picks up the new look without changes
 
-export const COLORS = {
+// the dark mode pass: there are two palettes now with the same token names, LIGHT_COLORS and DARK_COLORS,
+// and COLORS always reads whichever one is active, so the screens keep writing COLORS.text like before
+export const LIGHT_COLORS = {
   // ----- base -----
   // primary is the indigo brand color, selected chips and the plain buttons use it with white text
   primary: '#2F5D4A',
@@ -93,7 +95,140 @@ export const COLORS = {
   shadow: '#2A2520',
   shimmer_edge: 'rgba(255,255,255,0)',
   shimmer_peak: 'rgba(255,255,255,0.22)',
+  // words and icons over a photo on the black backdrop, white in both themes
+  on_photo: '#FFFFFF',
 };
+
+// the warm dark palette, still Hearth: a dark walnut page, warm cream text, quiet warm hairlines,
+// a lighter forest green for actions, and lighter terracotta and amber so they read on the dark
+// the fills are light here, so the words on them (on_cta, text_light) turn dark, every pair is AA (theme.test.js)
+export const DARK_COLORS = {
+  // ----- base -----
+  primary: '#7FB89B',
+  background: '#1B1814',
+  text: '#F1EBE0',
+  muted: '#24201B',
+  title: '#F1EBE0',
+  title_text: '#F1EBE0',
+
+  // ----- surfaces and lines -----
+  surface: '#24201B',
+  surface_raised: '#2E2923',
+  surface_sunken: '#1F1B17',
+  border: '#3A342C',
+  border_strong: '#4F4739',
+  text_muted: '#A99F92',
+  on_light: '#1B1814',
+  hairline: '#3A342C',
+
+  // ----- the brand call to action -----
+  cta: '#7FB89B',
+  cta_pressed: '#6AA587',
+  on_cta: '#14110E',
+  focus: '#7FB89B',
+  brand_tint: '#22332A',
+  on_brand_muted: '#1E3027',
+
+  // ----- states as fills, dark words on them -----
+  success: '#7FB89B',
+  action: '#8FB0CB',
+  info: '#8FB0CB',
+  accent: '#B79ABD',
+  highlight: '#E9C46A',
+  warning: '#D9A441',
+  danger: '#E08A6E',
+  secondary: '#A99F92',
+
+  // ----- states as text or icons on the dark surfaces -----
+  success_text: '#7FB89B',
+  info_text: '#8FB0CB',
+  accent_text: '#C3A9C8',
+  warning_text: '#E0B062',
+  danger_text: '#E89A80',
+
+  // ----- soft tints behind each state -----
+  success_tint: '#22332A',
+  info_tint: '#1F2A33',
+  accent_tint: '#2C2430',
+  warning_tint: '#35291A',
+  danger_tint: '#3A2219',
+  neutral_tint: '#2B2620',
+
+  // ----- text on colored buttons (dark, since the fills are light now) -----
+  text_light: '#14110E',
+  text_dark: '#1B1814',
+
+  // ----- other surfaces -----
+  surface_light: '#24201B',
+  toast_background: '#F1EBE0',
+  skeleton: '#2B2620',
+  skeleton_shine: '#332D26',
+
+  // ----- priority -----
+  priority_emergency: '#E08A6E',
+  priority_low: '#8FB0CB',
+
+  // ----- expense tags -----
+  tag_billed: '#7FB89B',
+  tag_recurring: '#B5AB9E',
+  tag_missing_receipt: '#E0B062',
+
+  // ----- overlays -----
+  backdrop: 'rgba(0,0,0,0.60)',
+  photo_backdrop: 'black',
+  shadow: '#000000',
+  shimmer_edge: 'rgba(241,235,224,0)',
+  shimmer_peak: 'rgba(241,235,224,0.08)',
+  on_photo: '#FFFFFF',
+};
+
+const palettes = { light: LIGHT_COLORS, dark: DARK_COLORS };
+// which palette is showing, the theme provider sets it before anything draws (light until then)
+let active_scheme = 'light';
+
+export function setActiveScheme(scheme) {
+  active_scheme = scheme === 'dark' ? 'dark' : 'light';
+}
+
+export function activeScheme() {
+  return active_scheme;
+}
+
+export function paletteFor(scheme) {
+  return palettes[scheme === 'dark' ? 'dark' : 'light'];
+}
+
+// an object that reads from whatever build() made for the active palette, made once per palette
+// Object.keys and spreading work on it too, so it can stand in for a plain object anywhere
+function livePaletteObject(read) {
+  return new Proxy(
+    {},
+    {
+      get: (target, key) => read()[key],
+      has: (target, key) => key in read(),
+      ownKeys: () => Reflect.ownKeys(read()),
+      getOwnPropertyDescriptor: (target, key) =>
+        key in read()
+          ? { value: read()[key], enumerable: true, configurable: true, writable: false }
+          : undefined,
+    },
+  );
+}
+
+// every color token, from the active palette at the moment it's read
+export const COLORS = livePaletteObject(() => palettes[active_scheme]);
+
+// for anything built from colors outside a render (style sheets, color tables, navigator options):
+// build gets the palette and runs once per palette, so switching themes never rebuilds styles mid-render
+export function themed(build) {
+  const made = {};
+  return livePaletteObject(() => {
+    if (!made[active_scheme]) {
+      made[active_scheme] = build(palettes[active_scheme]);
+    }
+    return made[active_scheme];
+  });
+}
 
 // one step for every gap, padding, and margin
 export const SPACING = {

@@ -278,7 +278,8 @@ describe('App.js guards the demo sides', () => {
   });
 
   test('the navigator is keyed on the demo side and the role, so a switch rebuilds it', () => {
-    expect(app_source).toMatch(/<NavigationContainer key=\{navigator_key\}/);
+    // the theme is in the key too, so a theme switch redraws every screen (and keeps where you were)
+    expect(app_source).toMatch(/key=\{navigator_key \+ ':' \+ theme\.scheme\}/);
     expect(app_source).toMatch(
       /const navigator_key = demo_mode \? 'demo-' \+ demo_role : 'app-' \+ \(role \|\| 'signed-out'\);/,
     );

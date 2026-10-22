@@ -96,3 +96,39 @@
 - **Navigation:** new edge MessageThread → Payments (the label). The sheets need no routes. The diagram was regenerated.
 - **Tests:** `features/reminders/utils/reminders.test.js` (14). It has the backend's text, target, and window vectors in the app's ledger shape, plus the demo's preview, too soon with `canSendAt`, nothing owed, ended tenancy, empty text, and the preview mapping.
 - **Checks:** lint 13 (known), 504 tests passing, format clean, iOS bundle exported with `--clear`.
+
+## Phase 5: dark mode
+
+- **Palette:** `theme.js` now has `LIGHT_COLORS` (the old values, untouched) and `DARK_COLORS` (warm walnut, cream text, lighter forest green, terracotta, and amber). Both have the same token names, and a test checks that.
+  - In the dark palette the fills are light, so `on_cta` and `text_light` are dark there.
+  - New token `on_photo` (white in both) for the words over a photo on the black backdrop.
+  - Every dark pair passed AA on the first try: text on every surface, states on tints, fills, and style pairs.
+- **How screens read it:** `COLORS` reads the active palette, so `color={COLORS.cta}` in a render is always right.
+  - Every module-level `StyleSheet.create` that used colors became `themedStyles((COLORS) => ({ ... }))` (`utils/themedStyles.js`). It's built once per palette and cached, the style keys didn't move (only the first and last lines changed), and the comments stayed word for word.
+  - Color tables and navigator options became `themed((COLORS) => ...)`: `tone_colors`, `tones`, Button `variants`, `status_colors`, `priority_colors`, the checklist condition colors, `demo_choices`, and the shared header, tab, and drawer options.
+  - The conversion was a script, file by file, with the tests and bundle run after. 37 `COLORS` imports that became unused were removed.
+  - This is the "makeStyles(theme) or equivalent" the prompt allows: one cached sheet per palette instead of a `useMemo` in every component, which needed no hook added to 90 components.
+- **`ThemeProvider` and `useTheme()`** (`context/ThemeContext.js`): System, Light, or Dark, saved per device under `rent_well_appearance`. System follows `useColorScheme()` live. The provider sets the active palette before its children draw.
+- **App:**
+  - The splash waits for the fonts and the saved Appearance (no flash).
+  - `StatusBar` is light in dark mode.
+  - `NavigationContainer` gets a navigation theme from the palette, and its key includes the scheme, so a switch redraws every screen. The navigator state is kept and restored only for a theme switch (the same mode and role in the other scheme), so you stay on the same screen. A mode or role change still starts fresh.
+  - `app.json`: `userInterfaceStyle` is `automatic` now (it was `light`, which would have hidden the phone's dark setting), and the splash plugin has a dark background.
+- **Settings:** an Appearance card with a `SegmentedControl` (System, Light, Dark) and a line saying what System is right now. No new screen.
+- **Fixes found on the way:**
+  - The checklist's "Changed since move-in" tag drew white words on a see-through tag (invisible in light mode too). It's terracotta now, like its outline.
+  - The photo viewers' hint text uses `on_photo`.
+- **Tests:**
+  - `theme.test.js` runs every contrast check on both palettes, plus same token names and themed objects switching and building once per palette.
+  - `stylePairs.test.js` and `navigation/chromeStyles.test.js` check both palettes.
+  - `context/ThemeContext.test.js` (4): System follows the phone live, a saved choice and saving a new one, and a bad saved value falls back to System.
+  - `navigation/featureFlows.test.js` (9) renders the real App:
+    - Leases: the list, a row, Renew, and Set Lease.
+    - Profit: the year change and the property filter.
+    - An expense added in the demo.
+    - A reminder: sent from an overdue row, too soon after, the tenant's chat label opening Payments, and nothing owed.
+    - Dark: the landlord Dashboard, drawer, ledger, and a form sheet, the tenant home, and Settings switching Dark and back while staying on Settings.
+  - `App.js` exports `forgetNavigationState()` so each test starts like a fresh launch.
+- **Updated tests:** the navigator key test (the key has the scheme now).
+- **Files:** 103 changed in this phase, most by the two-line wrapper.
+- **Checks:** lint 13 (known), 535 tests passing, format clean, no hex outside `theme.js`, iOS bundle exported with `--clear`.

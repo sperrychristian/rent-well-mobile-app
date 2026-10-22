@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  StyleSheet,
   View,
   Text,
   TextInput,
@@ -30,6 +29,7 @@ import StatusLabel from '../../../components/ui/StatusLabel';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
 import ReceiptImage from '../../../components/ReceiptImage';
+import { themedStyles } from '../../../utils/themedStyles';
 
 const priority_options = ['Emergency', 'Normal', 'Low'];
 
@@ -389,7 +389,7 @@ function WorkOrderDetailContent(props) {
 
 export default WorkOrderDetailScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   flex: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -533,4 +533,4 @@ const styles = StyleSheet.create({
   under_budget: {
     color: COLORS.success_text,
   },
-});
+}));

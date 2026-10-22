@@ -1,5 +1,6 @@
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { View, Text, TextInput } from 'react-native';
 import { COLORS, SPACING, TYPE, NUMBERS } from '../../theme';
+import { themedStyles } from '../../utils/themedStyles';
 
 // a money text box: a $ in front, the number pad with a decimal point, and tabular digits
 // style is the screen's own field style (it goes on the outside so the border, fill, and padding stay the same),
@@ -28,7 +29,7 @@ function CurrencyInput(props) {
 
 export default CurrencyInput;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   wrap: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -46,4 +47,4 @@ const styles = StyleSheet.create({
     padding: 0,
     alignSelf: 'stretch',
   },
-});
+}));

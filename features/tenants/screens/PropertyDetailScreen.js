@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, Text, ScrollView } from 'react-native';
+import { Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
@@ -7,7 +7,8 @@ import { useTenants } from '../context/TenantsContext';
 import { useLedger } from '../../payments/context/LedgerContext';
 import InstructionsModal from '../../payments/components/InstructionsModal';
 import { useToast } from '../../../components/ui/Toast';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { SPACING, TYPE, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // stub for the assignment: it gets only the property's id and looks the property up in the shared tenants data
 // (the demo's local copy or the server's), and if it isn't there it just shows the id instead of crashing
@@ -114,7 +115,7 @@ function PropertyDetailScreen(props) {
 
 export default PropertyDetailScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   // the header has the screen's title now, so the name gets its own plain line instead of the big card
   name_line: {
     ...TYPE.title,
@@ -150,4 +151,4 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
     marginBottom: SPACING.sm,
   },
-});
+}));

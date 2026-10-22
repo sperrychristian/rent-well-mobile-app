@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import SectionHeader from '../../../components/ui/SectionHeader';
 import ProgressLine from '../../../components/ui/ProgressLine';
@@ -18,6 +18,7 @@ import {
   showsOnboarding,
 } from '../utils/onboarding';
 import { COLORS, SPACING, TYPE, BORDER, SIZES, OPACITY } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 const step_icons = {
   property: 'home-outline',
@@ -155,7 +156,7 @@ function OnboardingCard(props) {
 
 export default OnboardingCard;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   box: {
     marginBottom: SPACING.lg,
   },
@@ -200,4 +201,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     marginTop: SPACING.sm,
   },
-});
+}));

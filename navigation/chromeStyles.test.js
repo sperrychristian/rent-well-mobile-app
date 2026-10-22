@@ -1,36 +1,49 @@
-import { COLORS, SIZES, TYPE } from '../theme';
+import { COLORS, LIGHT_COLORS, DARK_COLORS, SIZES, TYPE, setActiveScheme } from '../theme';
 import { contrastRatio, meetsAA } from '../utils/contrast';
-import { shared_tab_options, shared_drawer_options } from './screenOptions';
+import { shared_tab_options, shared_drawer_options, shared_screen_options } from './screenOptions';
 
 // the tab bar and drawer colors, sizes, and fonts, checked the same way theme.test.js checks the screens
 
-describe('tab bar and drawer contrast', () => {
+// the dark mode pass: the same pairs in both palettes, and the options read the active one
+describe.each([
+  ['light', LIGHT_COLORS],
+  ['dark', DARK_COLORS],
+])('tab bar and drawer contrast (%s)', (scheme, PALETTE) => {
   const pairs = [
-    ['picked tab label and icon', COLORS.cta, COLORS.background],
-    ['other tab labels and icons', COLORS.text_muted, COLORS.background],
-    ['unread count on its badge', COLORS.on_cta, COLORS.danger],
-    ['drawer row label', COLORS.text, COLORS.background],
-    ['picked drawer row label', COLORS.cta, COLORS.surface_raised],
-    ['drawer role line and section headers', COLORS.text_muted, COLORS.background],
-    ['header title', COLORS.title, COLORS.background],
+    ['picked tab label and icon', 'cta', 'background'],
+    ['other tab labels and icons', 'text_muted', 'background'],
+    ['unread count on its badge', 'on_cta', 'danger'],
+    ['drawer row label', 'text', 'background'],
+    ['picked drawer row label', 'cta', 'surface_raised'],
+    ['drawer role line and section headers', 'text_muted', 'background'],
+    ['header title', 'title', 'background'],
   ];
 
-  test.each(pairs)('%s meets AA', (name, text_color, background) => {
-    expect({ name, ok: meetsAA(text_color, background) }).toEqual({ name, ok: true });
+  afterAll(() => setActiveScheme('light'));
+
+  test.each(pairs)('%s meets AA', (name, text_token, background_token) => {
+    expect({ name, ok: meetsAA(PALETTE[text_token], PALETTE[background_token]) }).toEqual({
+      name,
+      ok: true,
+    });
   });
 
   test('the overdue dot stands out from the paper (3 to 1 for a graphic)', () => {
-    expect(contrastRatio(COLORS.danger, COLORS.background)).toBeGreaterThanOrEqual(3);
+    expect(contrastRatio(PALETTE.danger, PALETTE.background)).toBeGreaterThanOrEqual(3);
   });
 
-  test('the options use the same tokens', () => {
-    expect(shared_tab_options.tabBarActiveTintColor).toBe(COLORS.cta);
-    expect(shared_tab_options.tabBarInactiveTintColor).toBe(COLORS.text_muted);
-    expect(shared_tab_options.tabBarStyle.backgroundColor).toBe(COLORS.background);
-    expect(shared_tab_options.tabBarStyle.borderTopColor).toBe(COLORS.hairline);
-    expect(shared_tab_options.tabBarBadgeStyle.backgroundColor).toBe(COLORS.danger);
-    expect(shared_drawer_options.drawerStyle.backgroundColor).toBe(COLORS.background);
-    expect(shared_drawer_options.overlayColor).toBe(COLORS.backdrop);
+  test('the options use the same tokens from the active palette', () => {
+    setActiveScheme(scheme);
+    expect(COLORS.background).toBe(PALETTE.background);
+    expect(shared_tab_options.tabBarActiveTintColor).toBe(PALETTE.cta);
+    expect(shared_tab_options.tabBarInactiveTintColor).toBe(PALETTE.text_muted);
+    expect(shared_tab_options.tabBarStyle.backgroundColor).toBe(PALETTE.background);
+    expect(shared_tab_options.tabBarStyle.borderTopColor).toBe(PALETTE.hairline);
+    expect(shared_tab_options.tabBarBadgeStyle.backgroundColor).toBe(PALETTE.danger);
+    expect(shared_drawer_options.drawerStyle.backgroundColor).toBe(PALETTE.background);
+    expect(shared_drawer_options.overlayColor).toBe(PALETTE.backdrop);
+    expect({ ...shared_screen_options }.headerStyle.backgroundColor).toBe(PALETTE.background);
+    setActiveScheme('light');
   });
 });
 

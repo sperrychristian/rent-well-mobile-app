@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CommonActions } from '@react-navigation/native';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
@@ -8,6 +8,7 @@ import { useAppRole } from '../features/auth/hooks/useAppRole';
 import { useWorkOrders } from '../context/WorkOrdersContext';
 import { navigation_map, hubs, tabs_route } from './navigationMap';
 import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../theme';
+import { themedStyles } from '../utils/themedStyles';
 
 // the drawer's state with its history cut back to the tabs and the picked screen, same routes and keys,
 // so picking from the menu starts that section fresh: back goes to the tabs and the header shows the menu button
@@ -116,7 +117,7 @@ function DrawerContent(props) {
 
 export default DrawerContent;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   content: {
     paddingHorizontal: SPACING.lg,
     paddingBottom: SPACING.xl,
@@ -159,4 +160,4 @@ const styles = StyleSheet.create({
     fontFamily: TYPE.heading.fontFamily,
     color: COLORS.cta,
   },
-});
+}));

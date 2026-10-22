@@ -1,5 +1,6 @@
-import { View, StyleSheet } from 'react-native';
-import { COLORS, SIZES, RADIUS } from '../../theme';
+import { View } from 'react-native';
+import { SIZES, RADIUS } from '../../theme';
+import { themedStyles } from '../../utils/themedStyles';
 
 // the Hearth progress line: 4pt of forest green with a round end on a hairline-colored track
 // props: share (0 to 1), label (what screen readers hear), style
@@ -20,7 +21,7 @@ function ProgressLine(props) {
 
 export default ProgressLine;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   track: {
     height: SIZES.progress,
     borderRadius: RADIUS.pill,
@@ -32,4 +33,4 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.pill,
     backgroundColor: COLORS.cta,
   },
-});
+}));

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import {
-  StyleSheet,
   View,
   Text,
   TextInput,
@@ -26,6 +25,7 @@ import { placeLabel } from '../../tenants/utils/tenantHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
+import { themedStyles } from '../../../utils/themedStyles';
 
 const urgency_options = ['Emergency', 'Normal', 'Low'];
 // the server takes photos up to 10 MB
@@ -597,7 +597,7 @@ function NewWorkOrderScreen(props) {
 
 export default NewWorkOrderScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   screen: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -719,4 +719,4 @@ const styles = StyleSheet.create({
     top: -SPACING.sm,
     right: -SPACING.sm,
   },
-});
+}));

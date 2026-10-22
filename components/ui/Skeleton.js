@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { View, Animated, StyleSheet } from 'react-native';
+import { View, Animated } from 'react-native';
 import { useReduceMotion } from './useReduceMotion';
-import { COLORS, SPACING, RADIUS, BORDER, SIZES } from '../../theme';
+import { SPACING, RADIUS, BORDER, SIZES } from '../../theme';
+import { themedStyles } from '../../utils/themedStyles';
 
 // grey placeholder rows that stand in for a list while it loads, so the screen doesn't jump when the data shows up
 // they pulse gently, or sit still when Reduce Motion is on
@@ -47,7 +48,7 @@ function SkeletonList(props) {
 
 export default SkeletonList;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   list: {
     alignSelf: 'stretch',
     paddingTop: SPACING.sm,
@@ -84,4 +85,4 @@ const styles = StyleSheet.create({
     width: '45%',
     backgroundColor: COLORS.skeleton,
   },
-});
+}));

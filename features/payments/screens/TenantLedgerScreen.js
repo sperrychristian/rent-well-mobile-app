@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, RefreshControl, Alert, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/ui/Card';
 import SectionHeader from '../../../components/ui/SectionHeader';
@@ -29,6 +29,7 @@ import {
   upcomingRent,
 } from '../utils/ledgerHelpers';
 import { COLORS, SPACING, TYPE, SIZES, NUMBERS } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 function placeOf(ledger) {
   return ledger.unit_label ? ledger.property_name + ', ' + ledger.unit_label : ledger.property_name;
@@ -307,7 +308,7 @@ function TenantLedgerScreen(props) {
             variant="secondary"
             icon="ellipsis-horizontal-outline"
             title="More"
-            accessibilityLabel="More actions: add charge, edit rent schedule, void"
+            accessibilityLabel="More actions: send a reminder, add charge, edit rent schedule, void"
             onPress={() => setMoreOpen(true)}
             style={styles.action_more}
           />
@@ -469,7 +470,7 @@ function TenantLedgerScreen(props) {
 
 export default TenantLedgerScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -534,4 +535,4 @@ const styles = StyleSheet.create({
     ...TYPE.body_small,
     color: COLORS.text_muted,
   },
-});
+}));

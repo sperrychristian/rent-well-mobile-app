@@ -1,19 +1,12 @@
 import { useState } from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import { Modal, View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 // the pop-up forms share the sheet look from components/ui, the JSX still says Card
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TextField from '../../../components/TextField';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { SPACING, TYPE, SIZES } from '../../../theme';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // adds a property, or edits the name and address of one (property is null for a new one)
 // props: visible, property, onSave (gets name and address, gives back a promise), onClose
@@ -133,7 +126,7 @@ function PropertyFormModal(props) {
 
 export default PropertyFormModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   root: {
     flex: 1,
   },
@@ -180,4 +173,4 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 0,
   },
-});
+}));

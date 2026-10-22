@@ -21,24 +21,25 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import { conditions } from '../data/checklistTemplates';
 import { itemGotWorse } from '../utils/checklistHelpers';
 import { getPhotoUri, saveChecklistPhoto, deleteChecklistPhoto } from '../utils/checklistPhotos';
-import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
+import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER, SIZES, themed } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
+import { themedStyles } from '../../../utils/themedStyles';
 
 const max_photos = 3;
 
 // one color per condition so they're easy to spot
 // (the fintech pass: soft tints, the picked chip also gets its condition's darker border and ink text)
-const condition_colors = {
+const condition_colors = themed((COLORS) => ({
   Good: COLORS.success_tint,
   Fair: COLORS.warning_tint,
   Poor: COLORS.danger_tint,
-};
-const condition_borders = {
+}));
+const condition_borders = themed((COLORS) => ({
   Good: COLORS.success,
   Fair: COLORS.warning,
   Poor: COLORS.danger,
-};
+}));
 
 // props: visible, item, locked, in_demo, onSave, onDelete, onClose
 // onSave gets the changed fields, a locked (signed) checklist only shows the item and can't change it
@@ -367,7 +368,7 @@ function ChecklistItemModal(props) {
 
 export default ChecklistItemModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   root: {
     flex: 1,
   },
@@ -412,7 +413,8 @@ const styles = StyleSheet.create({
   worse_text: {
     ...TYPE.caption,
     fontFamily: TYPE.label.fontFamily,
-    color: COLORS.text_light,
+    // terracotta like the outline (it was white on the see-through tag, so it didn't show)
+    color: COLORS.danger_text,
   },
   compare_row: {
     flexDirection: 'row',
@@ -521,11 +523,11 @@ const styles = StyleSheet.create({
     height: '80%',
   },
   full_hint: {
-    color: COLORS.text_light,
+    color: COLORS.on_photo,
     fontFamily: FONTS.body,
     marginTop: SPACING.sm,
   },
   chip_text_on_light: {
     color: COLORS.on_light,
   },
-});
+}));

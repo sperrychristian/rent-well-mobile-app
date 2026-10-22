@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, ScrollView, RefreshControl, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, RefreshControl } from 'react-native';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
 import SummaryBlock from '../../../components/ui/SummaryBlock';
 import SectionHeader from '../../../components/ui/SectionHeader';
@@ -11,7 +11,8 @@ import ProfitChart from '../components/ProfitChart';
 import TaxSummarySheet from '../components/TaxSummarySheet';
 import { useProfitReport } from '../hooks/useProfitReport';
 import { formatCents } from '../../../utils/formatCurrency';
-import { COLORS, SPACING, TYPE, SIZES, NUMBERS } from '../../../theme';
+import { SPACING, TYPE, SIZES, NUMBERS } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // a landlord's year in one place: net profit as the big number, rent in and expenses out under it,
 // net by month as one green chart, then each property as a plain row (tap one to see its months in the chart)
@@ -143,7 +144,7 @@ function ProfitScreen() {
 
 export default ProfitScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -186,4 +187,4 @@ const styles = StyleSheet.create({
     color: COLORS.text_muted,
     marginTop: SPACING.sm,
   },
-});
+}));

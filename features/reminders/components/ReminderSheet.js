@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, TextInput, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TextInput, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import FormSheet from '../../payments/components/FormSheet';
 import { Field, form_styles } from '../../payments/components/FormBits';
@@ -15,6 +15,7 @@ import {
   formatLongDate,
 } from '../utils/reminderHelpers';
 import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 const kind_options = [
   { value: 'friendly', label: 'Friendly' },
@@ -196,7 +197,7 @@ function ReminderSheet(props) {
 
 export default ReminderSheet;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   loading: {
     marginVertical: SPACING.lg,
   },
@@ -230,4 +231,4 @@ const styles = StyleSheet.create({
     color: COLORS.text_muted,
     marginBottom: SPACING.xs,
   },
-});
+}));

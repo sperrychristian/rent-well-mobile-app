@@ -1,10 +1,11 @@
 import { memo } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AttachmentImage from './AttachmentImage';
 import { formatMessageTime, photo_only_body } from '../utils/messageHelpers';
 import { isRentReminder } from '../../reminders/utils/reminderHelpers';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // one message, mine on the right in blue and theirs on the left
 // (the fintech pass: mine is the indigo brand color, theirs is a light gray)
@@ -67,7 +68,7 @@ function MessageBubble(props) {
 
 export default memo(MessageBubble);
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   // the reminder label: a bell and the words, green on the tenant's white bubble, white on the landlord's green
   reminder: {
     flexDirection: 'row',
@@ -144,4 +145,4 @@ const styles = StyleSheet.create({
     fontFamily: TYPE.label.fontFamily,
     color: COLORS.text_muted,
   },
-});
+}));

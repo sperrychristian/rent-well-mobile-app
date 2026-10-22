@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  StyleSheet,
   View,
   Text,
   ScrollView,
@@ -27,6 +26,7 @@ import { list_styles } from '../../../components/ui/listStyles';
 import Avatar from '../../../components/ui/Avatar';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // every tenant by property and unit, the invites still waiting, and the past tenants folded away
 function TenantsScreen(props) {
@@ -351,7 +351,7 @@ function TenantsScreen(props) {
 
 export default TenantsScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -499,4 +499,4 @@ const styles = StyleSheet.create({
   revoke_text: {
     color: COLORS.danger_text,
   },
-});
+}));

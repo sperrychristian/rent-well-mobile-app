@@ -159,6 +159,34 @@ Contrast is AA (at least 4.5 to 1) for every pairing:
 - **Demo tour** (`features/home/components/DemoTourSheet.js`): the standard bottom sheet. A Fraunces title, one muted line, four ruled rows each with a green line icon and a sentence, and one green "Got It" pill.
 - **Empty states:** every list says what goes there in a Fraunces title and one muted sentence, with the screen's own add action as the one green pill. A list that only a server fills (Messages for a tenant, Past Requests, tenant Payments) has no button.
 
+## Dark mode
+
+- **Appearance:** Settings has System, Light, and Dark. It's saved on the phone under `rent_well_appearance` (not per account), so it holds before login, in the demo, and after logging out. System follows the phone's setting live. The splash stays up until the choice is read, so the first screen is never the wrong theme. The native splash follows the phone's own setting (`app.json` has a dark splash background), since nothing can be read before the app starts.
+- **The palette:** `theme.js` has `LIGHT_COLORS` and `DARK_COLORS` with the same token names, and `COLORS` always reads the active one. The dark one stays warm Hearth:
+
+| Token | Dark | What it is |
+| --- | --- | --- |
+| `background` | `#1B1814` | the page, dark walnut |
+| `surface`, `muted`, `surface_light` | `#24201B` | sheets and cards |
+| `surface_raised` | `#2E2923` | pressed and picked rows |
+| `surface_sunken` | `#1F1B17` | text boxes |
+| `text`, `title` | `#F1EBE0` | warm cream |
+| `text_muted` | `#A99F92` | quiet words |
+| `hairline`, `border` | `#3A342C` | rules |
+| `border_strong` | `#4F4739` | outlines |
+| `cta`, `primary`, `success`, `success_text` | `#7FB89B` | a lighter forest green |
+| `danger` / `danger_text` | `#E08A6E` / `#E89A80` | a lighter terracotta |
+| `warning_text` | `#E0B062` | amber |
+| `on_cta`, `text_light` | `#14110E` | the words on the light fills (dark, since the fills are light in dark mode) |
+| `on_photo` | `#FFFFFF` | words over a photo on the black backdrop, both themes |
+
+- **Rules:**
+  - Colors only come from `COLORS`, in both themes. No hex anywhere else.
+  - Styles are built with `themedStyles((COLORS) => ({ ... }))` (`utils/themedStyles.js`), once per palette. Color tables and navigator options use `themed((COLORS) => ...)` from `theme.js`. Colors read while drawing (`color={COLORS.cta}`) are always the active palette.
+  - `useTheme()` (`context/ThemeContext.js`) gives `scheme`, `is_dark`, `colors`, `preference`, and `setPreference`.
+  - A theme switch redraws the navigator and puts you back on the same screen. The status bar, the navigation theme, the tab bar, the drawer, headers, sheets, toasts, inputs, chat bubbles, the Profit chart, skeletons, the demo banner, Welcome, and the wordmark all read the palette.
+  - Every text and surface pair, every state on its tint, every fill, the style pairs, and the tab bar and drawer pairs are checked for AA in both palettes (`theme.test.js`, `components/ui/stylePairs.test.js`, `navigation/chromeStyles.test.js`).
+
 ## Payments screens
 
 The ledger screens follow the same rules:

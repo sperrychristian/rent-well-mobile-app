@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { Text, View, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PrimaryButton from '../../../components/PrimaryButton';
 import Button from '../../../components/ui/Button';
@@ -16,7 +16,8 @@ import { leaseEventLine } from '../../leases/utils/leaseHelpers';
 import { hapticSuccess } from '../../../utils/haptics';
 import { todayString } from '../../../utils/formatDate';
 import { onSocketEvent } from '../../../services/socket';
-import { COLORS, SPACING, TYPE, SIZES, BORDER } from '../../../theme';
+import { SPACING, TYPE, SIZES, BORDER } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // stub for the assignment: it gets only the tenant's id, shows their name when the tenants data has them,
 // and the id otherwise, then links to the Documents screen where leases live today
@@ -208,7 +209,7 @@ function pickTenancy(params, findTenancy, getTenantById) {
 
 export default TenantLeaseScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   // the header has the screen's title now, so the name gets its own plain line instead of the big card
   name_line: {
     ...TYPE.title,
@@ -266,4 +267,4 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
     marginTop: SPACING.lg,
   },
-});
+}));

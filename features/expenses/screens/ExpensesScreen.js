@@ -1,14 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  FlatList,
-  Pressable,
-  ScrollView,
-  TextInput,
-  Alert,
-} from 'react-native';
+import { View, Text, FlatList, Pressable, ScrollView, TextInput, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
@@ -40,6 +31,7 @@ import SkeletonList from '../../../components/ui/Skeleton';
 import ErrorState from '../../../components/ErrorState';
 import { useToast } from '../../../components/ui/Toast';
 import { useExpenses } from '../context/ExpensesContext';
+import { themedStyles } from '../../../utils/themedStyles';
 
 const month_names = [
   'January',
@@ -774,7 +766,7 @@ function ExpensesScreen(props) {
 
 export default ExpensesScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -1048,4 +1040,4 @@ const styles = StyleSheet.create({
   pressed: {
     backgroundColor: COLORS.surface_raised,
   },
-});
+}));

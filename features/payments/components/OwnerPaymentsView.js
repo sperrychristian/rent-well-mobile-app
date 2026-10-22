@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, RefreshControl, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../../components/ui/Card';
@@ -28,6 +28,7 @@ import {
 } from '../utils/ledgerMath';
 import { formatBalance, monthTitle, rowPill } from '../utils/ledgerHelpers';
 import { COLORS, SPACING, TYPE, SIZES, OPACITY } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // the order rows sort in, what needs the landlord first
 const row_order = { overdue: 0, pending: 1, due: 2, credit: 3, paid: 4 };
@@ -401,7 +402,7 @@ function OwnerPaymentsView(props) {
 
 export default OwnerPaymentsView;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   // the overdue row's quick action: a green bell and the word, a full 44 tall
   remind: {
     flexDirection: 'row',
@@ -482,4 +483,4 @@ const styles = StyleSheet.create({
     ...TYPE.subheading,
     color: COLORS.text,
   },
-});
+}));

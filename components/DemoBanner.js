@@ -1,8 +1,9 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useWorkOrders } from '../context/WorkOrdersContext';
 import { COLORS, SPACING, TYPE, RADIUS, SIZES, OPACITY } from '../theme';
+import { themedStyles } from '../utils/themedStyles';
 
 // shows a strip with an exit button, and only while the demo is running
 // it also has the switch between the landlord and tenant sides, which keeps the same demo data
@@ -70,7 +71,7 @@ function DemoBanner() {
 
 export default DemoBanner;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   banner: {
     width: '100%',
     backgroundColor: COLORS.cta,
@@ -117,4 +118,4 @@ const styles = StyleSheet.create({
   exit_text: {
     textDecorationLine: 'underline',
   },
-});
+}));

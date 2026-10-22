@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Switch, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Switch } from 'react-native';
 import FormSheet from '../../payments/components/FormSheet';
 import { Field, form_styles } from '../../payments/components/FormBits';
 import DateField from '../../../components/DateField';
 import { checkLeaseForm, addDaysTo } from '../utils/leaseHelpers';
 import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // set or edit a lease: start, end (or month to month), how many days of notice before it ends, and notes
 // a save replaces the whole lease, same as the server's PUT
@@ -126,7 +127,7 @@ function LeaseFormSheet(props) {
 
 export default LeaseFormSheet;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   switch_row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -150,4 +151,4 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     paddingTop: SPACING.sm,
   },
-});
+}));

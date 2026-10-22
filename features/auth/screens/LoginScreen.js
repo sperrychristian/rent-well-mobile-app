@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Text, Pressable, StyleSheet, View } from 'react-native';
+import { Text, Pressable, View } from 'react-native';
 import AuthLayout from '../components/AuthLayout';
 import SubmitButton from '../components/SubmitButton';
 import TextField from '../../../components/TextField';
 import { useAuth, homeRouteFor } from '../context/AuthContext';
 import { checkEmail, checkLoginPassword, collectErrors } from '../utils/authValidation';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { SPACING, TYPE, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 function LoginScreen(props) {
   const { login, session_expired } = useAuth();
@@ -99,7 +100,7 @@ function LoginScreen(props) {
 
 export default LoginScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   links: {
     alignItems: 'center',
     gap: SPACING.xs,
@@ -115,4 +116,4 @@ const styles = StyleSheet.create({
     color: COLORS.cta,
     textAlign: 'center',
   },
-});
+}));

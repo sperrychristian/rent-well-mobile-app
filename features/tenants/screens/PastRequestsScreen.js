@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, FlatList, RefreshControl } from 'react-native';
+import { View, Text, FlatList, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ErrorState from '../../../components/ErrorState';
 import { getAllWorkOrders } from '../../../services/api';
@@ -16,6 +16,7 @@ import { list_styles } from '../../../components/ui/listStyles';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // a former tenant's requests, read only, straight from the server (reading still works after a tenancy ends)
 function PastRequestsScreen() {
@@ -133,7 +134,7 @@ function PastRequestsScreen() {
 
 export default PastRequestsScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -179,4 +180,4 @@ const styles = StyleSheet.create({
   empty_text: {
     ...list_styles.empty_text,
   },
-});
+}));

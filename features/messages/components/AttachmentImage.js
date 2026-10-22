@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { View, Image, Pressable, ActivityIndicator, Text, StyleSheet } from 'react-native';
+import { View, Image, Pressable, ActivityIndicator, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useMessages } from '../context/MessagesContext';
 import { COLORS, SPACING, FONTS, TYPE, RADIUS } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // shows a message photo, the key gets swapped for a short-lived url first
 // props: attachment_key, onPress (gets the url for the full size view)
@@ -87,7 +88,7 @@ function AttachmentImage(props) {
 
 export default AttachmentImage;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   frame: {
     width: 200,
     height: 150,
@@ -105,4 +106,4 @@ const styles = StyleSheet.create({
     fontSize: TYPE.caption.fontSize,
     marginTop: SPACING.xs,
   },
-});
+}));

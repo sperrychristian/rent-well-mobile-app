@@ -5,7 +5,6 @@ import {
   Text,
   TextInput,
   ScrollView,
-  StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -19,6 +18,7 @@ import { checklist_disclaimer } from '../utils/checklistHelpers';
 import { COLORS, SPACING, TYPE } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // props: visible, default_name, not_done (how many items aren't checked), onSign, onClose
 // onSign gets the typed name and the date
@@ -106,7 +106,7 @@ function SignOffModal(props) {
 
 export default SignOffModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   root: {
     flex: 1,
   },
@@ -153,4 +153,4 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 0,
   },
-});
+}));

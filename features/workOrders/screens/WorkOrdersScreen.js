@@ -1,5 +1,4 @@
 import {
-  StyleSheet,
   View,
   FlatList,
   Alert,
@@ -24,6 +23,7 @@ import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // lower number sorts first, so emergencies come out on top
 const priority_rank = { Emergency: 0, Normal: 1, Low: 2 };
@@ -310,7 +310,7 @@ function WorkOrdersScreen(props) {
 
 export default WorkOrdersScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -371,4 +371,4 @@ const styles = StyleSheet.create({
   chip_text: {
     ...list_styles.chip_text,
   },
-});
+}));

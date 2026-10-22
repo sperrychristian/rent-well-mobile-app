@@ -1,6 +1,5 @@
 import { useState, useLayoutEffect } from 'react';
 import {
-  StyleSheet,
   View,
   Text,
   FlatList,
@@ -21,6 +20,7 @@ import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // the owner's properties: add, rename, change the address, or delete one nobody uses anymore
 function PropertiesScreen(props) {
@@ -227,7 +227,7 @@ function PropertiesScreen(props) {
 
 export default PropertiesScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -293,4 +293,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+}));

@@ -1,5 +1,6 @@
-import { View, StyleSheet } from 'react-native';
-import { COLORS, RADIUS, SIZES } from '../../../theme';
+import { View } from 'react-native';
+import { RADIUS, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // a thin bar that fills up as items get checked off, props are done and total
 function ProgressBar(props) {
@@ -18,7 +19,7 @@ function ProgressBar(props) {
 
 export default ProgressBar;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   // the Hearth pass: the same 4pt green line as everywhere else
   track: {
     height: SIZES.progress,
@@ -31,4 +32,4 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.pill,
     backgroundColor: COLORS.cta,
   },
-});
+}));

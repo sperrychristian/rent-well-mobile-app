@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Text, StyleSheet } from 'react-native';
+import { Text } from 'react-native';
 import FormSheet from '../../payments/components/FormSheet';
 import { Field, ChipPicker } from '../../payments/components/FormBits';
 import Button from '../../../components/ui/Button';
 import { useToast } from '../../../components/ui/Toast';
 import { useTaxSummary } from '../hooks/useProfitReport';
 import { shareTaxCsv, shareTaxText } from '../utils/shareTaxSummary';
-import { COLORS, SPACING, TYPE } from '../../../theme';
+import { SPACING, TYPE } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // the Schedule E style summary for one year, shared as a CSV (for a spreadsheet or an accountant) or as text
 // props: visible, years (YYYY strings, newest first), year (the one to start on), onClose
@@ -72,10 +73,10 @@ function TaxSummarySheet(props) {
 
 export default TaxSummarySheet;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   note: {
     ...TYPE.caption,
     color: COLORS.text_muted,
     marginTop: SPACING.sm,
   },
-});
+}));

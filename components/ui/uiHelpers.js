@@ -1,10 +1,10 @@
-import { COLORS } from '../../theme';
+import { themed } from '../../theme';
 
 // pure helpers for the ui pieces, nothing here draws anything so the tests can check them
 
 // the soft tint and the text color for each tone, icon circles, pills, banners, and avatars all use these
 // the fintech pass moved everything to tinted backgrounds with the matching dark text instead of solid fills
-export const tone_colors = {
+export const tone_colors = themed((COLORS) => ({
   brand: { tint: COLORS.brand_tint, text: COLORS.cta },
   success: { tint: COLORS.success_tint, text: COLORS.success_text },
   info: { tint: COLORS.info_tint, text: COLORS.info_text },
@@ -12,7 +12,7 @@ export const tone_colors = {
   warning: { tint: COLORS.warning_tint, text: COLORS.warning_text },
   danger: { tint: COLORS.danger_tint, text: COLORS.danger_text },
   neutral: { tint: COLORS.neutral_tint, text: COLORS.text_muted },
-};
+}));
 
 // the tone for a name, anything unknown is neutral
 export function toneColors(tone) {
@@ -26,7 +26,7 @@ function tinted(tone, icon) {
 
 // the fill, text color, and icon for each status or tag, the pill always shows the words too so it's never color only
 // the meanings match the colors the app already used (Open is red, In Progress orange, Resolved green)
-const tones = {
+const tones = themed((COLORS) => ({
   // work orders
   'Open': tinted('danger', 'alert-circle'),
   'In Progress': tinted('warning', 'time'),
@@ -65,9 +65,13 @@ const tones = {
   'No receipt': tinted('warning', 'alert'),
   'Capital': tinted('accent', 'trending-up'),
   'Demo': tinted('brand', 'play-circle'),
-};
+}));
 
-const neutral_tone = { fill: COLORS.neutral_tint, text: COLORS.text, icon: null };
+const neutral_tone = themed((COLORS) => ({
+  fill: COLORS.neutral_tint,
+  text: COLORS.text,
+  icon: null,
+}));
 
 // gives back { fill, text, icon } for a status, anything unknown gets the neutral grey look
 export function statusTone(label) {

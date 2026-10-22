@@ -7,7 +7,6 @@ import {
   Pressable,
   ScrollView,
   Switch,
-  StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -25,6 +24,7 @@ import { pickDocument } from '../utils/documentFiles';
 import { nameFromFile, iconFor, formatSize } from '../utils/documentHelpers';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // props: visible, onSave, onClose, plus optional document (edit mode), initial_file (a scan taken first),
 // default_name, default_category, default_property, and property_names
@@ -305,7 +305,7 @@ function DocumentFormModal(props) {
 
 export default DocumentFormModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   root: {
     flex: 1,
   },
@@ -420,4 +420,4 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 0,
   },
-});
+}));

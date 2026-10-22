@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { View, Text, TextInput, Switch, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Switch } from 'react-native';
 import FormSheet from './FormSheet';
 import { Field, MoneyField, ChipPicker, ReceiptPicker, form_styles } from './FormBits';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
@@ -8,6 +8,7 @@ import { centsToInputText } from '../../../utils/formatCurrency';
 import { makeIdempotencyKey } from '../utils/ledgerApi';
 import { payment_methods, validatePayment, hasErrors } from '../utils/ledgerHelpers';
 import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 const applies_options = [
   { value: 'rent', label: 'Rent' },
@@ -160,7 +161,7 @@ function PaymentFormModal(props) {
 
 export default PaymentFormModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   switch_row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -179,4 +180,4 @@ const styles = StyleSheet.create({
     ...TYPE.caption,
     color: COLORS.text_muted,
   },
-});
+}));

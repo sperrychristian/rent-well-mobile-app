@@ -1,10 +1,11 @@
-import { Modal, View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Modal, View, Text, Pressable, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHandle, sheet_styles } from '../../../components/ui/sheet';
 import Button from '../../../components/ui/Button';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // four short things to try, one list for each side of the demo, all on the shared sample data
 export const tour_points = {
@@ -102,7 +103,7 @@ function DemoTourSheet(props) {
 
 export default DemoTourSheet;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   dismiss: {
     flex: 1,
   },
@@ -141,4 +142,4 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
     marginTop: SPACING.lg,
   },
-});
+}));

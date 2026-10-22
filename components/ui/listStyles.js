@@ -1,11 +1,11 @@
-import { StyleSheet } from 'react-native';
 import { chip_styles } from './Chip';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, NUMBERS } from '../../theme';
+import { SPACING, TYPE, RADIUS, BORDER, SIZES, NUMBERS } from '../../theme';
+import { themedStyles } from '../../utils/themedStyles';
 
 // the pieces every list screen's filter bar shares (search box, segmented control, chips, offline note, empty text)
 // screens spread these into their own style names so the JSX didn't have to change, and they all match now
 // the fintech pass: the segment is a gray track with a white pill (same as SegmentedControl), banners are tinted
-export const list_styles = StyleSheet.create({
+export const list_styles = themedStyles((COLORS) => ({
   screen: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -118,4 +118,4 @@ export const list_styles = StyleSheet.create({
     ...NUMBERS,
     color: COLORS.text,
   },
-});
+}));

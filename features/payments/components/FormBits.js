@@ -1,10 +1,11 @@
-import { View, Text, Image, Pressable, Alert, StyleSheet } from 'react-native';
+import { View, Text, Image, Pressable, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import Chip from '../../../components/ui/Chip';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
 import Button from '../../../components/ui/Button';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // small pieces the payments forms share: a labeled field wrapper, a money box, a chip picker, and a receipt photo
 
@@ -131,7 +132,7 @@ export function ReceiptPicker(props) {
   );
 }
 
-export const form_styles = StyleSheet.create({
+export const form_styles = themedStyles((COLORS) => ({
   // the Hearth pass: white, a hairline edge, 8 corners, 52 tall
   input: {
     ...TYPE.input,
@@ -151,9 +152,9 @@ export const form_styles = StyleSheet.create({
     minHeight: SIZES.touch + SPACING.lg + SPACING.xs,
     textAlignVertical: 'top',
   },
-});
+}));
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   field: {
     marginBottom: SPACING.lg,
   },
@@ -224,4 +225,4 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 0,
   },
-});
+}));

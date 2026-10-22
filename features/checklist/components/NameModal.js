@@ -1,20 +1,12 @@
 import { useState } from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import { Modal, View, Text, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 // the pop-up forms share the sheet look from components/ui, the JSX still says Card
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { COLORS, SPACING, TYPE } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // a small form with one name box, used for adding a room or an item
 // Alert.prompt only works on iOS, so this works on both
@@ -78,7 +70,7 @@ function NameModal(props) {
 
 export default NameModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   backdrop: {
     flex: 1,
     backgroundColor: COLORS.backdrop,
@@ -107,4 +99,4 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 0,
   },
-});
+}));

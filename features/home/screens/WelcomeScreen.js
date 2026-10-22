@@ -1,11 +1,12 @@
-import { StyleSheet, Text, View, ScrollView, useWindowDimensions } from 'react-native';
+import { Text, View, ScrollView, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { SPACING, TYPE, SIZES } from '../../../theme';
 import PrimaryButton from '../../../components/PrimaryButton';
 import Wordmark from '../../../components/ui/Wordmark';
 import FadeInView from '../../../components/ui/FadeInView';
 import IconCircle from '../../../components/ui/IconCircle';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // the design pass: a hero with the pixel house and the wordmark over a faint pixel grid,
 // and the buttons down in the thumb zone (Log In, then Sign Up, then the demo with a line explaining it)
@@ -105,7 +106,7 @@ function WelcomeScreen(props) {
 
 export default WelcomeScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   screen: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -176,4 +177,4 @@ const styles = StyleSheet.create({
     fontFamily: TYPE.label.fontFamily,
     color: COLORS.text_muted,
   },
-});
+}));

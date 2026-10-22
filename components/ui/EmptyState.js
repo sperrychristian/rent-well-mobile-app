@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Button from './Button';
 import { COLORS, SPACING, TYPE, SIZES } from '../../theme';
+import { themedStyles } from '../../utils/themedStyles';
 
 // what a list shows when there's nothing in it: a small pixel drawing, a title, one line, and maybe a button
 // props: illustration (empty_work_orders, empty_messages, empty_tenants, empty_documents, empty_checklists,
@@ -54,7 +55,7 @@ function EmptyState(props) {
 
 export default EmptyState;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   box: {
     alignItems: 'center',
     alignSelf: 'stretch',
@@ -79,4 +80,4 @@ const styles = StyleSheet.create({
   action: {
     marginTop: SPACING.lg,
   },
-});
+}));

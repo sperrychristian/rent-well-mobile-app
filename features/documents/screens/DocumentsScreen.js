@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import {
-  StyleSheet,
   View,
   Text,
   FlatList,
@@ -31,6 +30,7 @@ import { COLORS, SPACING, TYPE, SIZES, OPACITY, NUMBERS } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import StatusLabel from '../../../components/ui/StatusLabel';
+import { themedStyles } from '../../../utils/themedStyles';
 
 const sort_options = ['Newest', 'Name'];
 
@@ -411,7 +411,7 @@ function DocumentsScreen() {
 
 export default DocumentsScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -516,4 +516,4 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: OPACITY.pressed,
   },
-});
+}));

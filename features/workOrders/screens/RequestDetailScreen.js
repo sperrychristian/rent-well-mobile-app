@@ -1,14 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-  Image,
-  Pressable,
-} from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Alert, Image, Pressable } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
@@ -22,6 +13,7 @@ import { formatDate } from '../../../utils/formatDate';
 import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusLabel from '../../../components/ui/StatusLabel';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // the server takes photos up to 10 MB
 const max_photo_bytes = 10485760;
@@ -233,7 +225,7 @@ function RequestDetailScreen(props) {
 
 export default RequestDetailScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -299,4 +291,4 @@ const styles = StyleSheet.create({
     ...TYPE.title,
     color: COLORS.text,
   },
-});
+}));

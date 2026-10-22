@@ -1,4 +1,4 @@
-import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
+import { Modal, View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHandle, sheet_styles } from './sheet';
@@ -6,6 +6,7 @@ import Button from './Button';
 import { useReduceMotion } from './useReduceMotion';
 import { lineIcon } from './lineIcon';
 import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../theme';
+import { themedStyles } from '../../utils/themedStyles';
 
 // a short list of choices that slides up from the bottom (the ledger's "More"), the Hearth sheet look:
 // white with 12 corners and the one shadow, each choice a ruled row with a line icon, Cancel at the bottom
@@ -75,7 +76,7 @@ function ActionSheet(props) {
 
 export default ActionSheet;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   dismiss: {
     flex: 1,
   },
@@ -107,4 +108,4 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
     marginTop: SPACING.md,
   },
-});
+}));

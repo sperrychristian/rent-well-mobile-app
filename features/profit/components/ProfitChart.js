@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Text, useWindowDimensions } from 'react-native';
 import Svg, { Line, Rect } from 'react-native-svg';
 import { month_short } from '../utils/profitMath';
 import { formatCents } from '../../../utils/formatCurrency';
 import { COLORS, SPACING, TYPE, SIZES, BORDER } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // net profit by month as one set of forest green bars on the paper, with hairline gridlines and no card
 // a month that lost money draws below the zero line (the same green, the words under it say which)
@@ -89,7 +90,7 @@ function ProfitChart(props) {
 
 export default ProfitChart;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   wrap: {
     marginTop: SPACING.lg,
     alignSelf: 'center',
@@ -104,4 +105,4 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
   },
-});
+}));

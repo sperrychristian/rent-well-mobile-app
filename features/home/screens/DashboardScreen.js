@@ -1,6 +1,6 @@
-import { StyleSheet, View, ScrollView } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, SPACING, SIZES } from '../../../theme';
+import { SPACING, SIZES } from '../../../theme';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DemoBanner from '../../../components/DemoBanner';
 import SummaryBlock from '../../../components/ui/SummaryBlock';
@@ -26,6 +26,7 @@ import { collectedShare, monthOf } from '../../payments/utils/ledgerMath';
 import { demo_landlord } from '../../messages/data/sampleThreads';
 import { leasesSummary, urgentLease } from '../../leases/utils/leaseHelpers';
 import { useProfitReport } from '../../profit/hooks/useProfitReport';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // the fintech pass: an overview like a bank's home screen, a hello, one indigo summary card with this month's
 // spending and its trend, three key numbers, the four things landlords open most, then everything else
@@ -238,7 +239,7 @@ function DashboardScreen(props) {
 
 export default DashboardScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -267,4 +268,4 @@ const styles = StyleSheet.create({
   logout_button: {
     marginTop: SPACING.md,
   },
-});
+}));

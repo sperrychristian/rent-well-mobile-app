@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import { leaseStatusLabel, daysLine, shortLeaseDate } from '../utils/leaseHelpers';
-import { COLORS, SPACING, TYPE, BORDER, NUMBERS } from '../../../theme';
+import { SPACING, TYPE, BORDER, NUMBERS } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // one lease as plain ruled lines on the paper: the status, the dates, the days left, the notice, and notes
 // tenants see the same block without the notes (the server never sends them a tenant's copy anyway)
@@ -46,7 +47,7 @@ function LeaseBlock(props) {
 
 export default LeaseBlock;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   status: {
     marginBottom: SPACING.sm,
   },
@@ -76,4 +77,4 @@ const styles = StyleSheet.create({
     borderTopWidth: BORDER.hairline,
     borderTopColor: COLORS.hairline,
   },
-});
+}));

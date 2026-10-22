@@ -1,6 +1,7 @@
-import { Text, Pressable, StyleSheet } from 'react-native';
+import { Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../theme';
+import { themedStyles } from '../../utils/themedStyles';
 
 // a filter or choice chip, selected ones fill with the steel blue and get a check so it's not color only
 // (the fintech pass: white with a hairline border, and a soft indigo tint with an indigo border when picked,
@@ -35,7 +36,7 @@ function Chip(props) {
 export default Chip;
 
 // the same look as a plain object, for screens whose chips are still their own Pressables
-export const chip_styles = StyleSheet.create({
+export const chip_styles = themedStyles((COLORS) => ({
   chip: {
     paddingVertical: SPACING.xs + SPACING.xxs,
     paddingHorizontal: SPACING.md - SPACING.xxs,
@@ -53,9 +54,9 @@ export const chip_styles = StyleSheet.create({
     ...TYPE.label,
     color: COLORS.text,
   },
-});
+}));
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   chip: {
     ...chip_styles.chip,
     flexDirection: 'row',
@@ -76,4 +77,4 @@ const styles = StyleSheet.create({
   selected_text: {
     color: COLORS.cta,
   },
-});
+}));

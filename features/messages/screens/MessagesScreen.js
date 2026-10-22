@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, FlatList, RefreshControl } from 'react-native';
+import { View, Text, FlatList, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 import Card from '../../../components/Card';
@@ -11,6 +11,7 @@ import { useMessages } from '../context/MessagesContext';
 import { useAuth } from '../../auth/context/AuthContext';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
+import { themedStyles } from '../../../utils/themedStyles';
 
 function MessagesScreen(props) {
   const insets = useSafeAreaInsets();
@@ -129,7 +130,7 @@ function MessagesScreen(props) {
 
 export default MessagesScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -172,4 +173,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: SPACING.lg,
   },
-});
+}));

@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import PrimaryButton from './PrimaryButton';
-import { COLORS, SPACING, TYPE, SIZES } from '../theme';
+import { SPACING, TYPE, SIZES } from '../theme';
 import IconCircle from './ui/IconCircle';
+import { themedStyles } from '../utils/themedStyles';
 
 // shown instead of a blank screen when something couldn't load, like being offline or the server being down
 // props: message, onRetry
@@ -31,7 +32,7 @@ function ErrorState(props) {
 
 export default ErrorState;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   box: {
     alignItems: 'center',
     alignSelf: 'stretch',
@@ -56,4 +57,4 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
     minWidth: SIZES.content_max_width / 4 + SPACING.sm,
   },
-});
+}));

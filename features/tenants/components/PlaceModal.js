@@ -5,7 +5,6 @@ import {
   Text,
   Pressable,
   ScrollView,
-  StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -15,9 +14,10 @@ import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TextField from '../../../components/TextField';
 import { checkPlace, unitSuggestions, placeLabel } from '../utils/tenantHelpers';
-import { COLORS, SPACING, TYPE } from '../../../theme';
+import { SPACING, TYPE } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // picks a property and a unit for Move or Assign, then asks before doing it
 // props: visible, title, confirm_word ('Move' or 'Assign'), tenant, moving_tenancy (null for assign),
@@ -163,7 +163,7 @@ function PlaceModal(props) {
 
 export default PlaceModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   root: {
     flex: 1,
   },
@@ -229,4 +229,4 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 0,
   },
-});
+}));

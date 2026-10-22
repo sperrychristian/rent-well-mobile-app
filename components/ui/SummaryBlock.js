@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, SPACING, TYPE, NUMBERS } from '../../theme';
+import { View, Text } from 'react-native';
+import { SPACING, TYPE, NUMBERS } from '../../theme';
+import { themedStyles } from '../../utils/themedStyles';
 
 // the big fact at the top of a screen: a small label, the key figure large, a caption, and room for extras under it
 // variants: brand (the indigo card with white text, for the one overview card on a home screen) and plain (white card)
@@ -35,7 +36,7 @@ function SummaryBlock(props) {
 
 export default SummaryBlock;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   block: {
     paddingVertical: SPACING.md,
     gap: SPACING.sm,
@@ -55,4 +56,4 @@ const styles = StyleSheet.create({
     ...TYPE.body,
     color: COLORS.text_muted,
   },
-});
+}));

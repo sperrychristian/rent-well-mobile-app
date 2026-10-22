@@ -25,6 +25,7 @@ import { list_styles } from '../../../components/ui/listStyles';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 import ReceiptImage from '../../../components/ReceiptImage';
+import { themedStyles } from '../../../utils/themedStyles';
 
 const repeat_options = ['None', 'Monthly', 'Yearly'];
 
@@ -494,7 +495,7 @@ function AddExpenseModal(props) {
 
 export default AddExpenseModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   root: {
     flex: 1,
   },
@@ -620,4 +621,4 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-});
+}));

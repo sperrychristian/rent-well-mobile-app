@@ -1,10 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Animated, AccessibilityInfo, Text, View, StyleSheet } from 'react-native';
+import { Animated, AccessibilityInfo, Text, View } from 'react-native';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useReduceMotion } from './useReduceMotion';
 import { lineIcon } from './lineIcon';
 import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../theme';
+import { themedStyles } from '../../utils/themedStyles';
 
 // a short dark bar at the bottom for routine success ("Payment recorded"), it goes away by itself
 // one host at the root so a toast still shows after the form that started it closes or the screen goes back
@@ -74,7 +75,7 @@ export function useToast() {
   return { show: show || (() => {}) };
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   wrap: {
     position: 'absolute',
     left: SPACING.md,
@@ -99,4 +100,4 @@ const styles = StyleSheet.create({
     color: COLORS.text_light,
     flexShrink: 1,
   },
-});
+}));

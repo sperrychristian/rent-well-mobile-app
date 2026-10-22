@@ -1,5 +1,6 @@
-import { View, Pressable, StyleSheet } from 'react-native';
-import { COLORS, SPACING, RADIUS, BORDER, SHADOWS } from '../../theme';
+import { View, Pressable } from 'react-native';
+import { SPACING, RADIUS, BORDER, SHADOWS } from '../../theme';
+import { themedStyles } from '../../utils/themedStyles';
 
 // a surface that groups related things, all three looks share the same padding and corners
 // variants: flat (sits on the page with a border), raised (lifted with a shadow), interactive (raised and tappable)
@@ -34,7 +35,7 @@ export default Card;
 // the Hearth pass: flat and interactive cards aren't boxes anymore, just a stretch of the page with room
 // above and below (rows inside bring their own hairlines), raised is the one white box with a hairline edge
 // for the rare spot that really needs one
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   card: {
     paddingVertical: SPACING.sm,
   },
@@ -52,4 +53,4 @@ const styles = StyleSheet.create({
   pressed: {
     backgroundColor: COLORS.surface_raised,
   },
-});
+}));

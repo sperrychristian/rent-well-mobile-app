@@ -1,5 +1,6 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { COLORS, SPACING, TYPE, BORDER, SIZES, NUMBERS } from '../../theme';
+import { View, Text, Pressable } from 'react-native';
+import { SPACING, TYPE, BORDER, SIZES, NUMBERS } from '../../theme';
+import { themedStyles } from '../../utils/themedStyles';
 
 // a row of tabs in a gray track where the picked one sits on a white pill, for filters that act like tabs
 // props: options (a list of { value, label, count }), value (the picked value), onChange, style, label (for screen readers)
@@ -42,7 +43,7 @@ function SegmentedControl(props) {
 
 export default SegmentedControl;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   // the Hearth pass: plain tabs on a hairline, the picked one gets a green underline and green words
   track: {
     flexDirection: 'row',
@@ -77,4 +78,4 @@ const styles = StyleSheet.create({
   count: {
     color: COLORS.text_muted,
   },
-});
+}));

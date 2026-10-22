@@ -1,9 +1,10 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Avatar from './Avatar';
 import { toneColors } from './uiHelpers';
 import { lineIcon } from './lineIcon';
 import { COLORS, SPACING, TYPE, BORDER, SIZES, NUMBERS } from '../../theme';
+import { themedStyles } from '../../utils/themedStyles';
 
 // one row in a list: something on the left (an icon or an avatar), a title and a subtitle, and a value or chevron on the right
 // props: title, subtitle, icon, icon_color, avatar_name, trailing (text or a node), chevron, onPress,
@@ -73,7 +74,7 @@ function ListRow(props) {
 
 export default ListRow;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -113,4 +114,4 @@ const styles = StyleSheet.create({
     ...TYPE.subheading,
     color: COLORS.text,
   },
-});
+}));

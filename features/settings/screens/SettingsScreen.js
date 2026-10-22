@@ -1,4 +1,4 @@
-import { StyleSheet, Text, ScrollView } from 'react-native';
+import { Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
@@ -8,11 +8,20 @@ import { useAuth } from '../../auth/context/AuthContext';
 import { useAppRole } from '../../auth/hooks/useAppRole';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { SIZES, COLORS, SPACING, TYPE } from '../../../theme';
+import { SIZES, SPACING, TYPE } from '../../../theme';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import ListRow from '../../../components/ui/ListRow';
 import DemoTourSheet from '../../home/components/DemoTourSheet';
 import { useDemoTour } from '../../home/hooks/useDemoTour';
+import { themedStyles } from '../../../utils/themedStyles';
+import SegmentedControl from '../../../components/ui/SegmentedControl';
+import { useTheme } from '../../../context/ThemeContext';
+
+const appearance_choices = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+];
 
 // stub for the assignment: the future home for account details, notification settings, the mileage rate,
 // and Log Out (the old Log Out buttons on the homes still work, this is just the spot it moves to later)
@@ -27,6 +36,8 @@ function SettingsScreen(props) {
   const shows_mileage = role === 'owner';
   // the demo tour opens again from here, it only means something while the demo runs
   const tour = useDemoTour(false);
+  // Appearance is saved on this phone, so it stays the same before login, in the demo, and after logging out
+  const theme = useTheme();
 
   return (
     <ScrollView
@@ -59,6 +70,21 @@ function SettingsScreen(props) {
             <Text style={styles.detail}>Demo mode, no account. Nothing here is saved.</Text>
           </>
         )}
+      </Card>
+
+      <Card>
+        <Text style={styles.heading}>Appearance</Text>
+        <SegmentedControl
+          label="Appearance"
+          options={appearance_choices}
+          value={theme.preference}
+          onChange={theme.setPreference}
+        />
+        <Text style={styles.detail}>
+          {theme.preference === 'system'
+            ? "Follows your phone, it's " + (theme.is_dark ? 'dark' : 'light') + ' right now.'
+            : 'Saved on this phone, for every account and the demo.'}
+        </Text>
       </Card>
 
       {shows_mileage && (
@@ -107,7 +133,7 @@ function SettingsScreen(props) {
 
 export default SettingsScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -138,4 +164,4 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginHorizontal: 0,
   },
-});
+}));

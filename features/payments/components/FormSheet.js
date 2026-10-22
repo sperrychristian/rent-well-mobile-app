@@ -1,17 +1,10 @@
-import {
-  Modal,
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import { Modal, View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 // the pop-up forms share the sheet look from components/ui
 import ModalCard from '../../../components/ui/ModalCard';
 import Button from '../../../components/ui/Button';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { COLORS, SPACING, TYPE } from '../../../theme';
+import { SPACING, TYPE } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // the frame every payments form sits in: a sheet over a dim backdrop, a title and a line under it,
 // the fields, a form-level error, and Cancel on the left with the main action on the right
@@ -76,7 +69,7 @@ function FormSheet(props) {
 
 export default FormSheet;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   root: {
     flex: 1,
   },
@@ -115,4 +108,4 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 0,
   },
-});
+}));

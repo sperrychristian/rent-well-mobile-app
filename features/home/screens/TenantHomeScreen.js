@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DemoBanner from '../../../components/DemoBanner';
@@ -23,6 +23,7 @@ import HeroNote from '../components/HeroNote';
 import DemoTourSheet from '../components/DemoTourSheet';
 import { useDemoTour } from '../hooks/useDemoTour';
 import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // the tenant's home: message the landlord or report something that needs fixing
 // the Hearth pass: the wordmark and your initials, then what you owe right now as one big number with the
@@ -246,7 +247,7 @@ function TenantHomeScreen(props) {
 
 export default TenantHomeScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   scroll: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -303,4 +304,4 @@ const styles = StyleSheet.create({
   logout_button: {
     marginHorizontal: 0,
   },
-});
+}));

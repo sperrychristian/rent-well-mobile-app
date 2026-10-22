@@ -1,4 +1,5 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
@@ -272,6 +273,48 @@ function MainDrawer() {
   );
 }
 
+// where the navigator was, kept so a theme switch can put it back, and only a theme switch:
+// it's used when the same navigator (same mode and role) mounts again in the other scheme
+const kept_navigation = { key: null, scheme: null, state: undefined };
+
+function keepNavigationState(navigator_key, scheme, state) {
+  kept_navigation.key = navigator_key;
+  kept_navigation.scheme = scheme;
+  kept_navigation.state = state;
+}
+
+// a fresh launch starts with nothing kept, the tests call this between runs to be one
+export function forgetNavigationState() {
+  keepNavigationState(null, null, undefined);
+}
+
+function keptNavigationState(navigator_key, scheme) {
+  if (kept_navigation.key !== navigator_key || kept_navigation.scheme === scheme) {
+    return undefined;
+  }
+  // it's the theme that changed, so the state carries over and now belongs to the new scheme
+  kept_navigation.scheme = scheme;
+  return kept_navigation.state;
+}
+
+// the navigator's own colors (the scene background behind every screen, cards, borders) from the palette
+function navigationThemeFor(theme) {
+  const base = theme.is_dark ? DarkTheme : DefaultTheme;
+  return {
+    ...base,
+    dark: theme.is_dark,
+    colors: {
+      ...base.colors,
+      primary: theme.colors.cta,
+      background: theme.colors.background,
+      card: theme.colors.background,
+      text: theme.colors.title,
+      border: theme.colors.hairline,
+      notification: theme.colors.danger,
+    },
+  };
+}
+
 // waits for the saved session, then starts on the right home for a signed-in account or on Welcome
 // the providers above start fresh (and remount this) whenever the mode or account changes,
 // so the first screen has to match the mode: the demo's dashboard, a role's home, or Login after a session ran out
@@ -279,6 +322,9 @@ function AppNavigator() {
   const { status, user, session_expired } = useAuth();
   const { demo_mode, demo_role } = useWorkOrders();
   const role = useAppRole();
+  // switching the theme starts the navigator over so every screen draws in the new colors,
+  // and it comes back on the same screen from the kept state (only a theme change reuses it)
+  const theme = useTheme();
   if (status === 'restoring') {
     return null;
   }
@@ -304,7 +350,13 @@ function AppNavigator() {
   const navigator_key = demo_mode ? 'demo-' + demo_role : 'app-' + (role || 'signed-out');
 
   return (
-    <NavigationContainer key={navigator_key} ref={navigation_ref}>
+    <NavigationContainer
+      key={navigator_key + ':' + theme.scheme}
+      ref={navigation_ref}
+      theme={navigationThemeFor(theme)}
+      initialState={keptNavigationState(navigator_key, theme.scheme)}
+      onStateChange={(state) => keepNavigationState(navigator_key, theme.scheme, state)}
+    >
       {/* I'm hiding the default header since my screens have their own title */}
       {/* that changed for the navigation assignment: every screen gets a header with one shared style now, */}
       {/* the titles come from navigation/navigationMap.js, and the ScreenTitle card stays as the big title */}
@@ -419,7 +471,18 @@ function AppNavigator() {
   );
 }
 
+// the theme reads the saved Appearance first, then the rest of the app starts inside it
 export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+}
+
+function AppContent() {
+  // the dark mode pass: the splash also waits for the saved Appearance, so the first screen is the right theme
+  const theme = useTheme();
   // load the fonts first and show nothing until they're ready
   // the Hearth pass: Fraunces for the big moments and DM Sans for the rest, and if they fail to load
   // the app still opens and the system font fills in for any family it doesn't have
@@ -431,27 +494,29 @@ export default function App() {
     DMSans_600SemiBold,
   });
   const fonts_done = fonts_loaded || !!fonts_error;
+  const ready = fonts_done && theme.ready;
 
   useEffect(() => {
     if (fonts_error) {
       console.log('Fonts did not load, using the system font', fonts_error.message);
     }
-    if (fonts_done) {
+    if (ready) {
       SplashScreen.hideAsync().catch(() => {});
     }
-  }, [fonts_done, fonts_error]);
+  }, [ready, fonts_error]);
 
-  if (!fonts_done) {
+  if (!ready) {
     return null;
   }
 
   return (
     // the drawer's swipe needs the gesture handler's root around everything
-    <GestureHandlerRootView style={styles.root}>
+    <GestureHandlerRootView style={[styles.root, { backgroundColor: theme.colors.background }]}>
       <AuthProvider>
         {/* light clock and battery icons, the app is navy */}
         {/* the fintech pass made the app light again, so the clock and battery are dark now */}
-        <StatusBar style="dark" />
+        {/* and in dark mode they're light again */}
+        <StatusBar style={theme.is_dark ? 'light' : 'dark'} />
         <AccountData>
           {/* toasts sit above every screen so one still shows after its form closes */}
           <ToastProvider>
