@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
+import { RemoteExpensesContext } from '../features/expenses/context/remoteExpensesContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { work_orders } from '../data/workOrders';
 import { seed_expenses } from '../data/expenses';
@@ -697,8 +698,19 @@ export function WorkOrdersProvider(props) {
 
 // screens call this to get the shared orders, expenses, and actions
 // in real mode the work order provider hands back the same shape with the orders coming from the server
+// and for a real landlord the expenses provider swaps in the server's expenses and their actions the same way
 export function useWorkOrders() {
   const local = useContext(WorkOrdersContext);
   const remote = useContext(RemoteWorkOrdersContext);
-  return remote || local;
+  const remote_expenses = useContext(RemoteExpensesContext);
+  const base = remote || local;
+  return useMemo(
+    () => (remote_expenses ? remote_expenses.withServerExpenses(base) : base),
+    [base, remote_expenses],
+  );
+}
+
+// the phone's own data no matter the mode, the expense import reads and clears the old phone expenses with it
+export function useLocalWorkOrders() {
+  return useContext(WorkOrdersContext);
 }

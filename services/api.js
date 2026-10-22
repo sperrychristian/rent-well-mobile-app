@@ -499,6 +499,14 @@ export async function getProfitReport(year, property_id) {
   return data.report;
 }
 
+// the Schedule E summary as JSON, for the text share
+export async function getTaxSummary(year) {
+  const data = await api_client.request('GET', '/reports/tax-summary', {
+    query: { year: year, format: 'json' },
+  });
+  return data.summary;
+}
+
 // the Schedule E summary as CSV text, ready to save and share
 export function getTaxSummaryCsv(year) {
   return api_client.request('GET', '/reports/tax-summary', {

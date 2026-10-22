@@ -32,6 +32,7 @@ import MyRequestsScreen from './features/workOrders/screens/MyRequestsScreen';
 import RequestDetailScreen from './features/workOrders/screens/RequestDetailScreen';
 import { TenantsProvider } from './features/tenants/context/TenantsContext';
 import { LedgerProvider } from './features/payments/context/LedgerContext';
+import { ExpensesProvider } from './features/expenses/context/ExpensesContext';
 import TenantsScreen from './features/tenants/screens/TenantsScreen';
 import TenantDetailScreen from './features/tenants/screens/TenantDetailScreen';
 import PropertiesScreen from './features/tenants/screens/PropertiesScreen';
@@ -100,7 +101,10 @@ function AccountData(props) {
           {/* tenants and properties: the demo's local copy, or the server's in real mode */}
           <TenantsProvider>
             {/* rent and payments: the demo's ledgers in memory, or the server's in real mode */}
-            <LedgerProvider>{props.children}</LedgerProvider>
+            <LedgerProvider>
+              {/* expenses: the server's for a real landlord, the phone's own everywhere else */}
+              <ExpensesProvider>{props.children}</ExpensesProvider>
+            </LedgerProvider>
           </TenantsProvider>
         </MessagesProvider>
       </RemoteWorkOrdersProvider>
