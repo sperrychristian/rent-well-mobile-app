@@ -141,6 +141,14 @@ Contrast is AA (at least 4.5 to 1) for every pairing:
 | Use terracotta for overdue and urgent only. | Use red blocks, or terracotta for routine things. |
 | Leave whitespace between sections. | Add shadows, gradients, or borders around groups. |
 
+## Tab bar and drawer
+
+- **Tab bar:** paper (`background`) with one `hairline` on top and no shadow. 56 tall plus the home indicator (`SIZES.tab_bar`). A 24 outline icon (`SIZES.tab_icon`) and a DM Sans 500 label at 12, green (`cta`) for the tab you're on and `text_muted` for the rest. The label can scale up to 1.3 times and stays on one line.
+- **Badges:** a count on Messages (terracotta `danger` fill, white numbers), and an 8 point terracotta dot (`SIZES.tab_dot`) on Payments when something is overdue and on the landlord's Work Orders while an order is still Open. The tab's accessibility label says it in words ("Payments, something is overdue"), so it's never color only.
+- **Drawer:** paper, 300 wide (`SIZES.drawer_width`), a hairline on its right edge, no shadow, and the ink `backdrop` over the screen. At the top: the Wordmark (small, left) and a muted role line ("Landlord", "Tenant", or the demo side). Then a section header per group (Main, Rentals, Money, Records, Account, or Repairs and Account for tenants) and plain rows: a 24 green line icon, a 17 medium label, a hairline on top, 52 tall (`SIZES.drawer_row`). The row you're on gets `surface_raised` and a semibold green label, and says it's selected to a screen reader.
+- **Headers:** the tab and drawer headers use the same paper bar and ink title as the stack. The menu button (`menu-outline`, 44 square) sits on the left, and hides on an iPad (768 and wider, `SIZES.wide_layout`) where the drawer stays open on the side.
+- **Gestures:** the drawer swipe starts within 24 points of the left edge (`SIZES.drawer_swipe_edge`) so it doesn't catch the chip rows.
+
 ## Payments screens
 
 The ledger screens follow the same rules:

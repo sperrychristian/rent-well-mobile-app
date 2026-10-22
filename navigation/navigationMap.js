@@ -31,6 +31,10 @@ export const situations = {
 //   header, after submit, or reset when the history gets cleared), label (what you tap),
 //   and roles when only owners or only tenants see it
 // future marks screens that should become a tab or a drawer item once the app moves past a plain stack
+// the tabs and drawer are built now, so future is gone and place says where each screen really lives:
+//   auth (the signed-out screens in the root stack), tab (in the role's tab bar), drawer (in the role's drawer),
+//   or drill (a detail or form screen in the root stack that pushes over the tabs and drawer)
+// nav_label and nav_icon are the short label and line icon a tab or drawer item shows (the header keeps the title)
 // reachable_in lists the situations (above) that can open the screen without logging in, out, or leaving the demo,
 //   the tests check it against the edges
 // demo: true on an edge means only the demo has it (starting a demo side, or switching sides from the demo banner)
@@ -49,7 +53,7 @@ export const navigation_map = {
       { to: 'RegisterOwner', param: null, via: 'button', label: 'Sign Up' },
       { to: 'DemoChooser', param: null, via: 'button', label: 'Try the Demo' },
     ],
-    future: [],
+    place: 'auth',
   },
   DemoChooser: {
     title: 'Pick a Demo Role',
@@ -64,7 +68,7 @@ export const navigation_map = {
       { to: 'Dashboard', param: null, via: 'reset', label: 'Demo as Landlord', demo: true },
       { to: 'TenantHome', param: null, via: 'reset', label: 'Demo as Tenant', demo: true },
     ],
-    future: [],
+    place: 'auth',
   },
   Login: {
     title: 'Log In to Rent Well',
@@ -80,7 +84,7 @@ export const navigation_map = {
       { to: 'RegisterOwner', param: null, via: 'link', label: 'New landlord?' },
       { to: 'RegisterTenant', param: null, via: 'link', label: 'I have an invite code' },
     ],
-    future: [],
+    place: 'auth',
   },
   RegisterOwner: {
     title: 'Landlord Sign Up',
@@ -95,7 +99,7 @@ export const navigation_map = {
       { to: 'RegisterTenant', param: null, via: 'link', label: 'Renting?' },
       { to: 'Login', param: null, via: 'link', label: 'Log in instead' },
     ],
-    future: [],
+    place: 'auth',
   },
   RegisterTenant: {
     title: 'Tenant Sign Up',
@@ -109,7 +113,7 @@ export const navigation_map = {
       { to: 'TenantHome', param: null, via: 'reset', label: 'Join' },
       { to: 'Login', param: null, via: 'link', label: 'Log in instead' },
     ],
-    future: [],
+    place: 'auth',
   },
 
   // ----- owner -----
@@ -141,7 +145,9 @@ export const navigation_map = {
         demo: true,
       },
     ],
-    future: [{ role: 'owner', kind: 'tab' }],
+    place: 'tab',
+    nav_label: 'Home',
+    nav_icon: 'home-outline',
   },
   WorkOrders: {
     title: 'All Work Orders',
@@ -157,7 +163,9 @@ export const navigation_map = {
       { to: 'WorkOrderDetail', param: 'workOrderId', via: 'card', label: 'Details' },
       { to: 'MessageThread', param: 'conversationId', via: 'card', label: 'Message' },
     ],
-    future: [{ role: 'owner', kind: 'tab' }],
+    place: 'tab',
+    nav_label: 'Work Orders',
+    nav_icon: 'construct-outline',
   },
   WorkOrderDetail: {
     title: 'Work Order',
@@ -171,7 +179,7 @@ export const navigation_map = {
     edges: [
       { to: 'MessageThread', param: 'conversationId', via: 'button', label: 'Message Tenant' },
     ],
-    future: [],
+    place: 'drill',
   },
   Tenants: {
     title: 'Your Tenants',
@@ -187,7 +195,9 @@ export const navigation_map = {
       { to: 'Properties', param: null, via: 'button', label: 'Properties' },
       { to: 'TenantDetail', param: 'tenantId', via: 'list item', label: 'a tenant' },
     ],
-    future: [{ role: 'owner', kind: 'tab' }],
+    place: 'drawer',
+    nav_label: 'Tenants',
+    nav_icon: 'people-outline',
   },
   TenantDetail: {
     title: 'Tenant Profile',
@@ -205,7 +215,7 @@ export const navigation_map = {
       { to: 'WorkOrders', param: 'tenantId', via: 'link', label: 'View in Work Orders' },
       { to: 'ChecklistDetail', param: 'checklistId', via: 'after submit', label: 'End Tenancy' },
     ],
-    future: [],
+    place: 'drill',
   },
   TenantLease: {
     title: 'Lease and Documents',
@@ -216,7 +226,7 @@ export const navigation_map = {
     status: 'stub',
     params: ['tenantId'],
     edges: [{ to: 'Documents', param: null, via: 'button', label: 'Open Documents' }],
-    future: [],
+    place: 'drill',
   },
   Properties: {
     title: 'Your Properties',
@@ -227,7 +237,9 @@ export const navigation_map = {
     status: 'built',
     params: [],
     edges: [{ to: 'PropertyDetail', param: 'propertyId', via: 'list item', label: 'a property' }],
-    future: [{ role: 'owner', kind: 'drawer' }],
+    place: 'drawer',
+    nav_label: 'Properties',
+    nav_icon: 'business-outline',
   },
   PropertyDetail: {
     title: 'Property Overview',
@@ -241,7 +253,7 @@ export const navigation_map = {
       { to: 'Tenants', param: 'propertyId', via: 'button', label: 'Tenants here' },
       { to: 'WorkOrders', param: 'propertyId', via: 'button', label: 'Work orders here' },
     ],
-    future: [],
+    place: 'drill',
   },
   InviteTenant: {
     title: 'Invite a New Tenant',
@@ -252,7 +264,7 @@ export const navigation_map = {
     status: 'built',
     params: [],
     edges: [],
-    future: [],
+    place: 'drill',
   },
   Documents: {
     title: 'Document Storage',
@@ -263,7 +275,9 @@ export const navigation_map = {
     status: 'built',
     params: [],
     edges: [],
-    future: [{ role: 'owner', kind: 'drawer' }],
+    place: 'drawer',
+    nav_label: 'Documents',
+    nav_icon: 'document-text-outline',
   },
   Checklist: {
     title: 'Condition Checklists',
@@ -281,7 +295,9 @@ export const navigation_map = {
         label: 'a checklist or New',
       },
     ],
-    future: [{ role: 'owner', kind: 'drawer' }],
+    place: 'drawer',
+    nav_label: 'Checklists',
+    nav_icon: 'checkbox-outline',
   },
   ChecklistDetail: {
     title: 'Checklist',
@@ -296,7 +312,7 @@ export const navigation_map = {
     edges: [
       { to: 'ChecklistDetail', param: 'checklistId', via: 'button', label: 'Start Move-Out' },
     ],
-    future: [],
+    place: 'drill',
   },
   Expenses: {
     title: 'Property Expenses',
@@ -311,7 +327,9 @@ export const navigation_map = {
       { to: 'YearEndReport', param: 'yearId', via: 'button', label: 'Year-End Report' },
       { to: 'WorkOrderDetail', param: 'workOrderId', via: 'link', label: 'linked work order' },
     ],
-    future: [{ role: 'owner', kind: 'drawer' }],
+    place: 'drawer',
+    nav_label: 'Expenses',
+    nav_icon: 'receipt-outline',
   },
   Mileage: {
     title: 'Mileage Log',
@@ -322,7 +340,9 @@ export const navigation_map = {
     status: 'built',
     params: [],
     edges: [],
-    future: [],
+    place: 'drawer',
+    nav_label: 'Mileage Log',
+    nav_icon: 'car-outline',
   },
   YearEndReport: {
     title: 'Year-End Tax Report',
@@ -335,7 +355,7 @@ export const navigation_map = {
     // the tax year is what identifies a year-end report
     params: ['yearId'],
     edges: [],
-    future: [],
+    place: 'drill',
   },
 
   // ----- tenant -----
@@ -363,7 +383,9 @@ export const navigation_map = {
         demo: true,
       },
     ],
-    future: [{ role: 'tenant', kind: 'tab' }],
+    place: 'tab',
+    nav_label: 'My Home',
+    nav_icon: 'home-outline',
   },
   MyRequests: {
     title: 'My Repair Requests',
@@ -377,7 +399,9 @@ export const navigation_map = {
       { to: 'NewWorkOrder', param: null, via: 'header', label: 'Add' },
       { to: 'RequestDetail', param: 'workOrderId', via: 'list item', label: 'a request' },
     ],
-    future: [{ role: 'tenant', kind: 'tab' }],
+    place: 'tab',
+    nav_label: 'Repairs',
+    nav_icon: 'list-outline',
   },
   RequestDetail: {
     title: 'Request',
@@ -389,7 +413,7 @@ export const navigation_map = {
     status: 'built',
     params: ['workOrderId'],
     edges: [],
-    future: [],
+    place: 'drill',
   },
   PastRequests: {
     title: 'Past Repair Requests',
@@ -400,7 +424,9 @@ export const navigation_map = {
     status: 'built',
     params: [],
     edges: [],
-    future: [],
+    place: 'drawer',
+    nav_label: 'Past Requests',
+    nav_icon: 'archive-outline',
   },
 
   // ----- shared by owners and tenants -----
@@ -422,7 +448,7 @@ export const navigation_map = {
         roles: ['tenant'],
       },
     ],
-    future: [],
+    place: 'drill',
   },
   Messages: {
     title: 'Message Inbox',
@@ -436,10 +462,9 @@ export const navigation_map = {
       { to: 'InviteTenant', param: null, via: 'header', label: 'Invite', roles: ['owner'] },
       { to: 'MessageThread', param: 'conversationId', via: 'list item', label: 'a conversation' },
     ],
-    future: [
-      { role: 'owner', kind: 'tab' },
-      { role: 'tenant', kind: 'tab' },
-    ],
+    place: 'tab',
+    nav_label: 'Messages',
+    nav_icon: 'chatbubble-outline',
   },
   MessageThread: {
     title: 'Conversation',
@@ -450,7 +475,7 @@ export const navigation_map = {
     status: 'built',
     params: ['conversationId'],
     edges: [],
-    future: [],
+    place: 'drill',
   },
   Payments: {
     title: 'Payments and Rent',
@@ -470,7 +495,9 @@ export const navigation_map = {
         roles: ['owner'],
       },
     ],
-    future: [],
+    place: 'tab',
+    nav_label: 'Payments',
+    nav_icon: 'card-outline',
   },
   TenantLedger: {
     title: 'Rent Ledger',
@@ -481,7 +508,7 @@ export const navigation_map = {
     status: 'built',
     params: ['tenancyId'],
     edges: [{ to: 'PaymentDetail', param: 'paymentId', via: 'list item', label: 'a payment' }],
-    future: [],
+    place: 'drill',
   },
   PaymentDetail: {
     title: 'Payment Record',
@@ -501,7 +528,7 @@ export const navigation_map = {
         roles: ['owner'],
       },
     ],
-    future: [],
+    place: 'drill',
   },
   Settings: {
     title: 'Settings and Profile',
@@ -515,9 +542,63 @@ export const navigation_map = {
       { to: 'Mileage', param: null, via: 'button', label: 'Mileage rate', roles: ['owner'] },
       { to: 'Welcome', param: null, via: 'reset', label: 'Log Out' },
     ],
-    future: [{ role: 'owner', kind: 'drawer' }],
+    place: 'drawer',
+    nav_label: 'Settings',
+    nav_icon: 'settings-outline',
   },
 };
+
+// what each role gets as hubs: the tab bar in order, and the drawer in sections
+// App.js registers the same screens in the same order, and the tests check the two match
+export const hubs = {
+  owner: {
+    tabs: ['Dashboard', 'Payments', 'WorkOrders', 'Messages'],
+    drawer: [
+      { title: 'Rentals', screens: ['Properties', 'Tenants'] },
+      { title: 'Money', screens: ['Expenses', 'Mileage'] },
+      { title: 'Records', screens: ['Documents', 'Checklist'] },
+      { title: 'Account', screens: ['Settings'] },
+    ],
+  },
+  tenant: {
+    tabs: ['TenantHome', 'Payments', 'MyRequests', 'Messages'],
+    drawer: [
+      { title: 'Repairs', screens: ['PastRequests'] },
+      { title: 'Account', screens: ['Settings'] },
+    ],
+  },
+};
+
+// the drawer's first screen is the tab bar itself, so this is the name the drawer gives it
+export const tabs_route = 'Tabs';
+// and the root stack's screen that holds the drawer (and the tabs inside it)
+export const main_route = 'Main';
+
+// every drawer screen for a role, in the order the drawer lists them
+export function drawerScreens(role) {
+  return hubs[role].drawer.flatMap((section) => section.screens);
+}
+
+// the tab and drawer screens together, the places you can always get to from the tab bar or the menu
+export function hubScreens(role) {
+  return [...hubs[role].tabs, ...drawerScreens(role)];
+}
+
+// where a screen sits inside the root stack: [] for the root's own screens, ['Main'] for a drawer screen,
+// and ['Main', 'Tabs'] for a tab, so code that navigates by name can wrap it in the right parents
+export function parentsOf(route_name) {
+  const screen = navigation_map[route_name];
+  if (!screen) {
+    return [];
+  }
+  if (screen.place === 'tab') {
+    return [main_route, tabs_route];
+  }
+  if (screen.place === 'drawer') {
+    return [main_route];
+  }
+  return [];
+}
 
 // "1a2b3c4d" from a long id, short ids (like the demo's "1") stay as they are
 export function shortId(id) {
@@ -538,19 +619,22 @@ export function headerTitle(route_name, params) {
 // the screens one situation can open without logging in or out (or leaving the demo), from its start
 export function reachableIn(situation_name) {
   const situation = situations[situation_name];
-  return reachableFrom(situation.start, { skip_resets: true, role: situation.role });
+  return reachableFrom(situation.start, { skip_resets: true, role: situation.role, hubs: true });
 }
 
 // every screen reachable from a start by following edges
 // skip_resets leaves out the reset edges (log in, log out), so a signed-in role stays inside its own screens
 // role keeps only the edges that role sees
+// hubs (with a role) counts the tab bar and the drawer: from any tab or drawer screen you can tap any other one
 export function reachableFrom(start, options) {
   const settings = options || {};
+  const hub_list = settings.hubs && settings.role ? hubScreens(settings.role) : [];
   const seen = new Set([start]);
   const queue = [start];
   while (queue.length > 0) {
     const current = queue.shift();
     const screen = navigation_map[current];
+    const next = [];
     (screen ? screen.edges : []).forEach((edge) => {
       if (settings.skip_resets && edge.via === 'reset') {
         return;
@@ -558,9 +642,15 @@ export function reachableFrom(start, options) {
       if (settings.role && edge.roles && !edge.roles.includes(settings.role)) {
         return;
       }
-      if (!seen.has(edge.to)) {
-        seen.add(edge.to);
-        queue.push(edge.to);
+      next.push(edge.to);
+    });
+    if (hub_list.includes(current)) {
+      next.push(...hub_list);
+    }
+    next.forEach((route_name) => {
+      if (!seen.has(route_name)) {
+        seen.add(route_name);
+        queue.push(route_name);
       }
     });
   }
