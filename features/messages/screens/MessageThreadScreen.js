@@ -262,6 +262,7 @@ function MessageThreadScreen(props) {
             is_mine={item.senderId === my_user_id}
             show_seen={item.id === seen_id}
             onOpenImage={setViewerUrl}
+            onOpenPayments={() => props.navigation.navigate('Payments')}
             day_label={dayDividerLabel(messages, index)}
             show_time={showsTime(messages, index)}
           />

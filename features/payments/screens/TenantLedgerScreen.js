@@ -15,6 +15,7 @@ import { ChargeRow, PaymentRow, ClaimRow } from '../components/LedgerRows';
 import PaymentFormModal from '../components/PaymentFormModal';
 import ChargeFormModal from '../components/ChargeFormModal';
 import ScheduleFormModal from '../components/ScheduleFormModal';
+import ReminderSheet from '../../reminders/components/ReminderSheet';
 import { useLedger } from '../context/LedgerContext';
 import { useLedgerReview } from '../hooks/useLedgerReview';
 import { hapticSuccess } from '../../../utils/haptics';
@@ -67,6 +68,8 @@ function TenantLedgerScreen(props) {
   const [form_key, setFormKey] = useState(0);
   // the More sheet, and the second sheet that picks what to void
   const [more_open, setMoreOpen] = useState(false);
+  // the rent reminder sheet, from More
+  const [reminder_open, setReminderOpen] = useState(false);
   const [void_open, setVoidOpen] = useState(false);
 
   function openForm(name) {
@@ -409,6 +412,16 @@ function TenantLedgerScreen(props) {
             icon: 'pricetag-outline',
             onPress: () => openForm('charge'),
           },
+          // a nudge for rent that's owed, the sheet says why when it can't go (nothing owed, sent today)
+          ...(!is_ended
+            ? [
+                {
+                  label: 'Send Reminder',
+                  icon: 'notifications-outline',
+                  onPress: () => setReminderOpen(true),
+                },
+              ]
+            : []),
           ...(!is_ended
             ? [
                 {
@@ -440,6 +453,15 @@ function TenantLedgerScreen(props) {
         }))}
         onClose={() => setVoidOpen(false)}
       />
+      {reminder_open ? (
+        <ReminderSheet
+          visible
+          tenancy_id={ledger.tenancy_id}
+          tenant_name={ledger.tenant_name}
+          place={placeOf(ledger)}
+          onClose={() => setReminderOpen(false)}
+        />
+      ) : null}
       {review.sheet}
     </View>
   );

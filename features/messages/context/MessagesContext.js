@@ -318,6 +318,33 @@ function MessagesStore(props) {
     return message;
   }
 
+  // a rent reminder is a message from the landlord with metadata saying so
+  // real mode: the server sent it, so its copy (from the 201) goes in the thread, the socket repeat gets dropped
+  // demo: it's posted from the landlord's side with the same metadata, and nobody fakes a reply to it
+  function addReminderMessage(conversation_id, body, metadata, server_message) {
+    if (!is_demo) {
+      if (server_message) {
+        handleNewMessage(server_message);
+      }
+      return server_message || null;
+    }
+    const message = {
+      id: 'demo-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+      conversationId: conversation_id,
+      senderId: my_user_id,
+      body: body,
+      attachmentKey: null,
+      metadata: metadata,
+      createdAt: new Date().toISOString(),
+    };
+    demo_messages.current[conversation_id] = [
+      message,
+      ...(demo_messages.current[conversation_id] || []),
+    ];
+    handleNewMessage(message);
+    return message;
+  }
+
   // clears my unread right away, then tells the server (which tells my other phones)
   function markRead(conversation_id) {
     // the demo has no server, so reading is a read event from whichever side is looking:
@@ -411,6 +438,7 @@ function MessagesStore(props) {
     getConversation,
     fetchMessages,
     sendMessage,
+    addReminderMessage,
     markRead,
     attachmentUrl,
     forgetAttachmentUrl,

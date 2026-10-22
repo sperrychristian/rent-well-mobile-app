@@ -430,7 +430,7 @@ function RemoteLedgerStore(props) {
     const stop_taps = listenForLedgerTaps((target) => {
       if (target.payment_id) {
         navigateWhenReady('PaymentDetail', { paymentId: target.payment_id });
-      } else if (role === 'owner' && target.tenancy_id) {
+      } else if (role === 'owner' && target.tenancy_id && !target.reminder) {
         navigateWhenReady('TenantLedger', { tenancyId: target.tenancy_id });
       } else {
         navigateWhenReady('Payments');

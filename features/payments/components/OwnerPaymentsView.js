@@ -15,6 +15,7 @@ import SkeletonList from '../../../components/ui/Skeleton';
 import ErrorState from '../../../components/ErrorState';
 import { list_styles } from '../../../components/ui/listStyles';
 import { ClaimRow, ProgressBar } from './LedgerRows';
+import ReminderSheet from '../../reminders/components/ReminderSheet';
 import { useLedger } from '../context/LedgerContext';
 import { useLedgerReview } from '../hooks/useLedgerReview';
 import { formatCents } from '../../../utils/formatCurrency';
@@ -46,6 +47,8 @@ function OwnerPaymentsView(props) {
   const [month, setMonth] = useState(this_month);
   const [property_id, setPropertyId] = useState('all');
   const [show_past, setShowPast] = useState(false);
+  // the overdue rows' Remind button opens the rent reminder sheet for that tenancy
+  const [remind_ledger, setRemindLedger] = useState(null);
 
   const ledgers = ledger_store.ledgers;
 
@@ -291,6 +294,20 @@ function OwnerPaymentsView(props) {
                 title={row.ledger.tenant_name}
                 subtitle={placeOf(row.ledger) + '\n' + balance.text}
                 detail={<StatusLabel label={pill.label} tone={pill.tone} icon={pill.icon} />}
+                trailing={
+                  row.derived.row_status === 'overdue' ? (
+                    <Pressable
+                      onPress={() => setRemindLedger(row.ledger)}
+                      hitSlop={SPACING.xs}
+                      accessibilityRole="button"
+                      accessibilityLabel={'Send ' + row.ledger.tenant_name + ' a rent reminder'}
+                      style={({ pressed }) => [styles.remind, pressed && styles.remind_pressed]}
+                    >
+                      <Ionicons name="notifications-outline" size={SIZES.icon} color={COLORS.cta} />
+                      <Text style={styles.remind_text}>Remind</Text>
+                    </Pressable>
+                  ) : null
+                }
                 accessibilityLabel={
                   row.ledger.tenant_name +
                   ', ' +
@@ -368,6 +385,15 @@ function OwnerPaymentsView(props) {
         ) : null}
         {body}
       </ScrollView>
+      {remind_ledger ? (
+        <ReminderSheet
+          visible
+          tenancy_id={remind_ledger.tenancy_id}
+          tenant_name={remind_ledger.tenant_name}
+          place={placeOf(remind_ledger)}
+          onClose={() => setRemindLedger(null)}
+        />
+      ) : null}
       {review.sheet}
     </View>
   );
@@ -376,6 +402,21 @@ function OwnerPaymentsView(props) {
 export default OwnerPaymentsView;
 
 const styles = StyleSheet.create({
+  // the overdue row's quick action: a green bell and the word, a full 44 tall
+  remind: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    minHeight: SIZES.touch,
+    paddingHorizontal: SPACING.xs,
+  },
+  remind_pressed: {
+    opacity: OPACITY.pressed,
+  },
+  remind_text: {
+    ...TYPE.label,
+    color: COLORS.cta,
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background,

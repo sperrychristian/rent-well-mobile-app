@@ -74,3 +74,25 @@
 - **Dashboard:** a Profit row with a live subtitle ("$2,340 net this month", terracotta when it's a loss).
 - **Navigation:** `Profit` is in the map (drawer, owner, Money) and registered once as a `Drawer.Screen`, with a new edge Dashboard → Profit. The drawer plan test lists it, and the diagram was regenerated.
 - **Checks:** lint 13 (known), 490 tests passing, format clean, iOS bundle exported with `--clear`.
+
+## Phase 4: one-tap rent reminders
+
+- **Rules:** `features/reminders/utils/reminderHelpers.js` ports the server's `src/reminders/rentReminders.js`.
+  - The suggested text is word for word for both kinds and stays within 600 characters, shortening long payment instructions but never the amount or date.
+  - The target is the rent balance plus any deposit owed by today, dated by the oldest unpaid charge due by today.
+  - The 24-hour window counts elapsed time.
+  - The demo's preview and send throw the server's codes: `NOTHING_OWED`, `NO_ACTIVE_TENANCY`, `REMINDER_TOO_SOON` (with `info.canSendAt`), and `VALIDATION_ERROR`.
+- **`useReminders()`:**
+  - Real mode calls `GET /tenancies/:id/reminders/preview` and `POST /tenancies/:id/reminders`, then puts the returned message in the thread.
+  - The demo keeps its log in the demo tenant data, so both demo sides share the 24-hour limit and it resets on exit. It posts the message from the landlord into that tenant's demo thread with the same `metadata` (no fake reply, no push).
+  - Priya has no demo thread, so her reminder is logged but has no chat to land in.
+- **`ReminderSheet`** (a sheet, no route):
+  - A Friendly or Overdue notice `SegmentedControl`, the amount owed and due date, the suggested text in an editable multiline field (600 max with an "N of 600 characters" counter), "Last reminder sent Oct 20", and a primary Send with a bell.
+  - Send is disabled with a clear line when nothing is owed, the tenancy ended, or one went out in the last 24 hours ("You can send the next one Oct 23 at 4:04 PM.").
+  - The same errors show inline if they come back from Send. Success gives a toast and a haptic.
+  - `FormSheet` got a `submit_disabled` prop for this.
+- **Entry points:** "Send Reminder" in the Rent Ledger's More sheet (current tenancies), and a "Remind" bell quick action (44 tall, labeled "Send <name> a rent reminder") on overdue tenant rows in Payments.
+- **Tenant side:** a reminder in the chat shows a small "Payment reminder" label with a bell (green on the tenant's bubble, white on the landlord's) that opens Payments. A `rent_reminder` push opens Payments (`push.js` and the ledger tap handler).
+- **Navigation:** new edge MessageThread → Payments (the label). The sheets need no routes. The diagram was regenerated.
+- **Tests:** `features/reminders/utils/reminders.test.js` (14). It has the backend's text, target, and window vectors in the app's ledger shape, plus the demo's preview, too soon with `canSendAt`, nothing owed, ended tenancy, empty text, and the preview mapping.
+- **Checks:** lint 13 (known), 504 tests passing, format clean, iOS bundle exported with `--clear`.

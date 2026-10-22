@@ -150,6 +150,10 @@ function ledgerFromResponse(response) {
   if (data.type === 'ledger:overdue_digest') {
     return { digest: true };
   }
+  // the landlord's rent reminder goes to the tenant's Payments, not the chat (docs/API.md, Rent reminder push)
+  if (data.type === 'rent_reminder') {
+    return { reminder: true, tenancy_id: data.tenancyId || null };
+  }
   return null;
 }
 

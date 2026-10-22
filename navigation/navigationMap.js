@@ -525,7 +525,8 @@ export const navigation_map = {
     file: 'features/messages/screens/MessageThreadScreen.js',
     status: 'built',
     params: ['conversationId'],
-    edges: [],
+    // a rent reminder's "Payment reminder" label opens Payments
+    edges: [{ to: 'Payments', param: null, via: 'link', label: 'Payment reminder label' }],
     place: 'drill',
   },
   Payments: {

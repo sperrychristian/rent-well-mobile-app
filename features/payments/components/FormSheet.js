@@ -17,6 +17,7 @@ import { COLORS, SPACING, TYPE } from '../../../theme';
 // the fields, a form-level error, and Cancel on the left with the main action on the right
 // props: visible, title, subtitle, children, error, submit_label, submit_icon, submit_variant, busy,
 //   onSubmit, onClose
+// (submit_disabled greys out the main action, the rent reminder sheet uses it when nothing can be sent)
 function FormSheet(props) {
   // with Reduce Motion on the sheet just appears, no slide
   const reduce_motion = useReduceMotion();
@@ -60,6 +61,7 @@ function FormSheet(props) {
                   title={props.submit_label}
                   icon={props.submit_icon}
                   loading={props.busy}
+                  disabled={props.submit_disabled}
                   onPress={props.onSubmit}
                   style={styles.button}
                 />

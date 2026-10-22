@@ -111,6 +111,7 @@ flowchart LR
   NewWorkOrder --> MyRequests
   Messages -->|header: Invite| InviteTenant
   Messages -->|conversationId| MessageThread
+  MessageThread --> Payments
   Payments -->|paymentId| PaymentDetail
   Payments -->|tenancyId| TenantLedger
   TenantLedger -->|paymentId| PaymentDetail
