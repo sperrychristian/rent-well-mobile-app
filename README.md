@@ -107,16 +107,26 @@ The full guide is in `docs/DESIGN.md`.
 
 ## Navigation (course assignment)
 
-**How to run:** `npm install`, then `npx expo start -c`, and open it in Expo Go or a simulator. With no backend running, tap **Try the Demo**, then **Demo as Landlord** or **Demo as Tenant**. Every screen on that side is reachable by tapping, and the back arrow returns.
+**How to run:** `npm install`, then `npx expo start -c`, and open it in Expo Go or a simulator (the drawer uses `react-native-gesture-handler` and Reanimated, which Expo Go already includes). With no backend running, tap **Try the Demo**, then **Demo as Landlord** or **Demo as Tenant**. The tab bar is at the bottom, the menu button (top left) opens the drawer, and every detail screen has a back arrow.
 
-**The diagram** (one page, drawn from `navigation/navigationMap.js` with `npm run diagram`):
-- image: `assignment/navigation/navigation-diagram.png`
-- PDF: `assignment/navigation/navigation-diagram.pdf`
-- The diagram has one box per screen and one arrow per navigation. Arrows that pass a param are labeled with its name, and TAB and DRAWER badges mark the future tabs and drawer.
-- `ASSIGNMENT_NAV.md` has the full write-up.
+**The structure:** a root native stack holds the signed-out screens, `Main` (a drawer), and every detail screen. The drawer's first screen is a bottom tab bar. `ASSIGNMENT_STRUCTURE.md` explains why in a few sentences.
+
+| Role | Tabs | Drawer |
+| --- | --- | --- |
+| Landlord | Home, Payments, Work Orders, Messages | Properties, Tenants, Expenses, Mileage Log, Documents, Checklists, Settings |
+| Tenant | My Home, Payments, Repairs, Messages | Past Requests, Settings |
+
+**The diagram** (one page with a swimlane per role, drawn from `navigation/navigationMap.js` with `npm run diagram`):
+- image: [assignment/navigation/navigation-diagram.png](assignment/navigation/navigation-diagram.png)
+- PDF: [assignment/navigation/navigation-diagram.pdf](assignment/navigation/navigation-diagram.pdf)
+- The tab bar and the drawer are drawn as labeled groups, and every arrow into a detail screen is labeled with the id it passes.
+- `ASSIGNMENT_NAV.md` has the full write-up (every screen, where it lives, header buttons, back behavior).
+
+![Navigation diagram](assignment/navigation/navigation-diagram.png)
 
 **Code:**
-- Everything is in one native stack in `App.js`. The header titles and the shared header style are in `navigation/screenOptions.js`.
+- `App.js` registers every screen on its navigator: `Stack.Screen`, `Drawer.Screen`, or `Tab.Screen`. The header titles and the shared styles for the stack, the tab bar, and the drawer are in `navigation/screenOptions.js`.
+- `navigation/navigationMap.js` is the source of truth (each screen's `place`: auth, tab, drawer, or drill), and `navigation/hubRouter.js` lets any screen still navigate to a tab or drawer screen by name.
 - Every screen is exported from `screens/index.js`. The files themselves live in `features/<feature>/screens/`.
 
 **Screens** (31). Every param is an id, never an object:

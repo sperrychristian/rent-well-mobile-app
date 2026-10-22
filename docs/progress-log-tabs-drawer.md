@@ -35,3 +35,13 @@ Branch made from `master` after `git pull origin master` (already up to date). `
 - The diagram test now checks the "#id" titles, the three lanes, and both groups per role. The mermaid copy groups screens into subgraphs per tab bar, drawer and detail.
 - ASSIGNMENT_NOTES.md: the "(DRAFT, rewrite in your own words)" title is replaced.
 - Checks: lint 13 (known), 421 tests passing, format clean, iOS bundle exported with `--clear`.
+
+## Phase 4: docs, draft markers, final sweeps
+
+- Draft marker search (case-insensitive: DRAFT, TODO, FIXME, "rewrite in your own words", "in his own words", "Draft for", "placeholder", "lorem", "Christian to rewrite") across the repo, leaving out node_modules, .git, dist, and package-lock.json:
+  - Fixed: `ASSIGNMENT_NOTES.md` line 1 (title had "DRAFT, rewrite in your own words"), `ASSIGNMENT_NAV.md` line 1 ("(draft)") and line 3 ("Draft for Christian to rewrite in his own words"), and `CLAUDE.md` ("the write-up draft").
+  - Left on purpose: every `placeholder=` and `placeholderTextColor` prop on text inputs, the chat composer's `draft` state in `MessageThreadScreen.js`, comments that say "placeholder rows" (skeleton loading) and "stub (placeholder for the assignment)" in the map, and the progress logs' and CLAUDE.md's mentions of the "draft API" (the ledger's history, not a draft label).
+  - No TODO, FIXME, or lorem anywhere in the app code.
+- New `ASSIGNMENT_STRUCTURE.md`. `ASSIGNMENT_NAV.md` rewritten as final: the navigator structure, the screen table regenerated from the map (with where each screen lives), the requirement checklist, header buttons (the menu button and the drawer back arrow added), and the tabs and drawer table. README's navigation section, `docs/DESIGN.md` (Tab bar and drawer), and `CLAUDE.md` updated.
+- Sweeps: no hex values or bare numbers in the new chrome (all tokens), `navigation/chromeStyles.test.js` checks the tab bar and drawer color pairs for AA, the touch sizes, and the label fit at the 1.3 font cap. `git diff master` shows no screen file changed on this branch.
+- Checks: lint 13 (known), 433 tests passing, format clean, iOS bundle exported with `--clear`.
