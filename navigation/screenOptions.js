@@ -145,7 +145,8 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: FONTS.medium,
     fontSize: TYPE.caption.fontSize,
-    lineHeight: TYPE.caption.lineHeight,
+    // the icon's box is 28 tall, so the bar is 56 (App.js adds the home indicator) and the label gets one tight line
+    lineHeight: TYPE.caption.fontSize + SPACING.xxs,
   },
   dot: {
     position: 'absolute',

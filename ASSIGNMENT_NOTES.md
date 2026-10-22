@@ -1,4 +1,4 @@
-# Assignment notes (DRAFT, rewrite in your own words)
+# Assignment notes: NewWorkOrderScreen device audit
 
 Screen audited: `screens/NewWorkOrderScreen.js` (tenant "Report an Issue").
 Tested on iPhone 18 Pro and iPad, portrait and landscape.

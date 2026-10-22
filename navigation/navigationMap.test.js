@@ -412,9 +412,20 @@ describe('the diagram is up to date with the map', () => {
   test('every screen and its title are drawn', () => {
     expect(unescape(svg)).toContain(mapped.length + ' screens');
     mapped.forEach((route_name) => {
-      expect(unescape(svg)).toContain('>' + navigation_map[route_name].title + '<');
+      // a title with an id param is drawn as "Work Order #id"
+      const title = navigation_map[route_name].title;
+      const ending = navigation_map[route_name].title_param ? ' #id<' : '<';
+      expect(unescape(svg)).toContain('>' + title + ending);
       expect(mermaid).toContain(route_name + '["');
     });
+  });
+
+  test('the diagram has a lane per role and draws the tab bar and drawer as groups', () => {
+    ['Signed out', 'Landlord', 'Tenant'].forEach((lane) => expect(svg).toContain('>' + lane + '<'));
+    expect(svg.match(/>TAB BAR</g)).toHaveLength(2);
+    expect(svg.match(/>DRAWER \(menu\)</g)).toHaveLength(2);
+    expect(mermaid).toContain('subgraph owner_tabs [Landlord tab bar]');
+    expect(mermaid).toContain('subgraph tenant_drawer [Tenant drawer]');
   });
 
   test('every arrow that passes an id is in the mermaid copy with its label', () => {

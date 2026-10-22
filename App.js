@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useWindowDimensions, StyleSheet } from 'react-native';
 import WelcomeScreen from './features/home/screens/WelcomeScreen';
 import DemoChooserScreen from './features/home/screens/DemoChooserScreen';
@@ -115,12 +116,18 @@ function MainTabs() {
   const shows_tenant = role !== 'owner';
   // the unread count on Messages, and the terracotta dots on Payments and Work Orders
   const badges = useTabBadges(shows_owner ? 'owner' : 'tenant');
+  // the default bar is 49 and clipped the labels, so it's a little taller, plus the home indicator's space
+  const insets = useSafeAreaInsets();
+  const tab_options = {
+    ...shared_tab_options,
+    tabBarStyle: [shared_tab_options.tabBarStyle, { height: SIZES.tab_bar + insets.bottom }],
+  };
   return (
     // back from any tab goes to the first one (the home), and back from the home leaves the app
     <Tab.Navigator
       initialRouteName={homeRouteFor({ role: role })}
       backBehavior="firstRoute"
-      screenOptions={shared_tab_options}
+      screenOptions={tab_options}
     >
       {shows_owner && (
         <Tab.Screen

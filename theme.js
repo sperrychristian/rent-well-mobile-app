@@ -249,10 +249,11 @@ export const SIZES = {
   chevron: 18,
   progress: 4,
   header_avatar: 44,
-  // the tabs and drawer: the tab icon, the small overdue dot and the unread count on a tab,
+  // the tabs and drawer: the tab icon, the tab bar's height above the home indicator, the small overdue dot and the unread count on a tab,
   // how wide the drawer is and how tall its rows are, how far in from the left edge a swipe opens it,
   // and the screen width where the drawer stays open on the side (an iPad)
   tab_icon: 24,
+  tab_bar: 56,
   tab_dot: 8,
   drawer_width: 300,
   drawer_row: 52,
