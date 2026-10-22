@@ -17,6 +17,10 @@ the same commit.
 - [Conversations and messages](#conversations-and-messages)
 - [Work orders](#work-orders)
 - [Rent ledger](#rent-ledger)
+- [Leases (owner only)](#leases-owner-only)
+- [Expenses (owner only)](#expenses-owner-only)
+- [Reports (owner only)](#reports-owner-only)
+- [Rent reminders (owner only)](#rent-reminders-owner-only)
 - [Uploads (image attachments)](#uploads-image-attachments)
 - [Push tokens](#push-tokens)
 - [Socket.IO](#socketio)
@@ -70,11 +74,11 @@ Every error response (4xx and 5xx, except `/health`) has this shape:
 }
 ```
 
-| Field           | Type   | Notes                                                                 |
-| --------------- | ------ | --------------------------------------------------------------------- |
-| `error.code`    | string | Stable, machine-readable. Branch on this, not on `message`.           |
-| `error.message` | string | Human-readable. Fine to log; not localized.                           |
-| `error.details` | array  | **Only present for `VALIDATION_ERROR`.** One entry per invalid field. |
+| Field           | Type            | Notes                                                                                                                                       |
+| --------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `error.code`    | string          | Stable, machine-readable. Branch on this, not on `message`.                                                                                 |
+| `error.message` | string          | Human-readable. Fine to log; not localized.                                                                                                 |
+| `error.details` | array \| object | **Only present for `VALIDATION_ERROR`** (an array, one entry per invalid field) **and `REMINDER_TOO_SOON`** (an object, `{ "canSendAt" }`). |
 
 `details[]` entries:
 
@@ -193,17 +197,54 @@ never deleted. Ending one sets `status` to `"ended"`.
   "status": "ended",
   "startedAt": "2025-09-01T15:04:05.000Z",
   "endedAt": "2026-10-31",
-  "moveOutNote": "Carpet cleaning deducted from deposit"
+  "moveOutNote": "Carpet cleaning deducted from deposit",
+  "lease": {
+    "leaseStartOn": "2025-11-01",
+    "leaseEndOn": "2026-10-31",
+    "leaseTerm": "fixed",
+    "renewalNoticeDays": 60,
+    "daysRemaining": 16,
+    "leaseStatus": "expiring_soon",
+    "leaseNotes": "Renewal offered at $1,500"
+  }
 }
 ```
 
-| Field         | Type           | Notes                                                                              |
-| ------------- | -------------- | ---------------------------------------------------------------------------------- |
-| `status`      | string         | `"active"` or `"ended"`                                                            |
-| `startedAt`   | string         | Full ISO timestamp                                                                 |
-| `endedAt`     | string \| null | **A calendar date, `YYYY-MM-DD`** (not a timestamp). `null` while active.          |
-| `unitLabel`   | string \| null |                                                                                    |
-| `moveOutNote` | string \| null | **Owner only.** The key is absent in every tenant copy (`GET /me`, socket events). |
+| Field         | Type           | Notes                                                                                             |
+| ------------- | -------------- | ------------------------------------------------------------------------------------------------- |
+| `status`      | string         | `"active"` or `"ended"`                                                                           |
+| `startedAt`   | string         | Full ISO timestamp                                                                                |
+| `endedAt`     | string \| null | **A calendar date, `YYYY-MM-DD`** (not a timestamp). `null` while active.                         |
+| `unitLabel`   | string \| null |                                                                                                   |
+| `moveOutNote` | string \| null | **Owner only.** The key is absent in every tenant copy (`GET /me`, socket events).                |
+| `lease`       | object         | The [lease block](#lease-block). Always present, `leaseStatus: "none"` when no lease is recorded. |
+
+#### Lease block
+
+Every tenancy carries its lease: `GET /me` (tenant), `GET /me/ledger`, `GET /tenants`,
+`GET /tenants/:id`, the tenancy routes, `tenancy:updated` events, the owner ledger, and each
+tenancy in `GET /properties`. `leaseStatus` and `daysRemaining` are worked out when you read
+them, from the property's local date (its `timeZone`), never stored.
+
+| Field               | Type           | Notes                                                                                                |
+| ------------------- | -------------- | ---------------------------------------------------------------------------------------------------- |
+| `leaseStartOn`      | string \| null | Calendar date `YYYY-MM-DD`                                                                           |
+| `leaseEndOn`        | string \| null | Calendar date. Always `null` for month to month                                                      |
+| `leaseTerm`         | string \| null | `"fixed"`, `"month_to_month"`, or `null` (no lease)                                                  |
+| `renewalNoticeDays` | number         | Default `60`. Decides when `expiring_soon` starts and the owner's first reminder                     |
+| `daysRemaining`     | number \| null | Days from today to `leaseEndOn`. `0` on the last day, negative once expired. `null` with no end date |
+| `leaseStatus`       | string         | See below                                                                                            |
+| `leaseNotes`        | string \| null | **Owner only.** The key is absent in every tenant copy                                               |
+
+| `leaseStatus`    | When                                                                                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `none`           | No lease recorded                                                                                                                                      |
+| `month_to_month` | Month to month, no end date                                                                                                                            |
+| `active`         | Fixed lease with more than `renewalNoticeDays` days left                                                                                               |
+| `expiring_soon`  | Fixed lease with 0 to `renewalNoticeDays` days left (both ends included, so it's `expiring_soon` exactly `renewalNoticeDays` out, and on the last day) |
+| `expired`        | Fixed lease whose end date has passed (`daysRemaining < 0`)                                                                                            |
+
+Tenants can read their lease block but can't change it. Every lease route is owner only.
 
 ### Message
 
@@ -214,12 +255,18 @@ never deleted. Ending one sets `status` to `"ended"`.
   "senderId": "uuid",
   "body": "The kitchen faucet is dripping.",
   "attachmentKey": null,
+  "metadata": null,
   "createdAt": "2026-10-11T23:12:27.844Z"
 }
 ```
 
 `attachmentKey` is `null` or a key from [POST /uploads/sign](#post-uploadssign). To show the image,
 exchange the key for a URL with [GET /uploads/url](#get-uploadsurl).
+
+`metadata` is `null` for every ordinary message. A [rent reminder](#rent-reminders-owner-only) the
+owner sent has `{ "type": "rent_reminder", "tenancyId": "uuid", "chargeId": "uuid" }`. Show those
+with a "Pay now" button that opens Payments. Clients can't set `metadata`, it's only ever written by
+the reminder route.
 
 ### Conversation (list item)
 
@@ -1873,6 +1920,671 @@ What the app should already handle so this is painless: `pending`, `processing`,
 
 ---
 
+## Leases (owner only)
+
+A lease lives on its tenancy (one per tenancy). Every route needs `role = "owner"` and only finds
+my own tenancies (someone else's is `404`). Lease dates are calendar dates (`YYYY-MM-DD`) and
+"today" is the property's local date, same as the [rent ledger](#rent-ledger).
+
+### `GET /tenancies/:id/lease`
+
+**200**:
+
+```json
+{
+  "lease": { "...Lease block" },
+  "events": [
+    {
+      "id": "uuid",
+      "type": "renewed",
+      "data": {
+        "previousEndOn": "2026-10-31",
+        "previousTerm": "fixed",
+        "newEndOn": "2027-10-31",
+        "newRentCents": 150000,
+        "scheduleId": "uuid",
+        "rentChangeStartsOn": "2026-12-01"
+      },
+      "actorUserId": "uuid",
+      "createdAt": "2026-10-15T18:00:00.000Z"
+    }
+  ]
+}
+```
+
+`events` is the lease timeline, oldest first. Events are never deleted.
+
+| `type`    | When                                   | `data`                                                                                                                                             |
+| --------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `set`     | First `PUT` on a tenancy with no lease | `{ "before", "after" }`, each `{ leaseStartOn, leaseEndOn, leaseTerm, renewalNoticeDays, leaseNotes }`                                             |
+| `changed` | Any later `PUT` that changes something | `{ "before", "after" }`                                                                                                                            |
+| `renewed` | `POST /tenancies/:id/lease/renew`      | `previousEndOn`, `previousTerm`, `newEndOn`, `newRentCents` (or `null`), `scheduleId` and `rentChangeStartsOn` (both `null` without a rent change) |
+
+Errors: `401`, `403 FORBIDDEN`, `404 NOT_FOUND`.
+
+### `PUT /tenancies/:id/lease`
+
+Sets the whole lease (a `PUT` replaces it, so fields you leave out are cleared). Unknown fields
+are rejected.
+
+```json
+{
+  "leaseStartOn": "2025-11-01",
+  "leaseEndOn": "2026-10-31",
+  "leaseTerm": "fixed",
+  "renewalNoticeDays": 60,
+  "leaseNotes": "Pets: one cat"
+}
+```
+
+| Field               | Required | Rules                                                                                                                                        |
+| ------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `leaseStartOn`      | no       | date or `null`                                                                                                                               |
+| `leaseEndOn`        | no       | date or `null`. Must be after `leaseStartOn`                                                                                                 |
+| `leaseTerm`         | no       | `fixed` or `month_to_month`. Left out: `fixed` if there's an end date, `month_to_month` if only a start date, and no lease at all if neither |
+| `renewalNoticeDays` | no       | integer 0 to 365, default 60                                                                                                                 |
+| `leaseNotes`        | no       | up to 1000 chars, `null` or `""` = none. Owner only                                                                                          |
+
+- `month_to_month` can't have `leaseEndOn`, and `fixed` needs it (`400 VALIDATION_ERROR`).
+- Every date has to be within 20 years of today (`400 INVALID_LEASE_DATES`).
+- `PUT` with `{}` clears the lease (`leaseStatus: "none"`).
+- A `PUT` that changes nothing writes no event and sends no socket event.
+
+**200**: `{ "lease": { "...Lease block" } }`
+
+Sends [`tenancy:updated`](#tenancyupdated) with `action: "lease_updated"` to both people.
+
+Errors: `400 VALIDATION_ERROR`, `400 INVALID_LEASE_DATES`, `401`, `403 FORBIDDEN`,
+`404 NOT_FOUND`, `409 TENANCY_ENDED`.
+
+### `POST /tenancies/:id/lease/renew`
+
+Extends the lease to a new end date, and optionally changes the rent.
+
+```json
+{ "newEndOn": "2027-10-31", "newRentCents": 150000 }
+```
+
+| Field          | Required | Rules                                                                      |
+| -------------- | -------- | -------------------------------------------------------------------------- |
+| `newEndOn`     | yes      | date after today, after the current `leaseEndOn`, and after `leaseStartOn` |
+| `newRentCents` | no       | integer cents, 1 to 100000000                                              |
+
+- The lease becomes `fixed` with `leaseEndOn = newEndOn` (a month to month lease becomes fixed).
+- With `newRentCents`, the rent schedule changes by the **same rules as
+  [PUT /rent-schedule](#put-tenanciesidrent-schedule)**: billed rent is never rewritten, and the
+  new amount starts the first month that hasn't been billed yet. Due day, grace days, and late fee
+  stay the same.
+- The renewal and the rent change are one step: if the rent change fails, the lease isn't
+  extended either.
+- Lease reminders start over for the new end date.
+
+**200**:
+
+```json
+{
+  "lease": { "...Lease block" },
+  "schedule": { "...RentSchedule" },
+  "replacedSchedule": { "...RentSchedule" }
+}
+```
+
+`schedule` and `replacedSchedule` are `null` without `newRentCents`. Sends `tenancy:updated`
+with `action: "lease_renewed"`, plus `ledger:updated` (`reason: "schedule_changed"`) when the rent
+changed.
+
+Errors: `400 VALIDATION_ERROR`, `400 INVALID_LEASE_DATES`, `400 LATE_FEE_EXCEEDS_RENT` (the
+current late fee is more than the new rent), `401`, `403 FORBIDDEN`, `404 NOT_FOUND`,
+`409 TENANCY_ENDED`, `409 NO_LEASE` (nothing to renew, set one with `PUT` first),
+`409 NO_RENT_SCHEDULE` (`newRentCents` given but there's no schedule to change).
+
+### `GET /leases/expiring?withinDays=90`
+
+My active tenancies with a fixed lease ending between today and `withinDays` days from now
+(0 to 365, default 90), soonest first. Already expired leases aren't listed (their tenancy's
+`leaseStatus` is `expired`).
+
+**200**:
+
+```json
+{
+  "withinDays": 90,
+  "leases": [
+    {
+      "tenancyId": "uuid",
+      "tenant": { "id": "uuid", "name": "Tara Tenant" },
+      "property": { "id": "uuid", "name": "Maple Court" },
+      "unitLabel": "Unit 2B",
+      "daysRemaining": 25,
+      "currentRentCents": 145000,
+      "lease": { "...Lease block" }
+    }
+  ]
+}
+```
+
+`currentRentCents` is the current rent schedule's amount, or `null` if there's no schedule.
+
+Errors: `400 VALIDATION_ERROR`, `401`, `403 FORBIDDEN`.
+
+### Lease reminders
+
+A server job sends lease reminder pushes. It runs hourly with `LEASE_JOB=on`, or once with
+`npm run leases:run`. Only active tenancies with a fixed lease that hasn't ended get them:
+
+- **Owner:** `renewalNoticeDays`, 30, and 7 days before the end. If a day was missed (the job was
+  off, or the lease was just entered), only the current one goes out, never a burst of old ones.
+  A 30 or 7 day notice period is the same reminder as the 30 or 7 day one.
+- **Tenant:** once, 30 days before the end (or as soon after that as the lease is known).
+- Each reminder goes out once per lease end date. A renewal moves the end date, so the reminders
+  start over.
+
+The pushes are listed under [Lease pushes](#lease-pushes).
+
+---
+
+## Expenses (owner only)
+
+The owner's spending, for profit and tax reports. Every route needs `role = "owner"` and only sees
+my own expenses (anyone else's is `404`, and a tenant gets `403`). Like the ledger:
+
+- **Money is integer cents** (`amountCents`). Never decimals.
+- `spentOn` is a calendar date (`YYYY-MM-DD`), never shifted by a time zone.
+- **Deleting is a soft delete.** The expense disappears from every list and report but stays in
+  the database (tax history). The database refuses hard deletes.
+
+### Expense
+
+```json
+{
+  "id": "uuid",
+  "propertyId": "uuid",
+  "property": { "id": "uuid", "name": "Maple Court" },
+  "category": "repairs",
+  "vendor": "Wasatch Plumbing",
+  "description": "Replace kitchen faucet",
+  "amountCents": 18000,
+  "spentOn": "2026-10-03",
+  "paymentMethod": "credit_card",
+  "taxDeductible": true,
+  "receiptKey": "attachments/<myUserId>/<uuid>.jpg",
+  "workOrderId": "uuid",
+  "notes": "Under warranty for a year",
+  "clientId": null,
+  "createdAt": "2026-10-03T18:00:00.000Z",
+  "updatedAt": "2026-10-03T18:00:00.000Z"
+}
+```
+
+| Field           | Required on create | Rules                                                                                                                                |
+| --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `propertyId`    | no                 | One of my live properties, or `null` for a general expense (accountant, mileage, ...)                                                |
+| `category`      | yes                | `repairs`, `utilities`, `insurance`, `taxes`, `mortgage_interest`, `supplies`, `advertising`, `professional_fees`, `travel`, `other` |
+| `vendor`        | no                 | up to 120 chars. `null` or `""` = none                                                                                               |
+| `description`   | yes                | trimmed, 1 to 500 chars                                                                                                              |
+| `amountCents`   | yes                | integer, 1 to 100000000                                                                                                              |
+| `spentOn`       | yes                | date. Not in the future (at the property, UTC for a general expense), not before 2000-01-01                                          |
+| `paymentMethod` | no                 | `cash`, `check`, `credit_card`, `debit_card`, `bank_transfer`, `zelle`, `venmo`, `other`, or `null`                                  |
+| `taxDeductible` | no                 | boolean, default `true`                                                                                                              |
+| `receiptKey`    | no                 | a key **I** uploaded through [POST /uploads/sign](#post-uploadssign), or `null`                                                      |
+| `workOrderId`   | no                 | a work order at one of my properties, or `null`. See below                                                                           |
+| `notes`         | no                 | up to 2000 chars. `null` or `""` = none                                                                                              |
+
+- `clientId` is only set on expenses that came in through [import](#post-expensesimport).
+  Read only.
+- **Work order links:** the work order has to be at one of my properties. With no `propertyId`,
+  the expense takes the work order's property. If both are given they have to match
+  (`400 WORK_ORDER_PROPERTY_MISMATCH`).
+- **Receipts** use the normal upload flow (sign, `PUT`, send the key). Download with
+  [GET /uploads/url](#get-uploadsurl). Only I can download an expense receipt (not my tenants,
+  not other owners), and not after the expense is deleted.
+
+### `GET /expenses`
+
+Query (all optional):
+
+| Param        | Notes                                              |
+| ------------ | -------------------------------------------------- |
+| `propertyId` | a property id, or `none` for general expenses only |
+| `category`   | one category                                       |
+| `from`, `to` | `YYYY-MM-DD`, inclusive, on `spentOn`              |
+| `limit`      | 1 to 100, default 50                               |
+| `cursor`     | the `nextCursor` from the previous page            |
+
+Newest `spentOn` first.
+
+**200**:
+
+```json
+{
+  "expenses": [ { "...Expense" } ],
+  "totals": { "count": 41, "amountCents": 1834200, "taxDeductibleCents": 1790000 },
+  "nextCursor": "uuid"
+}
+```
+
+`totals` covers **every** expense matching the filters, not just this page. `nextCursor` is
+`null` on the last page.
+
+Errors: `400 VALIDATION_ERROR`, `400 INVALID_CURSOR` (not one of my live expenses), `401`,
+`403 FORBIDDEN`.
+
+### `POST /expenses`
+
+Body: the fields in the [Expense](#expense) table. Unknown fields (including `clientId`) are
+rejected.
+
+**201**: `{ "expense": { "...Expense" } }`
+
+Errors: `400 VALIDATION_ERROR`, `400 INVALID_SPENT_ON`, `400 ATTACHMENT_INVALID`,
+`400 WORK_ORDER_PROPERTY_MISMATCH`, `401`, `403 FORBIDDEN`, `404 NOT_FOUND` (property or work
+order isn't mine, or the property is deleted).
+
+### `GET /expenses/:id`
+
+**200**: `{ "expense": { "...Expense" } }`. Errors: `401`, `403 FORBIDDEN`, `404 NOT_FOUND`.
+
+### `PATCH /expenses/:id`
+
+Send any of the create fields (at least one). `null` clears the optional ones. The change is
+merged onto the expense and the whole thing is checked again (so a work order at another property
+is still a mismatch). An expense can stay on a property that was deleted later, but can't be moved
+onto a deleted one.
+
+**200**: `{ "expense": { "...Expense" } }`
+
+Errors: same as `POST`, plus `404` when the expense isn't mine or is deleted.
+
+### `DELETE /expenses/:id`
+
+Soft delete. **204**, no body. Deleting again is `404`.
+
+### `POST /expenses/import`
+
+For moving the app's old local expenses onto the server. 1 to **500** items per call.
+
+```json
+{
+  "expenses": [
+    {
+      "clientId": "local-7f3a",
+      "propertyId": "uuid",
+      "category": "supplies",
+      "description": "Smoke detector batteries",
+      "amountCents": 2399,
+      "spentOn": "2025-08-14"
+    }
+  ]
+}
+```
+
+Each item has every create field plus a required `clientId` (the app's own id, 1 to 100 chars).
+
+- **Idempotent per `clientId`.** A `clientId` I've imported before comes back as
+  `status: "existing"` with its original `id`. It's not updated or checked again, so retrying a
+  whole batch after a dropped connection never duplicates anything and always gives the same ids.
+- **Partial success.** Good items are imported, and each bad item comes back as `status: "failed"`
+  with an `error`. Fix those and resend the batch: the ones already in are `existing`.
+- A `clientId` repeated inside one call: the first one counts, the repeats fail with
+  `DUPLICATE_CLIENT_ID`.
+- `clientId`s are per owner. Another owner using the same `clientId` never touches my rows.
+
+**200**:
+
+```json
+{
+  "results": [
+    { "index": 0, "clientId": "local-7f3a", "status": "created", "id": "uuid", "error": null },
+    { "index": 1, "clientId": "local-7f3b", "status": "existing", "id": "uuid", "error": null },
+    {
+      "index": 2,
+      "clientId": "local-7f3c",
+      "status": "failed",
+      "id": null,
+      "error": { "code": "INVALID_SPENT_ON", "message": "spentOn can't be in the future" }
+    },
+    {
+      "index": 3,
+      "clientId": "local-7f3d",
+      "status": "failed",
+      "id": null,
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "Expense is invalid",
+        "details": [
+          { "path": "amountCents", "message": "amountCents must be a whole number of cents" }
+        ]
+      }
+    }
+  ],
+  "createdCount": 1,
+  "existingCount": 1,
+  "failedCount": 2
+}
+```
+
+`results` has one entry per item, in request order (`index` is the position). `clientId` is `null`
+on a failed item that didn't send one. Per-item `error.code` is one of `VALIDATION_ERROR` (with
+`details`), `DUPLICATE_CLIENT_ID`, `INVALID_SPENT_ON`, `ATTACHMENT_INVALID`,
+`WORK_ORDER_PROPERTY_MISMATCH`, or `NOT_FOUND` (property or work order isn't mine).
+
+Errors (whole request): `400 VALIDATION_ERROR` (`expenses` missing, empty, or more than 500),
+`401`, `403 FORBIDDEN`.
+
+### `GET /expenses/summary?year=YYYY`
+
+`year` is required (2000 to 2100).
+
+**200**:
+
+```json
+{
+  "summary": {
+    "year": 2026,
+    "totalCents": 1834200,
+    "taxDeductibleCents": 1790000,
+    "count": 41,
+    "byCategory": [{ "category": "repairs", "amountCents": 512000, "count": 9 }],
+    "byMonth": [{ "month": "2026-01", "amountCents": 120000 }],
+    "byProperty": [
+      { "property": { "id": "uuid", "name": "Maple Court" }, "amountCents": 900000 },
+      { "property": null, "amountCents": 34200 }
+    ]
+  }
+}
+```
+
+- `byCategory` has all 10 categories in the order listed above, zeros included.
+- `byMonth` has all 12 months.
+- `byProperty` has every live property (zeros included), then any deleted property with
+  expenses that year, then `property: null` (general expenses), always last.
+
+Errors: `400 VALIDATION_ERROR`, `401`, `403 FORBIDDEN`.
+
+---
+
+## Reports (owner only)
+
+Both reports need `year` (2000 to 2100) and only cover my properties. Tenants get `403`.
+
+**Rent collected** is exactly the [rent ledger's](#rent-ledger) number: the server calls the same
+function `GET /ledger/summary` uses for `collectedCents`. That means only `succeeded` payments,
+the rent pool only (rent, late fees, other charges, never deposits), and refunds subtracted.
+Pending claims, rejected, voided, failed, and returned payments are left out. It's bucketed by
+`paidOn`, and expenses by `spentOn`. Both are the property's own calendar dates, so a payment on
+Dec 31 is December's even if it's already Jan 1 in UTC. For any month and property, the profit
+report's `rentCollectedCents` equals `GET /ledger/summary`'s `collectedCents`.
+
+### `GET /reports/profit?year=YYYY&propertyId=`
+
+**200**:
+
+```json
+{
+  "report": {
+    "year": 2026,
+    "propertyId": null,
+    "properties": [
+      {
+        "property": { "id": "uuid", "name": "Maple Court" },
+        "rentCollectedCents": 2900000,
+        "expensesCents": 812000,
+        "netCents": 2088000,
+        "months": [
+          { "month": "2026-01", "rentCollectedCents": 240000, "expensesCents": 18000, "netCents": 222000 }
+        ]
+      }
+    ],
+    "general": {
+      "rentCollectedCents": 0,
+      "expensesCents": 34200,
+      "netCents": -34200,
+      "months": [ { "...month" } ]
+    },
+    "total": {
+      "rentCollectedCents": 2900000,
+      "expensesCents": 846200,
+      "netCents": 2053800,
+      "months": [ { "...month" } ]
+    }
+  }
+}
+```
+
+- Every row has all 12 `months`. `netCents = rentCollectedCents - expensesCents` and can be
+  negative.
+- `properties` has every live property (zeros if nothing happened), plus any deleted property with
+  activity that year.
+- `general` is expenses with no property. `total` is everything, general included.
+- With `propertyId` (one of mine, deleted ones too): just that property, `general` is `null`, and
+  `total` is that property alone.
+- Expenses count whether or not they're tax deductible. The tax summary is where that matters.
+
+Errors: `400 VALIDATION_ERROR`, `401`, `403 FORBIDDEN`, `404 NOT_FOUND` (`propertyId` isn't mine).
+
+### `GET /reports/tax-summary?year=YYYY&format=json|csv`
+
+The year in IRS Schedule E (rental income) shape. `format` defaults to `json`.
+
+- **Income** is rent collected (above), Schedule E line 3.
+- **Expenses** are only `taxDeductible: true` ones, grouped onto Schedule E lines in form order.
+  Non-deductible spending is reported separately (`nonDeductibleExpensesCents`) and isn't in the
+  totals or net.
+- `netCents = incomeCents - deductibleExpensesCents`.
+
+| `category`          | Schedule E line | `label`                               |
+| ------------------- | --------------- | ------------------------------------- |
+| `advertising`       | 5               | Advertising                           |
+| `travel`            | 6               | Auto and travel                       |
+| `insurance`         | 9               | Insurance                             |
+| `professional_fees` | 10              | Legal and other professional fees     |
+| `mortgage_interest` | 12              | Mortgage interest paid to banks, etc. |
+| `repairs`           | 14              | Repairs                               |
+| `supplies`          | 15              | Supplies                              |
+| `taxes`             | 16              | Taxes                                 |
+| `utilities`         | 17              | Utilities                             |
+| `other`             | 19              | Other                                 |
+
+Schedule E lines the app doesn't track (cleaning, commissions, management fees, other interest,
+depreciation) are left out. This is a summary for the owner and their accountant, not tax advice.
+
+**200 (json)**:
+
+```json
+{
+  "summary": {
+    "year": 2026,
+    "properties": [
+      {
+        "property": { "id": "uuid", "name": "Maple Court" },
+        "incomeCents": 2900000,
+        "categories": [
+          { "category": "advertising", "scheduleELine": 5, "label": "Advertising", "amountCents": 0 }
+        ],
+        "deductibleExpensesCents": 790000,
+        "nonDeductibleExpensesCents": 22000,
+        "netCents": 2110000
+      }
+    ],
+    "general": { "...same block, incomeCents is always 0" },
+    "total": { "...same block, everything" }
+  }
+}
+```
+
+Every block lists all 10 categories, zeros included.
+
+**200 (csv)**: `Content-Type: text/csv; charset=utf-8` and
+`Content-Disposition: attachment; filename="tax-summary-2026.csv"`. CRLF line endings, a header
+row, then one block per property, then the general block, then the all-properties block. Fields
+with commas, quotes, or newlines are quoted, with inner quotes doubled.
+
+```
+year,scope,property_id,property_name,schedule_e_line,category,label,amount_cents,amount
+2026,property,<uuid>,Maple Court,3,rents_received,Rents received,2900000,29000.00
+2026,property,<uuid>,Maple Court,5,advertising,Advertising,0,0.00
+...
+2026,property,<uuid>,Maple Court,19,other,Other,0,0.00
+2026,property,<uuid>,Maple Court,20,total_expenses,Total expenses,790000,7900.00
+2026,property,<uuid>,Maple Court,21,net,Income or (loss),2110000,21100.00
+2026,property,<uuid>,Maple Court,,non_deductible,Not tax deductible (not in totals),22000,220.00
+2026,general,,General (no property),3,rents_received,Rents received,0,0.00
+...
+2026,all,,All properties,21,net,Income or (loss),2075800,20758.00
+2026,all,,All properties,,non_deductible,Not tax deductible (not in totals),22000,220.00
+```
+
+| Column            | Notes                                                                            |
+| ----------------- | -------------------------------------------------------------------------------- |
+| `scope`           | `property`, `general`, or `all`                                                  |
+| `property_id`     | empty for `general` and `all`                                                    |
+| `property_name`   | the property's name, `General (no property)`, or `All properties`                |
+| `schedule_e_line` | 3, the category lines, 20 (total expenses), 21 (net). Empty for `non_deductible` |
+| `category`        | `rents_received`, a category, `total_expenses`, `net`, or `non_deductible`       |
+| `amount_cents`    | integer cents                                                                    |
+| `amount`          | the same amount in dollars with two decimals (`1550.00`), for spreadsheets       |
+
+Each block is 14 rows, in this order: income, the 10 categories, total, net, non-deductible.
+
+Errors: `400 VALIDATION_ERROR` (bad year or format), `401`, `403 FORBIDDEN`.
+
+---
+
+## Rent reminders (owner only)
+
+The owner can nudge a tenant who owes rent. A reminder is a normal message from the owner in the
+owner/tenant thread, with text the server suggests from the ledger. **Nothing is ever sent
+automatically. A reminder only goes out when the owner taps send.** Every route needs
+`role = "owner"` and only finds my own tenancies (someone else's is `404`). Tenants get `403` on
+all of them.
+
+### The flow
+
+1. `GET /tenancies/:id/reminders/preview?kind=friendly` shows the suggested text, the amount, and
+   whether I can send right now.
+2. The owner edits the text (optional) and taps send: `POST /tenancies/:id/reminders`.
+3. The server posts it in the thread, the tenant gets `message:new` and a push that opens
+   Payments, and it's logged in `GET /tenancies/:id/reminders`.
+
+**Rules:**
+
+- The tenancy has to be active (`409 NO_ACTIVE_TENANCY`) and **owe something as of today** at
+  the property: the rent balance plus any deposit due by today (`409 NOTHING_OWED`). Pending
+  "I paid" claims don't reduce it. That's the same number as `balances.rentBalanceCents` (plus
+  owed deposit) on the ledger.
+- **One reminder per tenancy per 24 hours**, measured in elapsed time from the last send (not
+  calendar days). Exactly 24 hours later is allowed. Too soon is `429 REMINDER_TOO_SOON` with
+  `details.canSendAt`.
+- The due date in the text is the **oldest unpaid charge's** due date, a property-local date.
+
+### Suggested text
+
+Built from the tenant's first name, the amount owed in dollars with cents, the oldest unpaid due
+date, the place, and the property's `paymentInstructions`. It's always 600 characters or less.
+Long payment instructions get shortened with `…`, but the amount and date never do.
+
+| `kind`           | Tone            | Example                                                                                                                                                                                                                                                                    |
+| ---------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `friendly`       | warm            | `Hi Tara, just a friendly reminder that your balance of $1,450.00 for Maple Court, Unit 2B was due October 1. How to pay: Zelle to owner@example.com. If you have already sent it, you can mark it paid in the app. Thanks so much!`                                       |
+| `overdue_notice` | firm but polite | `Hi Tara, your balance of $1,450.00 for Maple Court, Unit 2B is past due. It was due October 1. Please send payment as soon as possible. How to pay: Zelle to owner@example.com. If you have already paid, please mark it paid in the app so I can confirm it. Thank you.` |
+
+With no payment instructions, "How to pay: ..." becomes "You can pay the way you usually do."
+
+### `GET /tenancies/:id/reminders/preview?kind=friendly|overdue_notice`
+
+`kind` defaults to `friendly`.
+
+**200**:
+
+```json
+{
+  "preview": {
+    "kind": "friendly",
+    "messageText": "Hi Tara, just a friendly reminder that ...",
+    "amountCents": 145000,
+    "chargeId": "uuid",
+    "dueOn": "2026-10-01",
+    "lastReminderAt": "2026-10-20T16:04:00.000Z",
+    "canSendNow": false,
+    "canSendAt": "2026-10-21T16:04:00.000Z"
+  }
+}
+```
+
+- `chargeId` / `dueOn`: the oldest unpaid charge due by today.
+- `lastReminderAt`: when the last reminder for this tenancy went out, or `null`.
+- `canSendAt`: when the next one is allowed, or `null` when `canSendNow` is `true`.
+
+Errors: `400 VALIDATION_ERROR` (bad kind), `401`, `403 FORBIDDEN`, `404 NOT_FOUND`,
+`409 NO_ACTIVE_TENANCY`, `409 NOTHING_OWED`.
+
+### `POST /tenancies/:id/reminders`
+
+```json
+{ "kind": "friendly", "message": "Hi Tara, quick reminder about October's rent..." }
+```
+
+| Field     | Required | Rules                                                                           |
+| --------- | -------- | ------------------------------------------------------------------------------- |
+| `kind`    | yes      | `friendly` or `overdue_notice`                                                  |
+| `message` | no       | the owner's edited text, trimmed, 1 to 600 chars. Left out = the suggested text |
+
+What happens (one transaction, so two taps at once send one reminder):
+
+- The text is posted as a message from the owner in the owner/tenant conversation (created if
+  it's somehow missing), with `metadata: { "type": "rent_reminder", "tenancyId", "chargeId" }`.
+- The usual [`message:new`](#messagenew) socket event goes to the thread room and both people's
+  personal rooms.
+- The tenant gets a [rent reminder push](#rent-reminder-push) whose tap opens **Payments**. It's
+  sent even if they have the thread open.
+- The reminder is logged (the history below). It's never deleted.
+
+**201**:
+
+```json
+{
+  "reminder": {
+    "id": "uuid",
+    "tenancyId": "uuid",
+    "kind": "friendly",
+    "chargeId": "uuid",
+    "amountCents": 145000,
+    "messageId": "uuid",
+    "messageText": "Hi Tara, quick reminder about October's rent...",
+    "sentAt": "2026-10-22T16:04:00.000Z"
+  },
+  "message": { "...Message, with metadata" }
+}
+```
+
+`amountCents` is what was owed when it was sent, so the history still reads right after the tenant
+pays.
+
+**429 REMINDER_TOO_SOON**:
+
+```json
+{
+  "error": {
+    "code": "REMINDER_TOO_SOON",
+    "message": "You can send one reminder per tenancy every 24 hours",
+    "details": { "canSendAt": "2026-10-23T16:04:00.000Z" }
+  }
+}
+```
+
+Errors: `400 VALIDATION_ERROR`, `401`, `403 FORBIDDEN`, `404 NOT_FOUND`,
+`409 NO_ACTIVE_TENANCY`, `409 NOTHING_OWED`, `429 REMINDER_TOO_SOON`.
+
+### `GET /tenancies/:id/reminders`
+
+History for one tenancy, newest first.
+
+**200**: `{ "reminders": [ { "...reminder" } ] }`
+
+Errors: `401`, `403 FORBIDDEN`, `404 NOT_FOUND`.
+
+---
+
 ## Uploads (image attachments)
 
 Auth required, any role. Attaching an image takes three steps:
@@ -1932,7 +2644,8 @@ Returns a short-lived download URL **only if** the key is attached to something 
 
 - a message in a conversation I'm part of,
 - a photo on a work order I can see (I'm its owner or its linked tenant), or
-- the `receiptPhotoKey` of a payment I'm on (I'm its owner or its tenant).
+- the `receiptPhotoKey` of a payment I'm on (I'm its owner or its tenant), or
+- the `receiptKey` of one of **my own** expenses that isn't deleted (owners only).
 
 Receipt photos use the same upload flow as message attachments: sign, `PUT` the bytes, then send
 the key as `receiptPhotoKey`.
@@ -2113,10 +2826,65 @@ The owner's daily digest counts every overdue charge, including ended tenancies.
 Later, with Stripe: `Payment received` (`payment:succeeded`) to the tenant, and `Payment failed` /
 `Payment returned` (`payment:failed`, `payment:returned`) to both.
 
+#### Lease pushes
+
+From the lease job. `<place>` and the date work like the ledger pushes. `<when>` is `today`,
+`tomorrow`, or `in <n> days`.
+
+| To     | When                                       | `title`                | `body`                                                                               |
+| ------ | ------------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------ |
+| owner  | `renewalNoticeDays`, 30, and 7 days before | `Lease ending soon`    | `<tenant name>'s lease at <place> ends <Mon D> (<when>).`                            |
+| tenant | 30 days before                             | `Your lease ends soon` | `Your lease at <place> ends <Mon D> (<when>). Talk to your landlord about renewing.` |
+
+```json
+{
+  "title": "Lease ending soon",
+  "body": "Tara Tenant's lease at Maple Court, Unit 2B ends Nov 9 (in 25 days).",
+  "sound": "default",
+  "data": {
+    "type": "lease:reminder",
+    "kind": "owner_30",
+    "tenancyId": "uuid",
+    "leaseEndOn": "2026-11-09",
+    "daysRemaining": 25
+  }
+}
+```
+
+`data.kind` is `owner_notice`, `owner_30`, `owner_7`, or `tenant_30`. Route a tapped
+`lease:reminder` to the tenancy (owner) or the tenant's home screen.
+
+#### Rent reminder push
+
+To the tenant when the owner sends a [rent reminder](#rent-reminders-owner-only). The body is the
+start of the reminder text (up to 100 chars).
+
+```json
+{
+  "title": "Rent reminder",
+  "body": "Hi Tara, just a friendly reminder that your balance of $1,450.00 for Maple Court, Unit 2…",
+  "sound": "default",
+  "data": {
+    "type": "rent_reminder",
+    "screen": "payments",
+    "kind": "friendly",
+    "tenancyId": "uuid",
+    "chargeId": "uuid",
+    "conversationId": "uuid",
+    "messageId": "uuid"
+  }
+}
+```
+
+The title is `Rent reminder` for `friendly` and `Rent is past due` for `overdue_notice`. **Route
+a tapped `rent_reminder` to Payments** (`data.screen`), not the conversation. The tenant doesn't
+also get the generic new-message push for it.
+
 Use `data.type` to route a tapped notification: `message:new` → the conversation,
 `workorder:new` / `workorder:updated` → the work order detail screen, `tenancy:updated` → refetch
 `GET /me` (tenants), `payment:*` → `GET /payments/:paymentId`, `ledger:reminder` → the tenant's
-ledger (`GET /me/ledger`), `ledger:overdue_digest` → the owner's summary (`GET /ledger/summary`).
+ledger (`GET /me/ledger`), `ledger:overdue_digest` → the owner's summary (`GET /ledger/summary`), `rent_reminder` → Payments
+(`GET /me/ledger`).
 
 ---
 
@@ -2230,7 +2998,7 @@ with no linked tenant only go to the owner.
 #### `tenancy:updated`
 
 Sent to the owner's and the tenant's personal rooms when the owner assigns, moves, or ends a
-tenancy. No room joining is needed.
+tenancy, or changes or renews its lease. No room joining is needed.
 
 ```json
 {
@@ -2240,13 +3008,16 @@ tenancy. No room joining is needed.
 }
 ```
 
-| `action`     | `tenancy`                   | `endedTenancy`         |
-| ------------ | --------------------------- | ---------------------- |
-| `"assigned"` | the new active tenancy      | `null`                 |
-| `"moved"`    | the new active tenancy      | the old, ended tenancy |
-| `"ended"`    | the tenancy that just ended | `null`                 |
+| `action`          | `tenancy`                               | `endedTenancy`         |
+| ----------------- | --------------------------------------- | ---------------------- |
+| `"assigned"`      | the new active tenancy                  | `null`                 |
+| `"moved"`         | the new active tenancy                  | the old, ended tenancy |
+| `"ended"`         | the tenancy that just ended             | `null`                 |
+| `"lease_updated"` | the tenancy, with its new `lease` block | `null`                 |
+| `"lease_renewed"` | the tenancy, with its new `lease` block | `null`                 |
 
-The owner's copy includes `moveOutNote`. **The tenant's copy has no `moveOutNote` key.** On the
+The owner's copy includes `moveOutNote` and `lease.leaseNotes`. **The tenant's copy has neither
+key.** Lease actions send no push. On the
 tenant side, refetch `GET /me` (or patch `activeTenancies`/`endedTenancies` locally) and switch
 to read-only mode if no active tenancy is left. On the owner side, refetch `GET /tenants` and
 `GET /properties` or update them locally.
@@ -2290,11 +3061,15 @@ later.
 | 400  | `VALIDATION_ERROR`              | Body, query, or params failed validation. Has `details`.                                                                        |
 | 400  | `INVALID_JSON`                  | Body isn't valid JSON                                                                                                           |
 | 400  | `INVITE_INVALID`                | Invite code unknown, used, expired, or revoked                                                                                  |
-| 400  | `INVALID_CURSOR`                | Pagination cursor isn't in this conversation / one of my work orders                                                            |
+| 400  | `INVALID_CURSOR`                | Pagination cursor isn't in this conversation / one of my work orders / one of my expenses                                       |
 | 400  | `TENANCY_REQUIRED`              | Tenant with several active tenancies must send `tenancyId` (work orders, payment claims)                                        |
 | 400  | `INVALID_END_DATE`              | `endedAt` is before the tenancy started or more than 30 days ahead                                                              |
 | 400  | `INVALID_PAID_ON`               | Payment `paidOn` is in the future or more than 366 days ago                                                                     |
 | 400  | `INVALID_DUE_DATE`              | Charge `dueOn` is more than 366 days from today                                                                                 |
+| 400  | `INVALID_LEASE_DATES`           | A lease date is more than 20 years from today, or a renewal's `newEndOn` isn't after today, the current end, and the start      |
+| 400  | `LATE_FEE_EXCEEDS_RENT`         | Lease renewal's `newRentCents` is less than the current late fee                                                                |
+| 400  | `INVALID_SPENT_ON`              | Expense `spentOn` is in the future or before 2000-01-01                                                                         |
+| 400  | `WORK_ORDER_PROPERTY_MISMATCH`  | Expense's work order is at a different property than its `propertyId`                                                           |
 | 400  | `INVALID_START_DATE`            | Rent schedule `startsOn` is more than 366 days from today                                                                       |
 | 400  | `PHOTO_LIMIT`                   | Work order would have more than 10 photos                                                                                       |
 | 400  | `ATTACHMENT_INVALID`            | Attachment key isn't yours or wasn't uploaded                                                                                   |
@@ -2311,7 +3086,11 @@ later.
 | 409  | `INVALID_STATUS_TRANSITION`     | Work order or payment status move isn't allowed (reserved, the routes return the more specific codes above)                     |
 | 409  | `WORK_ORDER_NOT_OPEN`           | Tenant tried to add photos after work started                                                                                   |
 | 409  | `TENANCY_EXISTS`                | That tenant already has an active tenancy in that unit                                                                          |
-| 409  | `TENANCY_ENDED`                 | The tenancy has already ended (can't end, move, or change its rent schedule)                                                    |
+| 409  | `TENANCY_ENDED`                 | The tenancy has already ended (can't end, move, or change its rent schedule or lease)                                           |
+| 409  | `NOTHING_OWED`                  | Rent reminder on a tenancy that owes nothing as of today                                                                        |
+| 409  | `NO_ACTIVE_TENANCY`             | Rent reminder on an ended tenancy (409 here, the tenant-side write block is 403)                                                |
+| 409  | `NO_LEASE`                      | Renewing a tenancy that has no lease                                                                                            |
+| 409  | `NO_RENT_SCHEDULE`              | Lease renewal with `newRentCents` on a tenancy with no rent schedule                                                            |
 | 409  | `SCHEDULE_START_TOO_EARLY`      | New rent schedule would start before the first month the current one hasn't billed                                              |
 | 409  | `LATE_FEE_EXISTS`               | That rent charge already has its one late fee                                                                                   |
 | 409  | `ALREADY_VOIDED`                | The charge is already voided                                                                                                    |
@@ -2323,6 +3102,7 @@ later.
 | 409  | `PROPERTY_HAS_ACTIVE_TENANCY`   | Can't delete: someone still actively lives there                                                                                |
 | 409  | `PROPERTY_HAS_OPEN_WORK_ORDERS` | Can't delete: a work order there isn't resolved                                                                                 |
 | 413  | `PAYLOAD_TOO_LARGE`             | JSON body over 100 KB, or local upload over the size limit                                                                      |
+| 429  | `REMINDER_TOO_SOON`             | A rent reminder for this tenancy went out less than 24 hours ago. `details.canSendAt` says when                                 |
 | 429  | `RATE_LIMITED`                  | Too many `/auth/*` requests from this IP                                                                                        |
 | 500  | `INTERNAL_ERROR`                | Server bug. The message is always generic.                                                                                      |
 | 501  | `NOT_CONFIGURED`                | Stripe provider stub. No route can reach it today, reserved for when `stripe_ach` is enabled                                    |
