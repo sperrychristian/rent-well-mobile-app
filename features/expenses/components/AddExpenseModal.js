@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TextInput,
-  Image,
   Pressable,
   ScrollView,
   Switch,
@@ -20,11 +19,13 @@ import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
 import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
-import { expense_categories, payment_methods } from '../../../data/expenseOptions';
+import { useExpenses } from '../context/ExpensesContext';
 import { todayString } from '../../../utils/formatDate';
 import { list_styles } from '../../../components/ui/listStyles';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
+import ReceiptImage from '../../../components/ReceiptImage';
+import { themedStyles } from '../../../utils/themedStyles';
 
 const repeat_options = ['None', 'Monthly', 'Yearly'];
 
@@ -35,6 +36,9 @@ function AddExpenseModal(props) {
   const reduce_motion = useReduceMotion();
   const expense_id = props.expense ? props.expense.id : null;
   const is_editing = !!props.expense;
+  // real mode saves to the server, which has its own category and payment lists and no repeat or billback
+  const expense_options = useExpenses();
+  const is_remote = expense_options.is_remote;
 
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Repairs');
@@ -165,7 +169,8 @@ function AddExpenseModal(props) {
     props.onClose();
   }
 
-  const property_names = props.property_names || [];
+  // on the server an expense belongs to one of the landlord's properties (or none), so those are the choices
+  const property_names = is_remote ? expense_options.property_names : props.property_names || [];
   const show_extras = props.allow_extras && !is_editing;
   const splitting = show_extras && split_on;
 
@@ -204,7 +209,7 @@ function AddExpenseModal(props) {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.chip_row}
               >
-                {expense_categories.map((option) => (
+                {expense_options.categories.map((option) => (
                   <Pressable
                     key={option}
                     onPress={() => setCategory(option)}
@@ -218,21 +223,40 @@ function AddExpenseModal(props) {
                 ))}
               </ScrollView>
 
-              <View style={styles.switch_row}>
-                <View style={styles.switch_text}>
-                  <Text style={styles.label}>Capital improvement</Text>
-                  <Text style={styles.helper}>
-                    Repairs are deducted the year they happen. Improvements like a new roof or
-                    appliance are usually depreciated over several years. Ask your accountant if you
-                    are not sure.
-                  </Text>
+              {/* the server calls it tax deductible, which is the same switch the other way around */}
+              {is_remote ? (
+                <View style={styles.switch_row}>
+                  <View style={styles.switch_text}>
+                    <Text style={styles.label}>Tax deductible</Text>
+                    <Text style={styles.helper}>
+                      Turn this off for capital improvements like a new roof, which are usually
+                      depreciated instead. Ask your accountant if you are not sure.
+                    </Text>
+                  </View>
+                  <Switch
+                    value={!is_capital}
+                    onValueChange={(value) => setIsCapital(!value)}
+                    trackColor={{ false: COLORS.border_strong, true: COLORS.success }}
+                    accessibilityLabel="Tax deductible"
+                  />
                 </View>
-                <Switch
-                  value={is_capital}
-                  onValueChange={setIsCapital}
-                  trackColor={{ false: COLORS.border_strong, true: COLORS.success }}
-                />
-              </View>
+              ) : (
+                <View style={styles.switch_row}>
+                  <View style={styles.switch_text}>
+                    <Text style={styles.label}>Capital improvement</Text>
+                    <Text style={styles.helper}>
+                      Repairs are deducted the year they happen. Improvements like a new roof or
+                      appliance are usually depreciated over several years. Ask your accountant if
+                      you are not sure.
+                    </Text>
+                  </View>
+                  <Switch
+                    value={is_capital}
+                    onValueChange={setIsCapital}
+                    trackColor={{ false: COLORS.border_strong, true: COLORS.success }}
+                  />
+                </View>
+              )}
 
               {show_extras && (
                 <View style={styles.switch_row}>
@@ -291,7 +315,7 @@ function AddExpenseModal(props) {
               <Text style={[styles.label, styles.label_gap]}>Date</Text>
               <DateField value={date_text} onChange={setDateText} />
 
-              {show_extras && !splitting && (
+              {show_extras && !splitting && !is_remote && (
                 <View>
                   <Text style={styles.label}>Repeat</Text>
                   <View style={styles.wrap_row}>
@@ -328,7 +352,7 @@ function AddExpenseModal(props) {
 
               <Text style={styles.label}>Payment method</Text>
               <View style={styles.wrap_row}>
-                {payment_methods.map((option) => (
+                {expense_options.payment_methods.map((option) => (
                   <Pressable
                     key={option}
                     onPress={() => setPaymentMethod(option)}
@@ -342,7 +366,7 @@ function AddExpenseModal(props) {
                 ))}
               </View>
 
-              {!splitting && (
+              {!splitting && !is_remote && (
                 <View>
                   <View style={styles.switch_row}>
                     <View style={styles.switch_text}>
@@ -388,7 +412,7 @@ function AddExpenseModal(props) {
                         accessibilityRole="imagebutton"
                         accessibilityLabel="Open photo"
                       >
-                        <Image source={{ uri: uri }} style={styles.receipt_thumb} />
+                        <ReceiptImage value={uri} style={styles.receipt_thumb} />
                       </Pressable>
                       <Pressable
                         style={styles.remove_button}
@@ -461,7 +485,7 @@ function AddExpenseModal(props) {
             accessibilityRole="button"
             accessibilityLabel="Close photo"
           >
-            <Image source={{ uri: full_receipt }} style={styles.full_photo} resizeMode="contain" />
+            <ReceiptImage value={full_receipt} style={styles.full_photo} resizeMode="contain" />
           </Pressable>
         )}
       </View>
@@ -471,7 +495,7 @@ function AddExpenseModal(props) {
 
 export default AddExpenseModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   root: {
     flex: 1,
   },
@@ -597,4 +621,4 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-});
+}));

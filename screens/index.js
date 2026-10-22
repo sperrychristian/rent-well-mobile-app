@@ -9,6 +9,7 @@ export { default as DemoChooserScreen } from '../features/home/screens/DemoChoos
 export { default as DocumentsScreen } from '../features/documents/screens/DocumentsScreen';
 export { default as ExpensesScreen } from '../features/expenses/screens/ExpensesScreen';
 export { default as InviteTenantScreen } from '../features/invites/screens/InviteTenantScreen';
+export { default as LeasesScreen } from '../features/leases/screens/LeasesScreen';
 export { default as LoginScreen } from '../features/auth/screens/LoginScreen';
 export { default as MessageThreadScreen } from '../features/messages/screens/MessageThreadScreen';
 export { default as MessagesScreen } from '../features/messages/screens/MessagesScreen';
@@ -18,6 +19,7 @@ export { default as NewWorkOrderScreen } from '../features/workOrders/screens/Ne
 export { default as PastRequestsScreen } from '../features/tenants/screens/PastRequestsScreen';
 export { default as PaymentDetailScreen } from '../features/payments/screens/PaymentDetailScreen';
 export { default as PaymentsScreen } from '../features/payments/screens/PaymentsScreen';
+export { default as ProfitScreen } from '../features/profit/screens/ProfitScreen';
 export { default as PropertiesScreen } from '../features/tenants/screens/PropertiesScreen';
 export { default as PropertyDetailScreen } from '../features/tenants/screens/PropertyDetailScreen';
 export { default as RegisterOwnerScreen } from '../features/auth/screens/RegisterOwnerScreen';

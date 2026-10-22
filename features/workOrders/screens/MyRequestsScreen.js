@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, FlatList, Pressable, RefreshControl } from 'react-native';
+import { View, Text, FlatList, Pressable, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PrimaryButton from '../../../components/PrimaryButton';
@@ -12,6 +12,7 @@ import { list_styles } from '../../../components/ui/listStyles';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // the tenant's own requests, newest first, they update live when the landlord changes something
 function MyRequestsScreen(props) {
@@ -71,7 +72,10 @@ function MyRequestsScreen(props) {
           <EmptyState
             illustration="empty_work_orders"
             title="No requests yet"
-            message="Tap Report an Issue when something needs fixing."
+            message="When something needs fixing, report it here and your landlord gets it right away."
+            action_label="Report an Issue"
+            action_icon="add-circle-outline"
+            onAction={() => props.navigation.navigate('NewWorkOrder')}
           />
         }
         renderItem={({ item }) => (
@@ -128,7 +132,7 @@ function MyRequestsScreen(props) {
 
 export default MyRequestsScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -194,4 +198,4 @@ const styles = StyleSheet.create({
   empty_text: {
     ...list_styles.empty_text,
   },
-});
+}));

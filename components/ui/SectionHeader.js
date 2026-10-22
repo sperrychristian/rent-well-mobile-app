@@ -1,5 +1,6 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { COLORS, SPACING, TYPE, SIZES } from '../../theme';
+import { View, Text, Pressable } from 'react-native';
+import { SPACING, TYPE, SIZES } from '../../theme';
+import { themedStyles } from '../../utils/themedStyles';
 
 // a small heading over a group of rows or cards, with an optional count and an action on the right
 // props: title, count, action_label, onAction, style
@@ -29,7 +30,7 @@ function SectionHeader(props) {
 
 export default SectionHeader;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -53,4 +54,4 @@ const styles = StyleSheet.create({
     ...TYPE.label,
     color: COLORS.cta,
   },
-});
+}));

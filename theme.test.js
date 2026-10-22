@@ -1,4 +1,16 @@
-import { COLORS, TYPE, SPACING, RADIUS, SHADOWS, SIZES, NUMBERS } from './theme';
+import {
+  COLORS,
+  LIGHT_COLORS,
+  DARK_COLORS,
+  TYPE,
+  SPACING,
+  RADIUS,
+  SHADOWS,
+  SIZES,
+  NUMBERS,
+  setActiveScheme,
+  themed,
+} from './theme';
 import { contrastRatio, meetsAA } from './utils/contrast';
 
 // every text color the screens put on every surface it can land on, AA is 4.5 for normal text
@@ -48,14 +60,18 @@ const fills_with_light_text = [
 ];
 const fills_with_dark_text = ['highlight', 'warning'];
 
-describe('theme contrast', () => {
+// the dark mode pass: every check runs on both palettes
+describe.each([
+  ['light', LIGHT_COLORS],
+  ['dark', DARK_COLORS],
+])('theme contrast (%s)', (scheme, PALETTE) => {
   test('every text color is AA on every surface', () => {
     const failing = [];
     text_tokens.forEach((text) => {
       surfaces.forEach((surface) => {
-        if (!meetsAA(COLORS[text], COLORS[surface])) {
+        if (!meetsAA(PALETTE[text], PALETTE[surface])) {
           failing.push(
-            text + ' on ' + surface + ' = ' + contrastRatio(COLORS[text], COLORS[surface]),
+            text + ' on ' + surface + ' = ' + contrastRatio(PALETTE[text], PALETTE[surface]),
           );
         }
       });
@@ -65,7 +81,7 @@ describe('theme contrast', () => {
 
   test('each state text color is AA on its own tint', () => {
     tint_pairs.forEach(([text, tint]) => {
-      expect({ text, tint, ok: meetsAA(COLORS[text], COLORS[tint]) }).toEqual({
+      expect({ text, tint, ok: meetsAA(PALETTE[text], PALETTE[tint]) }).toEqual({
         text,
         tint,
         ok: true,
@@ -75,36 +91,60 @@ describe('theme contrast', () => {
 
   test('white text is AA on every dark fill', () => {
     fills_with_light_text.forEach((fill) => {
-      expect({ fill, ok: meetsAA(COLORS.text_light, COLORS[fill]) }).toEqual({ fill, ok: true });
+      expect({ fill, ok: meetsAA(PALETTE.text_light, PALETTE[fill]) }).toEqual({ fill, ok: true });
     });
   });
 
   test('ink text is AA on every light fill', () => {
     fills_with_dark_text.forEach((fill) => {
-      expect({ fill, ok: meetsAA(COLORS.on_light, COLORS[fill]) }).toEqual({ fill, ok: true });
-      expect({ fill, ok: meetsAA(COLORS.text_dark, COLORS[fill]) }).toEqual({ fill, ok: true });
+      expect({ fill, ok: meetsAA(PALETTE.on_light, PALETTE[fill]) }).toEqual({ fill, ok: true });
+      expect({ fill, ok: meetsAA(PALETTE.text_dark, PALETTE[fill]) }).toEqual({ fill, ok: true });
     });
   });
 
   test('the brand button keeps white text AA even while pressed', () => {
-    expect(meetsAA(COLORS.on_cta, COLORS.cta)).toBe(true);
-    expect(meetsAA(COLORS.on_brand_muted, COLORS.cta)).toBe(true);
-    expect(meetsAA(COLORS.on_cta, COLORS.cta_pressed)).toBe(true);
+    expect(meetsAA(PALETTE.on_cta, PALETTE.cta)).toBe(true);
+    expect(meetsAA(PALETTE.on_brand_muted, PALETTE.cta)).toBe(true);
+    expect(meetsAA(PALETTE.on_cta, PALETTE.cta_pressed)).toBe(true);
   });
 
   test('the focus ring is visible on the fields (3 to 1 for non-text)', () => {
-    expect(meetsAA(COLORS.focus, COLORS.surface, true)).toBe(true);
-    expect(meetsAA(COLORS.focus, COLORS.surface_sunken, true)).toBe(true);
-    expect(contrastRatio(COLORS.border_strong, COLORS.surface)).toBeGreaterThan(1.5);
+    expect(meetsAA(PALETTE.focus, PALETTE.surface, true)).toBe(true);
+    expect(meetsAA(PALETTE.focus, PALETTE.surface_sunken, true)).toBe(true);
+    expect(contrastRatio(PALETTE.border_strong, PALETTE.surface)).toBeGreaterThan(1.5);
   });
 });
 
 describe('theme tokens', () => {
   test('every color is a hex color or an rgba or keyword overlay', () => {
-    Object.entries(COLORS).forEach(([name, value]) => {
-      const ok = /^#[0-9a-f]{6}$/i.test(value) || /^rgba\(/.test(value) || value === 'black';
-      expect({ name, ok }).toEqual({ name, ok: true });
+    [LIGHT_COLORS, DARK_COLORS].forEach((palette) =>
+      Object.entries(palette).forEach(([name, value]) => {
+        const ok = /^#[0-9a-f]{6}$/i.test(value) || /^rgba\(/.test(value) || value === 'black';
+        expect({ name, ok }).toEqual({ name, ok: true });
+      }),
+    );
+  });
+
+  test('both palettes have exactly the same token names', () => {
+    expect(Object.keys(DARK_COLORS).sort()).toEqual(Object.keys(LIGHT_COLORS).sort());
+  });
+
+  test('COLORS and themed objects read the active palette, built once per palette', () => {
+    let builds = 0;
+    const table = themed((palette) => {
+      builds++;
+      return { page: { backgroundColor: palette.background } };
     });
+    setActiveScheme('dark');
+    expect(COLORS.background).toBe(DARK_COLORS.background);
+    expect(table.page.backgroundColor).toBe(DARK_COLORS.background);
+    expect({ ...table }.page.backgroundColor).toBe(DARK_COLORS.background);
+    setActiveScheme('light');
+    expect(COLORS.background).toBe(LIGHT_COLORS.background);
+    expect(table.page.backgroundColor).toBe(LIGHT_COLORS.background);
+    expect(table.page.backgroundColor).toBe(LIGHT_COLORS.background);
+    expect(builds).toBe(2);
+    expect(Object.keys(COLORS)).toEqual(Object.keys(LIGHT_COLORS));
   });
 
   test('the type scale has a line height bigger than the size so larger fonts do not clip', () => {

@@ -1,7 +1,8 @@
-import { View, Text, Pressable, Platform, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Platform } from 'react-native';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { stringToDate, dateToString } from '../utils/dateInput';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../theme';
+import { themedStyles } from '../utils/themedStyles';
 
 // value is a date text like 2026-10-07 and onChange gets the new date text back
 function DateField(props) {
@@ -55,7 +56,7 @@ function DateField(props) {
 
 export default DateField;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   ios_row: {
     alignItems: 'flex-start',
     marginBottom: SPACING.sm,
@@ -74,4 +75,4 @@ const styles = StyleSheet.create({
     ...TYPE.body,
     color: COLORS.text,
   },
-});
+}));

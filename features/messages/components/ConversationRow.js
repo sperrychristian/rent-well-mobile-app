@@ -1,10 +1,11 @@
 import { memo } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import UnreadBadge from './UnreadBadge';
 import { formatMessageTime } from '../utils/messageHelpers';
 import { COLORS, SPACING, FONTS, TYPE, BORDER, OPACITY, SIZES } from '../../../theme';
 import Avatar from '../../../components/ui/Avatar';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // one thread in the inbox: who, the last message, when, and how many are unread
 // props: conversation, my_user_id, onPress
@@ -60,7 +61,7 @@ function ConversationRow(props) {
 
 export default memo(ConversationRow);
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   // the Hearth pass: a ruled row on the paper, no box
   row: {
     flexDirection: 'row',
@@ -117,4 +118,4 @@ const styles = StyleSheet.create({
   // an unread thread gets an amber edge, the bold text and the badge say it too
   // (the Hearth pass dropped the edge, the bold text and the badge carry it)
   row_unread: {},
-});
+}));

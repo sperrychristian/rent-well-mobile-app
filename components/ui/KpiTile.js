@@ -1,5 +1,6 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { COLORS, SPACING, TYPE, NUMBERS, OPACITY } from '../../theme';
+import { View, Text, Pressable } from 'react-native';
+import { SPACING, TYPE, NUMBERS, OPACITY } from '../../theme';
+import { themedStyles } from '../../utils/themedStyles';
 
 // one key number: a small uppercase label, the value big, and a short caption under it
 // the icon sits on top and the label goes under the value, so the numbers line up even when a label wraps
@@ -51,7 +52,7 @@ function KpiTile(props) {
 
 export default KpiTile;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   tile: {
     flex: 1,
     paddingVertical: SPACING.sm,
@@ -72,4 +73,4 @@ const styles = StyleSheet.create({
     ...TYPE.body_small,
     color: COLORS.text_muted,
   },
-});
+}));

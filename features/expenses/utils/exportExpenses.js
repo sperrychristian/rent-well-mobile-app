@@ -12,7 +12,8 @@ function csvField(value) {
 }
 
 // writes the csv text to a temporary file and opens the phone's share sheet
-async function shareCsvText(csv, file_name, dialog_title) {
+// the tax summary export uses it too, so it's exported now
+export async function shareCsvText(csv, file_name, dialog_title) {
   const file = new File(Paths.cache, file_name);
   if (file.exists) {
     file.delete();

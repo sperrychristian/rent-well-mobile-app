@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, View, Text, FlatList, Pressable, ScrollView, Alert } from 'react-native';
+import { View, Text, FlatList, Pressable, ScrollView, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
@@ -7,12 +7,13 @@ import TripModal from '../components/TripModal';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { formatDate } from '../../../utils/formatDate';
 import { sumMiles } from '../../expenses/utils/expenseStats';
-import { COLORS, SPACING, TYPE, OPACITY, NUMBERS, SIZES } from '../../../theme';
+import { SPACING, TYPE, OPACITY, NUMBERS, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import IconCircle from '../../../components/ui/IconCircle';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
+import { themedStyles } from '../../../utils/themedStyles';
 
 function MileageScreen(props) {
   // need the insets so the title clears the notch and status bar
@@ -162,9 +163,12 @@ function MileageScreen(props) {
         ListHeaderComponent={list_header}
         ListEmptyComponent={
           <EmptyState
-            illustration="empty_expenses"
+            illustration="empty_mileage"
             title={'No trips logged for ' + year}
-            message="Tap Add Trip after a drive to a property."
+            message="Log each drive to a property, the deduction adds itself up for tax time."
+            action_label="Add Trip"
+            action_icon="add-circle-outline"
+            onAction={openNewForm}
           />
         }
         renderItem={({ item }) => (
@@ -205,7 +209,7 @@ function MileageScreen(props) {
 
 export default MileageScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -302,4 +306,4 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     textAlign: 'right',
   },
-});
+}));

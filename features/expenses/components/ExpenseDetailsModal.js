@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Modal, View, Text, Image, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { Modal, View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { COLORS, SPACING, TYPE, RADIUS, NUMBERS } from '../../../theme';
+import { SPACING, TYPE, RADIUS, NUMBERS } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
+import ReceiptImage from '../../../components/ReceiptImage';
+import { themedStyles } from '../../../utils/themedStyles';
 
 function ExpenseDetailsModal(props) {
   // with Reduce Motion on the sheet just appears, no slide or fade
@@ -49,7 +51,7 @@ function ExpenseDetailsModal(props) {
                   accessibilityRole="imagebutton"
                   accessibilityLabel="Open receipt photo"
                 >
-                  <Image source={{ uri: expense.photo_uri }} style={styles.photo} />
+                  <ReceiptImage value={expense.photo_uri} style={styles.photo} />
                 </Pressable>
               )}
             </View>
@@ -69,11 +71,7 @@ function ExpenseDetailsModal(props) {
             accessibilityRole="button"
             accessibilityLabel="Close photo"
           >
-            <Image
-              source={{ uri: full_photo_uri }}
-              style={styles.full_photo}
-              resizeMode="contain"
-            />
+            <ReceiptImage value={full_photo_uri} style={styles.full_photo} resizeMode="contain" />
           </Pressable>
         )}
       </View>
@@ -83,7 +81,7 @@ function ExpenseDetailsModal(props) {
 
 export default ExpenseDetailsModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -135,4 +133,4 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-});
+}));

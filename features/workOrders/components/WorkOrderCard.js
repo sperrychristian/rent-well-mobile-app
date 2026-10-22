@@ -1,25 +1,26 @@
-import { Text, View, Image, Pressable, StyleSheet } from 'react-native';
+import { Text, View, Image, Pressable } from 'react-native';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import RemoteImage from '../../../components/RemoteImage';
 import StatusLabel from '../../../components/ui/StatusLabel';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, themed } from '../../../theme';
 import { formatDate } from '../../../utils/formatDate';
 import { formatCurrency } from '../../../utils/formatCurrency';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // I keep one color per status so the badge is readable at a glance
-export const status_colors = {
+export const status_colors = themed((COLORS) => ({
   'Open': COLORS.danger,
   'In Progress': COLORS.warning,
   'Resolved': COLORS.success,
-};
+}));
 
 // one color per priority so emergencies stand out in the list
-export const priority_colors = {
+export const priority_colors = themed((COLORS) => ({
   'Emergency': COLORS.priority_emergency,
   'Normal': COLORS.secondary,
   'Low': COLORS.priority_low,
-};
+}));
 
 function WorkOrderCard(props) {
   const order = props.order;
@@ -158,7 +159,7 @@ function WorkOrderCard(props) {
 
 export default WorkOrderCard;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   // the Hearth pass: each order is a ruled section on the paper with a hairline on top
   card: {
     marginTop: 0,
@@ -230,4 +231,4 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.cta,
     borderColor: COLORS.cta,
   },
-});
+}));

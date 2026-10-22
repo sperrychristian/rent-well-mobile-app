@@ -1,4 +1,4 @@
-import { Modal, View, Text, Image, ScrollView, StyleSheet } from 'react-native';
+import { Modal, View, Text, Image, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 // the pop-up forms share the sheet look from components/ui, the JSX still says Card
 import Card from '../../../components/ui/ModalCard';
@@ -8,6 +8,7 @@ import { getDocumentUri } from '../utils/documentFiles';
 import { isImage, iconFor, expiryTag, daysUntil, formatSize } from '../utils/documentHelpers';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // props: visible, document, in_demo, onOpen, onEdit, onDelete, onClose, and onDismiss (iOS calls it once the modal is fully gone)
 function DocumentDetailModal(props) {
@@ -136,7 +137,7 @@ function DocumentDetailModal(props) {
 
 export default DocumentDetailModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   backdrop: {
     flex: 1,
     backgroundColor: COLORS.backdrop,
@@ -199,4 +200,4 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 0,
   },
-});
+}));

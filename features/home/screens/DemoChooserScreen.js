@@ -1,15 +1,16 @@
-import { StyleSheet, View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/ui/Card';
 import Wordmark from '../../../components/ui/Wordmark';
 import FadeInView from '../../../components/ui/FadeInView';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { COLORS, SPACING, TYPE, SIZES, BORDER } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES, BORDER, themed } from '../../../theme';
 import IconCircle from '../../../components/ui/IconCircle';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // the two ways into the demo, both run on the same local sample data and never touch an account
-const demo_choices = [
+const demo_choices = themed((COLORS) => [
   {
     role: 'owner',
     title: 'Demo as Landlord',
@@ -28,7 +29,7 @@ const demo_choices = [
     tone: 'brand',
     hint: "Starts the demo on Sam's home screen",
   },
-];
+]);
 
 // picks which side the demo opens on, back goes to Welcome like any other screen
 function DemoChooserScreen() {
@@ -86,7 +87,7 @@ function DemoChooserScreen() {
 
 export default DemoChooserScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -136,4 +137,4 @@ const styles = StyleSheet.create({
     ...TYPE.body_small,
     color: COLORS.text_muted,
   },
-});
+}));

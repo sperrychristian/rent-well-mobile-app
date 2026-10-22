@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import { View, Text, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../theme';
+import { themedStyles } from '../utils/themedStyles';
 
 // a labeled text box with its error right underneath, extra props go straight to the TextInput
 // props: label, error, value, onChangeText, plus anything TextInput takes
@@ -54,7 +55,7 @@ function TextField(props) {
 
 export default TextField;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   field: {
     marginBottom: SPACING.md,
   },
@@ -97,4 +98,4 @@ const styles = StyleSheet.create({
     color: COLORS.text_muted,
     marginTop: SPACING.xs,
   },
-});
+}));

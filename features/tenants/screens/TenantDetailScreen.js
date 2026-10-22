@@ -1,14 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  ActivityIndicator,
-  Alert,
-  Linking,
-} from 'react-native';
+import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
@@ -25,6 +16,7 @@ import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import Avatar from '../../../components/ui/Avatar';
 import StatusLabel from '../../../components/ui/StatusLabel';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // one tenant: how to reach them, where they live now, their work orders, where they lived before,
 // and the owner's actions (message, move, assign, end)
@@ -375,7 +367,7 @@ function TenantDetailScreen(props) {
 
 export default TenantDetailScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   // the header has the screen's title now, so the name gets its own plain line instead of the big card
   name_line: {
     ...TYPE.title,
@@ -486,4 +478,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.xs,
   },
-});
+}));

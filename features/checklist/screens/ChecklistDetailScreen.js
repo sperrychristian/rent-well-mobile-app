@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, Pressable, Alert } from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
@@ -20,6 +20,7 @@ import { shareChecklistText } from '../utils/exportChecklist';
 import { COLORS, SPACING, TYPE, BORDER, SIZES, OPACITY } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusLabel from '../../../components/ui/StatusLabel';
+import { themedStyles } from '../../../utils/themedStyles';
 
 function ChecklistDetailScreen(props) {
   // need the insets so the title clears the notch and status bar
@@ -375,7 +376,7 @@ function ChecklistDetailScreen(props) {
 
 export default ChecklistDetailScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   // the header has the screen's title now, so the name gets its own plain line instead of the big card
   name_line: {
     ...TYPE.title,
@@ -526,4 +527,4 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: OPACITY.pressed,
   },
-});
+}));

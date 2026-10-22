@@ -1,4 +1,4 @@
-import { StyleSheet, Text, ScrollView } from 'react-native';
+import { Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
@@ -8,8 +8,20 @@ import { useAuth } from '../../auth/context/AuthContext';
 import { useAppRole } from '../../auth/hooks/useAppRole';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { SIZES, COLORS, SPACING, TYPE } from '../../../theme';
+import { SIZES, SPACING, TYPE } from '../../../theme';
 import { formatCurrency } from '../../../utils/formatCurrency';
+import ListRow from '../../../components/ui/ListRow';
+import DemoTourSheet from '../../home/components/DemoTourSheet';
+import { useDemoTour } from '../../home/hooks/useDemoTour';
+import { themedStyles } from '../../../utils/themedStyles';
+import SegmentedControl from '../../../components/ui/SegmentedControl';
+import { useTheme } from '../../../context/ThemeContext';
+
+const appearance_choices = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+];
 
 // stub for the assignment: the future home for account details, notification settings, the mileage rate,
 // and Log Out (the old Log Out buttons on the homes still work, this is just the spot it moves to later)
@@ -22,6 +34,10 @@ function SettingsScreen(props) {
   // owners and the demo get the mileage rate, tenants don't track mileage
   // (the tenant side of the demo is a tenant here too, so it skips it)
   const shows_mileage = role === 'owner';
+  // the demo tour opens again from here, it only means something while the demo runs
+  const tour = useDemoTour(false);
+  // Appearance is saved on this phone, so it stays the same before login, in the demo, and after logging out
+  const theme = useTheme();
 
   return (
     <ScrollView
@@ -56,6 +72,21 @@ function SettingsScreen(props) {
         )}
       </Card>
 
+      <Card>
+        <Text style={styles.heading}>Appearance</Text>
+        <SegmentedControl
+          label="Appearance"
+          options={appearance_choices}
+          value={theme.preference}
+          onChange={theme.setPreference}
+        />
+        <Text style={styles.detail}>
+          {theme.preference === 'system'
+            ? "Follows your phone, it's " + (theme.is_dark ? 'dark' : 'light') + ' right now.'
+            : 'Saved on this phone, for every account and the demo.'}
+        </Text>
+      </Card>
+
       {shows_mileage && (
         <Card>
           <Text style={styles.heading}>Mileage rate</Text>
@@ -71,6 +102,16 @@ function SettingsScreen(props) {
         </Card>
       )}
 
+      {demo_mode && (
+        <ListRow
+          icon="compass-outline"
+          title="Take the tour"
+          subtitle="Four things to try in the demo"
+          onPress={tour.open}
+          style={styles.tour_row}
+        />
+      )}
+
       <Card>
         <Text style={styles.heading}>Coming soon</Text>
         <Text style={styles.body}>
@@ -81,13 +122,18 @@ function SettingsScreen(props) {
 
       {/* only shows for a signed-in account */}
       <LogoutButton style={styles.logout_button} />
+      <DemoTourSheet
+        visible={tour.visible}
+        role={role === 'tenant' ? 'tenant' : 'owner'}
+        onClose={tour.close}
+      />
     </ScrollView>
   );
 }
 
 export default SettingsScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -110,9 +156,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
     marginTop: SPACING.sm,
   },
+  tour_row: {
+    marginTop: SPACING.md,
+  },
   logout_button: {
     width: '100%',
     alignSelf: 'center',
     marginHorizontal: 0,
   },
-});
+}));

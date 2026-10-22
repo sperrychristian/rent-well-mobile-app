@@ -1,6 +1,7 @@
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES, RADIUS, OPACITY } from '../theme';
+import { themedStyles } from '../utils/themedStyles';
 
 // an icon button for the header, the label is what a screen reader says since there's no text
 // props: icon, label, onPress
@@ -21,7 +22,7 @@ function HeaderIconButton(props) {
 
 export default HeaderIconButton;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   button: {
     width: SIZES.touch,
     height: SIZES.touch,
@@ -33,4 +34,4 @@ const styles = StyleSheet.create({
     opacity: OPACITY.pressed,
     backgroundColor: COLORS.surface_raised,
   },
-});
+}));

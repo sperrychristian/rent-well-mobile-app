@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, View, Text, FlatList, Pressable } from 'react-native';
+import { View, Text, FlatList, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PrimaryButton from '../../../components/PrimaryButton';
@@ -12,6 +12,7 @@ import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
+import { themedStyles } from '../../../utils/themedStyles';
 
 const status_filters = ['All', 'In progress', 'Complete'];
 
@@ -86,11 +87,15 @@ function ChecklistScreen(props) {
         ListEmptyComponent={
           <EmptyState
             illustration="empty_checklists"
-            title={
+            title={checklists.length === 0 ? 'No checklists yet' : 'No checklists match'}
+            message={
               checklists.length === 0
-                ? 'No checklists yet, tap New Checklist to start one'
-                : 'No checklists match'
+                ? 'Walk a unit at move-in and move-out, room by room, so deposits are easy to settle.'
+                : 'Try another status above.'
             }
+            action_label="New Checklist"
+            action_icon="add-circle-outline"
+            onAction={openNewForm}
           />
         }
         renderItem={({ item }) => {
@@ -168,7 +173,7 @@ function ChecklistScreen(props) {
 
 export default ChecklistScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -249,4 +254,4 @@ const styles = StyleSheet.create({
   segment: {
     marginBottom: SPACING.sm + SPACING.xs,
   },
-});
+}));

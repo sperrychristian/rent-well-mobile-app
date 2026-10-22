@@ -105,21 +105,45 @@ The full guide is in `docs/DESIGN.md`.
 | --- | --- | --- | --- |
 | ![Dashboard](docs/screenshots/dashboard.png) | ![Tenant home](docs/screenshots/tenant_home.png) | ![Work orders](docs/screenshots/work_orders.png) | ![Thread](docs/screenshots/thread.png) |
 
+## Leases, profit, rent reminders, and dark mode
+
+- **Leases:** the landlord drawer has Leases, every lease sorted by end date with its status (Active, Expiring soon, Expired, Month to month, No lease) and days left. A row opens that tenancy's lease, where Set, Edit, and Renew (with an optional new rent) open as sheets, under a history of every change. The Dashboard says how many end soon and shows a terracotta line when one ends within 30 days. Tenants see "Your lease ends Jan 15" on My Home within 90 days.
+- **Expenses on the server:** a signed-in landlord's expenses live on the server now (the demo keeps its own). The same screens work offline from a saved copy, and expenses saved only on this phone can be uploaded once with "Upload N expenses from this phone", which keeps anything that fails for another try.
+- **Profit:** the drawer's Profit shows the year's net profit, rent collected and expenses, net by month as one green chart, and each property as a row (tap one to chart it). Tax Summary shares a Schedule E style summary as a CSV or text, from Profit or Expenses.
+- **Rent reminders:** on an overdue tenant in Payments (Remind) or from the Rent Ledger's More sheet, pick Friendly or Overdue notice, edit the suggested text, and Send. It lands in the chat with a "Payment reminder" label that opens Payments for the tenant. One per tenant every 24 hours.
+- **Dark mode:** Settings, Appearance: System, Light, or Dark, saved on the phone.
+
+## First run
+
+- **New landlords:** a signed-in landlord sees a "Get set up" checklist at the top of the Dashboard: Add a property, Invite a tenant, Set the rent. Each step opens the screen or sheet that already does it, and a progress line shows how far along you are. It goes away when you finish, or when you tap "Hide this for good".
+- **The demo:** the demo opens a short tour the first time, with four things to try on that side. Settings has a "Take the tour" row to see it again.
+- **Empty lists:** every empty list says what goes there and has the one button that adds the first one.
+
 ## Navigation (course assignment)
 
-**How to run:** `npm install`, then `npx expo start -c`, and open it in Expo Go or a simulator. With no backend running, tap **Try the Demo**, then **Demo as Landlord** or **Demo as Tenant**. Every screen on that side is reachable by tapping, and the back arrow returns.
+**How to run:** `npm install`, then `npx expo start -c`, and open it in Expo Go or a simulator (the drawer uses `react-native-gesture-handler` and Reanimated, which Expo Go already includes). With no backend running, tap **Try the Demo**, then **Demo as Landlord** or **Demo as Tenant**. The tab bar is at the bottom, the menu button (top left) opens the drawer, and every detail screen has a back arrow.
 
-**The diagram** (one page, drawn from `navigation/navigationMap.js` with `npm run diagram`):
-- image: `assignment/navigation/navigation-diagram.png`
-- PDF: `assignment/navigation/navigation-diagram.pdf`
-- The diagram has one box per screen and one arrow per navigation. Arrows that pass a param are labeled with its name, and TAB and DRAWER badges mark the future tabs and drawer.
-- `ASSIGNMENT_NAV.md` has the full write-up.
+**The structure:** a root native stack holds the signed-out screens, `Main` (a drawer), and every detail screen. The drawer's first screen is a bottom tab bar. `ASSIGNMENT_STRUCTURE.md` explains why in a few sentences.
+
+| Role | Tabs | Drawer |
+| --- | --- | --- |
+| Landlord | Home, Payments, Work Orders, Messages | Properties, Tenants, Leases, Expenses, Mileage Log, Profit, Documents, Checklists, Settings |
+| Tenant | My Home, Payments, Repairs, Messages | Past Requests, Settings |
+
+**The diagram** (one page with a swimlane per role, drawn from `navigation/navigationMap.js` with `npm run diagram`):
+- image: [assignment/navigation/navigation-diagram.png](assignment/navigation/navigation-diagram.png)
+- PDF: [assignment/navigation/navigation-diagram.pdf](assignment/navigation/navigation-diagram.pdf)
+- The tab bar and the drawer are drawn as labeled groups, and every arrow into a detail screen is labeled with the id it passes.
+- `ASSIGNMENT_NAV.md` has the full write-up (every screen, where it lives, header buttons, back behavior).
+
+![Navigation diagram](assignment/navigation/navigation-diagram.png)
 
 **Code:**
-- Everything is in one native stack in `App.js`. The header titles and the shared header style are in `navigation/screenOptions.js`.
+- `App.js` registers every screen on its navigator: `Stack.Screen`, `Drawer.Screen`, or `Tab.Screen`. The header titles and the shared styles for the stack, the tab bar, and the drawer are in `navigation/screenOptions.js`.
+- `navigation/navigationMap.js` is the source of truth (each screen's `place`: auth, tab, drawer, or drill), and `navigation/hubRouter.js` lets any screen still navigate to a tab or drawer screen by name.
 - Every screen is exported from `screens/index.js`. The files themselves live in `features/<feature>/screens/`.
 
-**Screens** (31). Every param is an id, never an object:
+**Screens** (33). Every param is an id, never an object:
 
 | Header title | Route | Who | Params |
 | --- | --- | --- | --- |
@@ -133,7 +157,9 @@ The full guide is in `docs/DESIGN.md`.
 | Work Order | `WorkOrderDetail` | Landlord | `workOrderId` |
 | Your Tenants | `Tenants` | Landlord | `propertyId` |
 | Tenant Profile | `TenantDetail` | Landlord | `tenantId` |
-| Lease and Documents | `TenantLease` | Landlord | `tenantId` |
+| Lease and Documents | `TenantLease` | Landlord | `tenancyId` or `tenantId` |
+| Leases | `Leases` | Landlord | none |
+| Profit | `Profit` | Landlord | none |
 | Your Properties | `Properties` | Landlord | none |
 | Property Overview | `PropertyDetail` | Landlord | `propertyId` |
 | Invite a New Tenant | `InviteTenant` | Landlord | none |

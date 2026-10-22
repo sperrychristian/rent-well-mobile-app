@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,6 +6,7 @@ import Card from '../../../components/ui/Card';
 import Wordmark from '../../../components/ui/Wordmark';
 import FadeInView from '../../../components/ui/FadeInView';
 import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // the shared frame for login and both sign up screens: title, a card for the form, and room for the keyboard
 // props: title, error (a message from the server shown above the form), children, footer
@@ -50,7 +51,7 @@ function AuthLayout(props) {
 
 export default AuthLayout;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -93,4 +94,4 @@ const styles = StyleSheet.create({
     color: COLORS.danger_text,
     flex: 1,
   },
-});
+}));

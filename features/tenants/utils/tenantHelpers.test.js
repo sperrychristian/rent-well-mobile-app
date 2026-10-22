@@ -57,6 +57,16 @@ describe('mapping api shapes', () => {
       started_at: '2025-09-01',
       ended_at: null,
       move_out_note: '',
+      // an older api copy with no lease block reads as no lease
+      lease: {
+        lease_start_on: null,
+        lease_end_on: null,
+        lease_term: null,
+        renewal_notice_days: 60,
+        days_remaining: null,
+        lease_status: 'none',
+        lease_notes: '',
+      },
     });
   });
 

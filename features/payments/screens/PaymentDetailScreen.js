@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Image, Alert, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Image, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import Card from '../../../components/ui/Card';
@@ -16,6 +16,7 @@ import { formatCents } from '../../../utils/formatCurrency';
 import { paymentPill, methodLabel, timelineFor } from '../utils/ledgerHelpers';
 import { shareReceipt } from '../utils/shareReceipt';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 const event_icons = {
   recorded: 'create-outline',
@@ -278,7 +279,7 @@ function PaymentDetailScreen(props) {
 
 export default PaymentDetailScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -393,4 +394,4 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 0,
   },
-});
+}));

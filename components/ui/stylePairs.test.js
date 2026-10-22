@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { COLORS } from '../../theme';
+import { LIGHT_COLORS, DARK_COLORS } from '../../theme';
 import { contrastRatio } from '../../utils/contrast';
 
 // reads every style block in the app's source, and wherever one block sets both a text color and a background,
@@ -51,12 +51,16 @@ describe('text and background pairs in the styles', () => {
     expect(pairs.length).toBeGreaterThan(5);
   });
 
-  test('every pair is a real token and AA', () => {
+  // the dark mode pass: the same pairs have to hold in both palettes
+  test.each([
+    ['light', LIGHT_COLORS],
+    ['dark', DARK_COLORS],
+  ])('every pair is a real token and AA (%s)', (scheme, PALETTE) => {
     const failing = pairs
-      .filter((pair) => String(COLORS[pair.background]).startsWith('#'))
+      .filter((pair) => String(PALETTE[pair.background]).startsWith('#'))
       .map((pair) => ({
         ...pair,
-        ratio: contrastRatio(COLORS[pair.text], COLORS[pair.background]),
+        ratio: contrastRatio(PALETTE[pair.text], PALETTE[pair.background]),
       }))
       .filter((pair) => pair.ratio === null || pair.ratio < 4.5);
     expect(failing).toEqual([]);

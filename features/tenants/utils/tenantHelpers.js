@@ -1,3 +1,5 @@
+import { fromApiLease } from '../../leases/utils/leaseHelpers';
+
 // pure helpers for tenants, properties, and tenancies, nothing here touches the network so they're easy to test
 // the screens use snake_case shapes, these turn the api's camelCase into them and back the demo up with the same rules
 
@@ -45,6 +47,8 @@ export function fromApiTenancy(api_tenancy) {
     started_at: localDateString(api_tenancy.startedAt),
     ended_at: api_tenancy.endedAt || null,
     move_out_note: api_tenancy.moveOutNote || '',
+    // every tenancy carries its lease now, with its status already worked out by the server
+    lease: fromApiLease(api_tenancy.lease),
   };
 }
 

@@ -1,6 +1,6 @@
 import { Text, StyleSheet, Pressable, ActivityIndicator, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, OPACITY, SIZES } from '../../theme';
+import { SPACING, TYPE, RADIUS, BORDER, OPACITY, SIZES, themed } from '../../theme';
 import { lineIcon } from './lineIcon';
 
 // the one button for the whole app, every look comes from a variant so screens don't style their own
@@ -12,7 +12,7 @@ import { lineIcon } from './lineIcon';
 // the Hearth pass: every button is a full pill, primary is the forest green with white text, secondary is
 // a see-through pill with a warm outline, tertiary is green text only, and destructive is terracotta words
 // in a terracotta outline (never a filled red block), plain looks like primary now
-const variants = {
+const variants = themed((COLORS) => ({
   primary: {
     fill: COLORS.cta,
     text: COLORS.on_cta,
@@ -39,7 +39,7 @@ const variants = {
   },
   // the fintech pass: plain is the indigo with white text now, screens that recolor it keep white text on top
   plain: { fill: COLORS.primary, text: COLORS.text_light, border: COLORS.primary, pressed: null },
-};
+}));
 
 const heights = {
   small: SIZES.button_small,

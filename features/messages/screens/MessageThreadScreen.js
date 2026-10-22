@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  StyleSheet,
   View,
   Text,
   TextInput,
@@ -30,6 +29,7 @@ import {
   showsTime,
 } from '../utils/messageHelpers';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, OPACITY } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // the server takes photos up to 10 MB and message text up to 2000 characters
 const max_photo_bytes = 10485760;
@@ -262,6 +262,7 @@ function MessageThreadScreen(props) {
             is_mine={item.senderId === my_user_id}
             show_seen={item.id === seen_id}
             onOpenImage={setViewerUrl}
+            onOpenPayments={() => props.navigation.navigate('Payments')}
             day_label={dayDividerLabel(messages, index)}
             show_time={showsTime(messages, index)}
           />
@@ -360,7 +361,7 @@ function MessageThreadScreen(props) {
 
 export default MessageThreadScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   // the header has the screen's title now, so the name gets its own plain line instead of the big card
   name_line: {
     ...TYPE.subheading,
@@ -494,4 +495,4 @@ const styles = StyleSheet.create({
   send_disabled: {
     opacity: OPACITY.disabled,
   },
-});
+}));

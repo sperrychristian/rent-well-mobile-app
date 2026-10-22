@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, RefreshControl, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
@@ -21,6 +21,7 @@ import { formatCents } from '../../../utils/formatCurrency';
 import { deriveLedger, addDays } from '../utils/ledgerMath';
 import { formatBalance, groupByMonth, shortDate, upcomingRent } from '../utils/ledgerHelpers';
 import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // how far back a rejected claim stays pinned at the top, after that it's just in the history
 const rejected_days = 60;
@@ -379,7 +380,7 @@ function TenantPaymentsView(props) {
 
 export default TenantPaymentsView;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -472,4 +473,4 @@ const styles = StyleSheet.create({
     ...TYPE.subheading,
     color: COLORS.text,
   },
-});
+}));

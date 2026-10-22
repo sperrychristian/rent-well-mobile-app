@@ -1,14 +1,5 @@
 import { useState } from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import { Modal, View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 // the pop-up forms share the sheet look from components/ui, the JSX still says Card
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
@@ -16,9 +7,10 @@ import DateField from '../../../components/DateField';
 import TextField from '../../../components/TextField';
 import { todayString } from '../../../utils/formatDate';
 import { checkEndDate, placeLabel } from '../utils/tenantHelpers';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { SPACING, TYPE, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
+import { themedStyles } from '../../../utils/themedStyles';
 
 const max_note_length = 1000;
 
@@ -135,7 +127,7 @@ function EndTenancyModal(props) {
 
 export default EndTenancyModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   root: {
     flex: 1,
   },
@@ -189,4 +181,4 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 0,
   },
-});
+}));

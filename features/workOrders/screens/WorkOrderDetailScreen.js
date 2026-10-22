@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  StyleSheet,
   View,
   Text,
   TextInput,
@@ -29,6 +28,8 @@ import { list_styles } from '../../../components/ui/listStyles';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
+import ReceiptImage from '../../../components/ReceiptImage';
+import { themedStyles } from '../../../utils/themedStyles';
 
 const priority_options = ['Emergency', 'Normal', 'Low'];
 
@@ -321,9 +322,7 @@ function WorkOrderDetailContent(props) {
                 <Text style={styles.amount}>{formatCurrency(expense.amount)}</Text>
                 <Text style={styles.detail}>{expense.description || 'No description'}</Text>
               </View>
-              {expense.photo_uri && (
-                <Image source={{ uri: expense.photo_uri }} style={styles.thumb} />
-              )}
+              {expense.photo_uri && <ReceiptImage value={expense.photo_uri} style={styles.thumb} />}
             </View>
           ))}
         </Card>
@@ -390,7 +389,7 @@ function WorkOrderDetailContent(props) {
 
 export default WorkOrderDetailScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   flex: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -534,4 +533,4 @@ const styles = StyleSheet.create({
   under_budget: {
     color: COLORS.success_text,
   },
-});
+}));

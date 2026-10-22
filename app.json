@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/hearth-icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true
     },
@@ -31,7 +31,11 @@
           "image": "./assets/hearth-splash.png",
           "imageWidth": 160,
           "resizeMode": "contain",
-          "backgroundColor": "#F7F3EC"
+          "backgroundColor": "#F7F3EC",
+          "dark": {
+            "image": "./assets/hearth-splash.png",
+            "backgroundColor": "#1B1814"
+          }
         }
       ]
     ],

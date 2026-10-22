@@ -150,9 +150,25 @@ function ledgerFromResponse(response) {
   if (data.type === 'ledger:overdue_digest') {
     return { digest: true };
   }
+  // the landlord's rent reminder goes to the tenant's Payments, not the chat (docs/API.md, Rent reminder push)
+  if (data.type === 'rent_reminder') {
+    return { reminder: true, tenancy_id: data.tenancyId || null };
+  }
   return null;
 }
 
 export function listenForLedgerTaps(onOpen) {
   return listenForTaps(ledgerFromResponse, onOpen);
+}
+
+// lease pushes (lease:reminder) carry the tenancy, onOpen gets the tenancy id
+// owners open that tenancy's lease, tenants go home where their lease line is
+function leaseFromResponse(response) {
+  const data =
+    response && response.notification ? response.notification.request.content.data : null;
+  return data && data.type === 'lease:reminder' && data.tenancyId ? data.tenancyId : null;
+}
+
+export function listenForLeaseTaps(onOpen) {
+  return listenForTaps(leaseFromResponse, onOpen);
 }

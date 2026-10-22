@@ -1,9 +1,4 @@
 flowchart LR
-  classDef auth fill:#dbdde0,stroke:#0F1B2D,stroke-width:2px;
-  classDef owner fill:#dcebe2,stroke:#157A3E,stroke-width:2px;
-  classDef tenant fill:#ebe1fc,stroke:#7C3AED,stroke-width:2px;
-  classDef shared fill:#dee8fc,stroke:#2563EB,stroke-width:2px;
-  classDef stub stroke-dasharray: 6 4;
   subgraph signed_out [Signed out]
     Welcome["Welcome to Rent Well"]
     DemoChooser["Pick a Demo Role"]
@@ -11,32 +6,44 @@ flowchart LR
     RegisterOwner["Landlord Sign Up"]
     RegisterTenant["Tenant Sign Up"]
   end
-  Dashboard["Landlord Dashboard<br/>TAB owner"]
-  WorkOrders["All Work Orders<br/>TAB owner"]
-  WorkOrderDetail["Work Order"]
-  Tenants["Your Tenants<br/>TAB owner"]
-  TenantDetail["Tenant Profile"]
-  TenantLease["Lease and Documents (stub)"]
-  Properties["Your Properties<br/>DRAWER owner"]
-  PropertyDetail["Property Overview (stub)"]
-  InviteTenant["Invite a New Tenant"]
-  Documents["Document Storage<br/>DRAWER owner"]
-  Checklist["Condition Checklists<br/>DRAWER owner"]
-  ChecklistDetail["Checklist"]
-  Expenses["Property Expenses<br/>DRAWER owner"]
-  Mileage["Mileage Log"]
-  YearEndReport["Year-End Tax Report"]
-  TenantHome["My Home<br/>TAB tenant"]
-  MyRequests["My Repair Requests<br/>TAB tenant"]
-  RequestDetail["Request"]
-  PastRequests["Past Repair Requests"]
-  NewWorkOrder["Add a Work Order"]
-  Messages["Message Inbox<br/>TAB owner, TAB tenant"]
-  MessageThread["Conversation"]
-  Payments["Payments and Rent"]
-  TenantLedger["Rent Ledger"]
-  PaymentDetail["Payment Record"]
-  Settings["Settings and Profile (stub)<br/>DRAWER owner"]
+  subgraph owner_tabs [Landlord tab bar]
+    Dashboard["Landlord Dashboard"]
+    Payments["Payments and Rent"]
+    WorkOrders["All Work Orders"]
+    Messages["Message Inbox"]
+  end
+  subgraph owner_drawer [Landlord drawer]
+    Properties["Your Properties"]
+    Tenants["Your Tenants"]
+    Leases["Leases"]
+    Expenses["Property Expenses"]
+    Mileage["Mileage Log"]
+    Profit["Profit"]
+    Documents["Document Storage"]
+    Checklist["Condition Checklists"]
+    Settings["Settings and Profile (stub)"]
+  end
+  subgraph tenant_tabs [Tenant tab bar]
+    TenantHome["My Home"]
+    MyRequests["My Repair Requests"]
+  end
+  subgraph tenant_drawer [Tenant drawer]
+    PastRequests["Past Repair Requests"]
+  end
+  subgraph details [Detail screens (root stack)]
+    WorkOrderDetail["Work Order"]
+    TenantDetail["Tenant Profile"]
+    TenantLease["Lease and Documents"]
+    PropertyDetail["Property Overview (stub)"]
+    InviteTenant["Invite a New Tenant"]
+    ChecklistDetail["Checklist"]
+    YearEndReport["Year-End Tax Report"]
+    RequestDetail["Request"]
+    NewWorkOrder["Add a Work Order"]
+    MessageThread["Conversation"]
+    TenantLedger["Rent Ledger"]
+    PaymentDetail["Payment Record"]
+  end
   Welcome --> Login
   Welcome --> RegisterOwner
   Welcome --> DemoChooser
@@ -60,6 +67,11 @@ flowchart LR
   Dashboard --> Documents
   Dashboard --> Checklist
   Dashboard --> Expenses
+  Dashboard --> Leases
+  Dashboard --> Profit
+  Dashboard -->|tenancyId| TenantLease
+  Dashboard --> Properties
+  Dashboard --> InviteTenant
   Dashboard -.-> Welcome
   Dashboard -.->|Switch to Tenant view| TenantHome
   WorkOrders -->|header: Add| NewWorkOrder
@@ -76,6 +88,8 @@ flowchart LR
   TenantDetail -->|tenantId| WorkOrders
   TenantDetail -->|checklistId| ChecklistDetail
   TenantLease --> Documents
+  Leases -->|tenancyId| TenantLease
+  Leases --> Tenants
   Properties -->|propertyId| PropertyDetail
   PropertyDetail -->|propertyId| Tenants
   PropertyDetail -->|propertyId| WorkOrders
@@ -97,40 +111,10 @@ flowchart LR
   NewWorkOrder --> MyRequests
   Messages -->|header: Invite| InviteTenant
   Messages -->|conversationId| MessageThread
+  MessageThread --> Payments
   Payments -->|paymentId| PaymentDetail
   Payments -->|tenancyId| TenantLedger
   TenantLedger -->|paymentId| PaymentDetail
   PaymentDetail -->|tenancyId| TenantLedger
   Settings --> Mileage
   Settings -.-> Welcome
-  class Welcome auth;
-  class DemoChooser auth;
-  class Login auth;
-  class RegisterOwner auth;
-  class RegisterTenant auth;
-  class Dashboard owner;
-  class WorkOrders owner;
-  class WorkOrderDetail owner;
-  class Tenants owner;
-  class TenantDetail owner;
-  class TenantLease owner,stub;
-  class Properties owner;
-  class PropertyDetail owner,stub;
-  class InviteTenant owner;
-  class Documents owner;
-  class Checklist owner;
-  class ChecklistDetail owner;
-  class Expenses owner;
-  class Mileage owner;
-  class YearEndReport owner;
-  class TenantHome tenant;
-  class MyRequests tenant;
-  class RequestDetail tenant;
-  class PastRequests tenant;
-  class NewWorkOrder shared;
-  class Messages shared;
-  class MessageThread shared;
-  class Payments shared;
-  class TenantLedger owner;
-  class PaymentDetail shared;
-  class Settings shared,stub;

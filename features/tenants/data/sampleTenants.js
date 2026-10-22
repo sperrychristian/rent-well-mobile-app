@@ -26,9 +26,62 @@ export const demo_tenant = {
   conversation_id: 'demo-convo-sam',
 };
 
+// the demo leases tell the same story as the backend's seed: one ending in 25 days (inside the 60 day
+// notice window), one in 70 days, one month to month, a past tenant whose lease ran out, and one with none
+function sampleLease(end_in_days, extra) {
+  return {
+    lease_start_on: daysFromToday(end_in_days - 364),
+    lease_end_on: daysFromToday(end_in_days),
+    lease_term: 'fixed',
+    renewal_notice_days: 60,
+    lease_notes: '',
+    ...(extra || {}),
+  };
+}
+
+// the 'set' event each sample lease would have from when the landlord first entered it
+function setEvent(id, lease, days_ago) {
+  return [
+    {
+      id: id,
+      type: 'set',
+      data: {
+        before: { leaseTerm: null },
+        after: {
+          leaseStartOn: lease.lease_start_on,
+          leaseEndOn: lease.lease_end_on,
+          leaseTerm: lease.lease_term,
+          renewalNoticeDays: lease.renewal_notice_days,
+          leaseNotes: lease.lease_notes || null,
+        },
+      },
+      createdAt: timestampFromToday(-days_ago),
+    },
+  ];
+}
+
 // a fresh copy every time the demo starts, so changes from the last demo never carry over
 export function buildSampleTenantData() {
+  const sam_lease = sampleLease(25, {
+    lease_notes: 'Wants to renew. Thinking $1,495 for the next year',
+  });
+  const jordan_lease = sampleLease(70);
+  const priya_lease = {
+    lease_start_on: daysFromToday(-60),
+    lease_end_on: null,
+    lease_term: 'month_to_month',
+    renewal_notice_days: 30,
+    lease_notes: '',
+  };
+  // Morgan's lease ran out, then they moved out 15 days later
+  const morgan_lease = sampleLease(-90);
   return {
+    lease_events: {
+      'demo-tenancy-sam': setEvent('demo-lease-event-sam', sam_lease, 340),
+      'demo-tenancy-jordan': setEvent('demo-lease-event-jordan', jordan_lease, 290),
+      'demo-tenancy-priya': setEvent('demo-lease-event-priya', priya_lease, 60),
+      'demo-tenancy-morgan': setEvent('demo-lease-event-morgan', morgan_lease, 450),
+    },
     properties: [
       { id: 'demo-prop-maple', name: '123 Maple St', address: '123 Maple St, Springfield' },
       { id: 'demo-prop-cedar', name: '48 Cedar Ave', address: '48 Cedar Ave, Springfield' },
@@ -77,6 +130,7 @@ export function buildSampleTenantData() {
         started_at: timestampFromToday(-380),
         ended_at: null,
         move_out_note: '',
+        lease: sam_lease,
       },
       {
         id: 'demo-tenancy-jordan',
@@ -87,6 +141,7 @@ export function buildSampleTenantData() {
         started_at: timestampFromToday(-320),
         ended_at: null,
         move_out_note: '',
+        lease: jordan_lease,
       },
       {
         id: 'demo-tenancy-priya',
@@ -97,6 +152,7 @@ export function buildSampleTenantData() {
         started_at: timestampFromToday(-60),
         ended_at: null,
         move_out_note: '',
+        lease: priya_lease,
       },
       {
         id: 'demo-tenancy-alex',
@@ -107,6 +163,7 @@ export function buildSampleTenantData() {
         started_at: timestampFromToday(-150),
         ended_at: null,
         move_out_note: '',
+        lease: null,
       },
       {
         id: 'demo-tenancy-morgan',
@@ -117,6 +174,7 @@ export function buildSampleTenantData() {
         started_at: timestampFromToday(-800),
         ended_at: daysFromToday(-75),
         move_out_note: 'Deposit returned in full',
+        lease: morgan_lease,
       },
     ],
     // same shape as the server's invites

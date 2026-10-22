@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, RefreshControl, Alert, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/ui/Card';
 import SectionHeader from '../../../components/ui/SectionHeader';
@@ -15,6 +15,7 @@ import { ChargeRow, PaymentRow, ClaimRow } from '../components/LedgerRows';
 import PaymentFormModal from '../components/PaymentFormModal';
 import ChargeFormModal from '../components/ChargeFormModal';
 import ScheduleFormModal from '../components/ScheduleFormModal';
+import ReminderSheet from '../../reminders/components/ReminderSheet';
 import { useLedger } from '../context/LedgerContext';
 import { useLedgerReview } from '../hooks/useLedgerReview';
 import { hapticSuccess } from '../../../utils/haptics';
@@ -28,6 +29,7 @@ import {
   upcomingRent,
 } from '../utils/ledgerHelpers';
 import { COLORS, SPACING, TYPE, SIZES, NUMBERS } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 function placeOf(ledger) {
   return ledger.unit_label ? ledger.property_name + ', ' + ledger.unit_label : ledger.property_name;
@@ -67,6 +69,8 @@ function TenantLedgerScreen(props) {
   const [form_key, setFormKey] = useState(0);
   // the More sheet, and the second sheet that picks what to void
   const [more_open, setMoreOpen] = useState(false);
+  // the rent reminder sheet, from More
+  const [reminder_open, setReminderOpen] = useState(false);
   const [void_open, setVoidOpen] = useState(false);
 
   function openForm(name) {
@@ -304,7 +308,7 @@ function TenantLedgerScreen(props) {
             variant="secondary"
             icon="ellipsis-horizontal-outline"
             title="More"
-            accessibilityLabel="More actions: add charge, edit rent schedule, void"
+            accessibilityLabel="More actions: send a reminder, add charge, edit rent schedule, void"
             onPress={() => setMoreOpen(true)}
             style={styles.action_more}
           />
@@ -409,6 +413,16 @@ function TenantLedgerScreen(props) {
             icon: 'pricetag-outline',
             onPress: () => openForm('charge'),
           },
+          // a nudge for rent that's owed, the sheet says why when it can't go (nothing owed, sent today)
+          ...(!is_ended
+            ? [
+                {
+                  label: 'Send Reminder',
+                  icon: 'notifications-outline',
+                  onPress: () => setReminderOpen(true),
+                },
+              ]
+            : []),
           ...(!is_ended
             ? [
                 {
@@ -440,6 +454,15 @@ function TenantLedgerScreen(props) {
         }))}
         onClose={() => setVoidOpen(false)}
       />
+      {reminder_open ? (
+        <ReminderSheet
+          visible
+          tenancy_id={ledger.tenancy_id}
+          tenant_name={ledger.tenant_name}
+          place={placeOf(ledger)}
+          onClose={() => setReminderOpen(false)}
+        />
+      ) : null}
       {review.sheet}
     </View>
   );
@@ -447,7 +470,7 @@ function TenantLedgerScreen(props) {
 
 export default TenantLedgerScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -512,4 +535,4 @@ const styles = StyleSheet.create({
     ...TYPE.body_small,
     color: COLORS.text_muted,
   },
-});
+}));

@@ -1,6 +1,7 @@
-import { Modal, Pressable, Image, Text, StyleSheet } from 'react-native';
-import { COLORS, SPACING, FONTS } from '../../../theme';
+import { Modal, Pressable, Image, Text } from 'react-native';
+import { SPACING, FONTS } from '../../../theme';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // the full size photo, tap anywhere to close
 // props: url (null hides it), onClose
@@ -31,7 +32,7 @@ function ImageViewerModal(props) {
 
 export default ImageViewerModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   backdrop: {
     flex: 1,
     backgroundColor: COLORS.photo_backdrop,
@@ -43,8 +44,8 @@ const styles = StyleSheet.create({
     height: '80%',
   },
   hint: {
-    color: COLORS.text_light,
+    color: COLORS.on_photo,
     fontFamily: FONTS.body,
     marginTop: SPACING.sm,
   },
-});
+}));

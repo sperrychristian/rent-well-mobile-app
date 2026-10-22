@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Text, Pressable, StyleSheet, View } from 'react-native';
+import { Text, Pressable, View } from 'react-native';
 import AuthLayout from '../components/AuthLayout';
 import SubmitButton from '../components/SubmitButton';
 import TextField from '../../../components/TextField';
@@ -12,7 +12,8 @@ import {
   normalizeInviteCode,
   collectErrors,
 } from '../utils/authValidation';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { SPACING, TYPE, SIZES } from '../../../theme';
+import { themedStyles } from '../../../utils/themedStyles';
 
 function RegisterTenantScreen(props) {
   const { registerTenant } = useAuth();
@@ -123,7 +124,7 @@ function RegisterTenantScreen(props) {
 
 export default RegisterTenantScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   links: {
     alignItems: 'center',
     gap: SPACING.xs,
@@ -139,4 +140,4 @@ const styles = StyleSheet.create({
     color: COLORS.cta,
     textAlign: 'center',
   },
-});
+}));

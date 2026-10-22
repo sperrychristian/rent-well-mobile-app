@@ -1,21 +1,13 @@
 import { useState, useEffect } from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import { Modal, View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 // the pop-up forms share the sheet look from components/ui, the JSX still says Card
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { COLORS, SPACING, TYPE } from '../../../theme';
+import { SPACING, TYPE } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // props: visible, properties (list of names), budgets (name to amount), onSave, onClose
 function BudgetsModal(props) {
@@ -111,7 +103,7 @@ function BudgetsModal(props) {
 
 export default BudgetsModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   backdrop: {
     flex: 1,
     backgroundColor: COLORS.backdrop,
@@ -155,4 +147,4 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 0,
   },
-});
+}));

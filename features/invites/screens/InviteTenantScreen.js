@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  StyleSheet,
   View,
   Text,
   ScrollView,
@@ -22,6 +21,7 @@ import { useTenants } from '../../tenants/context/TenantsContext';
 import { pendingInvites, formatInviteCode, inviteShareText } from '../utils/inviteHelpers';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
+import { themedStyles } from '../../../utils/themedStyles';
 
 function InviteTenantScreen() {
   const insets = useSafeAreaInsets();
@@ -315,7 +315,7 @@ function InviteTenantScreen() {
 
 export default InviteTenantScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -446,4 +446,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+}));

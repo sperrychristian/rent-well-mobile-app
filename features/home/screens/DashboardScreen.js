@@ -1,6 +1,6 @@
-import { StyleSheet, View, ScrollView } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, SPACING, SIZES } from '../../../theme';
+import { SPACING, SIZES } from '../../../theme';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DemoBanner from '../../../components/DemoBanner';
 import SummaryBlock from '../../../components/ui/SummaryBlock';
@@ -10,6 +10,9 @@ import FadeInView from '../../../components/ui/FadeInView';
 import LogoutButton from '../../auth/components/LogoutButton';
 import HomeTopBar from '../components/HomeTopBar';
 import HeroNote from '../components/HeroNote';
+import OnboardingCard from '../components/OnboardingCard';
+import DemoTourSheet from '../components/DemoTourSheet';
+import { useDemoTour } from '../hooks/useDemoTour';
 import { useMessages } from '../../messages/context/MessagesContext';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { useAuth } from '../../auth/context/AuthContext';
@@ -21,6 +24,9 @@ import { useLedger } from '../../payments/context/LedgerContext';
 import { ownerPaymentsLine, behindSummary, monthTitle } from '../../payments/utils/ledgerHelpers';
 import { collectedShare, monthOf } from '../../payments/utils/ledgerMath';
 import { demo_landlord } from '../../messages/data/sampleThreads';
+import { leasesSummary, urgentLease } from '../../leases/utils/leaseHelpers';
+import { useProfitReport } from '../../profit/hooks/useProfitReport';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // the fintech pass: an overview like a bank's home screen, a hello, one indigo summary card with this month's
 // spending and its trend, three key numbers, the four things landlords open most, then everything else
@@ -38,6 +44,14 @@ function DashboardScreen(props) {
   const open_orders = openCount(orders);
   const in_progress_orders = activeCount(orders) - open_orders;
   const active_tenants = tenants.filter((tenant) => tenant.is_active).length;
+  // leases come with the tenants, the row says how many end soon and the terracotta line names the soonest
+  const leases_line = leasesSummary(tenants);
+  const urgent_lease = urgentLease(tenants);
+  // this month's net from the profit report (the server's in real mode), like "$2,340 net this month"
+  const profit = useProfitReport(String(new Date().getFullYear()), null);
+  const this_profit_month = profit.report
+    ? profit.report.total.months[new Date().getMonth()]
+    : null;
   // rent this month from the ledger already in memory: what needs doing first, and what's come in
   const ledger_store = useLedger();
   const rent = ownerPaymentsLine(
@@ -51,6 +65,8 @@ function DashboardScreen(props) {
   const this_month = months[months.length - 1];
   const open_checklists = checklists.filter((checklist) => !checklist.completed).length;
   const name = user && user.name ? user.name : demo_mode ? demo_landlord.name : '';
+  // the demo opens a short tour the first time, real mode never does
+  const tour = useDemoTour(demo_mode);
 
   let note = { text: 'Everyone is paid up', tone: 'success', icon: 'checkmark-circle-outline' };
   if (behind.count > 0) {
@@ -75,6 +91,8 @@ function DashboardScreen(props) {
         {/* only shows while the demo is running */}
         <DemoBanner />
         <HomeTopBar name={name} onProfile={() => props.navigation.navigate('Settings')} />
+        {/* a new landlord's first-run checklist, it hides itself in the demo and once it's done */}
+        <OnboardingCard navigation={props.navigation} />
 
         {/* the hero: the big title, a hello, and the numbers worth a glance */}
         <FadeInView index={0}>
@@ -99,6 +117,18 @@ function DashboardScreen(props) {
             accessibilityHint="Opens Payments and Rent"
             onPress={() => props.navigation.navigate('Payments')}
           />
+          {/* only when a lease ends within 30 days, so it stays quiet the rest of the year */}
+          {urgent_lease ? (
+            <HeroNote
+              text={urgent_lease.text}
+              tone="danger"
+              icon="document-text-outline"
+              accessibilityHint="Opens the lease"
+              onPress={() =>
+                props.navigation.navigate('TenantLease', { tenancyId: urgent_lease.tenancy_id })
+              }
+            />
+          ) : null}
         </FadeInView>
 
         <FadeInView index={1} style={styles.rows}>
@@ -141,6 +171,27 @@ function DashboardScreen(props) {
             onPress={() => props.navigation.navigate('Tenants')}
           />
           <ListRow
+            icon="document-outline"
+            title="Leases"
+            subtitle={leases_line.text}
+            divider
+            onPress={() => props.navigation.navigate('Leases')}
+          />
+          <ListRow
+            icon="trending-up-outline"
+            title="Profit"
+            subtitle={
+              this_profit_month
+                ? formatCents(this_profit_month.net_cents, { cents: false }) + ' net this month'
+                : 'Rent in, expenses out'
+            }
+            subtitle_tone={
+              this_profit_month && this_profit_month.net_cents < 0 ? 'danger' : undefined
+            }
+            divider
+            onPress={() => props.navigation.navigate('Profit')}
+          />
+          <ListRow
             icon="receipt-outline"
             title="Expenses"
             subtitle={
@@ -181,13 +232,14 @@ function DashboardScreen(props) {
           <LogoutButton style={styles.logout_button} />
         </FadeInView>
       </ScrollView>
+      <DemoTourSheet visible={tour.visible} role="owner" onClose={tour.close} />
     </View>
   );
 }
 
 export default DashboardScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -216,4 +268,4 @@ const styles = StyleSheet.create({
   logout_button: {
     marginTop: SPACING.md,
   },
-});
+}));

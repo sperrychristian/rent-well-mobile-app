@@ -1,15 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  FlatList,
-  Pressable,
-  ScrollView,
-  TextInput,
-  Image,
-  Alert,
-} from 'react-native';
+import { View, Text, FlatList, Pressable, ScrollView, TextInput, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
@@ -34,6 +24,14 @@ import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import IconCircle from '../../../components/ui/IconCircle';
+import ReceiptImage from '../../../components/ReceiptImage';
+import ImportExpensesCard from '../components/ImportExpensesCard';
+import TaxSummarySheet from '../../profit/components/TaxSummarySheet';
+import SkeletonList from '../../../components/ui/Skeleton';
+import ErrorState from '../../../components/ErrorState';
+import { useToast } from '../../../components/ui/Toast';
+import { useExpenses } from '../context/ExpensesContext';
+import { themedStyles } from '../../../utils/themedStyles';
 
 const month_names = [
   'January',
@@ -76,6 +74,10 @@ function ExpensesScreen(props) {
     deleteRecurringRule,
     setBudgets,
   } = useWorkOrders();
+  // real mode: where the list came from (the server, or the copy saved on the phone), and the old phone expenses
+  const expense_store = useExpenses();
+  const toast = useToast();
+  const [tax_open, setTaxOpen] = useState(false);
 
   const current_year = String(new Date().getFullYear());
   // year defaults to this year so the tax year view is one tap away
@@ -253,7 +255,25 @@ function ExpensesScreen(props) {
   }
 
   // delete right away and show an undo bar for a few seconds, the receipts are kept in memory until it goes away
+  // on the server a delete can't be undone, so real mode asks first instead
   function handleDelete() {
+    if (expense_store.is_remote) {
+      const target_id = editing_id;
+      Alert.alert('Delete this expense?', "It's removed from your lists and reports.", [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            closeForm();
+            if (await deleteExpense(target_id)) {
+              toast.show('Expense deleted', 'trash-outline');
+            }
+          },
+        },
+      ]);
+      return;
+    }
     const removed = expenses.find((expense) => expense.id === editing_id);
     deleteExpense(editing_id);
     closeForm();
@@ -333,13 +353,16 @@ function ExpensesScreen(props) {
         />
       </View>
       <View style={styles.button_row}>
-        <PrimaryButton
-          title="Recurring"
-          icon="repeat-outline"
-          variant="tertiary"
-          style={styles.grey_button}
-          onPress={() => setRecurringOpen(true)}
-        />
+        {/* recurring rules make expenses on the phone, so they stay out of real mode until the server has them */}
+        {!expense_store.is_remote && (
+          <PrimaryButton
+            title="Recurring"
+            icon="repeat-outline"
+            variant="tertiary"
+            style={styles.grey_button}
+            onPress={() => setRecurringOpen(true)}
+          />
+        )}
         <PrimaryButton
           title="Budgets"
           icon="wallet-outline"
@@ -356,7 +379,22 @@ function ExpensesScreen(props) {
           style={styles.export_button}
           onPress={exportCsv}
         />
+        <PrimaryButton
+          title="Tax Summary"
+          icon="document-text-outline"
+          variant="tertiary"
+          style={styles.export_button}
+          onPress={() => setTaxOpen(true)}
+        />
       </View>
+      {/* real mode only: the old phone expenses waiting to go up, and a note when the list is the saved copy */}
+      {expense_store.is_remote && <ImportExpensesCard />}
+      {expense_store.from_cache && (
+        <Text style={styles.helper} accessibilityLiveRegion="polite">
+          Offline: showing the copy saved on this phone. Adding or changing expenses needs a
+          connection.
+        </Text>
+      )}
 
       <Text style={styles.section_label}>Year</Text>
       <ScrollView
@@ -551,9 +589,27 @@ function ExpensesScreen(props) {
     </View>
   );
 
+  // the first load from the server, before there's even a saved copy to show
+  if (expense_store.is_remote && expense_store.status === 'loading' && expenses.length === 0) {
+    return (
+      <View style={[styles.container, { paddingTop: SPACING.md }]}>
+        <SkeletonList rows={6} />
+      </View>
+    );
+  }
+  if (expense_store.is_remote && expense_store.status === 'error' && expenses.length === 0) {
+    return (
+      <View style={styles.container}>
+        <ErrorState message={expense_store.error_message} onRetry={expense_store.refresh} />
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, { paddingTop: SPACING.md }]}>
       <FlatList
+        refreshing={expense_store.refreshing}
+        onRefresh={expense_store.is_remote ? expense_store.refresh : undefined}
         data={rows}
         keyExtractor={(item) => item.key}
         keyboardShouldPersistTaps="handled"
@@ -564,6 +620,9 @@ function ExpensesScreen(props) {
             illustration="empty_expenses"
             title="No expenses match"
             message="Change the year or filters, or add an expense above."
+            action_label="Add Expense"
+            action_icon="add-circle-outline"
+            onAction={openNewForm}
           />
         }
         renderItem={({ item }) => {
@@ -647,7 +706,7 @@ function ExpensesScreen(props) {
               </View>
               {receipts.length > 0 && (
                 <View style={styles.receipt_box}>
-                  <Image source={{ uri: receipts[0] }} style={styles.receipt_thumb} />
+                  <ReceiptImage value={receipts[0]} style={styles.receipt_thumb} />
                   <Text style={styles.detail}>
                     {receipts.length} receipt{receipts.length > 1 ? 's' : ''}
                   </Text>
@@ -684,6 +743,9 @@ function ExpensesScreen(props) {
         onClose={closeForm}
         onDelete={handleDelete}
       />
+      {tax_open && (
+        <TaxSummarySheet visible years={years} year={year} onClose={() => setTaxOpen(false)} />
+      )}
       <RecurringModal
         visible={recurring_open}
         rules={recurring_rules}
@@ -704,7 +766,7 @@ function ExpensesScreen(props) {
 
 export default ExpensesScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -978,4 +1040,4 @@ const styles = StyleSheet.create({
   pressed: {
     backgroundColor: COLORS.surface_raised,
   },
-});
+}));

@@ -6,7 +6,6 @@ import {
   TextInput,
   Pressable,
   ScrollView,
-  StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -18,6 +17,7 @@ import { checklist_types } from '../data/checklistTemplates';
 import { COLORS, SPACING, TYPE } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
+import { themedStyles } from '../../../utils/themedStyles';
 
 // props: visible, property_names, move_ins (signed move-in checklists), onCreate, onClose
 // onCreate gets property, type, tenant, and move_in_id (null for a blank template)
@@ -205,7 +205,7 @@ function NewChecklistModal(props) {
 
 export default NewChecklistModal;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   root: {
     flex: 1,
   },
@@ -277,4 +277,4 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 0,
   },
-});
+}));

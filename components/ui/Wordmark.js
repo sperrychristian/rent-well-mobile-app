@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, TYPE } from '../../theme';
+import { themedStyles } from '../../utils/themedStyles';
 
 // the Rent Well lockup: the pixel house, the name in the pixel font, and a one-line tagline in Inter
 // the pixel font is only ever this big, it gets hard to read small, everything else stays Inter
@@ -46,7 +47,7 @@ function Wordmark(props) {
 
 export default Wordmark;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   lockup: {
     alignItems: 'center',
   },
@@ -70,4 +71,4 @@ const styles = StyleSheet.create({
   tagline_left: {
     textAlign: 'left',
   },
-});
+}));

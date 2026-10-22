@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, Pressable, Alert } from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
@@ -7,9 +7,10 @@ import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { formatDate } from '../../../utils/formatDate';
 import { buildYearEndData } from '../utils/expenseStats';
 import { shareYearEndCsv } from '../utils/exportExpenses';
-import { COLORS, SPACING, TYPE, BORDER, NUMBERS, SIZES } from '../../../theme';
+import { SPACING, TYPE, BORDER, NUMBERS, SIZES } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { formatCurrency } from '../../../utils/formatCurrency';
+import { themedStyles } from '../../../utils/themedStyles';
 
 function YearEndReportScreen(props) {
   // need the insets so the title clears the notch and status bar
@@ -159,7 +160,7 @@ function YearEndReportScreen(props) {
 
 export default YearEndReportScreen;
 
-const styles = StyleSheet.create({
+const styles = themedStyles((COLORS) => ({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -246,4 +247,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: SPACING.md,
   },
-});
+}));
