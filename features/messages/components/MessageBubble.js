@@ -33,7 +33,8 @@ function MessageBubble(props) {
           {isRentReminder(message) ? (
             <Pressable
               onPress={props.onOpenPayments}
-              hitSlop={{ top: SPACING.sm, bottom: SPACING.sm }}
+              // the label is short, so the slop makes it a full 44 to tap
+              hitSlop={{ top: SPACING.md, bottom: SPACING.md, left: SPACING.sm, right: SPACING.sm }}
               accessibilityRole="button"
               accessibilityLabel="Payment reminder, opens Payments"
               style={styles.reminder}

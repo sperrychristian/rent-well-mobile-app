@@ -132,3 +132,34 @@
 - **Updated tests:** the navigator key test (the key has the scheme now).
 - **Files:** 103 changed in this phase, most by the two-line wrapper.
 - **Checks:** lint 13 (known), 535 tests passing, format clean, no hex outside `theme.js`, iOS bundle exported with `--clear`.
+
+## Phase 6: tests, QA, docs
+
+- **Tests:**
+  - `features/realModeScreens.test.js` (4), with the routes mocked as docs/API.md answers:
+    - Profit: the server report, and a new year asks again.
+    - The reminder sheet: the server preview text, amount, and last sent, then a too-soon send showing when it can go next.
+    - Nothing owed and an ended tenancy turn Send off.
+    - Leases and Tenant Lease: the server lease block, notes, and timeline.
+  - Together with Phase 5's `featureFlows.test.js`, every new screen and sheet is rendered in both demo roles and mocked real mode. The main flows are covered: set a lease, renew a lease, add an expense, import phone expenses, change the profit year, send a reminder (success, too soon, nothing owed), and switch Appearance to Dark and back.
+- **Visual QA** (scratch web copy outside the repo, headless Chrome at 390x844, 360x640, and 820x1180, light and dark):
+  - Covered: the landlord home, Payments (a tab switch), the drawer, Leases, a lease drill-down and back, Profit, the reminder sheet, the tenant home, and the tenant drawer.
+  - No page errors and no sideways scroll in any run.
+  - Fixed: the Profit hero's two lines were spaced unevenly (the expenses line was a separate child). Both are in the caption now.
+  - The QA script itself needed to scroll the Remind button into view (it was under the tab bar at 390 and 360). That was a script problem, not an app one.
+  - Dark: cream on walnut reads well everywhere looked at. The demo banner is light green with dark words, the tab dots and counts are light terracotta, and the chart bars are light green.
+- **Sweeps:**
+  - No hex outside `theme.js` (one in a comment in `utils/contrast.js`).
+  - Contrast is checked on both palettes.
+  - Touch targets: Remind is 44 tall, and the chat's "Payment reminder" label got a 16 point vertical slop to reach 44.
+  - Every new pressable has a role and a label, and the chart has a spoken summary.
+  - Font scaling: the tab bar keeps its 1.3 cap and fits. The web render can't show the largest iOS setting, so the Dashboard rows weren't checked at it.
+  - Diff read: outside the four features and the theme wrapper lines, behavior changes are limited to the API client (`as_text`, the object `details` kept as `info`, new friendly messages), the ledger tap routing a `rent_reminder` to Payments, `FormSheet`'s `submit_disabled`, the More button label, and the invisible checklist tag fix.
+- **Docs:**
+  - `ASSIGNMENT_NAV.md`: the table regenerated from the map (33 screens), the new drawer items and sheets, the Rent Ledger's More button, and why Leases and Profit are drawer items and not tabs.
+  - `ASSIGNMENT_STRUCTURE.md`: the drawer list and the paragraph on later choices, still first person.
+  - README (the screen table, the tabs and drawer table, a new section on the features), CLAUDE.md, and `docs/DESIGN.md` (dark mode).
+- **Draft markers:** the case-insensitive search (DRAFT, TODO, FIXME, "rewrite in your own words", "in his own words", "Christian to rewrite") finds no label.
+  - What's left: the chat composer's `draft` variable, the payments and ledger-real logs describing the old "draft API", and the tabs-drawer log describing last week's search.
+  - One stale CLAUDE.md line about a "draft API" was out of date (the real ledger API is merged) and was corrected.
+- **Checks:** lint 13 (known), 539 tests passing, format clean, iOS bundle exported with `--clear`.

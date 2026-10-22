@@ -11,7 +11,7 @@ import ProfitChart from '../components/ProfitChart';
 import TaxSummarySheet from '../components/TaxSummarySheet';
 import { useProfitReport } from '../hooks/useProfitReport';
 import { formatCents } from '../../../utils/formatCurrency';
-import { SPACING, TYPE, SIZES, NUMBERS } from '../../../theme';
+import { SPACING, TYPE, SIZES } from '../../../theme';
 import { themedStyles } from '../../../utils/themedStyles';
 
 // a landlord's year in one place: net profit as the big number, rent in and expenses out under it,
@@ -73,16 +73,18 @@ function ProfitScreen() {
         onChange={setYear}
       />
 
+      {/* rent in and expenses out as two muted lines under the hero, in the caption so they're spaced alike */}
       <SummaryBlock
         label={'Net profit in ' + year}
         value={formatCents(total.net_cents)}
-        caption={'Rent collected ' + formatCents(total.rent_collected_cents)}
+        caption={
+          'Rent collected ' +
+          formatCents(total.rent_collected_cents) +
+          '\nExpenses ' +
+          formatCents(total.expenses_cents)
+        }
         style={styles.hero}
-      >
-        <Text style={[styles.out_line, NUMBERS]}>
-          {'Expenses ' + formatCents(total.expenses_cents)}
-        </Text>
-      </SummaryBlock>
+      />
 
       <ProfitChart months={chart_months} label={chart_label} />
       <Text style={styles.chart_caption}>
@@ -163,10 +165,6 @@ const styles = themedStyles((COLORS) => ({
   },
   hero: {
     marginTop: SPACING.lg,
-  },
-  out_line: {
-    ...TYPE.body_small,
-    color: COLORS.text_muted,
   },
   chart_caption: {
     ...TYPE.caption,
