@@ -10,6 +10,9 @@ import FadeInView from '../../../components/ui/FadeInView';
 import LogoutButton from '../../auth/components/LogoutButton';
 import HomeTopBar from '../components/HomeTopBar';
 import HeroNote from '../components/HeroNote';
+import OnboardingCard from '../components/OnboardingCard';
+import DemoTourSheet from '../components/DemoTourSheet';
+import { useDemoTour } from '../hooks/useDemoTour';
 import { useMessages } from '../../messages/context/MessagesContext';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { useAuth } from '../../auth/context/AuthContext';
@@ -51,6 +54,8 @@ function DashboardScreen(props) {
   const this_month = months[months.length - 1];
   const open_checklists = checklists.filter((checklist) => !checklist.completed).length;
   const name = user && user.name ? user.name : demo_mode ? demo_landlord.name : '';
+  // the demo opens a short tour the first time, real mode never does
+  const tour = useDemoTour(demo_mode);
 
   let note = { text: 'Everyone is paid up', tone: 'success', icon: 'checkmark-circle-outline' };
   if (behind.count > 0) {
@@ -75,6 +80,8 @@ function DashboardScreen(props) {
         {/* only shows while the demo is running */}
         <DemoBanner />
         <HomeTopBar name={name} onProfile={() => props.navigation.navigate('Settings')} />
+        {/* a new landlord's first-run checklist, it hides itself in the demo and once it's done */}
+        <OnboardingCard navigation={props.navigation} />
 
         {/* the hero: the big title, a hello, and the numbers worth a glance */}
         <FadeInView index={0}>
@@ -181,6 +188,7 @@ function DashboardScreen(props) {
           <LogoutButton style={styles.logout_button} />
         </FadeInView>
       </ScrollView>
+      <DemoTourSheet visible={tour.visible} role="owner" onClose={tour.close} />
     </View>
   );
 }

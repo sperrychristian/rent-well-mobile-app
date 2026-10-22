@@ -19,6 +19,8 @@ import ListRow from '../../../components/ui/ListRow';
 import FadeInView from '../../../components/ui/FadeInView';
 import HomeTopBar from '../components/HomeTopBar';
 import HeroNote from '../components/HeroNote';
+import DemoTourSheet from '../components/DemoTourSheet';
+import { useDemoTour } from '../hooks/useDemoTour';
 import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
 
 // the tenant's home: message the landlord or report something that needs fixing
@@ -38,6 +40,8 @@ function TenantHomeScreen(props) {
     ? ordersForTenant(orders, demo_tenant.name).length
     : orders.length;
   const name = demo_mode ? demo_tenant.name : user ? user.name : '';
+  // the demo opens a short tour the first time, real mode never does
+  const tour = useDemoTour(demo_mode);
   // with no active rental the tenant can only read, and this flips back on its own if they're assigned again
   const { is_read_only, my_active_tenancies, my_ended_tenancies } = useTenants();
   // rent from the ledger already in memory: overdue, due now, or "Rent due Nov 1: $1,200.00"
@@ -212,6 +216,7 @@ function TenantHomeScreen(props) {
       <View style={[styles.footer, { paddingBottom: insets.bottom + SPACING.md }]}>
         <LogoutButton style={styles.logout_button} />
       </View>
+      <DemoTourSheet visible={tour.visible} role="tenant" onClose={tour.close} />
     </ScrollView>
   );
 }

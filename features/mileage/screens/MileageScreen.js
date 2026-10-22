@@ -162,9 +162,12 @@ function MileageScreen(props) {
         ListHeaderComponent={list_header}
         ListEmptyComponent={
           <EmptyState
-            illustration="empty_expenses"
+            illustration="empty_mileage"
             title={'No trips logged for ' + year}
-            message="Tap Add Trip after a drive to a property."
+            message="Log each drive to a property, the deduction adds itself up for tax time."
+            action_label="Add Trip"
+            action_icon="add-circle-outline"
+            onAction={openNewForm}
           />
         }
         renderItem={({ item }) => (

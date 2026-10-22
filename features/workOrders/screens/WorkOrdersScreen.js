@@ -270,6 +270,9 @@ function WorkOrdersScreen(props) {
                   ? 'Try a different search or property.'
                   : 'New requests show up here as soon as they come in.'
               }
+              action_label="Add a Work Order"
+              action_icon="add-circle-outline"
+              onAction={() => props.navigation.navigate('NewWorkOrder')}
             />
           }
           renderItem={({ item }) => (

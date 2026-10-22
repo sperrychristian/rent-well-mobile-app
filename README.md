@@ -105,6 +105,12 @@ The full guide is in `docs/DESIGN.md`.
 | --- | --- | --- | --- |
 | ![Dashboard](docs/screenshots/dashboard.png) | ![Tenant home](docs/screenshots/tenant_home.png) | ![Work orders](docs/screenshots/work_orders.png) | ![Thread](docs/screenshots/thread.png) |
 
+## First run
+
+- **New landlords:** a signed-in landlord sees a "Get set up" checklist at the top of the Dashboard: Add a property, Invite a tenant, Set the rent. Each step opens the screen or sheet that already does it, and a progress line shows how far along you are. It goes away when you finish, or when you tap "Hide this for good".
+- **The demo:** the demo opens a short tour the first time, with four things to try on that side. Settings has a "Take the tour" row to see it again.
+- **Empty lists:** every empty list says what goes there and has the one button that adds the first one.
+
 ## Navigation (course assignment)
 
 **How to run:** `npm install`, then `npx expo start -c`, and open it in Expo Go or a simulator (the drawer uses `react-native-gesture-handler` and Reanimated, which Expo Go already includes). With no backend running, tap **Try the Demo**, then **Demo as Landlord** or **Demo as Tenant**. The tab bar is at the bottom, the menu button (top left) opens the drawer, and every detail screen has a back arrow.

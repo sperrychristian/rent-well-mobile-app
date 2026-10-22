@@ -71,7 +71,10 @@ function MyRequestsScreen(props) {
           <EmptyState
             illustration="empty_work_orders"
             title="No requests yet"
-            message="Tap Report an Issue when something needs fixing."
+            message="When something needs fixing, report it here and your landlord gets it right away."
+            action_label="Report an Issue"
+            action_icon="add-circle-outline"
+            onAction={() => props.navigation.navigate('NewWorkOrder')}
           />
         }
         renderItem={({ item }) => (

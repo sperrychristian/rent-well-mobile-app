@@ -224,6 +224,9 @@ function TenantsScreen(props) {
             illustration="empty_tenants"
             title="No properties or tenants yet"
             message="Add a property, then invite your first tenant."
+            action_label="Invite a Tenant"
+            action_icon="person-add-outline"
+            onAction={() => props.navigation.navigate('InviteTenant')}
           />
         )}
 

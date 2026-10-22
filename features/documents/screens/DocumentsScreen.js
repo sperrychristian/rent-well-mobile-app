@@ -340,6 +340,9 @@ function DocumentsScreen() {
             illustration="empty_documents"
             title="No documents match"
             message="Try another property or category, or add a document above."
+            action_label="Add Document"
+            action_icon="add-circle-outline"
+            onAction={openNewForm}
           />
         }
         renderItem={({ item }) => {

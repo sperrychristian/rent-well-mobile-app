@@ -6,6 +6,7 @@ import { COLORS, SPACING, TYPE, SIZES } from '../../theme';
 // what a list shows when there's nothing in it: a small pixel drawing, a title, one line, and maybe a button
 // props: illustration (empty_work_orders, empty_messages, empty_tenants, empty_documents, empty_checklists,
 //   empty_expenses, empty_payments), title, message, action_label, onAction, action_icon, style
+// (the onboarding pass added empty_properties and empty_mileage)
 // the Hearth pass: one muted line icon instead of the drawing (the illustration names still pick it),
 // the title in Fraunces, and the button is the one green pill
 const illustration_icons = {
@@ -16,6 +17,8 @@ const illustration_icons = {
   empty_checklists: 'checkbox-outline',
   empty_expenses: 'receipt-outline',
   empty_payments: 'card-outline',
+  empty_properties: 'home-outline',
+  empty_mileage: 'car-outline',
 };
 
 function EmptyState(props) {

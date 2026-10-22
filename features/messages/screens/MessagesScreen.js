@@ -87,8 +87,15 @@ function MessagesScreen(props) {
         ListEmptyComponent={
           <EmptyState
             illustration="empty_messages"
-            title="No conversations yet."
-            message={is_owner ? 'Invite a tenant and the thread shows up once they sign up.' : null}
+            title="No conversations yet"
+            message={
+              is_owner
+                ? 'Invite a tenant and the thread shows up once they sign up.'
+                : 'Your thread with your landlord shows up here once they set it up.'
+            }
+            action_label={is_owner ? 'Invite a Tenant' : undefined}
+            action_icon="person-add-outline"
+            onAction={is_owner ? () => props.navigation.navigate('InviteTenant') : undefined}
           />
         }
         renderItem={({ item }) => (
