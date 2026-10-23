@@ -204,7 +204,7 @@ Phases:
 Bank feed import and matching, receipt scanning that fills in amount, date, and vendor, rent income and profit per property, depreciation schedules for capital improvements, durable receipt storage, document encryption, cloud storage for documents, tenant access to shared documents, e-signatures.
 
 ## Next up
-1. Fill in the stubs: Settings and Property Detail.
+1. Build out the two stub screens: Settings and Property Detail.
 2. Move mileage, documents, and checklists to the backend, one at a time (expenses are done).
 3. Recurring expenses on the server (the Recurring button is hidden in real mode until then).
 

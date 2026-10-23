@@ -1,6 +1,6 @@
 # Rent Well: NewWorkOrderScreen audit
 
-Mobile Development assignment. I audited the tenant "Report an Issue" screen (`screens/NewWorkOrderScreen.js`) on two device sizes and in two orientations, then fixed what broke.
+Mobile Development assignment. I audited the tenant "Report an Issue" screen (`features/workOrders/screens/NewWorkOrderScreen.js`, it was `screens/NewWorkOrderScreen.js` when I did the audit) on two device sizes and in two orientations, then fixed what broke.
 
 ## Devices tested
 - Small phone: iPhone 18 Pro (iOS simulator)

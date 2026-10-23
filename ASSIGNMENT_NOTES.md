@@ -1,6 +1,6 @@
 # Assignment notes: NewWorkOrderScreen device audit
 
-Screen audited: `screens/NewWorkOrderScreen.js` (tenant "Report an Issue").
+Screen audited: `features/workOrders/screens/NewWorkOrderScreen.js` (tenant "Report an Issue"). It was `screens/NewWorkOrderScreen.js` when I did the audit, and I moved it into its feature folder later.
 Tested on iPhone 18 Pro and iPad, portrait and landscape.
 
 Note on order: the top-inset fix (pushing the title below the status bar) and the property chip fix were made in an earlier step, after the before screenshots and before the three fixes below.

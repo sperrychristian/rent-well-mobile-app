@@ -31,7 +31,7 @@
 
 ## Phase 2: expenses on the backend
 
-- **One interface:** `useExpenses()` (`features/expenses/context/ExpensesContext.js`) in both modes. For a real landlord, `ExpensesProvider` loads every page of `GET /expenses`, maps it to the app's existing expense shape (`features/expenses/utils/expenseApi.js`), and `useWorkOrders()` takes its expenses and expense actions. That's the same swap `RemoteWorkOrdersProvider` already does, so Expenses, Year-End, the Dashboard, and the work order screens' `order.expenses` all read the server's list with no screen rewrites. The demo, tenants, and signed out keep the phone's own list.
+- **One interface:** `useExpenses()` (`features/expenses/context/ExpensesContext.js`) in both modes. For a real landlord, `ExpensesProvider` loads every page of `GET /expenses`, maps it to the app's existing expense shape (`features/expenses/utils/expenseApi.js`), and `useWorkOrders()` takes its expenses and expense actions. That's the same swap `RemoteWorkOrdersProvider` already does, so Expenses, Year-End, the Dashboard, and the work order screens' `order.expenses` all read the server's list with no big screen changes. The demo, tenants, and signed out keep the phone's own list.
 - **Field mapping:**
   - amount (dollars on screen) ↔ `amountCents`
   - the category label ↔ the server's 10 categories (the form shows only those in real mode, and the phone's 4 extra categories map to the closest one on import)
@@ -159,7 +159,6 @@
   - `ASSIGNMENT_NAV.md`: the table regenerated from the map (33 screens), the new drawer items and sheets, the Rent Ledger's More button, and why Leases and Profit are drawer items and not tabs.
   - `ASSIGNMENT_STRUCTURE.md`: the drawer list and the paragraph on later choices, still first person.
   - README (the screen table, the tabs and drawer table, a new section on the features), CLAUDE.md, and `docs/DESIGN.md` (dark mode).
-- **Draft markers:** the case-insensitive search (DRAFT, TODO, FIXME, "rewrite in your own words", "in his own words", "Christian to rewrite") finds no label.
-  - What's left: the chat composer's `draft` variable, the payments and ledger-real logs describing the old "draft API", and the tabs-drawer log describing last week's search.
-  - One stale CLAUDE.md line about a "draft API" was out of date (the real ledger API is merged) and was corrected.
+- **Leftover labels:** a case-insensitive search for work-in-progress labels and to-do notes finds none in the docs or the app.
+  - One stale CLAUDE.md line about the early ledger API was out of date (the real ledger API is merged) and was corrected.
 - **Checks:** lint 13 (known), 539 tests passing, format clean, iOS bundle exported with `--clear`.

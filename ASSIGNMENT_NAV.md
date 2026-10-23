@@ -1,8 +1,8 @@
 # Navigation assignment: stack, tabs, and drawer
 
-Branch: `tabs-drawer` (made from `master`). The first part of this assignment (the stack skeleton, id params, headers, and the first diagram) was built on `navigation-assignment` and is merged into `master`. This week added a bottom tab navigator and a drawer on top of that stack. The short explanation of the structure is in `ASSIGNMENT_STRUCTURE.md`.
+Everything here is on `master`. I built the first part of this assignment (the stack skeleton, id params, headers, and the first diagram) earlier, then added a bottom tab navigator and a drawer on top of that stack. The short explanation of the structure is in `ASSIGNMENT_STRUCTURE.md`.
 
-Diagram: `assignment/navigation/navigation-diagram.pdf` (also `.png` and `.svg`). It is one page with a swimlane per role (signed out, landlord, tenant), the tab bar and drawer drawn as labeled groups, and the id param on every arrow into a detail screen. It is drawn from `navigation/navigationMap.js` by `npm run diagram`, so it can't drift from the code.
+Diagram: `assignment/navigation/navigation-diagram.pdf` (also `assignment/navigation/navigation-diagram.png` and `assignment/navigation/navigation-diagram.svg`). It is one page with a swimlane per role (signed out, landlord, tenant), the tab bar and drawer drawn as labeled groups, and the id param on every arrow into a detail screen. It is drawn from `navigation/navigationMap.js` by `npm run diagram`, so it can't drift from the code.
 
 ## 0. The navigator structure
 
@@ -52,7 +52,7 @@ Building the app showed I needed more than that:
 - Property & Tenant Management turned into Tenants, Tenant Profile, Your Properties, Invite a New Tenant, and Past Repair Requests (for a tenant whose rental ended).
 - Expenses grew a Mileage Log and a Year-End Tax Report.
 - Checklists have a list and a detail screen.
-- New for this assignment (stubs): Payments and Rent, Payment Record, Settings and Profile, Property Overview, and Lease and Documents.
+- New for this assignment (stubs at first): Payments and Rent, Payment Record, Settings and Profile, Property Overview, and Lease and Documents. Payments and Rent, Payment Record, and Lease and Documents are real screens now. Settings and Profile and Property Overview are still stubs.
 
 ### Audit before the changes (Step 1)
 
@@ -145,8 +145,8 @@ Requirements before the changes:
 | # | Requirement | How it's met | Files |
 | --- | --- | --- | --- |
 | 1 | Every screen listed | The tables above and `navigation/navigationMap.js`, which lists all 33 with title, role, feature, params, arrows, and where each one is reachable | `navigation/navigationMap.js` |
-| 2 | React Navigation and the native stack installed | `@react-navigation/native` and `@react-navigation/native-stack` were already there. `@react-navigation/elements` is now listed directly for `useHeaderHeight` | `package.json` |
-| 3 | One component per screen in its own file in a screens folder | Every screen lives in `features/<feature>/screens/`. The 5 new stubs use Card, PrimaryButton, and theme tokens, say what the real screen will do, and say "Coming soon". Later, the payments work turned Payments and Rent and Payment Record into real screens and added Rent Ledger | `features/payments/screens/`, `features/settings/screens/`, `features/tenants/screens/PropertyDetailScreen.js`, `features/tenants/screens/TenantLeaseScreen.js` |
+| 2 | React Navigation installed | `@react-navigation/native` and `@react-navigation/native-stack` were already there. I added `@react-navigation/bottom-tabs`, `@react-navigation/drawer`, and `react-native-gesture-handler` for the tabs and drawer. `@react-navigation/elements` is listed directly for `useHeaderHeight` | `package.json` |
+| 3 | One component per screen in its own file in a screens folder | Every screen lives in `features/<feature>/screens/`. The 5 stubs I added used Card, PrimaryButton, and theme tokens and said what the real screen will do. Since then I turned Payments and Rent, Payment Record, and Lease and Documents into real screens and added Rent Ledger, Leases, and Profit. Settings and Profile and Property Overview are the two stubs left | `features/payments/screens/`, `features/settings/screens/SettingsScreen.js`, `features/tenants/screens/PropertyDetailScreen.js`, `features/tenants/screens/TenantLeaseScreen.js` |
 | 4 | Every screen registered in a NavigationContainer with initialRouteName | The root `Stack.Navigator` starts on Welcome, Login (after a session runs out), or `Main`. The drawer's `initialRouteName` is `Tabs`, and the tabs start on the role's home (Dashboard or TenantHome) | `App.js` |
 | 5 | Every screen reachable and Back works | A test walks the map from each of the five starting situations (signed out, owner, tenant, demo landlord, demo tenant), counting the tab bar and drawer as hubs, and checks the result against each screen's `reachable_in`. Another checks that from every screen a situation reaches there's a way back to where it started. Render tests press every tab and drawer item, drill into a detail screen and go back, and check one header on each screen | `navigation/navigationMap.test.js`, `navigation/appNavigation.test.js` |
 | 6 | One-page diagram | `assignment/navigation/navigation-diagram.pdf` (tabloid landscape, one page, swimlanes by role) with `.png` and `.svg`. A test fails if the diagram is older than the map | `scripts/buildNavigationDiagram.mjs` |
@@ -164,11 +164,11 @@ Every param in the app is now an id with a name ending in `Id`: `workOrderId`, `
 
 The main example:
 
-- Passed: `WorkOrdersScreen.js` calls `props.navigation.navigate('WorkOrderDetail', { workOrderId: item.id })` when a card's Details button is tapped.
-- Read: `WorkOrderDetailScreen.js` does `props.route.params.workOrderId` and looks the order up with `getOrder` (in real mode it asks the server when the order isn't loaded yet, the same path push notifications use).
+- Passed: `features/workOrders/screens/WorkOrdersScreen.js` calls `props.navigation.navigate('WorkOrderDetail', { workOrderId: item.id })` when a card's Details button is tapped.
+- Read: `features/workOrders/screens/WorkOrderDetailScreen.js` does `props.route.params.workOrderId` and looks the order up with `getOrder` (in real mode it asks the server when the order isn't loaded yet, the same path push notifications use).
 - Shown: the header title is built with the options function form, `({ route }) => ({ title: headerTitle('WorkOrderDetail', route.params) })`, so it reads "Work Order #1" (or the first 8 characters of a server id).
 
-The stub example (now a real screen): `PaymentsScreen.js` calls `navigate('PaymentDetail', { paymentId: payment.id })` and `PaymentDetailScreen.js` reads `props.route.params.paymentId`, shows it in the header ("Payment Record #demo-pay"), and looks the payment up in the ledger store (or asks the server, for a push tap). The rent ledger added one more: a tenant row on Payments and the Rent Ledger link on Tenant Profile pass `tenancyId` to `TenantLedgerScreen.js`.
+The stub example (now a real screen): `features/payments/screens/PaymentsScreen.js` calls `navigate('PaymentDetail', { paymentId: payment.id })` and `features/payments/screens/PaymentDetailScreen.js` reads `props.route.params.paymentId`, shows it in the header ("Payment Record #demo-pay"), and looks the payment up in the ledger store (or asks the server, for a push tap). The rent ledger added one more: a tenant row on Payments and the Rent Ledger link on Tenant Profile pass `tenancyId` to `features/payments/screens/TenantLedgerScreen.js`.
 
 Other changes to keep params as ids:
 
@@ -189,11 +189,10 @@ Other changes to keep params as ids:
 | Your Tenants | person add | Opens Invite a New Tenant | `InviteHeaderButton` |
 | Message Inbox | person add (owners and the landlord demo only) | Opens Invite a New Tenant | `InviteHeaderButton` |
 | My Repair Requests | add (hidden when the rental has ended) | Opens Report an Issue | `AddRequestHeaderButton` |
-| Your Properties | add | Opens the Add Property form on that screen | `PropertiesScreen.js` (set with `navigation.setOptions` because the form lives there) |
-| Rent Ledger | add | Opens the Record Payment form on that screen | `TenantLedgerScreen.js` (set with `navigation.setOptions`, like Properties) |
-| Rent Ledger | more | Opens the More sheet: Send Reminder, Add Charge, the rent schedule, and Void | `TenantLedgerScreen.js` |
+| Your Properties | add | Opens the Add Property form on that screen | `features/tenants/screens/PropertiesScreen.js` (set with `navigation.setOptions` because the form lives there) |
+| Rent Ledger | add | Opens the Record Payment form on that screen | `features/payments/screens/TenantLedgerScreen.js` (set with `navigation.setOptions`, like Properties) |
 
-Every button uses Ionicons, `COLORS.title`, a hitSlop, and an accessibility label.
+Every button uses Ionicons, `COLORS.title`, a hitSlop, and an accessibility label. The Rent Ledger also has a More button on the screen itself (not in the header) for Send Reminder, Add Charge, the rent schedule, and Void.
 
 ## 5. Tabs and drawer
 
