@@ -113,7 +113,7 @@ function SettingsScreen(props) {
       )}
 
       <Card>
-        <Text style={styles.heading}>Coming soon</Text>
+        <Text style={styles.heading}>What&apos;s planned</Text>
         <Text style={styles.body}>
           Editing your name and email, changing your password, and picking which notifications you
           get.

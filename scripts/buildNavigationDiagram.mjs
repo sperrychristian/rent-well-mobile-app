@@ -717,7 +717,7 @@ function buildLegend(margin) {
       COLORS.border_strong +
       '" stroke-width="2.5" stroke-dasharray="10 7"/>',
   );
-  parts.push(text(left + 644, top + 89, 'STUB screen (placeholder)', 21, 600, text_color));
+  parts.push(text(left + 644, top + 89, 'STUB screen (not built yet)', 21, 600, text_color));
   parts.push(
     text(
       left + 560,

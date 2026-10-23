@@ -79,7 +79,7 @@ function PropertyDetailScreen(props) {
       ) : null}
 
       <Card>
-        <Text style={styles.heading}>Coming soon</Text>
+        <Text style={styles.heading}>What&apos;s planned</Text>
         <Text style={styles.body}>
           Units, rent per unit, the property&apos;s documents and checklists, and its expenses in
           one place.
