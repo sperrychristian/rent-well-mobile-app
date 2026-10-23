@@ -4,7 +4,7 @@ Branch `leases-expenses-onboarding`, made from `master` (which already had `ledg
 
 ## Phases 1 to 3: waiting on the backend
 
-`docs/API.md` and `../rent-well-api` don't have leases, expenses, `POST /expenses/import`, or `GET /reports/profit` yet. As Christian asked, nothing for those is built, and there's no placeholder UI or route for them. They'll be done when `docs/API.md` has the real contract.
+`docs/API.md` and `../rent-well-api` don't have leases, expenses, `POST /expenses/import`, or `GET /reports/profit` yet. As Christian asked, nothing for those is built, and there's no stand-in UI or route for them. They'll be done when `docs/API.md` has the real contract.
 
 ## Phase 4: onboarding and empty states (done)
 

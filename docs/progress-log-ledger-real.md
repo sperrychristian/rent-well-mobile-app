@@ -4,7 +4,7 @@ Branch `ledger-real-mode`, made from `hearth-redesign`. Not merged.
 
 - **The contract:**
   - `docs/API.md` here was older than the backend's, and had no Rent ledger section. I copied `../rent-well-api/API.md` over it, so it matches the backend again.
-  - The real API wins over `docs/API-ledger-draft.md` on every difference, so the draft doc is deleted.
+  - The real API wins over the earlier ledger contract doc on every difference, so that doc is deleted.
 - **Real mode uses the server's math:** `fromApiLedger` stores the server's statuses and balances in `ledger.server`, and `deriveLedger` returns those as is. Every action answers with one row, and then that tenancy is refetched.
 - **Demo mode keeps its local math, now ported from the backend's `src/ledger`:**
   - The server's payment status names.

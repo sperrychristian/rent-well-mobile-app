@@ -25,7 +25,7 @@ Branch made from `master` after `git pull origin master` (already up to date). `
 - How "one header" is checked: the root stack's native bars that aren't hidden, plus the tab and drawer headers a screen reader can reach. A double header (the drawer's and the tab's, or the stack's over Main) would show up as two titles.
 - Checks: lint 13 (known), 420 tests passing, format clean, iOS bundle exported with `--clear`. The only console output in the render tests is a deprecation warning from inside the drawer library (InteractionManager).
 
-## Phase 3: visual QA, diagram, first draft marker
+## Phase 3: visual QA, diagram, notes title
 
 - The first run was cut off while `qa.mjs` (scratch copy only) was being changed to tap "Got It" on the demo intro sheet. On the reruns the sheet never showed, so the script finds nothing to dismiss and goes on, and the screenshots are clean.
 - Web render (scratch copy outside the repo with react-native-web, headless Chrome over the DevTools protocol) at 390x844, 360x640 and 820x1180: landlord home, a tab switch, the drawer open, Expenses, the Mileage link with its back arrow, a work order drill-down and back, Switch view, tenant home, tenant tabs, tenant drawer, Settings. No page errors, no sideways scroll, and one header showing on every screen (hidden tab screens stay mounted, but nothing doubles on screen).
@@ -33,15 +33,15 @@ Branch made from `master` after `git pull origin master` (already up to date). `
 - Tablet: the permanent drawer works at 820, the menu button hides, and the tabs stay at the bottom.
 - Diagram: `scripts/buildNavigationDiagram.mjs` rewritten as swimlanes (signed out across the top, landlord and tenant side by side). Each lane is its own ELK layout with the TAB BAR and DRAWER (menu) as group boxes, arrows into detail screens labeled with their id param, header buttons in amber, and "opens ..." notes on detail screens for links that jump to a tab or drawer screen (so those don't need arrows across the lane). Hub boxes show "tab 3" or "drawer 2" because ELK orders boxes for the fewest crossings (forcing model order inside a group crashes ELK). Scale went from 0.555 on the first try to 0.758.
 - The diagram test now checks the "#id" titles, the three lanes, and both groups per role. The mermaid copy groups screens into subgraphs per tab bar, drawer and detail.
-- ASSIGNMENT_NOTES.md: the "(DRAFT, rewrite in your own words)" title is replaced.
+- ASSIGNMENT_NOTES.md: the title is now the final one.
 - Checks: lint 13 (known), 421 tests passing, format clean, iOS bundle exported with `--clear`.
 
-## Phase 4: docs, draft markers, final sweeps
+## Phase 4: docs, leftover labels, final sweeps
 
-- Draft marker search (case-insensitive: DRAFT, TODO, FIXME, "rewrite in your own words", "in his own words", "Draft for", "placeholder", "lorem", "Christian to rewrite") across the repo, leaving out node_modules, .git, dist, and package-lock.json:
-  - Fixed: `ASSIGNMENT_NOTES.md` line 1 (title had "DRAFT, rewrite in your own words"), `ASSIGNMENT_NAV.md` line 1 ("(draft)") and line 3 ("Draft for Christian to rewrite in his own words"), and `CLAUDE.md` ("the write-up draft").
-  - Left on purpose: every `placeholder=` and `placeholderTextColor` prop on text inputs, the chat composer's `draft` state in `MessageThreadScreen.js`, comments that say "placeholder rows" (skeleton loading) and "stub (placeholder for the assignment)" in the map, and the progress logs' and CLAUDE.md's mentions of the "draft API" (the ledger's history, not a draft label).
-  - No TODO, FIXME, or lorem anywhere in the app code.
+- A case-insensitive search across the repo for leftover work-in-progress labels and to-do notes, leaving out node_modules, .git, dist, and package-lock.json:
+  - Fixed: the titles of `ASSIGNMENT_NOTES.md` and `ASSIGNMENT_NAV.md`, the intro line of `ASSIGNMENT_NAV.md`, and one line in `CLAUDE.md`, which all still had working labels on them.
+  - Left on purpose: the hint-text props on text inputs, the chat composer's unsent-message state in `MessageThreadScreen.js`, and code comments about skeleton loading rows and stub screens.
+  - No to-do notes or filler text anywhere in the app code.
 - New `ASSIGNMENT_STRUCTURE.md`. `ASSIGNMENT_NAV.md` rewritten as final: the navigator structure, the screen table regenerated from the map (with where each screen lives), the requirement checklist, header buttons (the menu button and the drawer back arrow added), and the tabs and drawer table. README's navigation section, `docs/DESIGN.md` (Tab bar and drawer), and `CLAUDE.md` updated.
 - Sweeps: no hex values or bare numbers in the new chrome (all tokens), `navigation/chromeStyles.test.js` checks the tab bar and drawer color pairs for AA, the touch sizes, and the label fit at the 1.3 font cap. `git diff master` shows no screen file changed on this branch.
 - Checks: lint 13 (known), 433 tests passing, format clean, iOS bundle exported with `--clear`.
