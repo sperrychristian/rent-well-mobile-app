@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { View, Text, FlatList, Pressable, ScrollView, TextInput, Alert } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import { ImagePicker } from '../../../services/systemPickers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';

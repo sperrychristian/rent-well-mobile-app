@@ -39,3 +39,18 @@ Baseline before any change: lint 13 known problems (8 errors, 5 warnings), 539 t
 - `services/appLock.js`: `whileSystemDialog` wraps the calendar prompt so the Phase 4 lock never fires coming back from it.
 - `app.json`: the `expo-calendar` and `expo-local-authentication` plugins with the calendar and Face ID strings (the unused reminders string is turned off), and the same strings in `ios.infoPlist`.
 - Tests: `calendarEvents.test.js` (11), `deviceCalendar.test.js` (6), `navigation/calendarFlow.test.js` (4).
+- Checks: lint 13 (known), 588 tests in 55 suites, Prettier clean, iOS bundle with `--clear` (1890 modules).
+
+## Phase 4: Biometric unlock
+
+- `expo-local-authentication` (`~57.0.3`, installed with `npx expo install` in Phase 3 along with `expo-calendar`), with the Face ID string through its plugin and `ios.infoPlist` in `app.json`.
+- Settings, Security (`features/security/components/SecurityCard.js`): a switch worded for the phone ("Unlock with Face ID", "Touch ID", "fingerprint", or "face unlock"). Turning it on checks with the phone first. Saved per device under `rent_well_biometric_unlock`. Shown only for a signed-in account (never in the demo or signed out). A phone with nothing set up gets a short explanation instead of the switch.
+- `AppLockProvider` (`features/security/context/AppLockContext.js`) wraps `AppNavigator` in `App.js`. It locks on a launch that restores a saved session (a fresh login with a password doesn't) and after more than 60 seconds in the background. The lock screen covers the app instead of replacing it, so nothing underneath loses its place, and the app under it is hidden from screen readers.
+- Lock screen (`features/security/components/LockScreen.js`): the wordmark on paper, one line, the green Unlock pill (asks once by itself), Use Passcode, and Log Out as text. After three failed tries a terracotta line offers Log Out and the button becomes outlined.
+- Fail safe: the passcode fallback is never turned off. If the phone can't check anyone (no passcode, nothing enrolled, no hardware), the lock steps aside instead of trapping the person.
+- System dialogs: `services/appLock.js` `whileSystemDialog` pauses the lock. The photo picker, camera, file picker, and share sheet go through `services/systemPickers.js` (same names and calls as the expo modules, so each of the 13 files only changed its import line), and the push and calendar permission prompts are wrapped where they're asked.
+- Push taps: `navigateWhenReady` holds the target while the cover is up (and while a cold start is still deciding), and `openHeldNavigation` opens it after unlock.
+- Note: Face ID needs a development build. Expo Go has no Face ID entitlement for the app, so the prompt falls back to the passcode there.
+- Note: `npx expo-doctor` flags four patch updates (expo, expo-notifications, expo-sharing, jest-expo) that were already behind before this branch. Left alone.
+- Tests: `features/security/appLock.test.js` (17). The existing Settings test got a mock for the lock context.
+- Checks: lint 13 (known), 605 tests in 56 suites, Prettier clean, iOS bundle with `--clear` (1899 modules).

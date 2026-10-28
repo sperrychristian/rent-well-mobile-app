@@ -1,5 +1,5 @@
 import { File, Paths } from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
+import { Sharing } from '../../../services/systemPickers';
 import { shareCsvText } from '../../expenses/utils/exportExpenses';
 
 // the tax summary as a CSV (for a spreadsheet or an accountant) or as plain text (to read or paste)

@@ -44,6 +44,7 @@ import PaymentsScreen from './features/payments/screens/PaymentsScreen';
 import PaymentDetailScreen from './features/payments/screens/PaymentDetailScreen';
 import TenantLedgerScreen from './features/payments/screens/TenantLedgerScreen';
 import { ToastProvider } from './components/ui/Toast';
+import { AppLockProvider } from './features/security/context/AppLockContext';
 import SettingsScreen from './features/settings/screens/SettingsScreen';
 import PropertyDetailScreen from './features/tenants/screens/PropertyDetailScreen';
 import TenantLeaseScreen from './features/tenants/screens/TenantLeaseScreen';
@@ -532,7 +533,10 @@ function AppContent() {
         <AccountData>
           {/* toasts sit above every screen so one still shows after its form closes */}
           <ToastProvider>
-            <AppNavigator />
+            {/* the Face ID lock covers the app for a signed-in account that turned it on, never the demo */}
+            <AppLockProvider>
+              <AppNavigator />
+            </AppLockProvider>
           </ToastProvider>
         </AccountData>
       </AuthProvider>

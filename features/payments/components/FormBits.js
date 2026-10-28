@@ -1,5 +1,5 @@
 import { View, Text, Image, Pressable, Alert } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import { ImagePicker } from '../../../services/systemPickers';
 import { Ionicons } from '@expo/vector-icons';
 import Chip from '../../../components/ui/Chip';
 import CurrencyInput from '../../../components/ui/CurrencyInput';

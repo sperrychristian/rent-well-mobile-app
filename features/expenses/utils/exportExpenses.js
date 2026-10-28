@@ -1,5 +1,5 @@
 import { File, Paths } from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
+import { Sharing } from '../../../services/systemPickers';
 import { totalsByCategory, sumAmounts } from './expenseStats';
 
 // wraps a value in quotes when it has a comma, quote, or line break so the columns don't shift

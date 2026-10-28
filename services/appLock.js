@@ -25,8 +25,41 @@ export function systemDialogActive(now) {
   return open_dialogs > 0 || time - last_dialog_closed_at < 1500;
 }
 
+// ----- a push tap while the app is locked -----
+
+// true while the lock screen is up (or still deciding on a cold start), navigateWhenReady checks it
+let holding = false;
+// the one place a push tap wanted to go, the newest tap wins
+let held = null;
+
+export function setNavigationHold(value) {
+  holding = !!value;
+}
+
+export function navigationHeld() {
+  return holding;
+}
+
+// navigateWhenReady calls this first, it keeps the target and says "don't go yet" while locked
+export function holdIfLocked(route_name, params) {
+  if (!holding) {
+    return false;
+  }
+  held = { route_name: route_name, params: params };
+  return true;
+}
+
+// the target to open once the app unlocks, and it's cleared so it only opens once
+export function takeHeldNavigation() {
+  const target = held;
+  held = null;
+  return target;
+}
+
 // the tests start each run with nothing open
 export function resetSystemDialogs() {
   open_dialogs = 0;
   last_dialog_closed_at = 0;
+  holding = false;
+  held = null;
 }
