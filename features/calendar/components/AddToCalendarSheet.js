@@ -49,20 +49,15 @@ function AddToCalendarSheet(props) {
               these events and to check it hasn’t added them already.
             </Text>
           ) : null}
-          <View style={sheet_styles.button_row}>
+          {/* stacked, the main action first, so both labels fit on one line on a small phone */}
+          <View style={styles.buttons}>
             <Button
-              title="Not Now"
-              variant="secondary"
-              onPress={props.onCancel}
-              style={styles.button}
-            />
-            <Button
-              title={props.demo_mode ? 'Add Samples' : 'Add Events'}
+              title={props.demo_mode ? 'Add Sample Events' : 'Add Events'}
               icon="calendar-outline"
               variant="primary"
               onPress={props.onConfirm}
-              style={styles.button}
             />
+            <Button title="Not Now" variant="secondary" onPress={props.onCancel} />
           </View>
         </View>
       </View>
@@ -86,7 +81,8 @@ const styles = themedStyles((COLORS) => ({
     color: COLORS.text,
     marginBottom: SPACING.sm,
   },
-  button: {
-    flex: 1,
+  buttons: {
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
   },
 }));

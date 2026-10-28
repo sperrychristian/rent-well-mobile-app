@@ -127,7 +127,7 @@ describe('Calendar, landlord demo', () => {
     expect(screen.getByText(/these are sample events/)).toBeTruthy();
     expect(Calendar.createEventAsync).not.toHaveBeenCalled();
 
-    fireEvent.press(screen.getByText('Add Samples'));
+    fireEvent.press(screen.getByText('Add Sample Events'));
     await settle();
     expect(Calendar.createEventAsync).toHaveBeenCalled();
     Calendar.createEventAsync.mock.calls.forEach((call) => {
@@ -144,7 +144,7 @@ describe('Calendar, landlord demo', () => {
     fireEvent.press(screen.getByText('Add upcoming rent due dates and lease ends'));
     await settle();
     expect(screen.getByText(/Your phone will ask/)).toBeTruthy();
-    fireEvent.press(screen.getByText('Add Samples'));
+    fireEvent.press(screen.getByText('Add Sample Events'));
     await settle();
     expect(Calendar.createEventAsync).not.toHaveBeenCalled();
     const [title, , buttons] = Alert.alert.mock.calls[0];

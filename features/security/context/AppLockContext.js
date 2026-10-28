@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { View, AppState, StyleSheet } from 'react-native';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../auth/context/AuthContext';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
@@ -115,15 +116,18 @@ export function AppLockProvider(props) {
       >
         {props.children}
       </View>
+      {/* the lock sits outside the navigator, so it brings its own safe area (the navigator's isn't above it) */}
       {covering ? (
-        <LockScreen
-          ready={show_lock}
-          onUnlocked={unlock}
-          onLogout={() => {
-            unlock();
-            logout();
-          }}
-        />
+        <SafeAreaProvider style={StyleSheet.absoluteFill} initialMetrics={initialWindowMetrics}>
+          <LockScreen
+            ready={show_lock}
+            onUnlocked={unlock}
+            onLogout={() => {
+              unlock();
+              logout();
+            }}
+          />
+        </SafeAreaProvider>
       ) : null}
     </AppLockContext.Provider>
   );

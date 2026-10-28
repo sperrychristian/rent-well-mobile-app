@@ -186,7 +186,7 @@ function SearchScreen(props) {
           <ListRow
             icon={section.icon}
             title={highlighted(entry.title)}
-            subtitle={entry.subtitle}
+            subtitle={entry.subtitle ? highlighted(entry.subtitle) : ''}
             subtitle_tone={entry.tone === 'danger' ? 'danger' : undefined}
             accessibilityLabel={[section.title, entry.title, entry.subtitle].join(', ')}
             accessibilityHint="Opens it"

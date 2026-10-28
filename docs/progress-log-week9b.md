@@ -63,3 +63,15 @@ Baseline before any change: lint 13 known problems (8 errors, 5 warnings), 539 t
 - Docs: `ASSIGNMENT_NAV.md` (the screen table regenerated from the map, structure, counts, header buttons, tabs and drawer, the `expenseId` param), `ASSIGNMENT_STRUCTURE.md` (the drawer lists only), README (new feature section, screen table, drawer table), `docs/DESIGN.md` (Search, Calendar, the add sheet, the lock screen, Security), `CLAUDE.md`.
 - Sweep for draft, rewrite, own words, his own, for Christian, TODO, FIXME, placeholder, coming soon: nothing unfinished in any text. Reported only, not edited (code comments): `navigation/navigationMap.js` line 27 says stub means "placeholder for the assignment, real version coming later".
 - Checks: lint 13 (known), 608 tests in 56 suites, Prettier clean, iOS bundle with `--clear` (1899 modules).
+
+## Phase 6: tests, QA, sweeps
+
+- Smoke tests: `navigation/week9bScreens.test.js` draws Search (results, highlight, no matches), Calendar (grid, legend, agenda, add sheet), and Settings in both demo sides and both themes (12 runs) and checks the colors against the palette in use. `features/security/appLock.test.js` draws the lock screen and the Security card in light and dark.
+- Visual QA in a scratch copy outside the repo (react-native-web, react-dom, and @expo/metro-runtime installed there only, headless Chrome driven over its debugging protocol), landlord and tenant demo, light and dark, at 360x640, 390x844, and 820x1180, plus the lock screen with a scratch-only switch to show it on the web.
+  - Fixed: the lock screen crashed (no safe area provider above it, since it sits outside the navigator). It brings its own `SafeAreaProvider` with the starting metrics now, and `features/security/lockSafeArea.test.js` uses the real library to guard it. The unit tests had mocked the safe area, so this would have crashed on a phone.
+  - Fixed: "Add Samples" wrapped onto two lines in the half-width pill at 390. The sheet's buttons stack now (the green "Add Sample Events" first, "Not Now" under it).
+  - Fixed: rows that matched only in the subtitle (a tenant found by street) had nothing highlighted. Subtitles highlight too now.
+  - Looked right with nothing to fix: the home headers with Search and the gear, the drawer's Schedule section, the month grid and dots in both themes, the tablet layout with the drawer open on the side, past due rows in terracotta, the lock screen in both themes.
+  - Not checked on the web: the biggest Dynamic Type setting. The day numbers and weekday letters cap scaling at 1.3, and everything else uses the shared type scale that scales.
+- Sweeps: no hex or rgba in the new files, no stray numbers in styles, every Pressable has a role and a label, touch targets 44 or more (day cells are at least 44 wide at 360 and 56 tall), no em dashes in anything new. The diff against `master` only touches the files listed in the phases above.
+- Checks: lint 13 (known), 623 tests in 58 suites, Prettier clean, iOS bundle with `--clear` (1899 modules).

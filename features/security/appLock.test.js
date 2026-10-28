@@ -1,4 +1,5 @@
-import { Text, AppState } from 'react-native';
+import { Text, AppState, StyleSheet } from 'react-native';
+import { LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../../theme';
 import { render, screen, fireEvent, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as LocalAuthentication from 'expo-local-authentication';
@@ -29,7 +30,11 @@ jest.mock('expo-local-authentication', () => ({
 jest.mock('react-native-safe-area-context', () => {
   const insets = { top: 0, right: 0, bottom: 0, left: 0 };
   const { createContext } = require('react');
-  return { useSafeAreaInsets: () => insets, SafeAreaInsetsContext: createContext(insets) };
+  return {
+    useSafeAreaInsets: () => insets,
+    SafeAreaInsetsContext: createContext(insets),
+    SafeAreaProvider: (props) => props.children,
+  };
 });
 
 const owner = { id: 'owner-1', role: 'owner', name: 'Olivia Owner' };
@@ -291,6 +296,28 @@ describe('never locked out', () => {
     const options = LocalAuthentication.authenticateAsync.mock.calls[1][0];
     expect(options.disableDeviceFallback).toBe(false);
     expect(screen.queryByText(lock_line)).toBeNull();
+  });
+});
+
+describe('both themes', () => {
+  afterEach(() => setActiveScheme('light'));
+
+  test.each([
+    ['light', LIGHT_COLORS],
+    ['dark', DARK_COLORS],
+  ])('the lock screen and the Security card draw in the %s palette', async (scheme, palette) => {
+    setActiveScheme(scheme);
+    await AsyncStorage.setItem(biometric_unlock_key, 'on');
+    LocalAuthentication.authenticateAsync.mockResolvedValue({
+      success: false,
+      error: 'user_cancel',
+    });
+    render(app());
+    await settle();
+    expect(StyleSheet.flatten(screen.getByText('Security').props.style).color).toBe(palette.text);
+    await awayFor(61);
+    const line = screen.getByText(lock_line);
+    expect(StyleSheet.flatten(line.props.style).color).toBe(palette.text_muted);
   });
 });
 
