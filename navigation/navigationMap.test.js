@@ -345,10 +345,11 @@ describe('edges and params', () => {
       'Profit',
       'Documents',
       'Checklist',
+      'Calendar',
       'Settings',
     ]);
     expect(hubs.tenant.tabs).toEqual(['TenantHome', 'Payments', 'MyRequests', 'Messages']);
-    expect(drawerScreens('tenant')).toEqual(['PastRequests', 'Settings']);
+    expect(drawerScreens('tenant')).toEqual(['PastRequests', 'Calendar', 'Settings']);
   });
 
   test('every screen has a place, and the places agree with the tabs and drawer', () => {

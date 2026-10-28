@@ -26,3 +26,16 @@ Baseline before any change: lint 13 known problems (8 errors, 5 warnings), 539 t
 - Map: Search with its edges, header edges from both homes, `expenseId` on Expenses. Search and Calendar join the one-word title exceptions in the map test.
 - Tests: `features/search/utils/searchIndex.test.js` (11), `features/search/hooks/useRecentSearches.test.js` (3), `navigation/searchFlow.test.js` (4, real navigators, both demo sides).
 - Checks: lint 13 (known), 567 tests in 52 suites, Prettier clean, iOS bundle with `--clear` (1880 modules). Diagram regenerated.
+
+## Phase 3: Calendar
+
+- New drawer screen `Calendar` (title "Calendar", no params, role shared) in a new "Schedule" section for both roles (landlord: Rentals, Money, Records, Schedule, Account; tenant: Repairs, Schedule, Account). No new tab. Both homes got a "Calendar" row too, like every other drawer place.
+- Decision: no calendar library. The month grid is 7 columns of Pressables with the same tokens and line icons as the rest of the app, so it works in light and dark with nothing to install. Dots are one per tone (past due, due, paid or done, other), at most three, with a legend under the grid so color is never the only signal. Each day cell says its full date, today, the event count, and how many are past due.
+- Events (`features/calendar/utils/calendarEvents.js`, pure): rent and other charge due dates with their status, confirmed payments on the day paid, lease ends, and work order reported, started, and resolved dates. A landlord sees all of them, a tenant only their own ledger, lease, and requests. Past due rows are terracotta with the alert icon and the word "Overdue" (or "Expired").
+- Taps by id: Rent Ledger (`tenancyId`, a landlord's charge), Payment Record (`paymentId`), Lease and Documents (`tenancyId`), Work Order (`workOrderId`), Request (`workOrderId`), Payments (a tenant's charge), My Home (a tenant's lease end).
+- "Add to my calendar" (`expo-calendar`, installed with `npx expo install`, `~57.0.6`): a plus on each row from today on, and "Add upcoming rent due dates and lease ends" (the next 90 days, unpaid only). A sheet explains first (and in the demo says these are sample events going into the real calendar). Then the system prompt if needed, then a "Rent Well" calendar (made once, the default calendar if the phone won't allow it). Event ids are saved per account under `rent_well_calendar_events_<user id>`, and an event deleted in the Calendar app is added again next time. A denied permission gets a plain alert with Open Settings.
+- Decision: the legacy functions (`expo-calendar/legacy`). The SDK 57 object API throws in Expo Go, the legacy one works in Expo Go and in a build.
+- Decision: the demo's added events are remembered in memory until the app closes, not cleared on Exit Demo, so running the demo twice doesn't put the same [Demo] events on the phone twice. Nothing is saved to storage in the demo.
+- `services/appLock.js`: `whileSystemDialog` wraps the calendar prompt so the Phase 4 lock never fires coming back from it.
+- `app.json`: the `expo-calendar` and `expo-local-authentication` plugins with the calendar and Face ID strings (the unused reminders string is turned off), and the same strings in `ios.infoPlist`.
+- Tests: `calendarEvents.test.js` (11), `deviceCalendar.test.js` (6), `navigation/calendarFlow.test.js` (4).

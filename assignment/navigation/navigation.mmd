@@ -21,6 +21,7 @@ flowchart LR
     Profit["Profit"]
     Documents["Document Storage"]
     Checklist["Condition Checklists"]
+    Calendar["Calendar"]
     Settings["Settings and Profile (stub)"]
   end
   subgraph tenant_tabs [Tenant tab bar]
@@ -71,6 +72,7 @@ flowchart LR
   Dashboard --> Expenses
   Dashboard --> Leases
   Dashboard --> Profit
+  Dashboard --> Calendar
   Dashboard -->|tenancyId| TenantLease
   Dashboard --> Properties
   Dashboard --> InviteTenant
@@ -105,6 +107,7 @@ flowchart LR
   TenantHome --> Messages
   TenantHome --> MyRequests
   TenantHome --> NewWorkOrder
+  TenantHome --> Calendar
   TenantHome --> Payments
   TenantHome --> PastRequests
   TenantHome -.-> Welcome
@@ -121,6 +124,13 @@ flowchart LR
   PaymentDetail -->|tenancyId| TenantLedger
   Settings --> Mileage
   Settings -.-> Welcome
+  Calendar -->|tenancyId| TenantLedger
+  Calendar -->|paymentId| PaymentDetail
+  Calendar -->|tenancyId| TenantLease
+  Calendar -->|workOrderId| WorkOrderDetail
+  Calendar -->|workOrderId| RequestDetail
+  Calendar --> Payments
+  Calendar --> TenantHome
   Search -->|tenantId| TenantDetail
   Search -->|propertyId| PropertyDetail
   Search -->|workOrderId| WorkOrderDetail

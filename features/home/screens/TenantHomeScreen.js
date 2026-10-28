@@ -228,6 +228,14 @@ function TenantHomeScreen(props) {
           divider
           onPress={() => props.navigation.navigate('Messages')}
         />
+        {/* their rent due dates, lease end, and repair dates on one month */}
+        <ListRow
+          icon="calendar-outline"
+          title="Calendar"
+          subtitle="Rent due dates and your lease"
+          divider
+          onPress={() => props.navigation.navigate('Calendar')}
+        />
         {/* read only, the landlord sets and renews the lease */}
         <ListRow
           icon="document-outline"

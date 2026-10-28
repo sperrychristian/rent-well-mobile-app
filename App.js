@@ -48,6 +48,7 @@ import SettingsScreen from './features/settings/screens/SettingsScreen';
 import PropertyDetailScreen from './features/tenants/screens/PropertyDetailScreen';
 import TenantLeaseScreen from './features/tenants/screens/TenantLeaseScreen';
 import SearchScreen from './features/search/screens/SearchScreen';
+import CalendarScreen from './features/calendar/screens/CalendarScreen';
 import { navigation_ref } from './services/navigationRef';
 import {
   shared_screen_options,
@@ -267,6 +268,12 @@ function MainDrawer() {
         </Drawer.Group>
       )}
 
+      {/* both roles: their own rent, lease, and repair dates on a month grid */}
+      <Drawer.Screen
+        name="Calendar"
+        component={CalendarScreen}
+        options={drawerOptionsFor('Calendar')}
+      />
       <Drawer.Screen
         name="Settings"
         component={SettingsScreen}
