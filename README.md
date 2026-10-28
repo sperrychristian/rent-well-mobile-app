@@ -181,3 +181,11 @@ The full guide is in `docs/DESIGN.md`.
 | Payment Record | `PaymentDetail` | Both | `paymentId` |
 | Settings and Profile | `Settings` | Both | none |
 
+
+## Shared state (course assignment)
+
+Work orders are the shared state. One `WorkOrdersProvider` (React Context, `context/WorkOrdersContext.js`) wraps the whole navigator in `App.js`, and every screen reads it with `useWorkOrders()`, so a status change on Work Order Detail shows at once on the Work Orders list, the Home subtitle, the tab badge, a tenant's profile, and the tenant's own Repairs list.
+
+- The short explanation: [ASSIGNMENT_STATE.md](ASSIGNMENT_STATE.md)
+- Which screens change it and which show it: [docs/shared-state.md](docs/shared-state.md)
+- The tests that prove it: `navigation/sharedState.test.js` (the real navigators) and `features/workOrders/context/remoteWorkOrders.test.js` (real mode)

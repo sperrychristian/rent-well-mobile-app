@@ -127,6 +127,24 @@ export function ordersForTenant(orders, tenant_name) {
   return orders.filter((order) => (order.tenant || '').trim().toLowerCase() === name);
 }
 
+// one tenant's orders for the tenant profile, by their account id when the order has one, else by name like the demo
+// newest first, so the profile shows the same rows the Work Orders list would
+export function ordersForTenantRecord(orders, tenant) {
+  if (!tenant) {
+    return [];
+  }
+  const by_name = ordersForTenant(
+    orders.filter((order) => !order.tenant_id),
+    tenant.name,
+  );
+  const by_id = orders.filter((order) => order.tenant_id && order.tenant_id === tenant.id);
+  return [...by_id, ...by_name].sort(
+    (a, b) =>
+      (b.created_at || '').localeCompare(a.created_at || '') ||
+      (b.created_at_iso || '').localeCompare(a.created_at_iso || ''),
+  );
+}
+
 // expenses stay on the phone for now, this builds the small order.expenses list the work order screens read
 export function legacyExpensesFor(expenses, order_id) {
   return expenses

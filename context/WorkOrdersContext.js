@@ -39,6 +39,8 @@ const extras_key = 'rent_well_extras';
 const documents_key = 'rent_well_documents';
 const checklists_key = 'rent_well_checklists';
 
+// step 1: create the context. the default is null on purpose, there's no fake shape to fall back on,
+// so a screen that isn't inside the provider gets a clear error from useWorkOrders() instead of empty data
 const WorkOrdersContext = createContext(null);
 
 // ids from the clock alone can repeat when several things are added in the same millisecond, so I add random letters
@@ -70,6 +72,8 @@ function splitOrder(order, collected_expenses) {
 // the starting orders, also what the demo resets to every time it starts
 const default_orders = work_orders.map((order) => splitOrder(order, []));
 
+// step 2: the provider holds the state with useState, App.js puts it above the NavigationContainer
+// so every screen in the tabs, the drawer, and the stack reads the same orders
 export function WorkOrdersProvider(props) {
   // start with the mock data and swap in saved data once it loads
   const [orders, setOrders] = useState(default_orders);
@@ -644,6 +648,7 @@ export function WorkOrdersProvider(props) {
     return orders_with_expenses.find((order) => order.id === order_id);
   }
 
+  // step 3: everything the screens need goes out through one value object, the orders and the actions that change them
   const value = {
     orders: orders_with_expenses,
     expenses,
@@ -700,7 +705,13 @@ export function WorkOrdersProvider(props) {
 // in real mode the work order provider hands back the same shape with the orders coming from the server
 // and for a real landlord the expenses provider swaps in the server's expenses and their actions the same way
 export function useWorkOrders() {
+  // step 4: screens read it with useContext, through this hook so they never import the context itself
   const local = useContext(WorkOrdersContext);
+  if (!local) {
+    throw new Error(
+      'useWorkOrders() has to be used inside WorkOrdersProvider (App.js wraps the whole navigator in it)',
+    );
+  }
   const remote = useContext(RemoteWorkOrdersContext);
   const remote_expenses = useContext(RemoteExpensesContext);
   const base = remote || local;

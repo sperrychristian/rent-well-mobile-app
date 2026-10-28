@@ -1,13 +1,7 @@
-import { useState, useEffect } from 'react';
 import { View, Text, FlatList, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ErrorState from '../../../components/ErrorState';
-import { getAllWorkOrders } from '../../../services/api';
-import {
-  fromApiWorkOrder,
-  mergeWorkOrders,
-  ordersForTenant,
-} from '../../workOrders/utils/workOrderHelpers';
+import { ordersForTenant } from '../../workOrders/utils/workOrderHelpers';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { demo_tenant } from '../data/sampleTenants';
 import { formatDate } from '../../../utils/formatDate';
@@ -19,47 +13,23 @@ import SkeletonList from '../../../components/ui/Skeleton';
 import { themedStyles } from '../../../utils/themedStyles';
 
 // a former tenant's requests, read only, straight from the server (reading still works after a tenancy ends)
+// the shared state pass: it used to fetch its own copy here, now it reads the same list the rest of the app does
+// (the real-mode work order store already loads a former tenant's requests, so there's one copy, not two)
 function PastRequestsScreen() {
   const insets = useSafeAreaInsets();
-  const [orders, setOrders] = useState([]);
-  // loading, ready, or error
-  const [status, setStatus] = useState('loading');
-  const [error_message, setErrorMessage] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
-  // goes up on Try Again or a pull down so the load runs again
-  const [load_count, setLoadCount] = useState(0);
   // the demo never calls the server, a demo tenant whose rental ended reads Sam's requests from the demo list
-  const { demo_mode, orders: local_orders } = useWorkOrders();
-
-  useEffect(() => {
-    if (demo_mode) {
-      return undefined;
-    }
-    let active = true;
-    getAllWorkOrders()
-      .then((api_orders) => {
-        if (active) {
-          setOrders(mergeWorkOrders([], api_orders.map(fromApiWorkOrder)));
-          setStatus('ready');
-          setErrorMessage('');
-        }
-      })
-      .catch((error) => {
-        console.log('Could not load past requests', error.message);
-        if (active) {
-          setErrorMessage(error.message);
-          setStatus('error');
-        }
-      })
-      .finally(() => {
-        if (active) {
-          setRefreshing(false);
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, [load_count, demo_mode]);
+  const {
+    demo_mode,
+    orders: local_orders,
+    orders_status,
+    orders_error,
+    refreshing_orders,
+    refreshOrders,
+  } = useWorkOrders();
+  const orders = demo_mode ? [] : local_orders;
+  const status = orders_status || 'ready';
+  const error_message = orders_error || '';
+  const refreshing = !!refreshing_orders;
 
   // one row, used by the server list and the demo list
   function renderRow({ item }) {
@@ -78,8 +48,9 @@ function PastRequestsScreen() {
   }
 
   function reload() {
-    setRefreshing(true);
-    setLoadCount((current) => current + 1);
+    if (refreshOrders) {
+      refreshOrders();
+    }
   }
 
   let body;

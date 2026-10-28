@@ -95,6 +95,8 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 // the local data is saved per account, so it needs the signed-in user's id
 function AccountData(props) {
   const { user } = useAuth();
+  // the shared state assignment: WorkOrdersProvider sits up here, above AppNavigator and its NavigationContainer,
+  // so every screen in the tabs, the drawer, and the stack reads and changes the same work orders
   return (
     <WorkOrdersProvider user_id={user ? user.id : null}>
       {/* in real mode the work orders come from the server, demo and signed out keep the local ones */}

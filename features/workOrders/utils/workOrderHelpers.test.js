@@ -10,6 +10,7 @@ import {
   openCount,
   activeCount,
   ordersForTenant,
+  ordersForTenantRecord,
   legacyExpensesFor,
 } from './workOrderHelpers';
 
@@ -229,5 +230,22 @@ describe('ordersForTenant', () => {
   test('a blank name matches nothing, so orders with no tenant never show up', () => {
     expect(ordersForTenant([{ id: '4', tenant: '' }], '')).toEqual([]);
     expect(ordersForTenant([{ id: '4', tenant: '' }], null)).toEqual([]);
+  });
+});
+
+describe('ordersForTenantRecord', () => {
+  const orders = [
+    { id: 'a', tenant: 'Sam Rivera', tenant_id: null, created_at: '2026-10-01' },
+    { id: 'b', tenant: 'Someone Else', tenant_id: 'u-sam', created_at: '2026-10-05' },
+    { id: 'c', tenant: 'sam rivera', tenant_id: 'u-other', created_at: '2026-10-09' },
+  ];
+
+  test('matches by account id when the order has one, by name otherwise, newest first', () => {
+    const mine = ordersForTenantRecord(orders, { id: 'u-sam', name: 'Sam Rivera' });
+    expect(mine.map((order) => order.id)).toEqual(['b', 'a']);
+  });
+
+  test('no tenant gives an empty list', () => {
+    expect(ordersForTenantRecord(orders, null)).toEqual([]);
   });
 });
