@@ -127,6 +127,7 @@ export const navigation_map = {
     params: [],
     edges: [
       { to: 'Settings', param: null, via: 'header', label: 'Settings gear' },
+      { to: 'Search', param: null, via: 'header', label: 'Search' },
       { to: 'WorkOrders', param: null, via: 'button', label: 'Work Orders' },
       { to: 'NewWorkOrder', param: null, via: 'button', label: 'New Work Order (demo)' },
       { to: 'Messages', param: null, via: 'button', label: 'Messages' },
@@ -358,7 +359,8 @@ export const navigation_map = {
     feature: 'expenses',
     file: 'features/expenses/screens/ExpensesScreen.js',
     status: 'built',
-    params: [],
+    // optional: Search opens one expense's form by its id
+    params: ['expenseId'],
     edges: [
       { to: 'Mileage', param: null, via: 'button', label: 'Mileage' },
       { to: 'YearEndReport', param: 'yearId', via: 'button', label: 'Year-End Report' },
@@ -420,6 +422,7 @@ export const navigation_map = {
     params: [],
     edges: [
       { to: 'Settings', param: null, via: 'header', label: 'Settings gear' },
+      { to: 'Search', param: null, via: 'header', label: 'Search' },
       { to: 'Messages', param: null, via: 'card', label: 'Messages' },
       { to: 'MyRequests', param: null, via: 'card', label: 'My Requests' },
       { to: 'NewWorkOrder', param: null, via: 'card', label: 'Report an Issue' },
@@ -597,6 +600,63 @@ export const navigation_map = {
     place: 'drawer',
     nav_label: 'Settings',
     nav_icon: 'settings-outline',
+  },
+  // one search over what the app already has loaded, each result opens its own screen by id
+  Search: {
+    title: 'Search',
+    role: 'shared',
+    reachable_in: ['owner', 'tenant', 'demo_owner', 'demo_tenant'],
+    feature: 'search',
+    file: 'features/search/screens/SearchScreen.js',
+    status: 'built',
+    params: [],
+    edges: [
+      {
+        to: 'TenantDetail',
+        param: 'tenantId',
+        via: 'list item',
+        label: 'a tenant',
+        roles: ['owner'],
+      },
+      {
+        to: 'PropertyDetail',
+        param: 'propertyId',
+        via: 'list item',
+        label: 'a property',
+        roles: ['owner'],
+      },
+      {
+        to: 'WorkOrderDetail',
+        param: 'workOrderId',
+        via: 'list item',
+        label: 'a work order',
+        roles: ['owner'],
+      },
+      {
+        to: 'RequestDetail',
+        param: 'workOrderId',
+        via: 'list item',
+        label: 'a request',
+        roles: ['tenant'],
+      },
+      { to: 'PaymentDetail', param: 'paymentId', via: 'list item', label: 'a payment' },
+      {
+        to: 'TenantLedger',
+        param: 'tenancyId',
+        via: 'list item',
+        label: 'a charge',
+        roles: ['owner'],
+      },
+      { to: 'Payments', param: null, via: 'list item', label: 'a charge', roles: ['tenant'] },
+      {
+        to: 'Expenses',
+        param: 'expenseId',
+        via: 'list item',
+        label: 'an expense',
+        roles: ['owner'],
+      },
+    ],
+    place: 'drill',
   },
 };
 

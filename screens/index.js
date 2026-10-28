@@ -25,6 +25,7 @@ export { default as PropertyDetailScreen } from '../features/tenants/screens/Pro
 export { default as RegisterOwnerScreen } from '../features/auth/screens/RegisterOwnerScreen';
 export { default as RegisterTenantScreen } from '../features/auth/screens/RegisterTenantScreen';
 export { default as RequestDetailScreen } from '../features/workOrders/screens/RequestDetailScreen';
+export { default as SearchScreen } from '../features/search/screens/SearchScreen';
 export { default as SettingsScreen } from '../features/settings/screens/SettingsScreen';
 export { default as TenantDetailScreen } from '../features/tenants/screens/TenantDetailScreen';
 export { default as TenantHomeScreen } from '../features/home/screens/TenantHomeScreen';

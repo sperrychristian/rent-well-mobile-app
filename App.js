@@ -47,6 +47,7 @@ import { ToastProvider } from './components/ui/Toast';
 import SettingsScreen from './features/settings/screens/SettingsScreen';
 import PropertyDetailScreen from './features/tenants/screens/PropertyDetailScreen';
 import TenantLeaseScreen from './features/tenants/screens/TenantLeaseScreen';
+import SearchScreen from './features/search/screens/SearchScreen';
 import { navigation_ref } from './services/navigationRef';
 import {
   shared_screen_options,
@@ -63,7 +64,7 @@ import { useTabBadges } from './navigation/tabBadges';
 import { useAppRole } from './features/auth/hooks/useAppRole';
 import { SIZES } from './theme';
 import {
-  SettingsHeaderButton,
+  HomeHeaderButtons,
   AddWorkOrderHeaderButton,
   InviteHeaderButton,
   AddRequestHeaderButton,
@@ -143,7 +144,7 @@ function MainTabs() {
           name="Dashboard"
           component={DashboardScreen}
           options={tabOptionsFor('Dashboard', null, {
-            headerRight: () => <SettingsHeaderButton />,
+            headerRight: () => <HomeHeaderButtons />,
           })}
         />
       )}
@@ -152,7 +153,7 @@ function MainTabs() {
           name="TenantHome"
           component={TenantHomeScreen}
           options={tabOptionsFor('TenantHome', null, {
-            headerRight: () => <SettingsHeaderButton />,
+            headerRight: () => <HomeHeaderButtons />,
           })}
         />
       )}
@@ -468,6 +469,8 @@ function AppNavigator() {
           component={PaymentDetailScreen}
           options={optionsFor('PaymentDetail')}
         />
+        {/* one search over everything already loaded, opened from the magnifying glass on both homes */}
+        <Stack.Screen name="Search" component={SearchScreen} options={optionsFor('Search')} />
       </Stack.Navigator>
     </NavigationContainer>
   );

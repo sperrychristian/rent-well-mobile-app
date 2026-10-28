@@ -15,3 +15,14 @@ Baseline before any change: lint 13 known problems (8 errors, 5 warnings), 539 t
 - Tests: `navigation/sharedState.test.js` (5, real navigators), `features/workOrders/context/remoteWorkOrders.test.js` (3, real mode optimistic, rollback, socket), 2 helper tests.
 - Docs: `ASSIGNMENT_STATE.md`, `docs/shared-state.md`, README section.
 - Checks: lint 13 (the known ones), 549 tests in 49 suites, Prettier clean, iOS bundle with `--clear` (1876 modules).
+
+## Phase 2: Search
+
+- New drill screen `Search` (title "Search", no params, role shared) in the root stack, opened by a magnifying glass on both homes (`HomeHeaderButtons` in `navigation/headerButtons.js`: Search, then the Settings gear).
+- `features/search/`: `utils/searchIndex.js` (pure: builds rows from the loaded lists, every word has to match, title matches first, grouped in a fixed section order, highlight parts, recent list), `hooks/useDebouncedValue.js` (250 ms), `hooks/useRecentSearches.js` (per account under `rent_well_recent_searches_<user id>`, memory only in the demo), `screens/SearchScreen.js`.
+- What a landlord searches: tenants, properties, work orders, payments, charges, expenses. A tenant: their own requests, payments, and charges (the demo tenant's orders come out of the shared list by name, like My Requests).
+- Taps go by id only, one inline navigate per route: Tenant Profile (`tenantId`), Property Overview (`propertyId`), Work Order (`workOrderId`), Request (`workOrderId`), Payment Record (`paymentId`), Rent Ledger (`tenancyId`, for a landlord's charge), Payments (a tenant's charge), Expenses (`expenseId`, new optional param that opens that expense's form once and then clears itself).
+- Decision: the matching letters are DM Sans 600 in the action green, so a match is shown by weight as well as color.
+- Map: Search with its edges, header edges from both homes, `expenseId` on Expenses. Search and Calendar join the one-word title exceptions in the map test.
+- Tests: `features/search/utils/searchIndex.test.js` (11), `features/search/hooks/useRecentSearches.test.js` (3), `navigation/searchFlow.test.js` (4, real navigators, both demo sides).
+- Checks: lint 13 (known), 567 tests in 52 suites, Prettier clean, iOS bundle with `--clear` (1880 modules). Diagram regenerated.

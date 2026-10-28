@@ -195,6 +195,23 @@ function ExpensesScreen(props) {
     setEditingId(null);
   }
 
+  // Search opens one expense by its id: its form opens once, then the id is cleared so coming back doesn't reopen it
+  const linked_expense_id = props.route && props.route.params ? props.route.params.expenseId : null;
+  const [opened_link, setOpenedLink] = useState(null);
+  if (linked_expense_id && linked_expense_id !== opened_link) {
+    setOpenedLink(linked_expense_id);
+    if (expenses.some((expense) => expense.id === linked_expense_id)) {
+      setEditingId(linked_expense_id);
+      setFormOpen(true);
+    }
+  }
+  const navigation = props.navigation;
+  useEffect(() => {
+    if (linked_expense_id) {
+      navigation.setParams({ expenseId: undefined });
+    }
+  }, [linked_expense_id, navigation]);
+
   // looks for an existing expense with the same amount, date, and vendor
   function findDuplicate(expense) {
     return expenses.find(

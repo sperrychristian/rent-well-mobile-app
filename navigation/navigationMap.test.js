@@ -321,7 +321,8 @@ describe('edges and params', () => {
 
   test('every screen has a title that is more than its route name', () => {
     // Leases and Profit are drawer sections where the one word is the clearest title (Christian's call)
-    const one_word_titles = ['Leases', 'Profit'];
+    // Search and Calendar too, the one word is what everyone expects on those
+    const one_word_titles = ['Leases', 'Profit', 'Search', 'Calendar'];
     mapped
       .filter((route_name) => !one_word_titles.includes(route_name))
       .forEach((route_name) => {

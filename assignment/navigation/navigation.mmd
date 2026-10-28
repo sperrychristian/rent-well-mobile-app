@@ -43,6 +43,7 @@ flowchart LR
     MessageThread["Conversation"]
     TenantLedger["Rent Ledger"]
     PaymentDetail["Payment Record"]
+    Search["Search"]
   end
   Welcome --> Login
   Welcome --> RegisterOwner
@@ -59,6 +60,7 @@ flowchart LR
   RegisterTenant -.-> TenantHome
   RegisterTenant --> Login
   Dashboard -->|header: Settings gear| Settings
+  Dashboard -->|header: Search| Search
   Dashboard --> WorkOrders
   Dashboard --> NewWorkOrder
   Dashboard --> Messages
@@ -99,6 +101,7 @@ flowchart LR
   Expenses -->|yearId| YearEndReport
   Expenses -->|workOrderId| WorkOrderDetail
   TenantHome -->|header: Settings gear| Settings
+  TenantHome -->|header: Search| Search
   TenantHome --> Messages
   TenantHome --> MyRequests
   TenantHome --> NewWorkOrder
@@ -118,3 +121,11 @@ flowchart LR
   PaymentDetail -->|tenancyId| TenantLedger
   Settings --> Mileage
   Settings -.-> Welcome
+  Search -->|tenantId| TenantDetail
+  Search -->|propertyId| PropertyDetail
+  Search -->|workOrderId| WorkOrderDetail
+  Search -->|workOrderId| RequestDetail
+  Search -->|paymentId| PaymentDetail
+  Search -->|tenancyId| TenantLedger
+  Search --> Payments
+  Search -->|expenseId| Expenses
