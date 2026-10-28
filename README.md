@@ -113,6 +113,12 @@ The full guide is in `docs/DESIGN.md`.
 - **Rent reminders:** on an overdue tenant in Payments (Remind) or from the Rent Ledger's More sheet, pick Friendly or Overdue notice, edit the suggested text, and Send. It lands in the chat with a "Payment reminder" label that opens Payments for the tenant. One per tenant every 24 hours.
 - **Dark mode:** Settings, Appearance: System, Light, or Dark, saved on the phone.
 
+## Search, Calendar, and Face ID
+
+- **Search:** the magnifying glass on Home and My Home searches everything the app already has loaded. A landlord finds tenants, properties, work orders, payments, charges, and expenses, and a tenant finds their own requests, payments, and charges. Results are grouped with the matching words highlighted, and a tap opens the screen that shows it. Recent searches are kept per account (memory only in the demo), with a Clear button.
+- **Calendar:** in the drawer for both roles (Schedule). A month grid with dots for rent due dates, payments, lease ends, and work order dates, with a legend, and the day's agenda under it. Past due items are terracotta with an alert icon and the word Overdue. "Add to my calendar" sends one event or the next 90 days of rent and lease ends to the phone's calendar, in a "Rent Well" calendar, without doubles. The demo asks first and marks them "[Demo]".
+- **Face ID or Touch ID:** Settings, Security turns on "Unlock with Face ID" for a signed-in account. Rent Well asks when it opens and after more than a minute away, with the passcode as a fallback and Log Out after three failed tries. The demo is never locked. Face ID needs a development build (Expo Go falls back to the passcode).
+
 ## First run
 
 - **New landlords:** a signed-in landlord sees a "Get set up" checklist at the top of the Dashboard: Add a property, Invite a tenant, Set the rent. Each step opens the screen or sheet that already does it, and a progress line shows how far along you are. It goes away when you finish, or when you tap "Hide this for good".
@@ -127,8 +133,8 @@ The full guide is in `docs/DESIGN.md`.
 
 | Role | Tabs | Drawer |
 | --- | --- | --- |
-| Landlord | Home, Payments, Work Orders, Messages | Properties, Tenants, Leases, Expenses, Mileage Log, Profit, Documents, Checklists, Settings |
-| Tenant | My Home, Payments, Repairs, Messages | Past Requests, Settings |
+| Landlord | Home, Payments, Work Orders, Messages | Properties, Tenants, Leases, Expenses, Mileage Log, Profit, Documents, Checklists, Calendar, Settings |
+| Tenant | My Home, Payments, Repairs, Messages | Past Requests, Calendar, Settings |
 
 **The diagram** (one page with a swimlane per role, drawn from `navigation/navigationMap.js` with `npm run diagram`):
 - image: [assignment/navigation/navigation-diagram.png](assignment/navigation/navigation-diagram.png)
@@ -143,7 +149,7 @@ The full guide is in `docs/DESIGN.md`.
 - `navigation/navigationMap.js` is the source of truth (each screen's `place`: auth, tab, drawer, or drill), and `navigation/hubRouter.js` lets any screen still navigate to a tab or drawer screen by name.
 - Every screen is exported from `screens/index.js`. The files themselves live in `features/<feature>/screens/`.
 
-**Screens** (33). Every param is an id, never an object:
+**Screens** (35). Every param is an id, never an object:
 
 | Header title | Route | Who | Params |
 | --- | --- | --- | --- |
@@ -166,7 +172,7 @@ The full guide is in `docs/DESIGN.md`.
 | Document Storage | `Documents` | Landlord | none |
 | Condition Checklists | `Checklist` | Landlord | none |
 | Checklist | `ChecklistDetail` | Landlord | `checklistId` |
-| Property Expenses | `Expenses` | Landlord | none |
+| Property Expenses | `Expenses` | Landlord | `expenseId` |
 | Mileage Log | `Mileage` | Landlord | none |
 | Year-End Tax Report | `YearEndReport` | Landlord | `yearId` |
 | My Home | `TenantHome` | Tenant | none |
@@ -180,6 +186,8 @@ The full guide is in `docs/DESIGN.md`.
 | Rent Ledger | `TenantLedger` | Landlord | `tenancyId` |
 | Payment Record | `PaymentDetail` | Both | `paymentId` |
 | Settings and Profile | `Settings` | Both | none |
+| Calendar | `Calendar` | Both | none |
+| Search | `Search` | Both | none |
 
 
 ## Shared state (course assignment)

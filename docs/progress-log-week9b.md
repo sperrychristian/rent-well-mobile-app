@@ -54,3 +54,12 @@ Baseline before any change: lint 13 known problems (8 errors, 5 warnings), 539 t
 - Note: `npx expo-doctor` flags four patch updates (expo, expo-notifications, expo-sharing, jest-expo) that were already behind before this branch. Left alone.
 - Tests: `features/security/appLock.test.js` (17). The existing Settings test got a mock for the lock context.
 - Checks: lint 13 (known), 605 tests in 56 suites, Prettier clean, iOS bundle with `--clear` (1899 modules).
+
+## Phase 5: navigation, diagram, docs
+
+- Map: 35 screens. Search (drill, shared) and Calendar (drawer, shared, Schedule section for both roles) with their edges, Search header edges and Calendar rows from both homes, `expenseId` on Expenses.
+- Tests: hubRouter covers the new names (Calendar opens inside Main, Expenses keeps `expenseId`, Search stays on the stack). `appNavigation.test.js` checks Search has one header and Back returns to each home, and its existing drawer walk now opens Calendar in both demo sides with one header. The map tests (registered once, reachable from all five starting points, a way back, id-only params, no inline object params) all pass with the new screens.
+- Diagram regenerated (`npm run diagram`): one page, swimlanes, 35 screens. Looked at the PNG: everything is readable. The landlord lane is the busiest, with Search's edges added, but no labels overlap.
+- Docs: `ASSIGNMENT_NAV.md` (the screen table regenerated from the map, structure, counts, header buttons, tabs and drawer, the `expenseId` param), `ASSIGNMENT_STRUCTURE.md` (the drawer lists only), README (new feature section, screen table, drawer table), `docs/DESIGN.md` (Search, Calendar, the add sheet, the lock screen, Security), `CLAUDE.md`.
+- Sweep for draft, rewrite, own words, his own, for Christian, TODO, FIXME, placeholder, coming soon: nothing unfinished in any text. Reported only, not edited (code comments): `navigation/navigationMap.js` line 27 says stub means "placeholder for the assignment, real version coming later".
+- Checks: lint 13 (known), 608 tests in 56 suites, Prettier clean, iOS bundle with `--clear` (1899 modules).

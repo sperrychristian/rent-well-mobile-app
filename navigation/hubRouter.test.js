@@ -5,7 +5,15 @@ import { previousDrawerRoute } from './headerButtons';
 import { tabBadges } from './tabBadges';
 
 // the root stack's router with the override, run by hand on small states like React Navigation does
-const route_names = ['Welcome', 'Login', 'Main', 'PaymentDetail', 'NewWorkOrder', 'MessageThread'];
+const route_names = [
+  'Welcome',
+  'Login',
+  'Main',
+  'PaymentDetail',
+  'NewWorkOrder',
+  'MessageThread',
+  'Search',
+];
 const options = {
   routeNames: route_names,
   routeParamList: {},
@@ -65,6 +73,37 @@ describe('hubRouter on the root stack', () => {
     );
     expect(next.routes.map((route) => route.name)).toEqual(['Main']);
     expect(next.routes[0].params).toEqual({ screen: 'Tenants', params: { propertyId: 'p1' } });
+  });
+
+  // the week 9b names: Calendar is a drawer screen, Search is a plain stack screen, Expenses takes an expense id
+  test('the new names land in the right place: Calendar in the drawer, Search on the stack', () => {
+    const from_search = stackWith(['Main', 'Search']);
+    const to_calendar = router.getStateForAction(
+      from_search,
+      CommonActions.navigate('Calendar'),
+      options,
+    );
+    expect(to_calendar.routes.map((route) => route.name)).toEqual(['Main']);
+    expect(to_calendar.routes[0].params).toEqual({ screen: 'Calendar', params: undefined });
+
+    const to_expense = router.getStateForAction(
+      from_search,
+      CommonActions.navigate('Expenses', { expenseId: 'e1' }),
+      options,
+    );
+    expect(to_expense.routes[0].params).toEqual({
+      screen: 'Expenses',
+      params: { expenseId: 'e1' },
+    });
+
+    expect(isHubRoute('Calendar')).toBe(true);
+    expect(isHubRoute('Search')).toBe(false);
+    const to_search = router.getStateForAction(
+      stackWith(['Main']),
+      CommonActions.navigate('Search'),
+      options,
+    );
+    expect(to_search.routes.map((route) => route.name)).toEqual(['Main', 'Search']);
   });
 
   test('push to a hub never stacks a second Main', () => {

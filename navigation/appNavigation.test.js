@@ -154,6 +154,17 @@ describe('the landlord demo', () => {
     expect(focusedRoute()).toBe('WorkOrders');
   });
 
+  test('Search pushes over the tabs with one header and a back arrow home', async () => {
+    await startDemo('Demo as Landlord');
+    fireEvent.press(screen.getByLabelText('Search'));
+    await settle();
+    expect(focusedRoute()).toBe('Search');
+    expect(visibleHeaders()).toEqual([headerTitle('Search')]);
+    act(() => navigation_ref.goBack());
+    await settle();
+    expect(focusedRoute()).toBe('Dashboard');
+  });
+
   test('a link from one section to another gets a back arrow to it', async () => {
     await startDemo('Demo as Landlord');
     await openDrawer();
@@ -224,6 +235,17 @@ describe('the tenant demo', () => {
       expect(visibleHeaders()).toEqual([headerTitle(route_name)]);
       await openDrawer();
     }
+  });
+
+  test('Search opens from My Home with one header', async () => {
+    await startDemo('Demo as Tenant');
+    fireEvent.press(screen.getByLabelText('Search'));
+    await settle();
+    expect(focusedRoute()).toBe('Search');
+    expect(visibleHeaders()).toEqual([headerTitle('Search')]);
+    act(() => navigation_ref.goBack());
+    await settle();
+    expect(focusedRoute()).toBe('TenantHome');
   });
 
   test('a request drills down over the tabs and back returns to My Requests', async () => {
