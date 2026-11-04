@@ -15,6 +15,11 @@ jest.mock('../../auth/context/AuthContext', () => ({
 jest.mock('../../tenants/context/TenantsContext', () => ({
   useTenants: () => ({ properties: [{ id: 'p-maple', name: 'Maple Court' }] }),
 }));
+// I pin today before the seed water bill (2026-11-01) comes due, so the counts below don't depend on the calendar
+jest.mock('../../../utils/formatDate', () => ({
+  ...jest.requireActual('../../../utils/formatDate'),
+  todayString: () => '2026-10-15',
+}));
 jest.mock('../../../services/socket', () => ({ onSocketEvent: () => () => {} }));
 jest.mock('../../../services/api', () => ({
   getExpenses: jest.fn(),
