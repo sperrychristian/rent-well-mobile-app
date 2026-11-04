@@ -16,6 +16,10 @@ jest.mock('../../../context/WorkOrdersContext', () => ({
     switchDemoRole: jest.fn(),
   }),
 }));
+// the Security card reads the app lock, its own tests are in features/security
+jest.mock('../../security/context/AppLockContext', () => ({
+  useAppLock: () => ({ enabled: false, loaded: true, setEnabled: jest.fn() }),
+}));
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn(), reset: jest.fn() }),
 }));

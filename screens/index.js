@@ -2,6 +2,7 @@
 // the files themselves stay in their feature folders (features/<feature>/screens/), this only re-exports them,
 // so nothing that imports a screen had to change. App.js still imports from the feature folders directly
 
+export { default as CalendarScreen } from '../features/calendar/screens/CalendarScreen';
 export { default as ChecklistDetailScreen } from '../features/checklist/screens/ChecklistDetailScreen';
 export { default as ChecklistScreen } from '../features/checklist/screens/ChecklistScreen';
 export { default as DashboardScreen } from '../features/home/screens/DashboardScreen';
@@ -25,6 +26,7 @@ export { default as PropertyDetailScreen } from '../features/tenants/screens/Pro
 export { default as RegisterOwnerScreen } from '../features/auth/screens/RegisterOwnerScreen';
 export { default as RegisterTenantScreen } from '../features/auth/screens/RegisterTenantScreen';
 export { default as RequestDetailScreen } from '../features/workOrders/screens/RequestDetailScreen';
+export { default as SearchScreen } from '../features/search/screens/SearchScreen';
 export { default as SettingsScreen } from '../features/settings/screens/SettingsScreen';
 export { default as TenantDetailScreen } from '../features/tenants/screens/TenantDetailScreen';
 export { default as TenantHomeScreen } from '../features/home/screens/TenantHomeScreen';

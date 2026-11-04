@@ -321,7 +321,8 @@ describe('edges and params', () => {
 
   test('every screen has a title that is more than its route name', () => {
     // Leases and Profit are drawer sections where the one word is the clearest title (Christian's call)
-    const one_word_titles = ['Leases', 'Profit'];
+    // Search and Calendar too, the one word is what everyone expects on those
+    const one_word_titles = ['Leases', 'Profit', 'Search', 'Calendar'];
     mapped
       .filter((route_name) => !one_word_titles.includes(route_name))
       .forEach((route_name) => {
@@ -344,10 +345,11 @@ describe('edges and params', () => {
       'Profit',
       'Documents',
       'Checklist',
+      'Calendar',
       'Settings',
     ]);
     expect(hubs.tenant.tabs).toEqual(['TenantHome', 'Payments', 'MyRequests', 'Messages']);
-    expect(drawerScreens('tenant')).toEqual(['PastRequests', 'Settings']);
+    expect(drawerScreens('tenant')).toEqual(['PastRequests', 'Calendar', 'Settings']);
   });
 
   test('every screen has a place, and the places agree with the tabs and drawer', () => {

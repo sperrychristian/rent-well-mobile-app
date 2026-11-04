@@ -44,9 +44,12 @@ import PaymentsScreen from './features/payments/screens/PaymentsScreen';
 import PaymentDetailScreen from './features/payments/screens/PaymentDetailScreen';
 import TenantLedgerScreen from './features/payments/screens/TenantLedgerScreen';
 import { ToastProvider } from './components/ui/Toast';
+import { AppLockProvider } from './features/security/context/AppLockContext';
 import SettingsScreen from './features/settings/screens/SettingsScreen';
 import PropertyDetailScreen from './features/tenants/screens/PropertyDetailScreen';
 import TenantLeaseScreen from './features/tenants/screens/TenantLeaseScreen';
+import SearchScreen from './features/search/screens/SearchScreen';
+import CalendarScreen from './features/calendar/screens/CalendarScreen';
 import { navigation_ref } from './services/navigationRef';
 import {
   shared_screen_options,
@@ -63,7 +66,7 @@ import { useTabBadges } from './navigation/tabBadges';
 import { useAppRole } from './features/auth/hooks/useAppRole';
 import { SIZES } from './theme';
 import {
-  SettingsHeaderButton,
+  HomeHeaderButtons,
   AddWorkOrderHeaderButton,
   InviteHeaderButton,
   AddRequestHeaderButton,
@@ -95,6 +98,8 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 // the local data is saved per account, so it needs the signed-in user's id
 function AccountData(props) {
   const { user } = useAuth();
+  // the shared state assignment: WorkOrdersProvider sits up here, above AppNavigator and its NavigationContainer,
+  // so every screen in the tabs, the drawer, and the stack reads and changes the same work orders
   return (
     <WorkOrdersProvider user_id={user ? user.id : null}>
       {/* in real mode the work orders come from the server, demo and signed out keep the local ones */}
@@ -141,7 +146,7 @@ function MainTabs() {
           name="Dashboard"
           component={DashboardScreen}
           options={tabOptionsFor('Dashboard', null, {
-            headerRight: () => <SettingsHeaderButton />,
+            headerRight: () => <HomeHeaderButtons />,
           })}
         />
       )}
@@ -150,7 +155,7 @@ function MainTabs() {
           name="TenantHome"
           component={TenantHomeScreen}
           options={tabOptionsFor('TenantHome', null, {
-            headerRight: () => <SettingsHeaderButton />,
+            headerRight: () => <HomeHeaderButtons />,
           })}
         />
       )}
@@ -264,6 +269,12 @@ function MainDrawer() {
         </Drawer.Group>
       )}
 
+      {/* both roles: their own rent, lease, and repair dates on a month grid */}
+      <Drawer.Screen
+        name="Calendar"
+        component={CalendarScreen}
+        options={drawerOptionsFor('Calendar')}
+      />
       <Drawer.Screen
         name="Settings"
         component={SettingsScreen}
@@ -466,6 +477,8 @@ function AppNavigator() {
           component={PaymentDetailScreen}
           options={optionsFor('PaymentDetail')}
         />
+        {/* one search over everything already loaded, opened from the magnifying glass on both homes */}
+        <Stack.Screen name="Search" component={SearchScreen} options={optionsFor('Search')} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -520,7 +533,10 @@ function AppContent() {
         <AccountData>
           {/* toasts sit above every screen so one still shows after its form closes */}
           <ToastProvider>
-            <AppNavigator />
+            {/* the Face ID lock covers the app for a signed-in account that turned it on, never the demo */}
+            <AppLockProvider>
+              <AppNavigator />
+            </AppLockProvider>
           </ToastProvider>
         </AccountData>
       </AuthProvider>

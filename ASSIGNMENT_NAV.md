@@ -14,10 +14,10 @@ NavigationContainer
       Tabs: bottom tabs (initialRouteName: the role's home)
         landlord: Home, Payments, Work Orders, Messages
         tenant:   My Home, Payments, Repairs, Messages
-      landlord drawer: Properties, Tenants, Leases, Expenses, Mileage Log, Profit, Documents, Checklists, Settings
-      tenant drawer:   Past Requests, Settings
+      landlord drawer: Properties, Tenants, Leases, Expenses, Mileage Log, Profit, Documents, Checklists, Calendar, Settings
+      tenant drawer:   Past Requests, Calendar, Settings
     every detail screen (Work Order, Tenant Profile, Property Overview, Rent Ledger, Payment Record,
-      Conversation, Add a Work Order, Invite a New Tenant, Checklist, Year-End Tax Report, Request, Lease and Documents)
+      Conversation, Add a Work Order, Invite a New Tenant, Checklist, Year-End Tax Report, Request, Lease and Documents, Search)
     sheets over a screen, no route: Set or Edit Lease, Renew Lease, Send Reminder, Tax Summary, and the forms
 ```
 
@@ -39,7 +39,7 @@ Every screen is its own component in its own file, inside a `screens/` folder fo
 
 Where a screen shows up in the navigators is a separate question from where its file lives: `navigation/navigationMap.js` gives every screen a `place` (`auth`, `tab`, `drawer`, or `drill`), and `App.js` registers it on that navigator. The table below says where each one lives.
 
-There's also a top-level `screens/index.js` that re-exports all 33 screen components from those files, so the whole list is in one `screens` folder. The files didn't move, and `App.js` still imports them from the feature folders, so nothing changed at runtime. `navigation/screensIndex.test.js` checks that `screens/index.js` lists exactly the screens in the navigation map.
+There's also a top-level `screens/index.js` that re-exports all 35 screen components from those files, so the whole list is in one `screens` folder. The files didn't move, and `App.js` still imports them from the feature folders, so nothing changed at runtime. `navigation/screensIndex.test.js` checks that `screens/index.js` lists exactly the screens in the navigation map.
 
 ### Where the list came from
 
@@ -102,7 +102,7 @@ Requirements before the changes:
 
 ### Final screen list (generated from the map)
 
-33 screens. "Lives in" is the navigator that shows the screen, from the map's `place`. "Reached from" lists every screen with an arrow into it, with the id param in brackets. [header] means a header button, [reset] means the history is cleared (log in, log out, exit demo), and [demo] is a demo-only way in. Every tab and drawer screen can also be reached from any other one through the tab bar or the menu. Forms that fit a sheet (Set and Renew Lease, Send Reminder, Tax Summary, and the older ones) open over their screen and have no route.
+35 screens. "Lives in" is the navigator that shows the screen, from the map's `place`. "Reached from" lists every screen with an arrow into it, with the id param in brackets. [header] means a header button, [reset] means the history is cleared (log in, log out, exit demo), and [demo] is a demo-only way in. Every tab and drawer screen can also be reached from any other one through the tab bar or the menu. Forms that fit a sheet (Set and Renew Lease, Send Reminder, Tax Summary, and the older ones) open over their screen and have no route.
 
 | Route | Header title | Lives in | Role | Params | Reached from (besides the tab bar and drawer) | File |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -113,38 +113,40 @@ Requirements before the changes:
 | RegisterTenant | Tenant Sign Up | root stack (signed out) | auth | none | Login, RegisterOwner | `features/auth/screens/RegisterTenantScreen.js` |
 | Dashboard | Landlord Dashboard | landlord tab 1 "Home" | owner | none | DemoChooser [demo], Login [reset], RegisterOwner [reset], TenantHome [demo] | `features/home/screens/DashboardScreen.js` |
 | WorkOrders | All Work Orders | landlord tab 3 "Work Orders" | owner | tenantId, propertyId | Dashboard, TenantDetail (tenantId), PropertyDetail (propertyId) | `features/workOrders/screens/WorkOrdersScreen.js` |
-| WorkOrderDetail | Work Order #(short workOrderId) | root stack (detail, pushes over the tabs) | owner | workOrderId | WorkOrders (workOrderId), Expenses (workOrderId) | `features/workOrders/screens/WorkOrderDetailScreen.js` |
+| WorkOrderDetail | Work Order #(short workOrderId) | root stack (detail, pushes over the tabs) | owner | workOrderId | WorkOrders (workOrderId), Expenses (workOrderId), Calendar (workOrderId), Search (workOrderId) | `features/workOrders/screens/WorkOrderDetailScreen.js` |
 | Tenants | Your Tenants | landlord drawer "Tenants" | owner | propertyId | Dashboard, Leases, PropertyDetail (propertyId) | `features/tenants/screens/TenantsScreen.js` |
-| TenantDetail | Tenant Profile | root stack (detail, pushes over the tabs) | owner | tenantId | Tenants (tenantId) | `features/tenants/screens/TenantDetailScreen.js` |
-| TenantLease | Lease and Documents | root stack (detail, pushes over the tabs) | owner | tenancyId, tenantId | Dashboard (tenancyId), TenantDetail (tenantId), Leases (tenancyId) | `features/tenants/screens/TenantLeaseScreen.js` |
+| TenantDetail | Tenant Profile | root stack (detail, pushes over the tabs) | owner | tenantId | Tenants (tenantId), Search (tenantId) | `features/tenants/screens/TenantDetailScreen.js` |
+| TenantLease | Lease and Documents | root stack (detail, pushes over the tabs) | owner | tenancyId, tenantId | Dashboard (tenancyId), TenantDetail (tenantId), Leases (tenancyId), Calendar (tenancyId) | `features/tenants/screens/TenantLeaseScreen.js` |
 | Leases | Leases | landlord drawer "Leases" | owner | none | Dashboard | `features/leases/screens/LeasesScreen.js` |
 | Properties | Your Properties | landlord drawer "Properties" | owner | none | Dashboard, Tenants | `features/tenants/screens/PropertiesScreen.js` |
-| PropertyDetail | Property Overview (stub) | root stack (detail, pushes over the tabs) | owner | propertyId | TenantDetail (propertyId), Properties (propertyId) | `features/tenants/screens/PropertyDetailScreen.js` |
+| PropertyDetail | Property Overview (stub) | root stack (detail, pushes over the tabs) | owner | propertyId | TenantDetail (propertyId), Properties (propertyId), Search (propertyId) | `features/tenants/screens/PropertyDetailScreen.js` |
 | InviteTenant | Invite a New Tenant | root stack (detail, pushes over the tabs) | owner | none | Dashboard, Tenants [header], Messages [header] | `features/invites/screens/InviteTenantScreen.js` |
 | Documents | Document Storage | landlord drawer "Documents" | owner | none | Dashboard, TenantLease | `features/documents/screens/DocumentsScreen.js` |
 | Checklist | Condition Checklists | landlord drawer "Checklists" | owner | none | Dashboard | `features/checklist/screens/ChecklistScreen.js` |
 | ChecklistDetail | Checklist #(short checklistId) | root stack (detail, pushes over the tabs) | owner | checklistId | TenantDetail (checklistId), Checklist (checklistId), ChecklistDetail (checklistId) | `features/checklist/screens/ChecklistDetailScreen.js` |
-| Expenses | Property Expenses | landlord drawer "Expenses" | owner | none | Dashboard | `features/expenses/screens/ExpensesScreen.js` |
+| Expenses | Property Expenses | landlord drawer "Expenses" | owner | expenseId | Dashboard, Search (expenseId) | `features/expenses/screens/ExpensesScreen.js` |
 | Profit | Profit | landlord drawer "Profit" | owner | none | Dashboard | `features/profit/screens/ProfitScreen.js` |
 | Mileage | Mileage Log | landlord drawer "Mileage Log" | owner | none | Expenses, Settings | `features/mileage/screens/MileageScreen.js` |
 | YearEndReport | Year-End Tax Report #(short yearId) | root stack (detail, pushes over the tabs) | owner | yearId | Expenses (yearId) | `features/expenses/screens/YearEndReportScreen.js` |
-| TenantHome | My Home | tenant tab 1 "My Home" | tenant | none | DemoChooser [demo], Login [reset], RegisterTenant [reset], Dashboard [demo] | `features/home/screens/TenantHomeScreen.js` |
+| TenantHome | My Home | tenant tab 1 "My Home" | tenant | none | DemoChooser [demo], Login [reset], RegisterTenant [reset], Dashboard [demo], Calendar | `features/home/screens/TenantHomeScreen.js` |
 | MyRequests | My Repair Requests | tenant tab 3 "Repairs" | tenant | none | TenantHome, NewWorkOrder | `features/workOrders/screens/MyRequestsScreen.js` |
-| RequestDetail | Request #(short workOrderId) | root stack (detail, pushes over the tabs) | tenant | workOrderId | MyRequests (workOrderId) | `features/workOrders/screens/RequestDetailScreen.js` |
+| RequestDetail | Request #(short workOrderId) | root stack (detail, pushes over the tabs) | tenant | workOrderId | MyRequests (workOrderId), Calendar (workOrderId), Search (workOrderId) | `features/workOrders/screens/RequestDetailScreen.js` |
 | PastRequests | Past Repair Requests | tenant drawer "Past Requests" | tenant | none | TenantHome | `features/tenants/screens/PastRequestsScreen.js` |
 | NewWorkOrder | Add a Work Order | root stack (detail, pushes over the tabs) | shared | none | Dashboard, WorkOrders [header], TenantHome, MyRequests [header] | `features/workOrders/screens/NewWorkOrderScreen.js` |
 | Messages | Message Inbox | landlord tab 4 "Messages", tenant tab 4 "Messages" | shared | none | Dashboard, TenantHome | `features/messages/screens/MessagesScreen.js` |
 | MessageThread | Conversation | root stack (detail, pushes over the tabs) | shared | conversationId | WorkOrders (conversationId), WorkOrderDetail (conversationId), TenantDetail (conversationId), Messages (conversationId) | `features/messages/screens/MessageThreadScreen.js` |
-| Payments | Payments and Rent | landlord tab 2 "Payments", tenant tab 2 "Payments" | shared | none | Dashboard, TenantHome, MessageThread | `features/payments/screens/PaymentsScreen.js` |
-| TenantLedger | Rent Ledger | root stack (detail, pushes over the tabs) | owner | tenancyId | TenantDetail (tenancyId), Payments (tenancyId), PaymentDetail (tenancyId) | `features/payments/screens/TenantLedgerScreen.js` |
-| PaymentDetail | Payment Record #(short paymentId) | root stack (detail, pushes over the tabs) | shared | paymentId | Payments (paymentId), TenantLedger (paymentId) | `features/payments/screens/PaymentDetailScreen.js` |
+| Payments | Payments and Rent | landlord tab 2 "Payments", tenant tab 2 "Payments" | shared | none | Dashboard, TenantHome, MessageThread, Calendar, Search | `features/payments/screens/PaymentsScreen.js` |
+| TenantLedger | Rent Ledger | root stack (detail, pushes over the tabs) | owner | tenancyId | TenantDetail (tenancyId), Payments (tenancyId), PaymentDetail (tenancyId), Calendar (tenancyId), Search (tenancyId) | `features/payments/screens/TenantLedgerScreen.js` |
+| PaymentDetail | Payment Record #(short paymentId) | root stack (detail, pushes over the tabs) | shared | paymentId | Payments (paymentId), TenantLedger (paymentId), Calendar (paymentId), Search (paymentId) | `features/payments/screens/PaymentDetailScreen.js` |
 | Settings | Settings and Profile (stub) | landlord drawer "Settings", tenant drawer "Settings" | shared | none | Dashboard [header], TenantHome [header] | `features/settings/screens/SettingsScreen.js` |
+| Calendar | Calendar | landlord drawer "Calendar", tenant drawer "Calendar" | shared | none | Dashboard, TenantHome | `features/calendar/screens/CalendarScreen.js` |
+| Search | Search | root stack (detail, pushes over the tabs) | shared | none | Dashboard [header], TenantHome [header] | `features/search/screens/SearchScreen.js` |
 
 ## 2. Requirement checklist
 
 | # | Requirement | How it's met | Files |
 | --- | --- | --- | --- |
-| 1 | Every screen listed | The tables above and `navigation/navigationMap.js`, which lists all 33 with title, role, feature, params, arrows, and where each one is reachable | `navigation/navigationMap.js` |
+| 1 | Every screen listed | The tables above and `navigation/navigationMap.js`, which lists all 35 with title, role, feature, params, arrows, and where each one is reachable | `navigation/navigationMap.js` |
 | 2 | React Navigation installed | `@react-navigation/native` and `@react-navigation/native-stack` were already there. I added `@react-navigation/bottom-tabs`, `@react-navigation/drawer`, and `react-native-gesture-handler` for the tabs and drawer. `@react-navigation/elements` is listed directly for `useHeaderHeight` | `package.json` |
 | 3 | One component per screen in its own file in a screens folder | Every screen lives in `features/<feature>/screens/`. The 5 stubs I added used Card, PrimaryButton, and theme tokens and said what the real screen will do. Since then I turned Payments and Rent, Payment Record, and Lease and Documents into real screens and added Rent Ledger, Leases, and Profit. Settings and Profile and Property Overview are the two stubs left | `features/payments/screens/`, `features/settings/screens/SettingsScreen.js`, `features/tenants/screens/PropertyDetailScreen.js`, `features/tenants/screens/TenantLeaseScreen.js` |
 | 4 | Every screen registered in a NavigationContainer with initialRouteName | The root `Stack.Navigator` starts on Welcome, Login (after a session runs out), or `Main`. The drawer's `initialRouteName` is `Tabs`, and the tabs start on the role's home (Dashboard or TenantHome) | `App.js` |
@@ -153,14 +155,14 @@ Requirements before the changes:
 | T1 | Dynamic component API | `createNativeStackNavigator`, `createDrawerNavigator`, and `createBottomTabNavigator`, each used as `Navigator` and `Screen` components | `App.js` |
 | T2 | An id param read from route.params and displayed | See section 3 | |
 | T3 | Meaningful header titles, one shared style through screenOptions with theme colors | `shared_screen_options` (stack), `shared_tab_options` (tab bar and tab headers), and `shared_drawer_options` (drawer and drawer headers) all take their colors, fonts, and sizes from `theme.js`. Each screen's title comes from the map, and screens whose title depends on a param use the options function form | `navigation/screenOptions.js`, `App.js` |
-| T4 | A useful headerRight or headerLeft button | Eight on the right and the menu button on the left, see section 4 | `navigation/headerButtons.js` |
+| T4 | A useful headerRight or headerLeft button | Ten on the right and the menu button on the left, see section 4 | `navigation/headerButtons.js` |
 | T5 | A tab navigator, a drawer, or both, with titles and icons | Both. Every tab and drawer item has a short label and an outline icon from the map (`nav_label`, `nav_icon`), see section 5 | `App.js`, `navigation/DrawerContent.js` |
 | T6 | Drill-down screens keep working, no duplicate headers, Back as expected | Detail screens live in the root stack and push over the tabs and drawer, see section 0 | `App.js`, `navigation/hubRouter.js` |
 | T7 | A short explanation of the structure | `ASSIGNMENT_STRUCTURE.md` | |
 
 ## 3. The id params
 
-Every param in the app is now an id with a name ending in `Id`: `workOrderId`, `conversationId`, `checklistId`, `tenantId`, `propertyId`, `paymentId`, `tenancyId` (added with the rent ledger), and `yearId` (a year-end report is identified by its tax year). No navigation passes a whole object, and a test searches the source to keep it that way.
+Every param in the app is now an id with a name ending in `Id`: `workOrderId`, `conversationId`, `checklistId`, `tenantId`, `propertyId`, `paymentId`, `tenancyId` (added with the rent ledger), `yearId` (a year-end report is identified by its tax year), and `expenseId` (Search opens one expense on Property Expenses). No navigation passes a whole object, and a test searches the source to keep it that way.
 
 The main example:
 
@@ -183,7 +185,9 @@ Other changes to keep params as ids:
 | --- | --- | --- | --- |
 | Every tab and drawer screen (left) | menu | Opens the drawer (hidden on an iPad, where the drawer stays open) | `HeaderMenuButton` in `navigation/headerButtons.js` |
 | A drawer screen opened by a link from another section (left) | back arrow | Goes back to that section | `DrawerHeaderLeft` |
+| Landlord Dashboard | search | Opens Search | `SearchHeaderButton` in `navigation/headerButtons.js` (the homes show it next to the gear through `HomeHeaderButtons`) |
 | Landlord Dashboard | gear | Opens Settings and Profile | `SettingsHeaderButton` in `navigation/headerButtons.js` |
+| My Home (tenant) | search | Opens Search | `SearchHeaderButton` |
 | My Home (tenant) | gear | Opens Settings and Profile | `SettingsHeaderButton` |
 | All Work Orders | add | Opens the new work order form (local in the demo, the API in real mode, where owners can now add one) | `AddWorkOrderHeaderButton` |
 | Your Tenants | person add | Opens Invite a New Tenant | `InviteHeaderButton` |
@@ -198,12 +202,13 @@ Every button uses Ionicons, `COLORS.title`, a hitSlop, and an accessibility labe
 
 | Role | Tabs (bottom, in order) | Drawer (menu) |
 | --- | --- | --- |
-| Landlord | Home (Landlord Dashboard), Payments (Payments and Rent), Work Orders (All Work Orders), Messages (Message Inbox) | Rentals: Properties, Tenants, Leases. Money: Expenses, Mileage Log, Profit. Records: Documents, Checklists. Account: Settings |
-| Tenant | My Home, Payments, Repairs (My Repair Requests), Messages | Repairs: Past Requests. Account: Settings |
+| Landlord | Home (Landlord Dashboard), Payments (Payments and Rent), Work Orders (All Work Orders), Messages (Message Inbox) | Rentals: Properties, Tenants, Leases. Money: Expenses, Mileage Log, Profit. Records: Documents, Checklists. Schedule: Calendar. Account: Settings |
+| Tenant | My Home, Payments, Repairs (My Repair Requests), Messages | Repairs: Past Requests. Schedule: Calendar. Account: Settings |
 
 - The tabs are what each role opens most days. The drawer holds what they open now and then. Last week's plan had Tenants as a landlord tab; Payments took that spot because rent is the thing a landlord checks most, and Tenants moved into the drawer next to Properties.
 - Leases and Profit (added after the tabs went in) are drawer sections, not tabs: a landlord checks them now and then, and the tab bar stays at four. Leases sits with Properties and Tenants under Rentals, Profit with Expenses and the Mileage Log under Money. Tenants see their own lease on My Home, so they have no new drawer item.
-- The tenant drawer only has what a tenant can reach today (Past Requests and Settings). Tenants don't have Documents or Checklists yet, so those aren't in it.
+- Calendar (added in week 9b) is a drawer item for both roles in its own Schedule section, not a tab, so the tab bar stays at four. Search is a detail screen in the root stack, opened from the search button on both homes, and it pushes over the tabs like any other detail.
+- The tenant drawer only has what a tenant can reach today (Past Requests, Calendar, and Settings). Tenants don't have Documents or Checklists yet, so those aren't in it.
 - Labels are short so four fit on a small phone ("Repairs" instead of "My Repair Requests"). The header still shows the full title.
 - The drawer's top section repeats the four tabs, so a drawer screen like Settings can get back to a tab without the hardware back button.
 

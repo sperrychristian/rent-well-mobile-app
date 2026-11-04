@@ -215,7 +215,15 @@ function DashboardScreen(props) {
                 ? 'Move-in and move-out'
                 : open_checklists + (open_checklists === 1 ? ' in progress' : ' in progress')
             }
+            divider
             onPress={() => props.navigation.navigate('Checklist')}
+          />
+          {/* rent due dates, lease ends, and work order dates on one month */}
+          <ListRow
+            icon="calendar-outline"
+            title="Calendar"
+            subtitle="Rent due dates, lease ends, repairs"
+            onPress={() => props.navigation.navigate('Calendar')}
           />
 
           {/* the temporary tenant form, real mode hides it since only tenants can file requests there */}

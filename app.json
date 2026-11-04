@@ -7,7 +7,12 @@
     "icon": "./assets/hearth-icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCalendarsUsageDescription": "Rent Well adds rent due dates, lease ends, and repair dates to your calendar, only when you tap Add to my calendar.",
+        "NSCalendarsFullAccessUsageDescription": "Rent Well adds rent due dates, lease ends, and repair dates to your calendar, only when you tap Add to my calendar.",
+        "NSFaceIDUsageDescription": "Rent Well uses Face ID to unlock the app, only after you turn on Unlock with Face ID in Settings."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -25,6 +30,19 @@
       "expo-sharing",
       "@react-native-community/datetimepicker",
       "expo-secure-store",
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Rent Well adds rent due dates, lease ends, and repair dates to your calendar, only when you tap Add to my calendar.",
+          "remindersPermission": false
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Rent Well uses Face ID to unlock the app, only after you turn on Unlock with Face ID in Settings."
+        }
+      ],
       [
         "expo-splash-screen",
         {

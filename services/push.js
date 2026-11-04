@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { registerPushToken, unregisterPushToken } from './api';
+import { whileSystemDialog } from './appLock';
 
 // the token this phone registered, so logout can remove the same one
 let registered_token = null;
@@ -28,7 +29,8 @@ export async function registerForPush() {
     const current = await Notifications.getPermissionsAsync();
     let granted = current.granted;
     if (!granted && current.canAskAgain !== false) {
-      const asked = await Notifications.requestPermissionsAsync();
+      // the app lock waits while the system prompt is up
+      const asked = await whileSystemDialog(() => Notifications.requestPermissionsAsync());
       granted = asked.granted;
     }
     if (!granted) {

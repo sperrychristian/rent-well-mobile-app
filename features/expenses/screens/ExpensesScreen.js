@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { View, Text, FlatList, Pressable, ScrollView, TextInput, Alert } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import { ImagePicker } from '../../../services/systemPickers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
@@ -194,6 +194,23 @@ function ExpensesScreen(props) {
     setFormOpen(false);
     setEditingId(null);
   }
+
+  // Search opens one expense by its id: its form opens once, then the id is cleared so coming back doesn't reopen it
+  const linked_expense_id = props.route && props.route.params ? props.route.params.expenseId : null;
+  const [opened_link, setOpenedLink] = useState(null);
+  if (linked_expense_id && linked_expense_id !== opened_link) {
+    setOpenedLink(linked_expense_id);
+    if (expenses.some((expense) => expense.id === linked_expense_id)) {
+      setEditingId(linked_expense_id);
+      setFormOpen(true);
+    }
+  }
+  const navigation = props.navigation;
+  useEffect(() => {
+    if (linked_expense_id) {
+      navigation.setParams({ expenseId: undefined });
+    }
+  }, [linked_expense_id, navigation]);
 
   // looks for an existing expense with the same amount, date, and vendor
   function findDuplicate(expense) {

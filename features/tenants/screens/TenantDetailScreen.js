@@ -9,6 +9,7 @@ import PlaceModal from '../components/PlaceModal';
 import EndTenancyModal from '../components/EndTenancyModal';
 import { useTenants } from '../context/TenantsContext';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { ordersForTenantRecord, activeCount } from '../../workOrders/utils/workOrderHelpers';
 import { useMessages } from '../../messages/context/MessagesContext';
 import { openConversationFor } from '../../messages/utils/openConversation';
 import { placeLabel, findMoveInChecklist } from '../utils/tenantHelpers';
@@ -33,7 +34,8 @@ function TenantDetailScreen(props) {
     moveTenancy,
     endTenancy,
   } = useTenants();
-  const { checklists, addChecklist } = useWorkOrders();
+  // the work orders come from the shared store too, so a status change on Work Order Detail shows here right away
+  const { checklists, addChecklist, orders, is_remote, orders_status } = useWorkOrders();
   const { conversations } = useMessages();
 
   // the fresh copy from the server, with the recent work orders the list doesn't have
@@ -98,7 +100,18 @@ function TenantDetailScreen(props) {
     );
   }
 
-  const recent = detail ? detail.recent_work_orders : [];
+  // the shared state pass: the count and the rows read the one work order list everyone else reads,
+  // and only fall back to the server's detail copy while the real-mode list is still loading
+  const shared_orders =
+    !is_remote || orders_status === 'ready' ? ordersForTenantRecord(orders, tenant) : null;
+  const recent = shared_orders
+    ? shared_orders.slice(0, 10)
+    : detail
+      ? detail.recent_work_orders
+      : [];
+  const open_work_order_count = shared_orders
+    ? activeCount(shared_orders)
+    : tenant.open_work_order_count;
 
   function openForm(kind, tenancy) {
     setFormKey((current) => current + 1);
@@ -268,10 +281,10 @@ function TenantDetailScreen(props) {
         <Card>
           <Text style={styles.heading}>Work orders</Text>
           <Text style={styles.detail}>
-            {tenant.open_work_order_count === 0
+            {open_work_order_count === 0
               ? 'No open work orders.'
-              : tenant.open_work_order_count +
-                (tenant.open_work_order_count === 1 ? ' open work order' : ' open work orders')}
+              : open_work_order_count +
+                (open_work_order_count === 1 ? ' open work order' : ' open work orders')}
           </Text>
           {recent.map((order) => (
             <View key={order.id} style={styles.order_row}>

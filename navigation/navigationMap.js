@@ -127,6 +127,7 @@ export const navigation_map = {
     params: [],
     edges: [
       { to: 'Settings', param: null, via: 'header', label: 'Settings gear' },
+      { to: 'Search', param: null, via: 'header', label: 'Search' },
       { to: 'WorkOrders', param: null, via: 'button', label: 'Work Orders' },
       { to: 'NewWorkOrder', param: null, via: 'button', label: 'New Work Order (demo)' },
       { to: 'Messages', param: null, via: 'button', label: 'Messages' },
@@ -137,6 +138,7 @@ export const navigation_map = {
       { to: 'Expenses', param: null, via: 'button', label: 'Expenses' },
       { to: 'Leases', param: null, via: 'button', label: 'Leases' },
       { to: 'Profit', param: null, via: 'button', label: 'Profit' },
+      { to: 'Calendar', param: null, via: 'button', label: 'Calendar' },
       // the terracotta line when a lease ends within 30 days opens that lease
       { to: 'TenantLease', param: 'tenancyId', via: 'link', label: 'Lease ending soon line' },
       // the first-run setup checklist (real landlords only, it never shows in the demo)
@@ -358,7 +360,8 @@ export const navigation_map = {
     feature: 'expenses',
     file: 'features/expenses/screens/ExpensesScreen.js',
     status: 'built',
-    params: [],
+    // optional: Search opens one expense's form by its id
+    params: ['expenseId'],
     edges: [
       { to: 'Mileage', param: null, via: 'button', label: 'Mileage' },
       { to: 'YearEndReport', param: 'yearId', via: 'button', label: 'Year-End Report' },
@@ -420,9 +423,11 @@ export const navigation_map = {
     params: [],
     edges: [
       { to: 'Settings', param: null, via: 'header', label: 'Settings gear' },
+      { to: 'Search', param: null, via: 'header', label: 'Search' },
       { to: 'Messages', param: null, via: 'card', label: 'Messages' },
       { to: 'MyRequests', param: null, via: 'card', label: 'My Requests' },
       { to: 'NewWorkOrder', param: null, via: 'card', label: 'Report an Issue' },
+      { to: 'Calendar', param: null, via: 'card', label: 'Calendar' },
       { to: 'Payments', param: null, via: 'card', label: 'Payments and Rent' },
       { to: 'PastRequests', param: null, via: 'card', label: 'Past Requests (no rental)' },
       { to: 'Welcome', param: null, via: 'reset', label: 'Log Out or Exit Demo' },
@@ -598,6 +603,115 @@ export const navigation_map = {
     nav_label: 'Settings',
     nav_icon: 'settings-outline',
   },
+  // a month of rent due dates, payments, lease ends, and work order dates, each row opens its screen by id
+  Calendar: {
+    title: 'Calendar',
+    role: 'shared',
+    reachable_in: ['owner', 'tenant', 'demo_owner', 'demo_tenant'],
+    feature: 'calendar',
+    file: 'features/calendar/screens/CalendarScreen.js',
+    status: 'built',
+    params: [],
+    edges: [
+      {
+        to: 'TenantLedger',
+        param: 'tenancyId',
+        via: 'list item',
+        label: 'a rent or charge due date',
+        roles: ['owner'],
+      },
+      { to: 'PaymentDetail', param: 'paymentId', via: 'list item', label: 'a payment' },
+      {
+        to: 'TenantLease',
+        param: 'tenancyId',
+        via: 'list item',
+        label: 'a lease end',
+        roles: ['owner'],
+      },
+      {
+        to: 'WorkOrderDetail',
+        param: 'workOrderId',
+        via: 'list item',
+        label: 'a work order date',
+        roles: ['owner'],
+      },
+      {
+        to: 'RequestDetail',
+        param: 'workOrderId',
+        via: 'list item',
+        label: 'a request date',
+        roles: ['tenant'],
+      },
+      {
+        to: 'Payments',
+        param: null,
+        via: 'list item',
+        label: 'a rent or charge due date',
+        roles: ['tenant'],
+      },
+      { to: 'TenantHome', param: null, via: 'list item', label: 'a lease end', roles: ['tenant'] },
+    ],
+    place: 'drawer',
+    nav_label: 'Calendar',
+    nav_icon: 'calendar-outline',
+  },
+  // one search over what the app already has loaded, each result opens its own screen by id
+  Search: {
+    title: 'Search',
+    role: 'shared',
+    reachable_in: ['owner', 'tenant', 'demo_owner', 'demo_tenant'],
+    feature: 'search',
+    file: 'features/search/screens/SearchScreen.js',
+    status: 'built',
+    params: [],
+    edges: [
+      {
+        to: 'TenantDetail',
+        param: 'tenantId',
+        via: 'list item',
+        label: 'a tenant',
+        roles: ['owner'],
+      },
+      {
+        to: 'PropertyDetail',
+        param: 'propertyId',
+        via: 'list item',
+        label: 'a property',
+        roles: ['owner'],
+      },
+      {
+        to: 'WorkOrderDetail',
+        param: 'workOrderId',
+        via: 'list item',
+        label: 'a work order',
+        roles: ['owner'],
+      },
+      {
+        to: 'RequestDetail',
+        param: 'workOrderId',
+        via: 'list item',
+        label: 'a request',
+        roles: ['tenant'],
+      },
+      { to: 'PaymentDetail', param: 'paymentId', via: 'list item', label: 'a payment' },
+      {
+        to: 'TenantLedger',
+        param: 'tenancyId',
+        via: 'list item',
+        label: 'a charge',
+        roles: ['owner'],
+      },
+      { to: 'Payments', param: null, via: 'list item', label: 'a charge', roles: ['tenant'] },
+      {
+        to: 'Expenses',
+        param: 'expenseId',
+        via: 'list item',
+        label: 'an expense',
+        roles: ['owner'],
+      },
+    ],
+    place: 'drill',
+  },
 };
 
 // what each role gets as hubs: the tab bar in order, and the drawer in sections
@@ -609,6 +723,7 @@ export const hubs = {
       { title: 'Rentals', screens: ['Properties', 'Tenants', 'Leases'] },
       { title: 'Money', screens: ['Expenses', 'Mileage', 'Profit'] },
       { title: 'Records', screens: ['Documents', 'Checklist'] },
+      { title: 'Schedule', screens: ['Calendar'] },
       { title: 'Account', screens: ['Settings'] },
     ],
   },
@@ -616,6 +731,7 @@ export const hubs = {
     tabs: ['TenantHome', 'Payments', 'MyRequests', 'Messages'],
     drawer: [
       { title: 'Repairs', screens: ['PastRequests'] },
+      { title: 'Schedule', screens: ['Calendar'] },
       { title: 'Account', screens: ['Settings'] },
     ],
   },

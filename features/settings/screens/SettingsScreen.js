@@ -16,6 +16,7 @@ import { useDemoTour } from '../../home/hooks/useDemoTour';
 import { themedStyles } from '../../../utils/themedStyles';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
 import { useTheme } from '../../../context/ThemeContext';
+import SecurityCard from '../../security/components/SecurityCard';
 
 const appearance_choices = [
   { value: 'system', label: 'System' },
@@ -86,6 +87,9 @@ function SettingsScreen(props) {
             : 'Saved on this phone, for every account and the demo.'}
         </Text>
       </Card>
+
+      {/* Face ID or Touch ID, only for a signed-in account (the demo and signed out are never locked) */}
+      {user && !demo_mode ? <SecurityCard /> : null}
 
       {shows_mileage && (
         <Card>

@@ -21,6 +21,28 @@ export function SettingsHeaderButton() {
   );
 }
 
+// the magnifying glass on both homes, it opens Search over the tabs
+export function SearchHeaderButton() {
+  const navigation = useNavigation();
+  return (
+    <HeaderIconButton
+      icon="search-outline"
+      label="Search"
+      onPress={() => navigation.navigate('Search')}
+    />
+  );
+}
+
+// the homes get two buttons on the right now, Search then the gear, side by side
+export function HomeHeaderButtons() {
+  return (
+    <View style={styles.row}>
+      <SearchHeaderButton />
+      <SettingsHeaderButton />
+    </View>
+  );
+}
+
 // owners (real or the demo) add a work order from the list, tenants never see the owner list anyway
 export function AddWorkOrderHeaderButton() {
   const navigation = useNavigation();
@@ -124,6 +146,10 @@ export function previousDrawerRoute(state) {
 }
 
 const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   // the tab and drawer headers put the left button right on the edge, this lines it up with the screen padding
   left: {
     marginLeft: SPACING.xs,
