@@ -199,6 +199,7 @@ export const navigation_map = {
     params: ['workOrderId'],
     edges: [
       { to: 'MessageThread', param: 'conversationId', via: 'button', label: 'Message Tenant' },
+      { to: 'NewWorkOrder', param: 'workOrderId', via: 'header', label: 'Edit' },
     ],
     place: 'drill',
   },
@@ -468,7 +469,7 @@ export const navigation_map = {
     file: 'features/workOrders/screens/RequestDetailScreen.js',
     status: 'built',
     params: ['workOrderId'],
-    edges: [],
+    edges: [{ to: 'NewWorkOrder', param: 'workOrderId', via: 'header', label: 'Edit' }],
     place: 'drill',
   },
   PastRequests: {
@@ -489,12 +490,16 @@ export const navigation_map = {
   NewWorkOrder: {
     // owners add work orders here and tenants report issues, so the header says it plainly for both
     title: 'Add a Work Order',
+    // the same screen edits one when it gets a workOrderId (the lecture's ManageExpense), so the title says Edit
+    edit_title: 'Edit Work Order',
+    edit_param: 'workOrderId',
     role: 'shared',
     reachable_in: ['owner', 'tenant', 'demo_owner', 'demo_tenant'],
     feature: 'workOrders',
     file: 'features/workOrders/screens/NewWorkOrderScreen.js',
     status: 'built',
-    params: [],
+    // optional: no id adds a new one, an id edits that one
+    params: ['workOrderId'],
     edges: [
       {
         to: 'MyRequests',
@@ -779,6 +784,11 @@ export function headerTitle(route_name, params) {
   const screen = navigation_map[route_name];
   if (!screen) {
     return route_name;
+  }
+  // a screen that adds and edits (NewWorkOrder) says Edit with the short id once it has one
+  const edit_value = screen.edit_param && params ? params[screen.edit_param] : null;
+  if (edit_value) {
+    return screen.edit_title + ' #' + shortId(edit_value);
   }
   const value = screen.title_param && params ? params[screen.title_param] : null;
   return value ? screen.title + ' #' + shortId(value) : screen.title;

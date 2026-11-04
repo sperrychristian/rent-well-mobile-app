@@ -12,6 +12,7 @@ import {
   updateWorkOrderPriority,
   updateWorkOrderNotes,
   updateWorkOrderContractor,
+  updateWorkOrderFields,
   addWorkOrderPhotos,
   uploadImage,
 } from '../../../services/api';
@@ -249,6 +250,22 @@ function RemoteStore(props) {
     );
   }
 
+  // the work order form's Update, owners only (the server takes nothing but photos from a tenant after it's sent)
+  // step 1: show the new priority, contractor, and estimate right away
+  // step 2: send them in one PATCH, step 3: changeOrder puts the old order back if the server says no
+  function updateWorkOrder(order_id, changes) {
+    const server_changes = {
+      priority: changes.priority,
+      contractor: changes.contractor,
+      estimate: changes.estimate,
+    };
+    return changeOrder(
+      order_id,
+      (order) => ({ ...order, ...server_changes }),
+      () => updateWorkOrderFields(order_id, server_changes),
+    );
+  }
+
   // the tenant's Report an Issue, request is { title, description, priority, photos, tenancy_id }
   // photos are { uri, mime_type }, they go up first and only then does the request get created
   // an owner's request also has property_id, unit_label, and tenant_user_id, since there's no tenancy to read them from
@@ -263,6 +280,8 @@ function RemoteStore(props) {
           priority: request.priority,
           unit_label: request.unit_label,
           tenant_user_id: request.tenant_user_id,
+          contractor: request.contractor,
+          estimate: request.estimate,
           photo_keys: photo_keys,
         }),
       );
@@ -314,6 +333,7 @@ function RemoteStore(props) {
     setNotes,
     setContractorInfo,
     addWorkOrder,
+    updateWorkOrder,
     // only real mode has these, screens check is_remote before using them
     is_remote: true,
     role: user.role,
