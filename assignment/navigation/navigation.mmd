@@ -82,6 +82,7 @@ flowchart LR
   WorkOrders -->|workOrderId| WorkOrderDetail
   WorkOrders -->|conversationId| MessageThread
   WorkOrderDetail -->|conversationId| MessageThread
+  WorkOrderDetail -->|Edit: workOrderId| NewWorkOrder
   Tenants -->|header: Invite| InviteTenant
   Tenants --> Properties
   Tenants -->|tenantId| TenantDetail
@@ -114,6 +115,7 @@ flowchart LR
   TenantHome -.->|Switch to Landlord view| Dashboard
   MyRequests -->|header: Add| NewWorkOrder
   MyRequests -->|workOrderId| RequestDetail
+  RequestDetail -->|Edit: workOrderId| NewWorkOrder
   NewWorkOrder --> MyRequests
   Messages -->|header: Invite| InviteTenant
   Messages -->|conversationId| MessageThread

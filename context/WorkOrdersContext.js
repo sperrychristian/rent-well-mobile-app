@@ -417,11 +417,23 @@ export function WorkOrdersProvider(props) {
       started_at: null,
       resolved_at: null,
       notes: '',
-      contractor: '',
-      estimate: null,
+      contractor: request.contractor || '',
+      estimate: request.estimate === undefined ? null : request.estimate,
       photo: request.photo,
+      preferred_date: request.preferred_date || '',
     };
     setOrders((current_orders) => [...current_orders, new_order]);
+  }
+
+  // the work order form's Update button
+  // step 1: find the order by its id, step 2: copy it with only the changed fields swapped in
+  // a Resolved order stays as it is, the form never opens for one but this is a backup
+  function updateWorkOrder(order_id, changes) {
+    setOrders((current_orders) =>
+      current_orders.map((order) =>
+        order.id === order_id && order.status !== 'Resolved' ? { ...order, ...changes } : order,
+      ),
+    );
   }
 
   // order_id can be null for an expense that isn't tied to a work order
@@ -682,6 +694,7 @@ export function WorkOrdersProvider(props) {
     setBudgets,
     setMileageRate,
     addWorkOrder,
+    updateWorkOrder,
     addDocument,
     updateDocument,
     deleteDocument,

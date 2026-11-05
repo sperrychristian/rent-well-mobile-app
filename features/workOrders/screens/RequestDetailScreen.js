@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { View, Text, ScrollView, ActivityIndicator, Alert, Image, Pressable } from 'react-native';
 import { ImagePicker } from '../../../services/systemPickers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,7 +8,10 @@ import ErrorState from '../../../components/ErrorState';
 import RemoteImage from '../../../components/RemoteImage';
 import ImageViewerModal from '../../messages/components/ImageViewerModal';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { canTenantAddPhotos, photosLeft } from '../utils/workOrderHelpers';
+import { canTenantAddPhotos, photosLeft, editRuleFor } from '../utils/workOrderHelpers';
+import HeaderIconButton from '../../../components/HeaderIconButton';
+import EditNote from '../components/EditNote';
+import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { formatDate } from '../../../utils/formatDate';
 import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
 import { list_styles } from '../../../components/ui/listStyles';
@@ -22,9 +25,31 @@ const max_photo_bytes = 10485760;
 // it updates on its own when the landlord changes something, since it reads the live list
 function RequestDetailScreen(props) {
   const insets = useSafeAreaInsets();
-  const { getOrder, is_remote, ensureOrder, addOrderPhotos } = useWorkOrders();
+  const { getOrder, is_remote, ensureOrder, addOrderPhotos, demo_mode } = useWorkOrders();
   const order_id = props.route.params.workOrderId;
   const order = getOrder(order_id);
+
+  // a tenant can edit their own request until work starts, the reason shows when they can't
+  // (the demo is Sam, so a request is Sam's own when it's under Sam's name, real mode only lists my own)
+  const edit_rule = editRuleFor(order, {
+    role: 'tenant',
+    is_remote: is_remote,
+    is_own: demo_mode && order ? order.tenant === demo_tenant.name : true,
+  });
+  const navigation = props.navigation;
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: edit_rule.canEdit
+        ? () => (
+            <HeaderIconButton
+              icon="create-outline"
+              label="Edit request"
+              onPress={() => navigation.navigate('NewWorkOrder', { workOrderId: order_id })}
+            />
+          )
+        : undefined,
+    });
+  }, [navigation, edit_rule.canEdit, order_id]);
 
   const [load_error, setLoadError] = useState('');
   // goes up on Try Again so the effect asks again
@@ -143,6 +168,10 @@ function RequestDetailScreen(props) {
             <StatusLabel label={order.priority} />
           </View>
           {order.description ? <Text style={styles.body}>{order.description}</Text> : null}
+          {order.preferred_date ? (
+            <Text style={styles.detail}>Preferred date: {order.preferred_date}</Text>
+          ) : null}
+          {!edit_rule.canEdit && <EditNote reason={edit_rule.reason} />}
         </Card>
 
         <Card>

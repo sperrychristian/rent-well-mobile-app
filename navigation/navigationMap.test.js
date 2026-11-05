@@ -407,6 +407,10 @@ describe('headerTitle', () => {
     expect(headerTitle('YearEndReport', { yearId: '2026' })).toBe('Year-End Tax Report #2026');
     expect(headerTitle('Dashboard', undefined)).toBe('Landlord Dashboard');
     expect(headerTitle('Unknown', undefined)).toBe('Unknown');
+    // the work order form adds with no id and edits with one, so the title says which
+    expect(headerTitle('NewWorkOrder', undefined)).toBe('Add a Work Order');
+    expect(headerTitle('NewWorkOrder', {})).toBe('Add a Work Order');
+    expect(headerTitle('NewWorkOrder', { workOrderId: '7' })).toBe('Edit Work Order #7');
     expect(shortId('abc')).toBe('abc');
   });
 });
@@ -442,7 +446,9 @@ describe('the diagram is up to date with the map', () => {
       navigation_map[route_name].edges
         .filter((edge) => edge.param)
         .forEach((edge) => {
-          expect(mermaid).toContain(route_name + ' -->|' + edge.param + '| ' + edge.to);
+          // a header button's arrow says its label first, like "Edit: workOrderId"
+          const label = edge.via === 'header' ? edge.label + ': ' + edge.param : edge.param;
+          expect(mermaid).toContain(route_name + ' -->|' + label + '| ' + edge.to);
         });
     });
   });

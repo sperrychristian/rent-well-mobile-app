@@ -12,6 +12,7 @@ import {
   ordersForTenant,
   ordersForTenantRecord,
   legacyExpensesFor,
+  editRuleFor,
 } from './workOrderHelpers';
 
 // built from local times so the test passes in any time zone
@@ -247,5 +248,38 @@ describe('ordersForTenantRecord', () => {
 
   test('no tenant gives an empty list', () => {
     expect(ordersForTenantRecord(orders, null)).toEqual([]);
+  });
+});
+
+describe('editRuleFor', () => {
+  const open_order = { id: '1', status: 'Open' };
+  const started = { id: '2', status: 'In Progress' };
+  const resolved = { id: '3', status: 'Resolved' };
+
+  test('a landlord can edit until the order is resolved', () => {
+    expect(editRuleFor(open_order, { role: 'owner' }).canEdit).toBe(true);
+    expect(editRuleFor(started, { role: 'owner', is_remote: true }).canEdit).toBe(true);
+    expect(editRuleFor(resolved, { role: 'owner' })).toEqual({
+      canEdit: false,
+      reason: 'This work order is resolved, so it can no longer be edited.',
+    });
+  });
+
+  test('a tenant can edit their own request only while it is Open, and only on the phone', () => {
+    expect(editRuleFor(open_order, { role: 'tenant' }).canEdit).toBe(true);
+    expect(editRuleFor(started, { role: 'tenant' }).reason).toBe(
+      'Work has started, so this request is locked. Message your landlord with changes.',
+    );
+    expect(editRuleFor(open_order, { role: 'tenant', is_own: false }).reason).toBe(
+      'Only requests you sent can be edited.',
+    );
+    expect(editRuleFor(open_order, { role: 'tenant', is_remote: true })).toEqual({
+      canEdit: false,
+      reason: "A sent request can't be changed, but you can still add photos below.",
+    });
+  });
+
+  test('no order means no edit and no reason', () => {
+    expect(editRuleFor(undefined, { role: 'owner' })).toEqual({ canEdit: false, reason: '' });
   });
 });

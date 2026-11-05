@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -29,6 +29,9 @@ import StatusLabel from '../../../components/ui/StatusLabel';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
 import ReceiptImage from '../../../components/ReceiptImage';
+import HeaderIconButton from '../../../components/HeaderIconButton';
+import EditNote from '../components/EditNote';
+import { editRuleFor } from '../utils/workOrderHelpers';
 import { themedStyles } from '../../../utils/themedStyles';
 
 const priority_options = ['Emergency', 'Normal', 'Low'];
@@ -110,6 +113,37 @@ function WorkOrderDetailContent(props) {
   const [show_expense_form, setShowExpenseForm] = useState(false);
   // the photo open full size, null when the viewer is closed
   const [viewer_url, setViewerUrl] = useState(null);
+  // the edit form can change the contractor and estimate too, so when the saved ones change the boxes follow
+  // (the React way to reset state from a prop: remember the last saved values and compare while drawing)
+  const saved_contractor = order ? order.contractor || '' : '';
+  const saved_estimate =
+    order && order.estimate !== null && order.estimate !== undefined ? String(order.estimate) : '';
+  const [last_saved, setLastSaved] = useState({
+    contractor: saved_contractor,
+    estimate: saved_estimate,
+  });
+  if (last_saved.contractor !== saved_contractor || last_saved.estimate !== saved_estimate) {
+    setLastSaved({ contractor: saved_contractor, estimate: saved_estimate });
+    setContractorText(saved_contractor);
+    setEstimateText(saved_estimate);
+  }
+
+  // the Edit button opens the work order form with this order's id, a resolved one says why it can't
+  const edit_rule = editRuleFor(order, { role: 'owner' });
+  const navigation = props.navigation;
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: edit_rule.canEdit
+        ? () => (
+            <HeaderIconButton
+              icon="create-outline"
+              label="Edit work order"
+              onPress={() => navigation.navigate('NewWorkOrder', { workOrderId: order_id })}
+            />
+          )
+        : undefined,
+    });
+  }, [navigation, edit_rule.canEdit, order_id]);
 
   // if the order can't be found I show a simple message instead of crashing
   if (!order) {
@@ -199,6 +233,10 @@ function WorkOrderDetailContent(props) {
             <StatusLabel label={order.priority || 'Normal'} />
           </View>
           {order.description ? <Text style={styles.detail}>{order.description}</Text> : null}
+          {order.preferred_date ? (
+            <Text style={styles.detail}>Preferred date: {order.preferred_date}</Text>
+          ) : null}
+          {!edit_rule.canEdit && <EditNote reason={edit_rule.reason} />}
           {/* I only show the issue photo if the work order has one */}
           {order.photo && <Image source={order.photo} style={styles.photo} />}
           {/* server orders can have up to 10 photos, tapping one opens it full size */}

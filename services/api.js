@@ -291,6 +291,13 @@ export async function createOwnerWorkOrder(fields) {
   if (fields.photo_keys && fields.photo_keys.length > 0) {
     body.photoKeys = fields.photo_keys;
   }
+  // the work order form can fill these in too, the server takes them on create (owner only)
+  if (fields.contractor) {
+    body.contractor = fields.contractor;
+  }
+  if (fields.estimate !== null && fields.estimate !== undefined) {
+    body.estimate = fields.estimate;
+  }
   const data = await api_client.request('POST', '/work-orders', { body: body });
   return data.workOrder;
 }
@@ -321,6 +328,16 @@ export function updateWorkOrderNotes(work_order_id, notes) {
 // estimate is a number or null, the server turns away strings
 export function updateWorkOrderContractor(work_order_id, contractor, estimate) {
   return patchWorkOrder(work_order_id, { contractor: contractor, estimate: estimate });
+}
+
+// the work order form's Update for an owner: priority, contractor, and estimate in one PATCH
+// (title and description can't be changed on the server, so the form shows them read only)
+export function updateWorkOrderFields(work_order_id, fields) {
+  return patchWorkOrder(work_order_id, {
+    priority: fields.priority,
+    contractor: fields.contractor,
+    estimate: fields.estimate,
+  });
 }
 
 // owner or tenant, the keys come from uploadImage and get added after the photos already there

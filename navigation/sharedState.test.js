@@ -126,7 +126,13 @@ describe('one work order store, many screens', () => {
       screen.getByPlaceholderText('e.g. Kitchen faucet leaking'),
       'Porch light out',
     );
-    fireEvent.press(screen.getByText('Submit Request'));
+    // the work order form needs a description and an urgency now (week 10)
+    fireEvent.changeText(
+      screen.getByLabelText('Description'),
+      'The bulb by the front door went out last night.',
+    );
+    fireEvent.press(screen.getByLabelText('Normal priority'));
+    fireEvent.press(screen.getByText('Add'));
     await settle();
     // the tenant's own list has it first
     expect(focusedRoute()).toBe('MyRequests');

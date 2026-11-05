@@ -77,6 +77,10 @@ function edgeKind(edge) {
 
 // the text on an arrow: the param name when one is passed, and "header" for header buttons
 function edgeLabel(edge) {
+  // a header button that passes an id (Edit on the detail screens) shows both, like "Edit: workOrderId"
+  if (edge.via === 'header' && edge.param) {
+    return edge.label + ': ' + edge.param;
+  }
   if (edge.via === 'header') {
     return 'header: ' + edge.label;
   }

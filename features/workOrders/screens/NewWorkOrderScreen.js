@@ -1,38 +1,57 @@
-import { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Image,
-  Pressable,
-  ScrollView,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  useWindowDimensions,
-  ActivityIndicator,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { ImagePicker } from '../../../services/systemPickers';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
+import { View, Text, Alert, Platform } from 'react-native';
+import { usePreventRemove } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
 import PrimaryButton from '../../../components/PrimaryButton';
+import WorkOrderForm from '../components/WorkOrderForm';
 import { useWorkOrders } from '../../../context/WorkOrdersContext';
 import { useTenants } from '../../tenants/context/TenantsContext';
+import { useAppRole } from '../../auth/hooks/useAppRole';
+import { useToast } from '../../../components/ui/Toast';
+import { hapticSuccess } from '../../../utils/haptics';
 import { getMe } from '../../../services/api';
-import { max_photos_per_upload } from '../utils/workOrderHelpers';
+import { editRuleFor } from '../utils/workOrderHelpers';
 import { placeLabel } from '../../tenants/utils/tenantHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
-import { list_styles } from '../../../components/ui/listStyles';
+import { headerTitle } from '../../../navigation/navigationMap';
+import { SPACING, TYPE, SIZES } from '../../../theme';
 import { themedStyles } from '../../../utils/themedStyles';
 
-const urgency_options = ['Emergency', 'Normal', 'Low'];
-// the server takes photos up to 10 MB
-const max_photo_bytes = 10485760;
+// asks before throwing away typed changes, the web has no Alert buttons so it uses the browser's confirm
+function confirmDiscard(onDiscard) {
+  if (Platform.OS === 'web') {
+    if (globalThis.confirm && globalThis.confirm('Discard changes? Your edits will be lost.')) {
+      onDiscard();
+    }
+    return;
+  }
+  Alert.alert('Discard changes?', 'You have changes that are not saved yet.', [
+    { text: 'Keep Editing', style: 'cancel' },
+    { text: 'Discard', style: 'destructive', onPress: onDiscard },
+  ]);
+}
 
+// the lecture's ManageExpense: one screen adds a work order or edits one, the workOrderId param says which
+// it keeps the route name NewWorkOrder so the header buttons, push taps, and the navigation map still find it
 function NewWorkOrderScreen(props) {
-  const { addWorkOrder, properties, is_remote, role, demo_mode, demo_role } = useWorkOrders();
+  const editedWorkOrderId = props.route.params ? props.route.params.workOrderId : undefined;
+  const isEditing = !!editedWorkOrderId;
+
+  const {
+    addWorkOrder,
+    updateWorkOrder,
+    getOrder,
+    properties,
+    is_remote,
+    role,
+    demo_mode,
+    demo_role,
+  } = useWorkOrders();
+  const app_role = useAppRole();
+  const selectedWorkOrder = isEditing ? getOrder(editedWorkOrderId) : undefined;
+  const toast = useToast();
+
   // in real mode a tenant's property, unit, and name come from their account, so those boxes go away
   const tenant_remote = is_remote && role === 'tenant';
   // a real owner picks the property (and optionally the tenant) from their own list, the Work Orders Add button opens this
@@ -50,45 +69,41 @@ function NewWorkOrderScreen(props) {
   const insets = useSafeAreaInsets();
   // the header sits above this screen now, so the keyboard lift has to count its height too
   const header_height = useHeaderHeight();
-  // I check the screen shape so the photo can shrink when it's wider than it is tall
-  const { width, height } = useWindowDimensions();
-  const is_landscape = width > height;
 
-  // everything the tenant types or picks stays in state until they submit
-  const [tenant_name, setTenantName] = useState('');
-  const [property, setProperty] = useState('');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState('Normal');
-  const [photo_uri, setPhotoUri] = useState(null);
-  // real mode takes up to 5 photos, each one is { uri, mime_type }
-  const [photos, setPhotos] = useState([]);
-  const [busy, setBusy] = useState(false);
+  let variant = 'local_owner';
+  if (tenant_remote) {
+    variant = 'remote_tenant';
+  } else if (owner_remote) {
+    variant = 'remote_owner';
+  } else if (tenant_demo) {
+    variant = 'demo_tenant';
+  }
+  const is_owner = app_role !== 'tenant';
+  const edit_rule = editRuleFor(selectedWorkOrder, {
+    role: is_owner ? 'owner' : 'tenant',
+    is_remote: is_remote,
+    is_own: tenant_demo && selectedWorkOrder ? selectedWorkOrder.tenant === demo_tenant.name : true,
+  });
+
+  const [submitting, setSubmitting] = useState(false);
   const [progress_text, setProgressText] = useState('');
+  const [submit_error, setSubmitError] = useState('');
+  const [is_dirty, setIsDirty] = useState(false);
+  // set right before leaving after a save, so the discard prompt never shows for a saved form
+  const allow_leave = useRef(false);
   // the tenant's rentals from GET /me, almost always just one
   const [tenancies, setTenancies] = useState([]);
-  const [tenancy_id, setTenancyId] = useState(null);
   // loading, ready, or error for the rental lookup
   const [me_status, setMeStatus] = useState('loading');
   const [me_attempt, setMeAttempt] = useState(0);
-  // the owner's choices: which property, which unit, and which tenant (all but the property are optional)
-  const [owner_property_id, setOwnerPropertyId] = useState(null);
-  const [owner_unit, setOwnerUnit] = useState('');
-  const [owner_tenant_id, setOwnerTenantId] = useState(null);
-  const owner_property = owner_properties.find((item) => item.id === owner_property_id);
 
-  // picking a tenant also fills in their unit, picking them again unlinks them
-  function chooseOwnerTenant(tenancy) {
-    if (owner_tenant_id === tenancy.tenant_id) {
-      setOwnerTenantId(null);
-      return;
-    }
-    setOwnerTenantId(tenancy.tenant_id);
-    setOwnerUnit(tenancy.unit_label || '');
-  }
+  // step 1: the title says Add or Edit, from the navigation map like every other header
+  useLayoutEffect(() => {
+    props.navigation.setOptions({ title: headerTitle('NewWorkOrder', props.route.params) });
+  }, [props.navigation, props.route.params]);
 
   useEffect(() => {
-    if (!tenant_remote) {
+    if (!tenant_remote || isEditing) {
       return undefined;
     }
     let active = true;
@@ -100,7 +115,6 @@ function NewWorkOrderScreen(props) {
         // the server renamed tenancies to activeTenancies, only active ones can file a request
         const list = me.activeTenancies || me.tenancies || [];
         setTenancies(list);
-        setTenancyId(list.length > 0 ? list[0].id : null);
         setMeStatus('ready');
       })
       .catch((error) => {
@@ -112,611 +126,216 @@ function NewWorkOrderScreen(props) {
     return () => {
       active = false;
     };
-  }, [tenant_remote, me_attempt]);
+  }, [tenant_remote, isEditing, me_attempt]);
 
-  // real mode keeps a list of photos, anything over 10 MB gets turned away
-  function keepPhotos(assets) {
-    const room = max_photos_per_upload - photos.length;
-    const fitting = assets.filter((asset) => !asset.fileSize || asset.fileSize <= max_photo_bytes);
-    if (fitting.length < assets.length) {
-      Alert.alert('Photo too large', 'Photos have to be under 10 MB.');
+  // step 2: leaving with unsaved changes (Cancel, the back button, a swipe, Android's back) asks first
+  usePreventRemove(is_dirty, (event) => {
+    if (allow_leave.current) {
+      props.navigation.dispatch(event.data.action);
+      return;
     }
-    setPhotos((current) => [
-      ...current,
-      ...fitting
-        .slice(0, room)
-        .map((asset) => ({ uri: asset.uri, mime_type: asset.mimeType || 'image/jpeg' })),
-    ]);
+    confirmDiscard(() => props.navigation.dispatch(event.data.action));
+  });
+
+  const onDirtyChange = useCallback((value) => setIsDirty(value), []);
+
+  function cancelHandler() {
+    props.navigation.goBack();
   }
 
-  function removePhoto(index) {
-    setPhotos((current) => current.filter((photo, photo_index) => photo_index !== index));
-  }
-
-  // I have to ask for camera permission before the camera can open
-  async function takePhoto() {
-    const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert('Camera access needed', 'Allow camera access in settings to take a photo.');
-      return;
-    }
-    const result = await ImagePicker.launchCameraAsync({ quality: 0.7 });
-    if (!result.canceled) {
-      if (remote_form) {
-        keepPhotos(result.assets);
-      } else {
-        setPhotoUri(result.assets[0].uri);
-      }
-    }
-  }
-
-  async function choosePhoto() {
-    // real mode can pick several at once, up to what's left of the 5
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.7,
-      allowsMultipleSelection: remote_form,
-      selectionLimit: remote_form ? max_photos_per_upload - photos.length : 1,
-    });
-    if (!result.canceled) {
-      if (remote_form) {
-        keepPhotos(result.assets);
-      } else {
-        setPhotoUri(result.assets[0].uri);
-      }
-    }
-  }
-
-  // real mode: the photos upload first, then the request goes to the landlord
-  async function submitToServer() {
-    if (title.trim() === '') {
-      Alert.alert('Describe the issue', 'Add a short title, like Kitchen faucet leaking.');
-      return;
-    }
-    if (title.trim().length > 120) {
-      Alert.alert('Shorten the title', 'Keep the title under 120 characters.');
-      return;
-    }
-    if (tenancies.length === 0) {
-      Alert.alert(
-        'No rental found',
-        "Your account isn't linked to a rental yet. Ask your landlord for an invite.",
-      );
-      return;
-    }
-    setBusy(true);
-    try {
-      await addWorkOrder(
-        {
-          title: title.trim(),
-          description: description.trim(),
-          priority: priority,
-          photos: photos,
-          // only needed when there's more than one rental to pick from
-          tenancy_id: tenancies.length > 1 ? tenancy_id : undefined,
-        },
-        (number, total) => setProgressText('Uploading photo ' + number + ' of ' + total + '...'),
-      );
-      Alert.alert('Request submitted', 'Your landlord has been notified.', [
-        { text: 'OK', onPress: () => props.navigation.replace('MyRequests') },
-      ]);
-    } catch (error) {
-      console.log('Could not submit the request', error.message);
-      // everything stays filled in so it can be sent again
-      Alert.alert('Request not sent', error.message);
-    }
-    setProgressText('');
-    setBusy(false);
-  }
-
-  // the owner's version: the property comes from the chips, then the photos upload and the order is created
-  async function submitOwnerOrder() {
-    if (!owner_property_id) {
-      Alert.alert('Pick a property', 'Choose which property this work order is for.');
-      return;
-    }
-    if (title.trim() === '' || title.trim().length > 120) {
-      Alert.alert('Describe the issue', 'Add a short title (up to 120 characters).');
-      return;
-    }
-    if (owner_unit.trim().length > 50) {
-      Alert.alert('Shorten the unit', 'Keep the unit under 50 characters.');
-      return;
-    }
-    setBusy(true);
-    try {
-      await addWorkOrder(
-        {
-          property_id: owner_property_id,
-          title: title.trim(),
-          description: description.trim(),
-          priority: priority,
-          photos: photos,
-          unit_label: owner_unit.trim(),
-          tenant_user_id: owner_tenant_id,
-        },
-        (number, total) => setProgressText('Uploading photo ' + number + ' of ' + total + '...'),
-      );
-      Alert.alert('Work order added', 'It shows up in Work Orders as Open.', [
-        { text: 'OK', onPress: () => props.navigation.goBack() },
-      ]);
-    } catch (error) {
-      console.log('Could not add the work order', error.message);
-      // everything stays filled in so it can be sent again
-      Alert.alert('Work order not added', error.message);
-    }
-    setProgressText('');
-    setBusy(false);
-  }
-
-  // the demo tenant's version: it goes in the demo's shared list, so the landlord side sees it as Open
-  // after switching, and the photo stays on the phone like the rest of the demo
-  function submitDemoRequest() {
-    if (title.trim() === '') {
-      Alert.alert('Describe the issue', 'Add a short title, like Kitchen faucet leaking.');
-      return;
-    }
-    if (!demo_place) {
-      Alert.alert('No rental found', "Sam doesn't have an active rental in the demo right now.");
-      return;
-    }
-    addWorkOrder({
-      title: title.trim(),
-      description: description.trim(),
-      property: demo_place,
-      tenant: demo_tenant.name,
-      priority: priority,
-      photo: photo_uri ? { uri: photo_uri } : null,
-    });
-    Alert.alert('Request submitted', 'Switch to the Landlord view to see it in Work Orders.', [
-      { text: 'OK', onPress: () => props.navigation.replace('MyRequests') },
-    ]);
-  }
-
-  // I check the required pieces first so an empty request never gets submitted
-  function handleSubmit() {
+  // the form's clean data turned into what each mode's addWorkOrder expects
+  function buildRequest(workOrderData) {
+    const estimate =
+      workOrderData.estimate_cents === null ? null : workOrderData.estimate_cents / 100;
     if (tenant_remote) {
-      submitToServer();
-      return;
+      return {
+        title: workOrderData.title,
+        description: workOrderData.description,
+        priority: workOrderData.priority,
+        photos: workOrderData.photos,
+        // only needed when there's more than one rental to pick from
+        tenancy_id: tenancies.length > 1 ? workOrderData.tenancy_id : undefined,
+      };
     }
     if (owner_remote) {
-      submitOwnerOrder();
-      return;
+      return {
+        property_id: workOrderData.property_id,
+        title: workOrderData.title,
+        description: workOrderData.description,
+        priority: workOrderData.priority,
+        photos: workOrderData.photos,
+        unit_label: workOrderData.unit_label,
+        tenant_user_id: workOrderData.tenant_user_id,
+        contractor: workOrderData.contractor,
+        estimate: estimate,
+      };
     }
+    // the demo tenant's version: it goes in the demo's shared list, so the landlord side sees it as Open
+    // after switching, and the photo stays on the phone like the rest of the demo
     if (tenant_demo) {
-      submitDemoRequest();
+      return {
+        title: workOrderData.title,
+        description: workOrderData.description,
+        property: demo_place,
+        tenant: demo_tenant.name,
+        priority: workOrderData.priority,
+        photo: workOrderData.photo_uri ? { uri: workOrderData.photo_uri } : null,
+        preferred_date: workOrderData.preferred_date,
+      };
+    }
+    return {
+      title: workOrderData.title,
+      description: workOrderData.description,
+      property: workOrderData.property,
+      tenant: workOrderData.tenant,
+      priority: workOrderData.priority,
+      photo: workOrderData.photo_uri ? { uri: workOrderData.photo_uri } : null,
+      contractor: workOrderData.contractor,
+      estimate: estimate,
+      preferred_date: workOrderData.preferred_date,
+    };
+  }
+
+  // only the fields this mode can change go into an update
+  function buildChanges(workOrderData) {
+    const estimate =
+      workOrderData.estimate_cents === null ? null : workOrderData.estimate_cents / 100;
+    if (is_remote) {
+      return {
+        priority: workOrderData.priority,
+        contractor: workOrderData.contractor,
+        estimate: estimate,
+      };
+    }
+    const changes = {
+      title: workOrderData.title,
+      description: workOrderData.description,
+      priority: workOrderData.priority,
+      preferred_date: workOrderData.preferred_date,
+    };
+    if (is_owner) {
+      changes.tenant = workOrderData.tenant;
+      changes.property = workOrderData.property;
+      changes.contractor = workOrderData.contractor;
+      changes.estimate = estimate;
+    }
+    if (workOrderData.photo_changed) {
+      changes.photo = workOrderData.photo_uri ? { uri: workOrderData.photo_uri } : null;
+    }
+    return changes;
+  }
+
+  // step 3: save through the shared context, add or update, then go back like the lecture does
+  // in real mode a failed save keeps the form open with everything still filled in
+  async function confirmHandler(workOrderData) {
+    if (tenant_remote && !isEditing && tenancies.length === 0) {
+      setSubmitError("Your account isn't linked to a rental yet. Ask your landlord for an invite.");
       return;
     }
-    if (tenant_name.trim() === '') {
-      Alert.alert('Add your name', 'Type your name so the landlord knows who sent it.');
+    if (tenant_demo && !isEditing && !demo_place) {
+      setSubmitError("Sam doesn't have an active rental in the demo right now.");
       return;
     }
-    if (property.trim() === '') {
-      Alert.alert('Add the property', 'Pick your property or type it in.');
+    setSubmitError('');
+    setSubmitting(true);
+    try {
+      if (isEditing) {
+        await updateWorkOrder(editedWorkOrderId, buildChanges(workOrderData));
+      } else {
+        await addWorkOrder(buildRequest(workOrderData), (number, total) =>
+          setProgressText('Uploading photo ' + number + ' of ' + total + '...'),
+        );
+      }
+    } catch (error) {
+      console.log('Could not save the work order', error.message);
+      // everything stays filled in so it can be sent again
+      setSubmitError((isEditing ? 'Not updated: ' : 'Not sent: ') + error.message);
+      setProgressText('');
+      setSubmitting(false);
       return;
     }
-    if (title.trim() === '') {
-      Alert.alert('Describe the issue', 'Add a short title, like Kitchen faucet leaking.');
-      return;
+    setProgressText('');
+    setSubmitting(false);
+    hapticSuccess();
+    if (isEditing) {
+      toast.show(is_owner ? 'Work order updated' : 'Request updated', 'checkmark-circle-outline');
+    } else if (tenant_demo) {
+      toast.show('Request sent. Switch to the Landlord view to see it.', 'send-outline');
+    } else if (!is_owner) {
+      toast.show('Request sent. Your landlord has been notified.', 'send-outline');
+    } else {
+      toast.show('Work order added', 'checkmark-circle-outline');
     }
-    addWorkOrder({
-      title: title.trim(),
-      description: description.trim(),
-      property: property.trim(),
-      tenant: tenant_name.trim(),
-      priority: priority,
-      photo: photo_uri ? { uri: photo_uri } : null,
-    });
-    Alert.alert('Request submitted', 'Your work order was added.', [
-      { text: 'OK', onPress: () => props.navigation.goBack() },
-    ]);
+    allow_leave.current = true;
+    // a tenant's new request opens their list so they can see it, everything else goes back
+    if (!isEditing && !is_owner) {
+      props.navigation.replace('MyRequests');
+    } else {
+      props.navigation.goBack();
+    }
+  }
+
+  // editing something that's gone or locked shows why instead of a form that can't save
+  if (isEditing && (!selectedWorkOrder || !edit_rule.canEdit)) {
+    return (
+      <View style={styles.message_screen}>
+        <Text style={styles.message_text}>
+          {!selectedWorkOrder ? 'That work order could not be found.' : edit_rule.reason}
+        </Text>
+        <PrimaryButton title="Back" variant="secondary" onPress={cancelHandler} />
+      </View>
+    );
   }
 
   return (
-    // iOS doesn't resize the app when the keyboard opens, so it needs padding; Android already moves the content up on its own
-    <KeyboardAvoidingView
-      keyboardVerticalOffset={header_height}
-      style={styles.screen}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={[
-          styles.container,
-          {
-            paddingTop: SPACING.md,
-            paddingBottom: insets.bottom + SPACING.lg,
-            paddingLeft: insets.left + SPACING.lg,
-            paddingRight: insets.right + SPACING.lg,
-          },
-        ]}
-      >
-        {/* I cap the width so the form doesn't stretch edge to edge on a tablet */}
-        <View style={styles.form}>
-          {/* an owner signed in for real can't file a tenant request, the dashboard hides the button but this is a backup */}
-          {/* it's the owner's own work order form now, opened from the Add button on Work Orders */}
-          {owner_remote ? (
-            <View>
-              <Text style={styles.label}>Property</Text>
-              {owner_properties.length === 0 ? (
-                <Text style={styles.notice}>
-                  Add a property first from Tenants, then Properties.
-                </Text>
-              ) : (
-                <View style={styles.chip_wrap}>
-                  {owner_properties.map((item) => (
-                    <Pressable
-                      key={item.id}
-                      onPress={() => {
-                        setOwnerPropertyId(item.id);
-                        setOwnerTenantId(null);
-                      }}
-                      hitSlop={{ top: 8, bottom: 8 }}
-                      style={[styles.chip, owner_property_id === item.id && styles.chip_active]}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: owner_property_id === item.id }}
-                    >
-                      <Text style={styles.chip_text}>{item.name}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              )}
-              {owner_property && owner_property.tenancies.length > 0 && (
-                <View>
-                  <Text style={styles.label}>Tenant (optional)</Text>
-                  <View style={styles.chip_wrap}>
-                    {owner_property.tenancies.map((tenancy) => (
-                      <Pressable
-                        key={tenancy.id}
-                        onPress={() => chooseOwnerTenant(tenancy)}
-                        hitSlop={{ top: 8, bottom: 8 }}
-                        style={[
-                          styles.chip,
-                          owner_tenant_id === tenancy.tenant_id && styles.chip_active,
-                        ]}
-                        accessibilityRole="button"
-                        accessibilityState={{ selected: owner_tenant_id === tenancy.tenant_id }}
-                      >
-                        <Text style={styles.chip_text}>
-                          {tenancy.tenant_name +
-                            (tenancy.unit_label ? ', ' + tenancy.unit_label : '')}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                </View>
-              )}
-              <Text style={styles.label}>Unit (optional)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Unit 2B, or Exterior"
-                placeholderTextColor={COLORS.text_muted}
-                value={owner_unit}
-                onChangeText={setOwnerUnit}
-              />
-            </View>
-          ) : tenant_remote ? (
-            <View style={styles.rental_box}>
-              <Text style={styles.label}>Reporting for</Text>
-              {me_status === 'loading' && <ActivityIndicator color={COLORS.title} />}
-              {me_status === 'error' && (
-                <Pressable
-                  onPress={() => setMeAttempt((current) => current + 1)}
-                  hitSlop={8}
-                  accessibilityRole="button"
-                >
-                  <Text style={styles.link_text}>
-                    {"Couldn't load your rental. Tap to try again."}
-                  </Text>
-                </Pressable>
-              )}
-              {me_status === 'ready' && tenancies.length === 0 && (
-                <Text style={styles.rental_text}>
-                  No rental linked yet. Ask your landlord for an invite.
-                </Text>
-              )}
-              {me_status === 'ready' && tenancies.length === 1 && (
-                <Text style={styles.rental_text}>
-                  {tenancies[0].property.name +
-                    (tenancies[0].unitLabel ? ', ' + tenancies[0].unitLabel : '')}
-                </Text>
-              )}
-              {me_status === 'ready' && tenancies.length > 1 && (
-                <View style={styles.chip_wrap}>
-                  {tenancies.map((tenancy) => (
-                    <Pressable
-                      key={tenancy.id}
-                      onPress={() => setTenancyId(tenancy.id)}
-                      hitSlop={{ top: 8, bottom: 8 }}
-                      style={[styles.chip, tenancy_id === tenancy.id && styles.chip_active]}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: tenancy_id === tenancy.id }}
-                    >
-                      <Text style={styles.chip_text}>
-                        {tenancy.property.name +
-                          (tenancy.unitLabel ? ', ' + tenancy.unitLabel : '')}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
-              )}
-            </View>
-          ) : tenant_demo ? (
-            <View style={styles.rental_box}>
-              <Text style={styles.label}>Reporting for</Text>
-              <Text style={styles.rental_text}>
-                {demo_place
-                  ? demo_tenant.name + ', ' + demo_place
-                  : 'No active rental in the demo right now.'}
-              </Text>
-            </View>
-          ) : (
-            <View>
-              <Text style={styles.label}>Your name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Your name"
-                placeholderTextColor={COLORS.text_muted}
-                value={tenant_name}
-                onChangeText={setTenantName}
-              />
-
-              <Text style={styles.label}>Property</Text>
-              {properties.length > 0 && (
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  style={styles.chip_scroll}
-                  contentContainerStyle={styles.chip_row}
-                >
-                  {properties.map((name) => (
-                    <Pressable
-                      key={name}
-                      onPress={() => setProperty(name)}
-                      style={[styles.chip, property === name && styles.chip_active]}
-                      hitSlop={{ top: 8, bottom: 8 }}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: property === name }}
-                    >
-                      <Text style={styles.chip_text}>{name}</Text>
-                    </Pressable>
-                  ))}
-                </ScrollView>
-              )}
-              <TextInput
-                style={styles.input}
-                placeholder="Pick one above or type your address"
-                placeholderTextColor={COLORS.text_muted}
-                value={property}
-                onChangeText={setProperty}
-              />
-            </View>
-          )}
-
-          <Text style={styles.label}>What's wrong?</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g. Kitchen faucet leaking"
-            placeholderTextColor={COLORS.text_muted}
-            value={title}
-            onChangeText={setTitle}
-          />
-
-          <Text style={styles.label}>Details</Text>
-          <TextInput
-            style={[styles.input, styles.description_input]}
-            placeholder="Anything the landlord should know"
-            placeholderTextColor={COLORS.text_muted}
-            multiline
-            value={description}
-            onChangeText={setDescription}
-          />
-
-          <Text style={styles.label}>How urgent is it?</Text>
-          <View style={styles.chip_wrap}>
-            {urgency_options.map((option) => (
-              <Pressable
-                key={option}
-                onPress={() => setPriority(option)}
-                style={[styles.chip, priority === option && styles.chip_active]}
-                hitSlop={{ top: 8, bottom: 8 }}
-                accessibilityRole="button"
-                accessibilityState={{ selected: priority === option }}
-              >
-                <Text style={styles.chip_text}>{option}</Text>
-              </Pressable>
-            ))}
-          </View>
-
-          {photo_uri && (
-            <Image
-              source={{ uri: photo_uri }}
-              style={[styles.preview, is_landscape && styles.preview_landscape]}
-            />
-          )}
-          {remote_form && photos.length > 0 && (
-            <ScrollView
-              horizontal
-              style={styles.chip_scroll}
-              contentContainerStyle={styles.thumb_row}
-            >
-              {photos.map((photo, index) => (
-                <View key={photo.uri + index}>
-                  <Image source={{ uri: photo.uri }} style={styles.thumb} />
-                  <Pressable
-                    style={styles.remove_button}
-                    onPress={() => removePhoto(index)}
-                    hitSlop={12}
-                    accessibilityLabel="Remove photo"
-                    accessibilityRole="button"
-                  >
-                    <Ionicons name="close-circle-outline" size={22} color={COLORS.danger_text} />
-                  </Pressable>
-                </View>
-              ))}
-            </ScrollView>
-          )}
-          {remote_form && (
-            <Text style={styles.helper}>
-              {photos.length + ' of ' + max_photos_per_upload + ' photos'}
-            </Text>
-          )}
-          {(!remote_form || photos.length < max_photos_per_upload) && (
-            <View style={styles.button_row}>
-              <PrimaryButton
-                title="Camera"
-                icon="camera-outline"
-                variant="secondary"
-                onPress={takePhoto}
-                style={styles.photo_button}
-              />
-              <PrimaryButton
-                title="Library"
-                icon="image-outline"
-                variant="secondary"
-                onPress={choosePhoto}
-                style={styles.photo_button}
-              />
-            </View>
-          )}
-
-          {busy && progress_text !== '' && <Text style={styles.helper}>{progress_text}</Text>}
-          <PrimaryButton
-            title={busy ? 'Sending...' : 'Submit Request'}
-            icon="send-outline"
-            variant="primary"
-            loading={busy}
-            onPress={busy ? undefined : handleSubmit}
-            style={[styles.submit_button, busy && styles.busy]}
-          />
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    <WorkOrderForm
+      submitButtonLabel={isEditing ? 'Update' : 'Add'}
+      onCancel={cancelHandler}
+      onSubmit={confirmHandler}
+      defaultValues={selectedWorkOrder}
+      isEditing={isEditing}
+      variant={variant}
+      showLandlordFields={is_owner}
+      // the server has no date for a work order, so the preferred date is only on the phone (the demo)
+      showDate={!is_remote}
+      readOnlyText={isEditing && is_remote}
+      // in real mode photos get added from the detail screen once it exists, the form adds them on create
+      showPhotos={!isEditing || !is_remote}
+      multiplePhotos={remote_form}
+      properties={properties}
+      ownerProperties={owner_properties}
+      tenancies={tenancies}
+      meStatus={me_status}
+      onRetryMe={() => setMeAttempt((current) => current + 1)}
+      placeText={
+        isEditing
+          ? selectedWorkOrder.property
+          : demo_place
+            ? demo_tenant.name + ', ' + demo_place
+            : null
+      }
+      submitting={submitting}
+      progressText={progress_text}
+      submitError={submit_error}
+      onDirtyChange={onDirtyChange}
+      insets={insets}
+      keyboardOffset={header_height}
+    />
   );
 }
 
 export default NewWorkOrderScreen;
 
 const styles = themedStyles((COLORS) => ({
-  screen: {
+  message_screen: {
     flex: 1,
     backgroundColor: COLORS.background,
+    paddingHorizontal: SIZES.screen_padding,
+    paddingTop: SPACING.lg,
+    gap: SPACING.md,
   },
-  container: {
-    flexGrow: 1,
-    padding: SPACING.lg,
-  },
-  form: {
-    width: '100%',
-    maxWidth: SIZES.content_max_width,
-    alignSelf: 'center',
-  },
-  label: {
-    ...TYPE.label,
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
-  },
-  input: {
-    ...list_styles.search_input,
-    padding: SPACING.sm,
-    marginBottom: SPACING.sm,
-  },
-  description_input: {
-    minHeight: SIZES.row_min_height + SPACING.md,
-    textAlignVertical: 'top',
-  },
-  // without this the horizontal list grows to fill the spare height and the chips stretch with it
-  chip_scroll: {
-    flexGrow: 0,
-  },
-  chip_row: {
-    gap: SPACING.sm,
-    paddingBottom: SPACING.sm,
-  },
-  chip_wrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.sm,
-    marginBottom: SPACING.sm,
-  },
-  chip: {
-    ...list_styles.chip,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-  },
-  chip_active: {
-    ...list_styles.chip_active,
-  },
-  chip_text: {
-    ...list_styles.chip_text,
-  },
-  preview: {
-    borderRadius: RADIUS.md,
-    width: '100%',
-    height: 160,
-    marginBottom: SPACING.sm,
-  },
-  preview_landscape: {
-    height: 120,
-  },
-  button_row: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-    marginBottom: SPACING.sm,
-  },
-  photo_button: {
-    flex: 1,
-    marginHorizontal: 0,
-  },
-  submit_button: {
-    marginHorizontal: 0,
-  },
-  busy: {},
-  notice: {
-    ...TYPE.body_small,
-    fontFamily: TYPE.label.fontFamily,
-    color: COLORS.text,
-    textAlign: 'center',
-    marginBottom: SPACING.md,
-  },
-  rental_box: {
-    backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.md,
-    borderWidth: BORDER.hairline,
-    borderColor: COLORS.border,
-    padding: SPACING.sm,
-    marginBottom: SPACING.md,
-  },
-  rental_text: {
+  message_text: {
     ...TYPE.body,
     color: COLORS.text,
-  },
-  link_text: {
-    ...TYPE.label,
-    fontSize: TYPE.body_small.fontSize,
-    color: COLORS.cta,
-  },
-  helper: {
-    ...TYPE.caption,
-    color: COLORS.text_muted,
-    marginBottom: SPACING.sm,
-  },
-  thumb_row: {
-    gap: SPACING.sm,
-    paddingTop: SPACING.sm,
-    paddingRight: SPACING.sm,
-    paddingBottom: SPACING.sm,
-  },
-  thumb: {
-    borderRadius: RADIUS.md,
-    width: 72,
-    height: 72,
-  },
-  remove_button: {
-    backgroundColor: COLORS.surface_raised,
-    borderRadius: RADIUS.pill,
-    position: 'absolute',
-    top: -SPACING.sm,
-    right: -SPACING.sm,
   },
 }));

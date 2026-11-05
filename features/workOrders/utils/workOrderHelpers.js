@@ -156,3 +156,39 @@ export function legacyExpensesFor(expenses, order_id) {
       photo_uri: expense.receipts && expense.receipts.length > 0 ? expense.receipts[0] : null,
     }));
 }
+
+// who can open the edit form for an order, and the short reason shown when they can't
+// a landlord can edit anything on their properties until it's Resolved, a tenant only their own request while it's still Open
+// real mode tenants can't change a request at all after it's sent (the server only takes new photos from them)
+// options: role ('owner' or 'tenant'), is_remote, is_own (false when the request isn't the tenant's)
+export function editRuleFor(order, options) {
+  const settings = options || {};
+  if (!order) {
+    return { canEdit: false, reason: '' };
+  }
+  if (settings.role === 'tenant') {
+    if (settings.is_own === false) {
+      return { canEdit: false, reason: 'Only requests you sent can be edited.' };
+    }
+    if (order.status !== 'Open') {
+      return {
+        canEdit: false,
+        reason: 'Work has started, so this request is locked. Message your landlord with changes.',
+      };
+    }
+    if (settings.is_remote) {
+      return {
+        canEdit: false,
+        reason: "A sent request can't be changed, but you can still add photos below.",
+      };
+    }
+    return { canEdit: true, reason: '' };
+  }
+  if (order.status === 'Resolved') {
+    return {
+      canEdit: false,
+      reason: 'This work order is resolved, so it can no longer be edited.',
+    };
+  }
+  return { canEdit: true, reason: '' };
+}
