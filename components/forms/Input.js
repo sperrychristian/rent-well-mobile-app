@@ -104,6 +104,8 @@ const styles = themedStyles((COLORS) => ({
   input: {
     ...TYPE.input,
     flex: 1,
+    // without this a text box in a row can be wider than the screen on the web
+    minWidth: 0,
     minHeight: SIZES.button_medium,
     backgroundColor: COLORS.surface_sunken,
     color: COLORS.text,

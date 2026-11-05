@@ -50,6 +50,20 @@ function WorkOrderPlaceFields(props) {
           />
         </View>
         <View onLayout={property_field.onLayout}>
+          <Input
+            label="Property"
+            invalid={!inputs.property.isValid}
+            errorText={inputs.property.errorText}
+            textInputConfig={{
+              ref: property_field.ref,
+              value: inputs.property.value,
+              onChangeText: (value) => props.onChange('property', value),
+              placeholder: 'Type the address or pick one below',
+              maxLength: name_max,
+              ...property_field.returnConfig,
+            }}
+          />
+          {/* the properties already in use, tapping one fills the box */}
           {props.properties.length > 0 && (
             <ScrollView
               horizontal
@@ -73,19 +87,6 @@ function WorkOrderPlaceFields(props) {
               ))}
             </ScrollView>
           )}
-          <Input
-            label="Property"
-            invalid={!inputs.property.isValid}
-            errorText={inputs.property.errorText}
-            textInputConfig={{
-              ref: property_field.ref,
-              value: inputs.property.value,
-              onChangeText: (value) => props.onChange('property', value),
-              placeholder: 'Pick one above or type the address',
-              maxLength: name_max,
-              ...property_field.returnConfig,
-            }}
-          />
         </View>
       </>
     );
@@ -241,10 +242,11 @@ const styles = themedStyles((COLORS) => ({
   // without this the horizontal list grows to fill the spare height and the chips stretch with it
   chip_scroll: {
     flexGrow: 0,
+    marginTop: -SPACING.sm,
+    marginBottom: SPACING.md,
   },
   chip_row: {
     gap: SPACING.sm,
-    paddingBottom: SPACING.sm,
   },
   chip: {
     ...list_styles.chip,

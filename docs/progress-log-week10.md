@@ -46,3 +46,13 @@ work orders, create and edit.
 - `NewWorkOrderScreen.test.js` (real mode with the store mocked): a failed save keeps the form and the
   values, a good one goes back with no prompt, and an owner's edit only sends priority, contractor and estimate.
 - 623 tests before, 675 after.
+
+## Phase 3: visual QA
+
+- Rendered the form on the web in a scratch copy outside the repo (react-native-web there only), at
+  360x640, 390x844 and 820 wide, light and dark: empty, errors, filled, edit, counter near the limit, the
+  tenant version, and the real-mode edit with read-only fields.
+- Fixed: on the web a text box in a row could be wider than the screen, so `Input` got `minWidth: 0`.
+- Fixed: the property chips sat above the Property label, they're under the box now.
+- Contrast: every new text and background pair is AA in both themes (`formContrast.test.js`).
+- Not fixed: on the web a long description scrolls inside its box instead of growing, phones grow it.
