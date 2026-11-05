@@ -30,3 +30,19 @@ work orders, create and edit.
 - Edit buttons on Work Order Detail and Request Detail, with `EditNote` showing the reason when editing is off.
 - Map: `NewWorkOrder` takes `workOrderId`, has `edit_title`, and two new Edit edges. The diagram labels
   a header arrow with an id as "Edit: workOrderId".
+
+## Phase 2: tests
+
+- `workOrderValidation.test.js`: every rule with its message, the limits on both sides, trimming,
+  decimals, and the dates (leap days, a day that doesn't exist, past only when creating, one year out).
+- `workOrderHelpers.test.js`: `editRuleFor` for both roles and both modes.
+- `WorkOrderForm.test.js`: empty submit, each rule past required, typing clears one field, the summary
+  line, one onSubmit call with whole cents, Add versus Update with pre-filled values, the read-only
+  real-mode edit, the counter turning amber at 450, the picker and typed date, return keys moving focus,
+  the dirty flag, and both themes.
+- `navigation/workOrderForm.test.js` (the real App): the tenant's request reaches the landlord's list, Home
+  count and badge, edits show on the detail, list and the other side, the tenant's edit locks once work
+  starts, bad input never reaches the store, and the discard prompt on Cancel and back.
+- `NewWorkOrderScreen.test.js` (real mode with the store mocked): a failed save keeps the form and the
+  values, a good one goes back with no prompt, and an owner's edit only sends priority, contractor and estimate.
+- 623 tests before, 675 after.
