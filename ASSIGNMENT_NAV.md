@@ -132,7 +132,7 @@ Requirements before the changes:
 | MyRequests | My Repair Requests | tenant tab 3 "Repairs" | tenant | none | TenantHome, NewWorkOrder | `features/workOrders/screens/MyRequestsScreen.js` |
 | RequestDetail | Request #(short workOrderId) | root stack (detail, pushes over the tabs) | tenant | workOrderId | MyRequests (workOrderId), Calendar (workOrderId), Search (workOrderId) | `features/workOrders/screens/RequestDetailScreen.js` |
 | PastRequests | Past Repair Requests | tenant drawer "Past Requests" | tenant | none | TenantHome | `features/tenants/screens/PastRequestsScreen.js` |
-| NewWorkOrder | Add a Work Order | root stack (detail, pushes over the tabs) | shared | none | Dashboard, WorkOrders [header], TenantHome, MyRequests [header] | `features/workOrders/screens/NewWorkOrderScreen.js` |
+| NewWorkOrder | Add a Work Order, or Edit Work Order #(short workOrderId) | root stack (detail, pushes over the tabs) | shared | workOrderId (only when editing) | Dashboard, WorkOrders [header], WorkOrderDetail [header] (workOrderId), TenantHome, MyRequests [header], RequestDetail [header] (workOrderId) | `features/workOrders/screens/NewWorkOrderScreen.js` |
 | Messages | Message Inbox | landlord tab 4 "Messages", tenant tab 4 "Messages" | shared | none | Dashboard, TenantHome | `features/messages/screens/MessagesScreen.js` |
 | MessageThread | Conversation | root stack (detail, pushes over the tabs) | shared | conversationId | WorkOrders (conversationId), WorkOrderDetail (conversationId), TenantDetail (conversationId), Messages (conversationId) | `features/messages/screens/MessageThreadScreen.js` |
 | Payments | Payments and Rent | landlord tab 2 "Payments", tenant tab 2 "Payments" | shared | none | Dashboard, TenantHome, MessageThread, Calendar, Search | `features/payments/screens/PaymentsScreen.js` |
@@ -155,7 +155,7 @@ Requirements before the changes:
 | T1 | Dynamic component API | `createNativeStackNavigator`, `createDrawerNavigator`, and `createBottomTabNavigator`, each used as `Navigator` and `Screen` components | `App.js` |
 | T2 | An id param read from route.params and displayed | See section 3 | |
 | T3 | Meaningful header titles, one shared style through screenOptions with theme colors | `shared_screen_options` (stack), `shared_tab_options` (tab bar and tab headers), and `shared_drawer_options` (drawer and drawer headers) all take their colors, fonts, and sizes from `theme.js`. Each screen's title comes from the map, and screens whose title depends on a param use the options function form | `navigation/screenOptions.js`, `App.js` |
-| T4 | A useful headerRight or headerLeft button | Ten on the right and the menu button on the left, see section 4 | `navigation/headerButtons.js` |
+| T4 | A useful headerRight or headerLeft button | Twelve on the right and the menu button on the left, see section 4 | `navigation/headerButtons.js` |
 | T5 | A tab navigator, a drawer, or both, with titles and icons | Both. Every tab and drawer item has a short label and an outline icon from the map (`nav_label`, `nav_icon`), see section 5 | `App.js`, `navigation/DrawerContent.js` |
 | T6 | Drill-down screens keep working, no duplicate headers, Back as expected | Detail screens live in the root stack and push over the tabs and drawer, see section 0 | `App.js`, `navigation/hubRouter.js` |
 | T7 | A short explanation of the structure | `ASSIGNMENT_STRUCTURE.md` | |
@@ -178,6 +178,7 @@ Other changes to keep params as ids:
 - Tenant Profile used to pass `search` (a name) to Work Orders. It passes `tenantId`, and Work Orders looks the name up.
 - Login used to get `expired` as a param. It reads `session_expired` from the auth context instead.
 - The snake_case params (`order_id` and the rest) were renamed to the `Id` style.
+- The work order form (week 10) adds and edits on one screen. With no params it adds, and the Edit button on Work Order and Request passes `workOrderId`, so the same screen loads that order, fills in the form, and its title reads "Edit Work Order #1" (`edit_title` and `edit_param` in the map).
 
 ## 4. Header buttons
 
@@ -193,6 +194,8 @@ Other changes to keep params as ids:
 | Your Tenants | person add | Opens Invite a New Tenant | `InviteHeaderButton` |
 | Message Inbox | person add (owners and the landlord demo only) | Opens Invite a New Tenant | `InviteHeaderButton` |
 | My Repair Requests | add (hidden when the rental has ended) | Opens Report an Issue | `AddRequestHeaderButton` |
+| Work Order (detail) | pencil (until it's resolved, otherwise a short line says why) | Opens the work order form in edit mode with `workOrderId` | `features/workOrders/screens/WorkOrderDetailScreen.js` (set with `navigation.setOptions`) |
+| Request (tenant detail) | pencil (your own request while it's Open, otherwise a short line says why) | Opens the same form in edit mode with `workOrderId` | `features/workOrders/screens/RequestDetailScreen.js` (set with `navigation.setOptions`) |
 | Your Properties | add | Opens the Add Property form on that screen | `features/tenants/screens/PropertiesScreen.js` (set with `navigation.setOptions` because the form lives there) |
 | Rent Ledger | add | Opens the Record Payment form on that screen | `features/payments/screens/TenantLedgerScreen.js` (set with `navigation.setOptions`, like Properties) |
 

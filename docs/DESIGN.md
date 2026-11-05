@@ -207,6 +207,19 @@ The ledger screens follow the same rules:
 - **Lock screen** (`features/security/components/LockScreen.js`): covers the whole app on paper. The Wordmark (medium, no tagline) and one muted line in the middle, then the green "Unlock with Face ID" pill (the words follow the phone), a green "Use Passcode" text button, and "Log Out" as a text button. After three failed tries a terracotta line explains and Log Out becomes an outlined pill. It's a modal for screen readers, and the app under it is hidden from them.
 - **Security in Settings** (`features/security/components/SecurityCard.js`): a card like Appearance, with the switch on the right of its label (green track when on) and one muted line under it.
 
+## Forms: Input with an inline error, and the counter
+
+The work order form (`features/workOrders/components/WorkOrderForm.js`) is built from three small pieces in `components/forms/`. Other forms keep their own inputs for now.
+
+- **Input** (`components/forms/Input.js`): the lecture's shape, `label`, `style`, `invalid`, and `textInputConfig` (everything the text box needs, including its `ref`), plus `errorText`, `helperText`, `counter`, and `accessory`.
+  - The label is a DM Sans 500 muted line above the box. The box is `surface_sunken` with a `border_strong` hairline, 52 tall, 8 corners. Multiline boxes start 128 tall and grow on phones.
+  - Invalid: the label and the border turn `danger_text`, the border goes to 1.5, and the message sits right under the box with the alert-circle line icon, so it's never color only. A screen reader hears the message as the field's hint, and the message is a polite live region.
+  - Read only (a value the server can't change): `surface_raised` with `text_muted`, and a helper line says why.
+  - Counter: "42/500" on the right of the line under the box, tabular digits, `text_muted`, and `warning_text` in DM Sans 500 from 90 percent of the limit. Screen readers hear "42 of 500 characters used". The box also gets `maxLength`, so the count can't pass the limit.
+- **ChoiceChips** (`components/forms/ChoiceChips.js`): a labeled radio group of the standard chips with the same inline error under them. An invalid group gives every chip a `danger_text` border.
+- **DateInput** (`components/forms/DateInput.js`): a typed YYYY-MM-DD box (`maxLength` 10) with a 44 square calendar button inside the row. iOS opens the inline picker in a card under the box with a Done text button, Android opens its dialog, and the web just types. The picker follows the theme (`themeVariant`) and uses `cta` as its accent, and the minimum and maximum dates come from the form's rules.
+- **The form around them:** one column at most `content_max_width` wide, in a ScrollView inside a KeyboardAvoidingView. A failed submit puts the lecture's one summary line ("Invalid input values, please check your data") above the buttons in `danger_text` with the alert icon, scrolls to the first bad field, and announces it. Cancel is a tertiary text button next to the green pill (Add or Update), each half the row.
+
 ## Visual QA
 
 The screenshots come from rendering the demo on the web in a scratch copy of the repo outside the project:

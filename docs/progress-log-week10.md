@@ -56,3 +56,14 @@ work orders, create and edit.
 - Fixed: the property chips sat above the Property label, they're under the box now.
 - Contrast: every new text and background pair is AA in both themes (`formContrast.test.js`).
 - Not fixed: on the web a long description scrolls inside its box instead of growing, phones grow it.
+
+## Phase 4: docs
+
+- `ASSIGNMENT_FORM.md` (what the form collects, the rules with their limits, one state object, add and edit),
+  a README section pointing to it, and a Forms section in `docs/DESIGN.md` (Input with the inline error,
+  ChoiceChips, DateInput, the counter).
+- `ASSIGNMENT_NAV.md`: NewWorkOrder's params, the two new Edit arrows, the two pencil header buttons, and
+  the `workOrderId` note. Still 35 screens, so `ASSIGNMENT_STRUCTURE.md` didn't change.
+- Sweep for draft, rewrite, own words, for Christian, TODO, FIXME, coming soon and placeholder labels:
+  nothing unfinished in any text people read. In code, `draft` is the message composer's variable in
+  `MessageThreadScreen.js` (that's its real name, left alone).

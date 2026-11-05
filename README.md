@@ -179,7 +179,7 @@ The full guide is in `docs/DESIGN.md`.
 | My Repair Requests | `MyRequests` | Tenant | none |
 | Request | `RequestDetail` | Tenant | `workOrderId` |
 | Past Repair Requests | `PastRequests` | Tenant | none |
-| Add a Work Order | `NewWorkOrder` | Both | none |
+| Add a Work Order (Edit Work Order when it has an id) | `NewWorkOrder` | Both | `workOrderId` (only when editing) |
 | Message Inbox | `Messages` | Both | none |
 | Conversation | `MessageThread` | Both | `conversationId` |
 | Payments and Rent | `Payments` | Both | none |
@@ -189,6 +189,14 @@ The full guide is in `docs/DESIGN.md`.
 | Calendar | `Calendar` | Both | none |
 | Search | `Search` | Both | none |
 
+
+## Work order form (course assignment)
+
+One validated form adds and edits a work order, built like the lecture's ManageExpense: `components/forms/Input.js`, `features/workOrders/components/WorkOrderForm.js`, and `features/workOrders/screens/NewWorkOrderScreen.js`, with the rules in `features/workOrders/utils/workOrderValidation.js`.
+
+- What it collects and the rules: [ASSIGNMENT_FORM.md](ASSIGNMENT_FORM.md)
+- To try it: in the demo, open Work Orders and tap the add button (landlord), or Report an Issue (tenant). The pencil on a work order opens the same form to edit it.
+- The tests: `features/workOrders/utils/workOrderValidation.test.js`, `features/workOrders/components/WorkOrderForm.test.js`, `features/workOrders/screens/NewWorkOrderScreen.test.js`, and `navigation/workOrderForm.test.js`
 
 ## Shared state (course assignment)
 
