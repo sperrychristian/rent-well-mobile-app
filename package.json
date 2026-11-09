@@ -55,7 +55,10 @@
     "diagram": "node --no-warnings scripts/buildNavigationDiagram.mjs",
     "datamodel": "node --no-warnings scripts/buildDataModelDiagram.mjs",
     "assets": "node --no-warnings scripts/buildAppAssets.mjs",
-    "data-model": "node --no-warnings scripts/buildDataModelDiagram.mjs"
+    "data-model": "node --no-warnings scripts/buildDataModelDiagram.mjs",
+    "firebase:fake": "node --no-warnings scripts/fakeFirebase.mjs",
+    "firebase:seed": "node --no-warnings --import ./scripts/appModules.mjs scripts/seedFirebase.mjs",
+    "firebase:check": "node --no-warnings --import ./scripts/appModules.mjs scripts/seedFirebase.mjs --check"
   },
   "private": true,
   "devDependencies": {

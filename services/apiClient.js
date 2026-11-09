@@ -4,7 +4,7 @@ import {
   createSingleFlight,
   buildQuery,
   ApiError,
-} from './apiHelpers';
+} from '../util/apiHelpers';
 
 // builds the api client, fetch and the token storage get passed in so the tests can use fakes
 // options: base_url, fetch_fn, token_store ({ load, save, clear })

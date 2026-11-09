@@ -64,3 +64,46 @@ Branch `milestone-2-firebase`, off `master` at `3b4dc69`. Newest phase at the bo
 - Decision: rent and late fee charge ids stay the ledger's existing deterministic ids
   (`rent-{tenancyId}-{yyyy-mm}`, `late-rent-...`) instead of a new format, so the ledger math and
   its parity tests keep working unchanged.
+
+## Phase 3: util/http.js and test infrastructure
+
+- `util/http.js` is the single entry point: `request` (10 second AbortController limit), `getNode`,
+  `putNode`, `patchNode` (multi-path at any parent), `pushNode`, `deleteNode`, `createIfAbsent`
+  (`if-match: null_etag`, gives back false on 412), and one `ApiError` per failure (`NOT_CONFIGURED`,
+  `NETWORK_ERROR`, `TIMEOUT`, `PERMISSION_DENIED`, `NOT_FOUND`, `BAD_REQUEST`, `SERVER_ERROR`).
+  It re-exports the resource modules in `util/data/`: session, users, properties, tenants, invites,
+  workOrders, expenses, mileage, ledger, leases, messages, reminders, checklists, documents, settings,
+  plus the shared `records.js` (keyed objects, field-level multi-path patches) and `pushId.js`.
+- Decision: the data modules that replace server routes (work orders, expenses, messages) hand back the
+  same camelCase shapes the old API sent, so the existing `fromApi*` mappers and providers keep working.
+  Tenants and the ledger load in the demo's own shape, so the demo's rule functions (`demoTenants.js`,
+  `demoLeases.js`, `demoLedger.js`) make every change and only the difference is written. No tenancy,
+  lease, or money rule is written a second time.
+- `services/apiHelpers.js` moved to `util/apiHelpers.js` (pure, still used by the demo rules).
+- `constants/config.js` reads `EXPO_PUBLIC_FIREBASE_DB_URL` and `EXPO_PUBLIC_FIREBASE_API_KEY` (optional,
+  unused until Auth). `.env.example` has placeholders only.
+- `scripts/fakeDatabase.js` is the in-memory REST core (GET, PUT, PATCH with multi-path and the overlap
+  rule, POST push ids, DELETE, null for missing, empty objects pruned, arrays to numbered keys,
+  `if-match`). `scripts/fakeFirebase.mjs` (`npm run firebase:fake`) serves it over `node:http` with
+  CORS, `--delay`, and `/__delay`, `/__fail`, `/__reset` switches for visual QA. The tests use the same
+  core behind a fake `fetch` (`scripts/testing/fakeFirebase.js`).
+- `scripts/seedData.js` builds the seed from the demo's own data (tenant data, sample ledgers, threads,
+  work orders, expenses, trips, budgets, checklists, documents) through the same `toDb` functions the
+  app saves with. Additions: a roommate (Riley Park in Sam's unit), an expired invite, a second landlord
+  with no data (Jamie Ortiz, for empty screens), a reminder from three days ago, and a second expense
+  linked to a work order. `scripts/seedFirebase.mjs` (`npm run firebase:seed`, `--reset`,
+  `npm run firebase:check`) only writes to the `.env` database or a local address and never prints the
+  address. `scripts/appModules.mjs` is a small resolve hook so node can import the app's extensionless
+  modules.
+- Real database: reachable from this machine (`GET /.json` answered 200 with `null`). Seeded and
+  checked: all 18 nodes PASS. A scratch probe confirmed the conditional PUT: 200 the first time, 412 the
+  second, value unchanged, scratch path deleted.
+- A bug the tests caught: the first seed keyed messages `m001`, which sorts after real push ids, so a new
+  message would have shown as the oldest. Seed messages now get push ids from their own timestamps.
+- Tests: `util/http.test.js` (14) and `util/data/*.test.js` (34): users and both sign ups, work orders
+  (scoping, tenant report, edit, statuses, delete and unlink), expenses (CRUD, validation, import per
+  row and no doubles), ledger (scoping, catch-up twice, two phones at once, grace days, claim and
+  confirm, schedule change), tenants (view, properties, invites, move as one write, end, leases),
+  messages (sides, send, read, metadata), and the list modules.
+- Checks: lint 0 errors (5 known warnings), 71 suites and 741 tests passing, format clean, iOS bundle
+  with `--clear` exported.

@@ -19,7 +19,7 @@ import {
   updateProperty as updatePropertyRequest,
   uploadImage,
 } from '../services/api';
-import { ApiError } from '../services/apiHelpers';
+import { ApiError } from '../util/apiHelpers';
 import { onSocketEvent } from '../services/socket';
 import { listenForLedgerTaps } from '../services/push';
 import { navigateWhenReady } from '../util/navigationRef';

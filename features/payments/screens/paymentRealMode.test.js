@@ -41,7 +41,7 @@ jest.mock('../../../services/push', () => ({ listenForLedgerTaps: () => () => {}
 const mock_server = { ledger: null, summary: null, calls: [], offline: false };
 
 jest.mock('../../../services/api', () => {
-  const { ApiError } = require('../../../services/apiHelpers');
+  const { ApiError } = require('../../../util/apiHelpers');
   const fixtures = require('../utils/ledgerApiFixtures');
   const record = (name, ...args) => mock_server.calls.push({ name, args });
   const offline = () =>
