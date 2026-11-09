@@ -271,9 +271,11 @@ Fully implemented: 32 of 35 screens. Static: Welcome and Demo Chooser (the way i
     and expenses for a Firebase landlord now.
 - Noted, not changed (outside this milestone or the same in the demo):
   - At 360 wide the Expenses quick action "Tax Summary" breaks inside the word. Same in the demo.
+    (Fixed, see Leftovers fixed below.)
   - An empty Documents list says "No documents match" instead of a first-run message. Same in the demo.
+    (Fixed, see Leftovers fixed below.)
   - Year-End Report still has a Receipts section that counts receipt photos, which a Firebase landlord
-    can't add until Storage.
+    can't add until Storage. (Fixed, see Leftovers fixed below.)
 - The two journal screenshots (`docs/screenshots/m2-work-orders.png`, `m2-payments.png`) are stand-ins
   from this web render at 390x844, light theme.
 
@@ -297,3 +299,34 @@ Fully implemented: 32 of 35 screens. Static: Welcome and Demo Chooser (the way i
   comments.
 - Final checks: lint 0 errors (5 known warnings), 69 suites and 815 tests passing (baseline was 63 and
   693), format clean, iOS bundle with `--clear` exported.
+
+## Leftovers fixed
+
+- **Tax Summary splitting inside the word** (`features/expenses/screens/ExpensesScreen.js`): the
+  text-only quick actions (Mileage, Year-End, Recurring, Budgets, Export CSV, Tax Summary) keep a small
+  side padding instead of the pill's 24pt, so at 360 wide each label has the room it needs and stays on
+  one line. At a font scale of 1.35 and up they stack one per row, full width, so even one long word
+  always fits and a label only wraps at a space. Font scaling stays on. Test:
+  `features/expenses/screens/expensesQuickActions.test.js` (normal size and 3.1x).
+- **Empty Documents wording** (`features/documents/screens/DocumentsScreen.js`): nothing saved shows
+  "No documents yet" with a sentence and Add Document, a search or filter that finds nothing shows "No
+  documents match" with Clear Filters (which resets the property, the category, and the search). Both
+  use the shared `ScreenState` empty component, in the demo and in Firebase. Test:
+  `features/documents/screens/documentsEmpty.test.js` (both cases, both modes). The coverage matrix
+  note for Documents says so now.
+- **Receipt wording for a Firebase landlord**: the Year-End Report's Receipts card, the "Expenses with a
+  receipt" line in its CSV, the Receipts column in the expenses CSV, and the "No receipt" tag on
+  Expenses rows are left out when the landlord's expenses are in Firebase. The demo shows all of them
+  as before, and no total or money math changed (`features/expenses/utils/exportExpenses.js`,
+  `features/expenses/screens/YearEndReportScreen.js`, `ExpensesScreen.js`). The tax summary text and
+  CSV never mentioned receipts. Test: `features/expenses/utils/receiptWording.test.js` (both CSVs,
+  both modes on the real App, the deductible and vendor totals match).
+- Visual QA (web render in the scratch copy against the fake server): Expenses, Year-End Report, and
+  Documents at 360x640, 390x844, and 1024 wide, light and dark, loaded (Taylor Brooks), empty (Jamie
+  Ortiz), and a Documents search with no match. Nothing cramped or clipped. Noted, not changed: an empty
+  Expenses list says "No expenses match" (the same wording issue Documents had), and the Year-End
+  Report's per property rows group by "123 Maple St, Unit 1" in the demo and by "123 Maple St" in
+  Firebase (the deductible and vendor totals are the same). The web render can't change the font scale,
+  so the largest size is covered by the jest test.
+- Checks: lint 0 errors (5 known warnings), 72 suites and 825 tests passing, format clean, iOS bundle
+  with `--clear` exported.
