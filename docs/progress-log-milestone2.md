@@ -276,3 +276,24 @@ Fully implemented: 32 of 35 screens. Static: Welcome and Demo Chooser (the way i
     can't add until Storage.
 - The two journal screenshots (`docs/screenshots/m2-work-orders.png`, `m2-payments.png`) are stand-ins
   from this web render at 390x844, light theme.
+
+## Wrap-up
+
+- Navigation diagram regenerated with `npm run diagram` as the last step: one page, 35 screens, no new
+  screens or edges this milestone, so `ASSIGNMENT_NAV.md` and `ASSIGNMENT_STRUCTURE.md` keep their
+  counts and lists (only their old API wording changed).
+- The real database was seeded again after the message key fix and checked: all 18 nodes PASS. A full
+  `--reset` wipe from this machine was turned away by the permission check, so the plain seed (which
+  rewrites each seeded node whole) was used instead.
+- Final sweeps: no hex colors added outside `constants/theme.js`, the only `fetch` in the app is
+  `util/http.js` (the seed and fake server scripts are tooling), no Firebase address in any committed
+  file or in `git log -p master..HEAD`, `.env` ignored and untracked, `.env.example` placeholders only.
+- Code comments that still mention the old API (left word for word, they describe where a ported rule
+  or test vector came from): `features/payments/utils/ledgerMath.js`, `backendVectors.js`,
+  `ledgerApiFixtures.js`, `ledgerApi.js`, `demoLedger.js`, `features/profit/utils/profitMath.js`,
+  `profitParity.test.js`, `features/reminders/utils/reminders.test.js` and `reminderHelpers.js`,
+  `features/leases/utils/leaseHelpers.js`, `features/expenses/utils/expenseApi.js`,
+  `features/workOrders/utils/workOrderValidation.js`, and the "server" wording in several store
+  comments.
+- Final checks: lint 0 errors (5 known warnings), 69 suites and 815 tests passing (baseline was 63 and
+  693), format clean, iOS bundle with `--clear` exported.
