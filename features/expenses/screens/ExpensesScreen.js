@@ -1,5 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
-import { View, Text, FlatList, Pressable, ScrollView, TextInput, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  ScrollView,
+  TextInput,
+  Alert,
+  useWindowDimensions,
+} from 'react-native';
 import { ImagePicker } from '../../../util/systemPickers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
@@ -66,9 +75,19 @@ function monthTitle(month_key) {
   return month_names[parseInt(parts[1], 10) - 1] + ' ' + parts[0];
 }
 
+// at this font scale and up the quick actions stack one per row (iOS Larger Text starts past 1.3)
+export const quick_stack_scale = 1.35;
+
 function ExpensesScreen(props) {
   // Firebase has no live updates, so this screen reloads quietly when it comes back into view
   useRefreshOnFocus(props.navigation, ['expenses', 'cloud']);
+  // the quick actions sit two to a row, but with big text one word like "Summary" won't fit in half the
+  // screen, so they stack one per row instead and a title only ever wraps at a space
+  const { fontScale } = useWindowDimensions();
+  const stack_quick = fontScale >= quick_stack_scale;
+  const quick_row_style = [styles.button_row, stack_quick && styles.button_stack];
+  // stacked, each button sizes to its own label instead of sharing the row
+  const quick_button_style = [styles.quick_button, stack_quick && styles.quick_button_stacked];
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
   const {
@@ -368,30 +387,30 @@ function ExpensesScreen(props) {
           />
         )}
       </View>
-      <View style={styles.button_row}>
+      <View style={quick_row_style}>
         <PrimaryButton
           title="Mileage"
           icon="car-outline"
           variant="tertiary"
-          style={styles.mileage_button}
+          style={[styles.mileage_button, ...quick_button_style]}
           onPress={() => props.navigation.navigate('Mileage')}
         />
         <PrimaryButton
           title="Year-End"
           icon="document-text-outline"
           variant="tertiary"
-          style={styles.report_button}
+          style={[styles.report_button, ...quick_button_style]}
           onPress={() => props.navigation.navigate('YearEndReport', { yearId: year })}
         />
       </View>
-      <View style={styles.button_row}>
+      <View style={quick_row_style}>
         {/* recurring rules make expenses on the phone, so they stay out of real mode until the server has them */}
         {!expense_store.is_remote && (
           <PrimaryButton
             title="Recurring"
             icon="repeat-outline"
             variant="tertiary"
-            style={styles.grey_button}
+            style={[styles.grey_button, ...quick_button_style]}
             onPress={() => setRecurringOpen(true)}
           />
         )}
@@ -399,23 +418,23 @@ function ExpensesScreen(props) {
           title="Budgets"
           icon="wallet-outline"
           variant="tertiary"
-          style={styles.grey_button}
+          style={[styles.grey_button, ...quick_button_style]}
           onPress={() => setBudgetsOpen(true)}
         />
       </View>
-      <View style={styles.button_row}>
+      <View style={quick_row_style}>
         <PrimaryButton
           title="Export CSV"
           icon="share-outline"
           variant="tertiary"
-          style={styles.export_button}
+          style={[styles.export_button, ...quick_button_style]}
           onPress={exportCsv}
         />
         <PrimaryButton
           title="Tax Summary"
           icon="document-text-outline"
           variant="tertiary"
-          style={styles.export_button}
+          style={[styles.export_button, ...quick_button_style]}
           onPress={() => setTaxOpen(true)}
         />
       </View>
@@ -837,6 +856,19 @@ const styles = themedStyles((COLORS) => ({
   export_button: {
     flex: 1,
     marginHorizontal: 0,
+  },
+  // text-only quick actions don't need the pill's wide side padding, so the label gets that room instead
+  quick_button: {
+    paddingHorizontal: SPACING.xs,
+  },
+  quick_button_stacked: {
+    flex: 0,
+    flexBasis: 'auto',
+  },
+  // big text: one quick action per row, full width
+  button_stack: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
   },
   section_label: {
     ...TYPE.label,
