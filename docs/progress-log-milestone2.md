@@ -45,3 +45,22 @@ Branch `milestone-2-firebase`, off `master` at `3b4dc69`. Newest phase at the bo
   paths. CLAUDE.md has a course folder map. The historical progress logs are left as written.
 - Checks: lint 0 errors (5 known warnings), 693/693 tests, format clean, iOS bundle with `--clear`
   exported.
+
+## Phase 2: data model
+
+- A second session was writing to the repo at the same time (it left an untracked
+  `util/data/model.js`). Christian stopped it, and that file was deleted unused.
+- `scripts/dataModel.mjs` is the one list of nodes, keys, fields, and references. `npm run data-model`
+  (`scripts/buildDataModelDiagram.mjs`) draws `docs/data-model.svg` and `.png` from it with elkjs and
+  headless Chrome. The first two drafts were too small to read (one tall column, every `ownerId`
+  arrow drawn). The final one runs top down, leaves out the `ownerId` arrows (the subtitle says so),
+  and fits one landscape page with readable field names.
+- `docs/data-model.md`: design rules, the annotated JSON tree, who reads and writes each node, what
+  stays on the phone, and the rent catch-up.
+- `database.rules.json`: test mode (`.read` and `.write` true), no `.indexOn`, since the app filters
+  on the phone instead of using REST queries.
+- `docs/API.md` is now a short note pointing to the data model, so the code comments that cite it
+  still lead somewhere.
+- Decision: rent and late fee charge ids stay the ledger's existing deterministic ids
+  (`rent-{tenancyId}-{yyyy-mm}`, `late-rent-...`) instead of a new format, so the ledger math and
+  its parity tests keep working unchanged.

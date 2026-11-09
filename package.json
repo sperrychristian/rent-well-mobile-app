@@ -53,7 +53,9 @@
     "test:watch": "jest --watchAll",
     "format:check": "prettier --check .",
     "diagram": "node --no-warnings scripts/buildNavigationDiagram.mjs",
-    "assets": "node --no-warnings scripts/buildAppAssets.mjs"
+    "datamodel": "node --no-warnings scripts/buildDataModelDiagram.mjs",
+    "assets": "node --no-warnings scripts/buildAppAssets.mjs",
+    "data-model": "node --no-warnings scripts/buildDataModelDiagram.mjs"
   },
   "private": true,
   "devDependencies": {
