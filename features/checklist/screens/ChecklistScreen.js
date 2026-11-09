@@ -9,7 +9,7 @@ import { useWorkOrders } from '../../../store/WorkOrdersContext';
 import { checklistProgress, filterChecklists, worseCount } from '../utils/checklistHelpers';
 import { COLORS, SPACING, TYPE, SIZES, OPACITY } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import EmptyState from '../../../components/ui/EmptyState';
+import ScreenState from '../../../components/ui/ScreenState';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
 import { themedStyles } from '../../../util/themedStyles';
@@ -89,17 +89,19 @@ function ChecklistScreen(props) {
         contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
         ListHeaderComponent={list_header}
         ListEmptyComponent={
-          <EmptyState
+          // nothing saved keeps New Checklist, a status filter with no hits gets Clear Filters instead
+          <ScreenState
+            status="empty"
             illustration="empty_checklists"
             title={checklists.length === 0 ? 'No checklists yet' : 'No checklists match'}
             message={
               checklists.length === 0
                 ? 'Walk a unit at move-in and move-out, room by room, so deposits are easy to settle.'
-                : 'Try another status above.'
+                : 'Nothing has this status. Clear the filter to see every checklist.'
             }
-            action_label="New Checklist"
-            action_icon="add-circle-outline"
-            onAction={openNewForm}
+            action_label={checklists.length === 0 ? 'New Checklist' : 'Clear Filters'}
+            action_icon={checklists.length === 0 ? 'add-circle-outline' : 'close-circle-outline'}
+            onAction={checklists.length === 0 ? openNewForm : () => setStatusFilter('All')}
           />
         }
         renderItem={({ item }) => {

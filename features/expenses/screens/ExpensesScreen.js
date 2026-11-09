@@ -13,6 +13,7 @@ import { ImagePicker } from '../../../util/systemPickers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
+import ScreenState from '../../../components/ui/ScreenState';
 import AddExpenseModal from '../components/AddExpenseModal';
 import RecurringModal from '../components/RecurringModal';
 import BudgetsModal from '../components/BudgetsModal';
@@ -39,7 +40,6 @@ import {
   NUMBERS,
 } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import EmptyState from '../../../components/ui/EmptyState';
 import { formatCurrency } from '../../../util/formatCurrency';
 import IconCircle from '../../../components/ui/IconCircle';
 import ReceiptImage from '../../../components/ReceiptImage';
@@ -193,6 +193,20 @@ function ExpensesScreen(props) {
   const shown_vendors = show_all_vendors ? vendor_totals : vendor_totals.slice(0, 5);
 
   const editing_expense = expenses.find((expense) => expense.id === editing_id);
+
+  // Clear Filters: every filter and the search back to the start, on the newest year that has expenses
+  // (this year when it has any), so clearing always shows something
+  function clearFilters() {
+    const newest_year = expenses.reduce(
+      (newest, expense) => (expense.date.slice(0, 4) > newest ? expense.date.slice(0, 4) : newest),
+      '',
+    );
+    const has_this_year = expenses.some((expense) => expense.date.slice(0, 4) === current_year);
+    setYear(has_this_year || !newest_year ? current_year : newest_year);
+    setPropertyFilter('All');
+    setCategoryFilter(null);
+    setSearchText('');
+  }
 
   function openNewForm() {
     setEditingId(null);
@@ -670,14 +684,28 @@ function ExpensesScreen(props) {
         contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg + 56 }}
         ListHeaderComponent={list_header}
         ListEmptyComponent={
-          <EmptyState
-            illustration="empty_expenses"
-            title="No expenses match"
-            message="Change the year or filters, or add an expense above."
-            action_label="Add Expense"
-            action_icon="add-circle-outline"
-            onAction={openNewForm}
-          />
+          // nothing saved at all gets the first-run message, a year, filter, or search with no hits gets Clear
+          expenses.length === 0 ? (
+            <ScreenState
+              status="empty"
+              illustration="empty_expenses"
+              title="No expenses yet"
+              message="Log repairs, insurance, taxes, and supplies here, and the Schedule E totals add up for you."
+              action_label="Add Expense"
+              action_icon="add-circle-outline"
+              onAction={openNewForm}
+            />
+          ) : (
+            <ScreenState
+              status="empty"
+              illustration="empty_expenses"
+              title="No expenses match"
+              message="Nothing fits this year, property, category, and search. Clear them to see your expenses."
+              action_label="Clear Filters"
+              action_icon="close-circle-outline"
+              onAction={clearFilters}
+            />
+          )
         }
         renderItem={({ item }) => {
           if (item.type === 'header') {

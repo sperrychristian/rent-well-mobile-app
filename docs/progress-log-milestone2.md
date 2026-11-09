@@ -324,9 +324,43 @@ Fully implemented: 32 of 35 screens. Static: Welcome and Demo Chooser (the way i
 - Visual QA (web render in the scratch copy against the fake server): Expenses, Year-End Report, and
   Documents at 360x640, 390x844, and 1024 wide, light and dark, loaded (Taylor Brooks), empty (Jamie
   Ortiz), and a Documents search with no match. Nothing cramped or clipped. Noted, not changed: an empty
-  Expenses list says "No expenses match" (the same wording issue Documents had), and the Year-End
+  Expenses list says "No expenses match" (the same wording issue Documents had, fixed below), and the Year-End
   Report's per property rows group by "123 Maple St, Unit 1" in the demo and by "123 Maple St" in
   Firebase (the deductible and vendor totals are the same). The web render can't change the font scale,
   so the largest size is covered by the jest test.
 - Checks: lint 0 errors (5 known warnings), 72 suites and 825 tests passing, format clean, iOS bundle
   with `--clear` exported.
+
+## Empty states on every filtered list
+
+- The same split Documents got, on every list that filters, with the shared `ScreenState` empty component,
+  in the demo and in Firebase:
+  - **Expenses** (`features/expenses/screens/ExpensesScreen.js`): no expenses at all says "No expenses
+    yet" with Add Expense. A year, property, category, or search with no hits says "No expenses match"
+    with Clear Filters, which resets all four and lands on the newest year that has expenses (this year
+    when it has any).
+  - **Work Orders** (`features/workOrders/screens/WorkOrdersScreen.js`): no work orders at all says "No
+    work orders yet" with Add a Work Order. A search or property filter (including a property opened from
+    Property Overview) with no hits says "No work orders match" with Clear Filters. A tab with nothing on
+    it and no filter on keeps the old "No open (or resolved) work orders found" message, since Active and
+    Resolved are views, not filters.
+  - **Mileage** (`features/mileage/screens/MileageScreen.js`): no trips at all says "No trips yet" with Add
+    Trip. A year with no trips while other years have some says "No trips match" with Clear Filters, which
+    goes to the newest year with trips (the year is the only filter).
+  - **Checklists** (`features/checklist/screens/ChecklistScreen.js`): it already said "yet" and "match",
+    but the match case offered New Checklist. It offers Clear Filters (back to All) now.
+- Already fine (they only show their empty message when there is nothing at all, or they have no filters):
+  Tenants, Payments (owner and tenant), Messages, Leases, Properties, My Repair Requests, Past Repair
+  Requests. Documents was fixed in the step before.
+- Tests: `navigation/emptyStates.test.js` (Firebase "yet" for all four with Jamie Ortiz, Firebase "match"
+  and Clear Filters for all four, demo "match" and Clear Filters for Expenses and Work Orders) and
+  `navigation/emptyStatesDemo.test.js` (the demo's sample lists emptied for the four "yet" cases, plus
+  the demo Mileage and Checklists "match" cases), sharing `navigation/emptyStatesHarness.js`. The coverage
+  matrix notes for the four screens say so.
+- Visual QA in the scratch copy against the fake server, the four screens empty (Jamie Ortiz) and filtered
+  to nothing (Taylor Brooks, with her trips moved to 2024 and the signed checklist removed on the fake
+  server), at 360x640, 390x844, and 1024 wide, light and dark. Nothing cramped or clipped. On a phone the
+  Expenses message sits below its summary and filters, so it shows after a short scroll (the same as
+  before, the header is long).
+- Checks: lint 0 errors (5 known warnings), 74 suites and 841 tests passing, format clean, iOS bundle with
+  `--clear` exported.
