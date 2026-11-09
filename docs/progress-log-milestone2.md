@@ -251,3 +251,28 @@ Branch `milestone-2-firebase`, off `master` at `3b4dc69`. Newest phase at the bo
 | Search * | orders, tenants, ledger | - | spinner | error with Try Again | no matches |
 
 Fully implemented: 32 of 35 screens. Static: Welcome and Demo Chooser (the way in and the local demo). Settings is mostly device settings (appearance, Face ID, the demo tour), only the mileage rate saves to Firebase, so it is not counted.
+
+## Visual QA
+
+- Web render of the app in a scratch copy outside the repo (react-native-web and react-dom installed
+  there only, plus a scratch-only global for the screenshot script), pointed at the fake Firebase server
+  (`npm run firebase:fake`, seeded with `npm run firebase:seed -- --url=http://localhost:9000`). Shots
+  were taken over the Chrome DevTools protocol.
+- Covered: every landlord and tenant screen at 390x844 in light and dark, the busiest screens at 360x640
+  and at tablet width (1024, the drawer stays open), the empty landlord (Jamie Ortiz) on every list,
+  loading (the fake server's `/__delay`), and error (`/__fail?status=500`) on the Home, a list, a cloud
+  screen, and Log In.
+- Fixed:
+  - Expenses offered to "Upload 1 expense from this phone" for a Firebase landlord, because the phone's
+    sample recurring rule still made a local expense. The recurring catch-up is skipped for a Firebase
+    landlord now (Recurring is hidden for them anyway).
+  - An empty Firebase landlord saw the phone's sample property names (123 Maple St, Unit 1...) as
+    filter chips on Documents and Expenses. The local property list leaves out the phone's own orders
+    and expenses for a Firebase landlord now.
+- Noted, not changed (outside this milestone or the same in the demo):
+  - At 360 wide the Expenses quick action "Tax Summary" breaks inside the word. Same in the demo.
+  - An empty Documents list says "No documents match" instead of a first-run message. Same in the demo.
+  - Year-End Report still has a Receipts section that counts receipt photos, which a Firebase landlord
+    can't add until Storage.
+- The two journal screenshots (`docs/screenshots/m2-work-orders.png`, `m2-payments.png`) are stand-ins
+  from this web render at 390x844, light theme.

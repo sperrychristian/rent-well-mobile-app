@@ -422,7 +422,9 @@ export function WorkOrdersProvider(props) {
 
   // once the saved data is in, I add anything that came due since the app last ran, but not in the demo
   useEffect(() => {
-    if (!loaded || demo_mode) {
+    // milestone 2: a Firebase landlord's expenses live in the database and Recurring is hidden for them,
+    // so the phone's sample rule must not make a phone expense the import card would then offer to upload
+    if (!loaded || demo_mode || firebase_owner_id) {
       return;
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect -- filling or reloading state when this opens is the point, it runs once per open
@@ -493,18 +495,21 @@ export function WorkOrdersProvider(props) {
   );
 
   // every property name that shows up on an order, expense, or trip, for the pickers and filters
+  // milestone 2: a Firebase landlord's orders and expenses come from the database, so the phone's own copies
+  // (sample data on a new account) stay out of the list, only the trips and documents loaded from Firebase count
   const properties = useMemo(
     () =>
       [
         ...new Set([
-          ...orders.map((order) => order.property),
-          ...expenses.map((expense) => expense.property),
+          ...(firebase_owner_id ? [] : orders.map((order) => order.property)),
+          ...(firebase_owner_id ? [] : expenses.map((expense) => expense.property)),
           ...trips.map((trip) => trip.property),
+          ...(firebase_owner_id ? documents.map((document) => document.property) : []),
         ]),
       ]
         .filter(Boolean)
         .sort(),
-    [orders, expenses, trips],
+    [orders, expenses, trips, documents, firebase_owner_id],
   );
 
   // one helper that swaps out only the matching order, the status actions use it
