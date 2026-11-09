@@ -144,7 +144,7 @@ export const screen_coverage = {
     writes: 'documents (records only)',
     loading: 'spinner',
     error: 'error with Try Again, banner when a save fails',
-    empty: 'no documents, with Add',
+    empty: 'no documents yet, with Add (or no match, with Clear Filters)',
     full: true,
     test: { account: 'owner-taylor', empty_account: 'owner-jamie' },
   },

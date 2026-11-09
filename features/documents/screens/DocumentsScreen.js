@@ -28,7 +28,7 @@ import { iconFor, expiryTag, daysUntil } from '../utils/documentHelpers';
 import { document_categories, expiring_soon_days } from '../../../data/documentOptions';
 import { COLORS, SPACING, TYPE, SIZES, OPACITY, NUMBERS } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import EmptyState from '../../../components/ui/EmptyState';
+import ScreenState from '../../../components/ui/ScreenState';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
@@ -113,6 +113,13 @@ function DocumentsScreen() {
 
   const detail_document = documents.find((document) => document.id === detail_id);
   const editing_document = documents.find((document) => document.id === editing_id);
+
+  // the empty list's Clear Filters puts every filter and the search back to the start
+  function clearFilters() {
+    setPropertyFilter('All');
+    setCategoryFilter('All');
+    setSearchText('');
+  }
 
   function openNewForm() {
     setEditingId(null);
@@ -356,14 +363,28 @@ function DocumentsScreen() {
         contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
         ListHeaderComponent={list_header}
         ListEmptyComponent={
-          <EmptyState
-            illustration="empty_documents"
-            title="No documents match"
-            message="Try another property or category, or add a document above."
-            action_label="Add Document"
-            action_icon="add-circle-outline"
-            onAction={openNewForm}
-          />
+          // nothing saved at all gets the first-run message, a search or filter that finds nothing gets Clear
+          documents.length === 0 ? (
+            <ScreenState
+              status="empty"
+              illustration="empty_documents"
+              title="No documents yet"
+              message="Keep leases, insurance, and inspection reports here, by property."
+              action_label="Add Document"
+              action_icon="add-circle-outline"
+              onAction={openNewForm}
+            />
+          ) : (
+            <ScreenState
+              status="empty"
+              illustration="empty_documents"
+              title="No documents match"
+              message="Nothing fits this property, category, and search. Clear them to see every document."
+              action_label="Clear Filters"
+              action_icon="close-circle-outline"
+              onAction={clearFilters}
+            />
+          )
         }
         renderItem={({ item }) => {
           const tag = expiryTag(item.expires_on);
