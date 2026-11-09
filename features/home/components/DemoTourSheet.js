@@ -4,8 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHandle, sheet_styles } from '../../../components/ui/sheet';
 import Button from '../../../components/ui/Button';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // four short things to try, one list for each side of the demo, all on the shared sample data
 export const tour_points = {

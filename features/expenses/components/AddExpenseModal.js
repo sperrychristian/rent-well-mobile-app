@@ -13,19 +13,19 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ImagePicker } from '../../../services/systemPickers';
+import { ImagePicker } from '../../../util/systemPickers';
 // the pop-up forms share the sheet look from components/ui, the JSX still says Card
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
-import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
-import { useExpenses } from '../context/ExpensesContext';
-import { todayString } from '../../../utils/formatDate';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../constants/theme';
+import { useExpenses } from '../../../store/ExpensesContext';
+import { todayString } from '../../../util/formatDate';
 import { list_styles } from '../../../components/ui/listStyles';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 import ReceiptImage from '../../../components/ReceiptImage';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 const repeat_options = ['None', 'Monthly', 'Yearly'];
 
@@ -335,8 +335,8 @@ function AddExpenseModal(props) {
                   </View>
                   {repeat !== 'None' && (
                     <Text style={styles.helper_block}>
-                      This saves today&apos;s expense and adds the next ones on their own. You can pause
-                      or delete it under Recurring.
+                      This saves today&apos;s expense and adds the next ones on their own. You can
+                      pause or delete it under Recurring.
                     </Text>
                   )}
                 </View>

@@ -1,7 +1,7 @@
 import { Text } from 'react-native';
 import { render, screen, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppLockProvider, biometric_unlock_key } from './context/AppLockContext';
+import { AppLockProvider, biometric_unlock_key } from '../../store/AppLockContext';
 
 // the lock screen sits outside the navigator, so it has to bring its own safe area
 // this one uses the real safe area library (no mock), the web QA found the crash this guards against
@@ -11,8 +11,8 @@ const mock_auth = {
   status: 'restoring',
   logout: jest.fn(),
 };
-jest.mock('../auth/context/AuthContext', () => ({ useAuth: () => mock_auth }));
-jest.mock('../../context/WorkOrdersContext', () => ({
+jest.mock('../../store/AuthContext', () => ({ useAuth: () => mock_auth }));
+jest.mock('../../store/WorkOrdersContext', () => ({
   useWorkOrders: () => ({ demo_mode: false }),
 }));
 // the real library, only with the phone's starting size filled in like a device has it

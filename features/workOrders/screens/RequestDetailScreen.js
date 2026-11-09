@@ -1,22 +1,22 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { View, Text, ScrollView, ActivityIndicator, Alert, Image, Pressable } from 'react-native';
-import { ImagePicker } from '../../../services/systemPickers';
+import { ImagePicker } from '../../../util/systemPickers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import ErrorState from '../../../components/ErrorState';
 import RemoteImage from '../../../components/RemoteImage';
 import ImageViewerModal from '../../messages/components/ImageViewerModal';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
 import { canTenantAddPhotos, photosLeft, editRuleFor } from '../utils/workOrderHelpers';
 import HeaderIconButton from '../../../components/HeaderIconButton';
 import EditNote from '../components/EditNote';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
-import { formatDate } from '../../../utils/formatDate';
-import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
+import { formatDate } from '../../../util/formatDate';
+import { COLORS, SPACING, TYPE, RADIUS } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusLabel from '../../../components/ui/StatusLabel';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the server takes photos up to 10 MB
 const max_photo_bytes = 10485760;

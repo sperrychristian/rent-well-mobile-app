@@ -5,10 +5,10 @@ import { DrawerContentScrollView } from '@react-navigation/drawer';
 import Wordmark from '../components/ui/Wordmark';
 import SectionHeader from '../components/ui/SectionHeader';
 import { useAppRole } from '../features/auth/hooks/useAppRole';
-import { useWorkOrders } from '../context/WorkOrdersContext';
+import { useWorkOrders } from '../store/WorkOrdersContext';
 import { navigation_map, hubs, tabs_route } from './navigationMap';
-import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../theme';
-import { themedStyles } from '../utils/themedStyles';
+import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../constants/theme';
+import { themedStyles } from '../util/themedStyles';
 
 // the drawer's state with its history cut back to the tabs and the picked screen, same routes and keys,
 // so picking from the menu starts that section fresh: back goes to the tabs and the header shows the menu button

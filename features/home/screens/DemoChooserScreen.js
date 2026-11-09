@@ -4,10 +4,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/ui/Card';
 import Wordmark from '../../../components/ui/Wordmark';
 import FadeInView from '../../../components/ui/FadeInView';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { COLORS, SPACING, TYPE, SIZES, BORDER, themed } from '../../../theme';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { COLORS, SPACING, TYPE, SIZES, BORDER, themed } from '../../../constants/theme';
 import IconCircle from '../../../components/ui/IconCircle';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the two ways into the demo, both run on the same local sample data and never touch an account
 const demo_choices = themed((COLORS) => [

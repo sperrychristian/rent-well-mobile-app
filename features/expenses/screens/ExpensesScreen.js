@@ -1,14 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { View, Text, FlatList, Pressable, ScrollView, TextInput, Alert } from 'react-native';
-import { ImagePicker } from '../../../services/systemPickers';
+import { ImagePicker } from '../../../util/systemPickers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import AddExpenseModal from '../components/AddExpenseModal';
 import RecurringModal from '../components/RecurringModal';
 import BudgetsModal from '../components/BudgetsModal';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { formatDate } from '../../../utils/formatDate';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { formatDate } from '../../../util/formatDate';
 import {
   sumAmounts,
   totalsByCategory,
@@ -19,10 +19,19 @@ import {
   splitAmount,
 } from '../utils/expenseStats';
 import { shareExpensesCsv } from '../utils/exportExpenses';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SHADOWS, SIZES, NUMBERS } from '../../../theme';
+import {
+  COLORS,
+  SPACING,
+  TYPE,
+  RADIUS,
+  BORDER,
+  SHADOWS,
+  SIZES,
+  NUMBERS,
+} from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
-import { formatCurrency } from '../../../utils/formatCurrency';
+import { formatCurrency } from '../../../util/formatCurrency';
 import IconCircle from '../../../components/ui/IconCircle';
 import ReceiptImage from '../../../components/ReceiptImage';
 import ImportExpensesCard from '../components/ImportExpensesCard';
@@ -30,8 +39,8 @@ import TaxSummarySheet from '../../profit/components/TaxSummarySheet';
 import SkeletonList from '../../../components/ui/Skeleton';
 import ErrorState from '../../../components/ErrorState';
 import { useToast } from '../../../components/ui/Toast';
-import { useExpenses } from '../context/ExpensesContext';
-import { themedStyles } from '../../../utils/themedStyles';
+import { useExpenses } from '../../../store/ExpensesContext';
+import { themedStyles } from '../../../util/themedStyles';
 
 const month_names = [
   'January',

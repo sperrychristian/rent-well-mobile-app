@@ -5,8 +5,8 @@ import { SheetHandle, sheet_styles } from './sheet';
 import Button from './Button';
 import { useReduceMotion } from './useReduceMotion';
 import { lineIcon } from './lineIcon';
-import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // a short list of choices that slides up from the bottom (the ledger's "More"), the Hearth sheet look:
 // white with 12 corners and the one shadow, each choice a ruled row with a line icon, Cancel at the bottom

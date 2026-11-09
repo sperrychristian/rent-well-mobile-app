@@ -51,7 +51,7 @@ The demo works with no backend. Logging in, signing up, messages, and work order
 2. In this repo, start the app with `npx expo start -c`.
    - iOS simulator: works as is (`http://localhost:4000`).
    - Android emulator: works as is (`http://10.0.2.2:4000`).
-   - Physical phone: open `services/config.js`, set `lan_api_url` to your computer's address, like `'http://192.168.1.20:4000'` (find it with `ipconfig getifaddr en0`). The phone and computer need to be on the same wifi.
+   - Physical phone: open `constants/config.js`, set `lan_api_url` to your computer's address, like `'http://192.168.1.20:4000'` (find it with `ipconfig getifaddr en0`). The phone and computer need to be on the same wifi.
 3. Log in with a seed account (password `password1234`): `owner@example.com` (landlord), `tenant@example.com` (tenant), `roommate@example.com` (shares Tara's unit), or `former@example.com` (a former tenant, read only). To try tenant sign up, use invite code `WELCOME2`. Run `npm run seed` in the API repo again to reset the seed data.
 
 Tenant management, as the landlord: Dashboard, then Tenants. Tenants are grouped by property and unit, with pending invites (Resend, Revoke) and Past Tenants underneath. Tap a tenant to message, move, assign, or end their tenancy. Properties is in the Tenants header. Changes show up live on other devices signed in to the same account.
@@ -200,8 +200,8 @@ One validated form adds and edits a work order, built like the lecture's ManageE
 
 ## Shared state (course assignment)
 
-Work orders are the shared state. One `WorkOrdersProvider` (React Context, `context/WorkOrdersContext.js`) wraps the whole navigator in `App.js`, and every screen reads it with `useWorkOrders()`, so a status change on Work Order Detail shows at once on the Work Orders list, the Home subtitle, the tab badge, a tenant's profile, and the tenant's own Repairs list.
+Work orders are the shared state. One `WorkOrdersProvider` (React Context, `store/WorkOrdersContext.js`) wraps the whole navigator in `App.js`, and every screen reads it with `useWorkOrders()`, so a status change on Work Order Detail shows at once on the Work Orders list, the Home subtitle, the tab badge, a tenant's profile, and the tenant's own Repairs list.
 
 - The short explanation: [ASSIGNMENT_STATE.md](ASSIGNMENT_STATE.md)
 - Which screens change it and which show it: [docs/shared-state.md](docs/shared-state.md)
-- The tests that prove it: `navigation/sharedState.test.js` (the real navigators) and `features/workOrders/context/remoteWorkOrders.test.js` (real mode)
+- The tests that prove it: `navigation/sharedState.test.js` (the real navigators) and `store/remoteWorkOrders.test.js` (real mode)

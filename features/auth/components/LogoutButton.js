@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../../store/AuthContext';
 
 // only shows for a signed-in account, the demo has its own exit button in the banner
 function LogoutButton(props) {

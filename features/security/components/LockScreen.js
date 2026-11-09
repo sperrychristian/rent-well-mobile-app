@@ -10,8 +10,8 @@ import {
   countsAsFailure,
 } from '../utils/biometrics';
 import { failures_before_logout } from '../utils/lockRules';
-import { SPACING, TYPE, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { SPACING, TYPE, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the lock screen in the Hearth look: the wordmark on paper, one quiet line, the green Unlock pill,
 // "Use Passcode" under it, and Log Out as plain text at the bottom

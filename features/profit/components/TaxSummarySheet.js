@@ -6,8 +6,8 @@ import Button from '../../../components/ui/Button';
 import { useToast } from '../../../components/ui/Toast';
 import { useTaxSummary } from '../hooks/useProfitReport';
 import { shareTaxCsv, shareTaxText } from '../utils/shareTaxSummary';
-import { SPACING, TYPE } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { SPACING, TYPE } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the Schedule E style summary for one year, shared as a CSV (for a spreadsheet or an accountant) or as text
 // props: visible, years (YYYY strings, newest first), year (the one to start on), onClose

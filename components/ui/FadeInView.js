@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Animated } from 'react-native';
 import { useReduceMotion } from './useReduceMotion';
-import { MOTION } from '../../theme';
+import { MOTION } from '../../constants/theme';
 
 // fades its children in with a small rise, index staggers a group so they come in one after another
 // with Reduce Motion on it just shows them, no movement at all

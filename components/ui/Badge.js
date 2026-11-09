@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native';
 import { badgeLabel } from './uiHelpers';
-import { FONTS, SPACING, RADIUS, BORDER, TYPE } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { FONTS, SPACING, RADIUS, BORDER, TYPE } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // a small count bubble, it hides itself at zero
 // props: count, label (what a screen reader says, like "3 unread messages"), tone (danger or cta), style

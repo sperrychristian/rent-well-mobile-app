@@ -1,6 +1,6 @@
 import { View, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SPACING, SIZES } from '../../../theme';
+import { SPACING, SIZES } from '../../../constants/theme';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DemoBanner from '../../../components/DemoBanner';
 import SummaryBlock from '../../../components/ui/SummaryBlock';
@@ -13,20 +13,20 @@ import HeroNote from '../components/HeroNote';
 import OnboardingCard from '../components/OnboardingCard';
 import DemoTourSheet from '../components/DemoTourSheet';
 import { useDemoTour } from '../hooks/useDemoTour';
-import { useMessages } from '../../messages/context/MessagesContext';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { useAuth } from '../../auth/context/AuthContext';
-import { useTenants } from '../../tenants/context/TenantsContext';
+import { useMessages } from '../../../store/MessagesContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { useAuth } from '../../../store/AuthContext';
+import { useTenants } from '../../../store/TenantsContext';
 import { openCount, activeCount } from '../../workOrders/utils/workOrderHelpers';
 import { monthlyTotals, shortMonth } from '../utils/overviewStats';
-import { formatCurrency, formatCents } from '../../../utils/formatCurrency';
-import { useLedger } from '../../payments/context/LedgerContext';
+import { formatCurrency, formatCents } from '../../../util/formatCurrency';
+import { useLedger } from '../../../store/LedgerContext';
 import { ownerPaymentsLine, behindSummary, monthTitle } from '../../payments/utils/ledgerHelpers';
 import { collectedShare, monthOf } from '../../payments/utils/ledgerMath';
 import { demo_landlord } from '../../messages/data/sampleThreads';
 import { leasesSummary, urgentLease } from '../../leases/utils/leaseHelpers';
 import { useProfitReport } from '../../profit/hooks/useProfitReport';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the fintech pass: an overview like a bank's home screen, a hello, one indigo summary card with this month's
 // spending and its trend, three key numbers, the four things landlords open most, then everything else

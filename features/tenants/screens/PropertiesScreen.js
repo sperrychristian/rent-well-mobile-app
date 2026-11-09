@@ -14,13 +14,13 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import ErrorState from '../../../components/ErrorState';
 import HeaderIconButton from '../../../components/HeaderIconButton';
 import PropertyFormModal from '../components/PropertyFormModal';
-import { useLedger } from '../../payments/context/LedgerContext';
-import { useTenants } from '../context/TenantsContext';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { useLedger } from '../../../store/LedgerContext';
+import { useTenants } from '../../../store/TenantsContext';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the owner's properties: add, rename, change the address, or delete one nobody uses anymore
 function PropertiesScreen(props) {

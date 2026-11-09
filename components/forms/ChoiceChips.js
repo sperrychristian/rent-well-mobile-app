@@ -1,8 +1,8 @@
 import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPE, SIZES } from '../../theme';
+import { COLORS, SPACING, TYPE, SIZES } from '../../constants/theme';
 import { list_styles } from '../ui/listStyles';
-import { themedStyles } from '../../utils/themedStyles';
+import { themedStyles } from '../../util/themedStyles';
 
 // a labeled row of chips where one can be picked, with the same inline error the Input shows
 // props: label, options ([{ key, label, spoken }]), selected (a key), onSelect(key), invalid, errorText,

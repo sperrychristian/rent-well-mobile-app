@@ -4,8 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import AttachmentImage from './AttachmentImage';
 import { formatMessageTime, photo_only_body } from '../utils/messageHelpers';
 import { isRentReminder } from '../../reminders/utils/reminderHelpers';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // one message, mine on the right in blue and theirs on the left
 // (the fintech pass: mine is the indigo brand color, theirs is a light gray)

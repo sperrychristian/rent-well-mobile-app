@@ -1,5 +1,5 @@
-import { useTenants } from '../../tenants/context/TenantsContext';
-import { useLedger } from '../../payments/context/LedgerContext';
+import { useTenants } from '../../../store/TenantsContext';
+import { useLedger } from '../../../store/LedgerContext';
 import { nextScheduledDue, monthOf } from '../../payments/utils/ledgerMath';
 
 // set and renew for the lease screens, the same calls in both modes

@@ -3,8 +3,8 @@ import { Ionicons } from '@expo/vector-icons';
 import Avatar from './Avatar';
 import { toneColors } from './uiHelpers';
 import { lineIcon } from './lineIcon';
-import { COLORS, SPACING, TYPE, BORDER, SIZES, NUMBERS } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, BORDER, SIZES, NUMBERS } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // one row in a list: something on the left (an icon or an avatar), a title and a subtitle, and a value or chevron on the right
 // props: title, subtitle, icon, icon_color, avatar_name, trailing (text or a node), chevron, onPress,

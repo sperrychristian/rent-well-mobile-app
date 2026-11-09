@@ -2,10 +2,10 @@ import { Platform, Linking } from 'react-native';
 // the legacy functions, since the newer object API isn't in Expo Go yet and these work in both
 import * as Calendar from 'expo-calendar/legacy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { storageKey } from '../../../utils/storageKeys';
-import { LIGHT_COLORS } from '../../../theme';
+import { storageKey } from '../../../util/storageKeys';
+import { LIGHT_COLORS } from '../../../constants/theme';
 import { deviceEventDetails } from './calendarEvents';
-import { whileSystemDialog } from '../../../services/appLock';
+import { whileSystemDialog } from '../../../util/appLock';
 
 // which app events are already on the phone, { event key: the phone's event id }, saved per account
 export const calendar_events_key = 'rent_well_calendar_events';

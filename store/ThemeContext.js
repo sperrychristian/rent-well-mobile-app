@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setActiveScheme, paletteFor } from '../theme';
+import { setActiveScheme, paletteFor } from '../constants/theme';
 
 // Appearance: System, Light, or Dark, saved on this phone (not per account), so it applies before login,
 // in the demo, in real mode, and after logging out

@@ -17,11 +17,11 @@ import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TextField from '../../../components/TextField';
 import ErrorState from '../../../components/ErrorState';
-import { useTenants } from '../../tenants/context/TenantsContext';
+import { useTenants } from '../../../store/TenantsContext';
 import { pendingInvites, formatInviteCode, inviteShareText } from '../utils/inviteHelpers';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 function InviteTenantScreen() {
   const insets = useSafeAreaInsets();

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react-native';
-import { LedgerProvider, useLedger } from '../context/LedgerContext';
+import { LedgerProvider, useLedger } from '../../../store/LedgerContext';
 import { ToastProvider } from '../../../components/ui/Toast';
 import PaymentsScreen from './PaymentsScreen';
 import TenantLedgerScreen from './TenantLedgerScreen';
@@ -8,10 +8,10 @@ import PaymentDetailScreen from './PaymentDetailScreen';
 
 // the screens read the mode and role from these two, so the tests set them here instead of signing in
 const mock_session = { user: null, demo_mode: true, demo_role: 'owner' };
-jest.mock('../../auth/context/AuthContext', () => ({
+jest.mock('../../../store/AuthContext', () => ({
   useAuth: () => ({ user: mock_session.user }),
 }));
-jest.mock('../../../context/WorkOrdersContext', () => ({
+jest.mock('../../../store/WorkOrdersContext', () => ({
   useWorkOrders: () => ({
     demo_mode: mock_session.demo_mode,
     demo_role: mock_session.demo_role,

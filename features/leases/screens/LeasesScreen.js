@@ -5,12 +5,12 @@ import SectionHeader from '../../../components/ui/SectionHeader';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
 import ErrorState from '../../../components/ErrorState';
-import { useTenants } from '../../tenants/context/TenantsContext';
+import { useTenants } from '../../../store/TenantsContext';
 import { placeLabel } from '../../tenants/utils/tenantHelpers';
 import { leaseRows, leaseStatusLabel, daysLine, shortLeaseDate } from '../utils/leaseHelpers';
-import { todayString } from '../../../utils/formatDate';
-import { SPACING, TYPE, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { todayString } from '../../../util/formatDate';
+import { SPACING, TYPE, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // every lease in one list, soonest end first: current tenancies, then past ones that had a lease
 // each row says the tenant, the place, the status in words and color, and the days left

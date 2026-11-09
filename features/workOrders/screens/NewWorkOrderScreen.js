@@ -5,18 +5,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
 import PrimaryButton from '../../../components/PrimaryButton';
 import WorkOrderForm from '../components/WorkOrderForm';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { useTenants } from '../../tenants/context/TenantsContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { useTenants } from '../../../store/TenantsContext';
 import { useAppRole } from '../../auth/hooks/useAppRole';
 import { useToast } from '../../../components/ui/Toast';
-import { hapticSuccess } from '../../../utils/haptics';
+import { hapticSuccess } from '../../../util/haptics';
 import { getMe } from '../../../services/api';
 import { editRuleFor } from '../utils/workOrderHelpers';
 import { placeLabel } from '../../tenants/utils/tenantHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { headerTitle } from '../../../navigation/navigationMap';
-import { SPACING, TYPE, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { SPACING, TYPE, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // asks before throwing away typed changes, the web has no Alert buttons so it uses the browser's confirm
 function confirmDiscard(onDiscard) {

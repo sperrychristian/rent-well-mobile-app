@@ -7,17 +7,17 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import ErrorState from '../../../components/ErrorState';
 import PlaceModal from '../components/PlaceModal';
 import EndTenancyModal from '../components/EndTenancyModal';
-import { useTenants } from '../context/TenantsContext';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useTenants } from '../../../store/TenantsContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
 import { ordersForTenantRecord, activeCount } from '../../workOrders/utils/workOrderHelpers';
-import { useMessages } from '../../messages/context/MessagesContext';
+import { useMessages } from '../../../store/MessagesContext';
 import { openConversationFor } from '../../messages/utils/openConversation';
 import { placeLabel, findMoveInChecklist } from '../utils/tenantHelpers';
-import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../../theme';
+import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import Avatar from '../../../components/ui/Avatar';
 import StatusLabel from '../../../components/ui/StatusLabel';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // one tenant: how to reach them, where they live now, their work orders, where they lived before,
 // and the owner's actions (message, move, assign, end)

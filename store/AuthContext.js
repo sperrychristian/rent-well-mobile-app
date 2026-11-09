@@ -5,10 +5,10 @@ import {
   registerOwner as registerOwnerRequest,
   registerTenant as registerTenantRequest,
   logoutSession,
-} from '../../../services/api';
-import { unregisterForPush } from '../../../services/push';
-import { resetTo } from '../../../services/navigationRef';
-import { clearAttachmentUrls } from '../../../services/attachmentUrls';
+} from '../services/api';
+import { unregisterForPush } from '../services/push';
+import { resetTo } from '../util/navigationRef';
+import { clearAttachmentUrls } from '../services/attachmentUrls';
 
 const AuthContext = createContext(null);
 

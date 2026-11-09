@@ -2,11 +2,11 @@ import { Modal, View, Text, ScrollView, Alert } from 'react-native';
 // the pop-up forms share the sheet look from components/ui, the JSX still says Card
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { SPACING, TYPE, RADIUS, BORDER } from '../../../theme';
-import { formatDate } from '../../../utils/formatDate';
-import { formatCurrency } from '../../../utils/formatCurrency';
+import { SPACING, TYPE, RADIUS, BORDER } from '../../../constants/theme';
+import { formatDate } from '../../../util/formatDate';
+import { formatCurrency } from '../../../util/formatCurrency';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // props: visible, rules, onToggle, onDelete, onClose
 function RecurringModal(props) {

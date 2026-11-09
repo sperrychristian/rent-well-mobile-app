@@ -19,20 +19,20 @@ import AddExpenseModal from '../../expenses/components/AddExpenseModal';
 import RemoteImage from '../../../components/RemoteImage';
 import ErrorState from '../../../components/ErrorState';
 import ImageViewerModal from '../../messages/components/ImageViewerModal';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { useMessages } from '../../messages/context/MessagesContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { useMessages } from '../../../store/MessagesContext';
 import { openConversationFor } from '../../messages/utils/openConversation';
-import { formatDate } from '../../../utils/formatDate';
-import { COLORS, SPACING, TYPE, RADIUS, SIZES, NUMBERS, BORDER } from '../../../theme';
+import { formatDate } from '../../../util/formatDate';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES, NUMBERS, BORDER } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusLabel from '../../../components/ui/StatusLabel';
-import { formatCurrency } from '../../../utils/formatCurrency';
+import { formatCurrency } from '../../../util/formatCurrency';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
 import ReceiptImage from '../../../components/ReceiptImage';
 import HeaderIconButton from '../../../components/HeaderIconButton';
 import EditNote from '../components/EditNote';
 import { editRuleFor } from '../utils/workOrderHelpers';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 const priority_options = ['Emergency', 'Normal', 'Low'];
 

@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import App, { forgetNavigationState } from '../App';
-import { navigation_ref } from '../services/navigationRef';
+import { navigation_ref } from '../util/navigationRef';
 
 // Search on the real App: the header button on both homes, results from every area, and taps that open
 // the right screen by id (the same harness as appNavigation.test.js)

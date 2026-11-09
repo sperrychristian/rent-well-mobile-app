@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { View, Image, Pressable, ActivityIndicator, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { cachedAttachmentUrl, forgetAttachmentUrl } from '../services/attachmentUrls';
-import { COLORS, FONTS, TYPE, SPACING, RADIUS } from '../theme';
-import { themedStyles } from '../utils/themedStyles';
+import { COLORS, FONTS, TYPE, SPACING, RADIUS } from '../constants/theme';
+import { themedStyles } from '../util/themedStyles';
 
 // shows an uploaded photo from its key, the key gets swapped for a short-lived url first
 // props: attachment_key, style (size and corners), onPress (gets the url, optional)

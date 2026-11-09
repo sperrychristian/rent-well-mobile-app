@@ -1,7 +1,7 @@
 import { StyleSheet, TextInput, AccessibilityInfo } from 'react-native';
 import { render, screen, fireEvent, act } from '@testing-library/react-native';
 import WorkOrderForm, { invalid_summary } from './WorkOrderForm';
-import { LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../../../theme';
+import { LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../../../constants/theme';
 
 // the work order form on its own: the lecture's behavior (one state object, errors on submit, typing
 // clears an error, a valid submit calls onSubmit once), plus the counter, the date picker, the return keys,

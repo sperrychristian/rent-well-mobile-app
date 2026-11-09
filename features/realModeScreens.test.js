@@ -22,10 +22,10 @@ jest.mock('../services/api', () => ({
   getReminderPreview: jest.fn(),
   sendReminder: jest.fn(),
 }));
-jest.mock('./expenses/context/ExpensesContext', () => ({
+jest.mock('../store/ExpensesContext', () => ({
   useExpenses: () => ({ is_remote: true, expenses: [] }),
 }));
-jest.mock('./payments/context/LedgerContext', () => ({
+jest.mock('../store/LedgerContext', () => ({
   useLedger: () => ({
     ledgers: [],
     today: '2026-10-22',
@@ -33,10 +33,10 @@ jest.mock('./payments/context/LedgerContext', () => ({
     instructionsFor: () => '',
   }),
 }));
-jest.mock('./messages/context/MessagesContext', () => ({
+jest.mock('../store/MessagesContext', () => ({
   useMessages: () => ({ addReminderMessage: jest.fn() }),
 }));
-jest.mock('../context/WorkOrdersContext', () => ({
+jest.mock('../store/WorkOrdersContext', () => ({
   useLocalWorkOrders: () => ({ demo_tenant_data: null, setDemoTenantData: jest.fn() }),
 }));
 
@@ -97,7 +97,7 @@ const mock_tenants = {
   setLease: jest.fn(),
   renewLease: jest.fn(),
 };
-jest.mock('./tenants/context/TenantsContext', () => ({ useTenants: () => mock_tenants }));
+jest.mock('../store/TenantsContext', () => ({ useTenants: () => mock_tenants }));
 
 async function settle() {
   for (let index = 0; index < 3; index++) {

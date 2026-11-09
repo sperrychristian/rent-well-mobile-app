@@ -1,17 +1,17 @@
 import { useEffect, useRef } from 'react';
 import { View, Text, FlatList, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../constants/theme';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DemoBanner from '../../../components/DemoBanner';
 import ErrorState from '../../../components/ErrorState';
 import ConversationRow from '../components/ConversationRow';
-import { useMessages } from '../context/MessagesContext';
-import { useAuth } from '../../auth/context/AuthContext';
+import { useMessages } from '../../../store/MessagesContext';
+import { useAuth } from '../../../store/AuthContext';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 function MessagesScreen(props) {
   const insets = useSafeAreaInsets();

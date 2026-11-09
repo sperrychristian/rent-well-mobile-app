@@ -1,7 +1,7 @@
 import { Modal, Pressable, Image, Text } from 'react-native';
-import { SPACING, FONTS } from '../../../theme';
+import { SPACING, FONTS } from '../../../constants/theme';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the full size photo, tap anywhere to close
 // props: url (null hides it), onClose

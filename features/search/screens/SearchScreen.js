@@ -6,12 +6,12 @@ import ListRow from '../../../components/ui/ListRow';
 import SectionHeader from '../../../components/ui/SectionHeader';
 import EmptyState from '../../../components/ui/EmptyState';
 import { list_styles } from '../../../components/ui/listStyles';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { useTheme } from '../../../context/ThemeContext';
-import { useAuth } from '../../auth/context/AuthContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { useTheme } from '../../../store/ThemeContext';
+import { useAuth } from '../../../store/AuthContext';
 import { useAppRole } from '../../auth/hooks/useAppRole';
-import { useTenants } from '../../tenants/context/TenantsContext';
-import { useLedger } from '../../payments/context/LedgerContext';
+import { useTenants } from '../../../store/TenantsContext';
+import { useLedger } from '../../../store/LedgerContext';
 import { ordersForTenant } from '../../workOrders/utils/workOrderHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
@@ -23,8 +23,8 @@ import {
   resultCount,
   min_query_length,
 } from '../utils/searchIndex';
-import { COLORS, SPACING, TYPE, SIZES, FONTS } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, SIZES, FONTS } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // how long typing has to stop before the search runs
 const debounce_ms = 250;

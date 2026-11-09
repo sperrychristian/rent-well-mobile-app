@@ -4,15 +4,15 @@ import { Ionicons } from '@expo/vector-icons';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import ProgressLine from '../../../components/ui/ProgressLine';
 import Button from '../../../components/ui/Button';
-import { formatCents } from '../../../utils/formatCurrency';
+import { formatCents } from '../../../util/formatCurrency';
 import {
   chargeStatusLine,
   paymentStatusLine,
   methodLabel,
   chargeKindLabel,
 } from '../utils/ledgerHelpers';
-import { COLORS, SPACING, TYPE, BORDER, SIZES, NUMBERS } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, BORDER, SIZES, NUMBERS } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the rows the payments screens list: a charge, a payment, a pending claim with its review buttons,
 // and a progress bar for collected over expected

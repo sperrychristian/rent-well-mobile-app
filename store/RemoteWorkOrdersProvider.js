@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RemoteWorkOrdersContext } from './remoteWorkOrdersContext';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { useAuth } from '../../auth/context/AuthContext';
+import { useWorkOrders } from './WorkOrdersContext';
+import { useAuth } from './AuthContext';
 import {
   getAllWorkOrders,
   getWorkOrder,
@@ -15,12 +15,12 @@ import {
   updateWorkOrderFields,
   addWorkOrderPhotos,
   uploadImage,
-} from '../../../services/api';
-import { onSocketEvent } from '../../../services/socket';
-import { listenForWorkOrderTaps } from '../../../services/push';
-import { navigateWhenReady } from '../../../services/navigationRef';
-import { storageKey } from '../../../utils/storageKeys';
-import { todayString } from '../../../utils/formatDate';
+} from '../services/api';
+import { onSocketEvent } from '../services/socket';
+import { listenForWorkOrderTaps } from '../services/push';
+import { navigateWhenReady } from '../util/navigationRef';
+import { storageKey } from '../util/storageKeys';
+import { todayString } from '../util/formatDate';
 import {
   fromApiWorkOrder,
   mergeWorkOrders,
@@ -29,7 +29,7 @@ import {
   openCount,
   activeCount,
   legacyExpensesFor,
-} from '../utils/workOrderHelpers';
+} from '../features/workOrders/utils/workOrderHelpers';
 
 // the last list from the server, so the screen isn't empty when the server can't be reached for a bit
 const cache_key = 'rent_well_work_orders_cache';

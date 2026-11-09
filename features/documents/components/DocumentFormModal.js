@@ -16,15 +16,15 @@ import { Ionicons } from '@expo/vector-icons';
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
-import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
+import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER, SIZES } from '../../../constants/theme';
 import { document_categories, dated_categories } from '../../../data/documentOptions';
-import { todayString } from '../../../utils/formatDate';
-import { addPeriod } from '../../../utils/recurring';
+import { todayString } from '../../../util/formatDate';
+import { addPeriod } from '../../../util/recurring';
 import { pickDocument } from '../utils/documentFiles';
 import { nameFromFile, iconFor, formatSize } from '../utils/documentHelpers';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // props: visible, onSave, onClose, plus optional document (edit mode), initial_file (a scan taken first),
 // default_name, default_category, default_property, and property_names

@@ -2,9 +2,9 @@ import { StyleSheet } from 'react-native';
 import { render, screen, fireEvent, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import App, { forgetNavigationState } from '../App';
-import { navigation_ref } from '../services/navigationRef';
-import { appearance_key } from '../context/ThemeContext';
-import { COLORS, LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../theme';
+import { navigation_ref } from '../util/navigationRef';
+import { appearance_key } from '../store/ThemeContext';
+import { COLORS, LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../constants/theme';
 
 // the real App in the demo, both sides: the new Leases, Profit, and reminder flows tapped like a person would,
 // and dark mode drawn on the busiest screens (the same harness as appNavigation.test.js)

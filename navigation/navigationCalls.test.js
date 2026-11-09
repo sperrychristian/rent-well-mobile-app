@@ -58,7 +58,7 @@ function secondArgument(call_text) {
 }
 
 const files = sourceFiles(root).filter(
-  (file) => !file.endsWith(path.join('services', 'navigationRef.js')),
+  (file) => !file.endsWith(path.join('util', 'navigationRef.js')),
 );
 const all_calls = files.flatMap((file) =>
   navigationCalls(fs.readFileSync(file, 'utf8')).map((text) => ({

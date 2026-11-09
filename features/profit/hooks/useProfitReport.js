@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { useExpenses } from '../../expenses/context/ExpensesContext';
-import { useTenants } from '../../tenants/context/TenantsContext';
-import { useLedger } from '../../payments/context/LedgerContext';
+import { useExpenses } from '../../../store/ExpensesContext';
+import { useTenants } from '../../../store/TenantsContext';
+import { useLedger } from '../../../store/LedgerContext';
 import { getProfitReport, getTaxSummary, getTaxSummaryCsv } from '../../../services/api';
 import { onSocketEvent } from '../../../services/socket';
 import {
@@ -14,7 +14,7 @@ import {
   fromApiProfitReport,
   fromApiTaxSummary,
 } from '../utils/profitMath';
-import { formatCents } from '../../../utils/formatCurrency';
+import { formatCents } from '../../../util/formatCurrency';
 
 // the demo (and anyone not signed in as a landlord) works the report out from the data on hand
 // with the same rules as the server, so both modes show the same numbers for the same data

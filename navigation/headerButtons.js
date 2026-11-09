@@ -2,9 +2,9 @@ import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { useNavigation, useNavigationState, DrawerActions } from '@react-navigation/native';
 import HeaderIconButton from '../components/HeaderIconButton';
 import { useAppRole } from '../features/auth/hooks/useAppRole';
-import { useTenants } from '../features/tenants/context/TenantsContext';
+import { useTenants } from '../store/TenantsContext';
 import { headerTitle, tabs_route } from './navigationMap';
-import { SIZES, SPACING } from '../theme';
+import { SIZES, SPACING } from '../constants/theme';
 
 // the buttons on the right of the header, each one is its own small component so it can check the role
 // they render inside the navigator, so they can use the same contexts the screens use

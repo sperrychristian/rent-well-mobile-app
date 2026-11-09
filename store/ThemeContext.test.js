@@ -3,7 +3,7 @@ import { Text } from 'react-native';
 import { render, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeProvider, useTheme, resolveScheme, appearance_key } from './ThemeContext';
-import { COLORS, LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../theme';
+import { COLORS, LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../constants/theme';
 
 // the phone's own setting, changed by the tests to check System follows it live
 const mock_system = { scheme: 'light' };

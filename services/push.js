@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { registerPushToken, unregisterPushToken } from './api';
-import { whileSystemDialog } from './appLock';
+import { whileSystemDialog } from '../util/appLock';
 
 // the token this phone registered, so logout can remove the same one
 let registered_token = null;

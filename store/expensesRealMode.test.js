@@ -2,26 +2,26 @@ import { useEffect } from 'react';
 import { Alert } from 'react-native';
 import { render, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { WorkOrdersProvider, useWorkOrders } from '../../../context/WorkOrdersContext';
+import { WorkOrdersProvider, useWorkOrders } from './WorkOrdersContext';
 import { ExpensesProvider, useExpenses } from './ExpensesContext';
-import * as api from '../../../services/api';
+import * as api from '../services/api';
 
 // a real landlord, with the server's expense routes mocked the way docs/API.md says they answer
 
 const mock_user = { id: 'owner-1', role: 'owner', name: 'Olivia Owner' };
-jest.mock('../../auth/context/AuthContext', () => ({
+jest.mock('./AuthContext', () => ({
   useAuth: () => ({ user: mock_user }),
 }));
-jest.mock('../../tenants/context/TenantsContext', () => ({
+jest.mock('./TenantsContext', () => ({
   useTenants: () => ({ properties: [{ id: 'p-maple', name: 'Maple Court' }] }),
 }));
 // I pin today before the seed water bill (2026-11-01) comes due, so the counts below don't depend on the calendar
-jest.mock('../../../utils/formatDate', () => ({
-  ...jest.requireActual('../../../utils/formatDate'),
+jest.mock('../util/formatDate', () => ({
+  ...jest.requireActual('../util/formatDate'),
   todayString: () => '2026-10-15',
 }));
-jest.mock('../../../services/socket', () => ({ onSocketEvent: () => () => {} }));
-jest.mock('../../../services/api', () => ({
+jest.mock('../services/socket', () => ({ onSocketEvent: () => () => {} }));
+jest.mock('../services/api', () => ({
   getExpenses: jest.fn(),
   createExpense: jest.fn(),
   updateExpense: jest.fn(),

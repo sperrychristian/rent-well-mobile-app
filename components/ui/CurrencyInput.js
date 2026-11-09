@@ -1,6 +1,6 @@
 import { View, Text, TextInput } from 'react-native';
-import { COLORS, SPACING, TYPE, NUMBERS } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, NUMBERS } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // a money text box: a $ in front, the number pad with a decimal point, and tabular digits
 // style is the screen's own field style (it goes on the outside so the border, fill, and padding stay the same),

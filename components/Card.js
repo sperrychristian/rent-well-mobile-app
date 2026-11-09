@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import UiCard from './ui/Card';
-import { SPACING } from '../theme';
+import { SPACING } from '../constants/theme';
 
 // the old Card keeps its place in the layout (90% wide, centered, space above and below) so no screen moves,
 // the look comes from the raised card in components/ui now

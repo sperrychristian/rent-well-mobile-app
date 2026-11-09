@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
-import { whileSystemDialog } from '../../../services/appLock';
+import { whileSystemDialog } from '../../../util/appLock';
 
 // what this phone can do for unlocking: { available, label }
 // available means it has the hardware and someone has set up a face or a finger on it

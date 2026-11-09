@@ -1,5 +1,5 @@
 import { File, Paths } from 'expo-file-system';
-import { Sharing } from '../../../services/systemPickers';
+import { Sharing } from '../../../util/systemPickers';
 import { buildReceiptText } from './ledgerHelpers';
 
 // writes the receipt text to a file in the cache and opens the share sheet, like the expenses CSV export

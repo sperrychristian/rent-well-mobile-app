@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Alert } from 'react-native';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LedgerProvider, useLedger } from '../context/LedgerContext';
+import { LedgerProvider, useLedger } from '../../../store/LedgerContext';
 import { ToastProvider } from '../../../components/ui/Toast';
 import PaymentsScreen from './PaymentsScreen';
 import TenantLedgerScreen from './TenantLedgerScreen';
@@ -17,10 +17,10 @@ const mock_session = {
   demo_mode: false,
   demo_role: 'owner',
 };
-jest.mock('../../auth/context/AuthContext', () => ({
+jest.mock('../../../store/AuthContext', () => ({
   useAuth: () => ({ user: mock_session.user }),
 }));
-jest.mock('../../../context/WorkOrdersContext', () => ({
+jest.mock('../../../store/WorkOrdersContext', () => ({
   useWorkOrders: () => ({
     demo_mode: mock_session.demo_mode,
     demo_role: mock_session.demo_role,

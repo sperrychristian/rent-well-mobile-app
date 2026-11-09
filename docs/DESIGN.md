@@ -6,7 +6,7 @@ The Hearth look is on branch `hearth-redesign`. It should feel refined, calm, an
 - hairlines instead of cards
 - plain text rows with simple line icons
 
-Everything comes from `theme.js` and `components/ui/`. `CLAUDE.md` has the short version, and this is the full guide. It replaces the indigo fintech look. The token names stayed the same, so older styles pick up the new colors.
+Everything comes from `constants/theme.js` and `components/ui/`. `CLAUDE.md` has the short version, and this is the full guide. It replaces the indigo fintech look. The token names stayed the same, so older styles pick up the new colors.
 
 | Welcome | Landlord overview | Tenant overview |
 | --- | --- | --- |
@@ -25,7 +25,7 @@ Everything comes from `theme.js` and `components/ui/`. `CLAUDE.md` has the short
 - **Line icons only:** Ionicons outline at 24 in rows. There are no icon circles, tinted squares, or pills behind anything.
 - **Spacing:** 24 of side padding on a screen, rows at least 64 tall, and a 4 point grid.
 
-## Tokens (`theme.js`)
+## Tokens (`constants/theme.js`)
 
 ### Colors
 
@@ -51,7 +51,7 @@ Contrast is AA (at least 4.5 to 1) for every pairing:
 - Green is 6.8 on the paper, terracotta 5.4, and amber 5.75.
 - White on green is 7.5.
 
-`theme.test.js`, `components/ui/stylePairs.test.js`, and `components/ui/hearth.test.js` check every pair.
+`constants/theme.test.js`, `components/ui/stylePairs.test.js`, and `components/ui/hearth.test.js` check every pair.
 
 ### Type (`TYPE`)
 
@@ -162,7 +162,7 @@ Contrast is AA (at least 4.5 to 1) for every pairing:
 ## Dark mode
 
 - **Appearance:** Settings has System, Light, and Dark. It's saved on the phone under `rent_well_appearance` (not per account), so it holds before login, in the demo, and after logging out. System follows the phone's setting live. The splash stays up until the choice is read, so the first screen is never the wrong theme. The native splash follows the phone's own setting (`app.json` has a dark splash background), since nothing can be read before the app starts.
-- **The palette:** `theme.js` has `LIGHT_COLORS` and `DARK_COLORS` with the same token names, and `COLORS` always reads the active one. The dark one stays warm Hearth:
+- **The palette:** `constants/theme.js` has `LIGHT_COLORS` and `DARK_COLORS` with the same token names, and `COLORS` always reads the active one. The dark one stays warm Hearth:
 
 | Token | Dark | What it is |
 | --- | --- | --- |
@@ -182,10 +182,10 @@ Contrast is AA (at least 4.5 to 1) for every pairing:
 
 - **Rules:**
   - Colors only come from `COLORS`, in both themes. No hex anywhere else.
-  - Styles are built with `themedStyles((COLORS) => ({ ... }))` (`utils/themedStyles.js`), once per palette. Color tables and navigator options use `themed((COLORS) => ...)` from `theme.js`. Colors read while drawing (`color={COLORS.cta}`) are always the active palette.
-  - `useTheme()` (`context/ThemeContext.js`) gives `scheme`, `is_dark`, `colors`, `preference`, and `setPreference`.
+  - Styles are built with `themedStyles((COLORS) => ({ ... }))` (`util/themedStyles.js`), once per palette. Color tables and navigator options use `themed((COLORS) => ...)` from `constants/theme.js`. Colors read while drawing (`color={COLORS.cta}`) are always the active palette.
+  - `useTheme()` (`store/ThemeContext.js`) gives `scheme`, `is_dark`, `colors`, `preference`, and `setPreference`.
   - A theme switch redraws the navigator and puts you back on the same screen. The status bar, the navigation theme, the tab bar, the drawer, headers, sheets, toasts, inputs, chat bubbles, the Profit chart, skeletons, the demo banner, Welcome, and the wordmark all read the palette.
-  - Every text and surface pair, every state on its tint, every fill, the style pairs, and the tab bar and drawer pairs are checked for AA in both palettes (`theme.test.js`, `components/ui/stylePairs.test.js`, `navigation/chromeStyles.test.js`).
+  - Every text and surface pair, every state on its tint, every fill, the style pairs, and the tab bar and drawer pairs are checked for AA in both palettes (`constants/theme.test.js`, `components/ui/stylePairs.test.js`, `navigation/chromeStyles.test.js`).
 
 ## Payments screens
 

@@ -7,11 +7,11 @@ import SectionHeader from '../../../components/ui/SectionHeader';
 import { toneColors } from '../../../components/ui/uiHelpers';
 import AddToCalendarSheet from '../components/AddToCalendarSheet';
 import { useDeviceCalendar } from '../hooks/useDeviceCalendar';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { useAuth } from '../../auth/context/AuthContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { useAuth } from '../../../store/AuthContext';
 import { useAppRole } from '../../auth/hooks/useAppRole';
-import { useTenants } from '../../tenants/context/TenantsContext';
-import { useLedger } from '../../payments/context/LedgerContext';
+import { useTenants } from '../../../store/TenantsContext';
+import { useLedger } from '../../../store/LedgerContext';
 import { ordersForTenant } from '../../workOrders/utils/workOrderHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { monthOf } from '../../payments/utils/ledgerMath';
@@ -29,8 +29,8 @@ import {
   upcomingForExport,
   canExport,
 } from '../utils/calendarEvents';
-import { COLORS, SPACING, TYPE, SIZES, RADIUS, BORDER, FONTS } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, SIZES, RADIUS, BORDER, FONTS } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the legend under the grid, so a dot's color always has words next to it somewhere on screen
 const legend = [

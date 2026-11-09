@@ -2,9 +2,9 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RemoteExpensesContext } from './remoteExpensesContext';
-import { useAuth } from '../../auth/context/AuthContext';
-import { useWorkOrders, useLocalWorkOrders } from '../../../context/WorkOrdersContext';
-import { useTenants } from '../../tenants/context/TenantsContext';
+import { useAuth } from './AuthContext';
+import { useWorkOrders, useLocalWorkOrders } from './WorkOrdersContext';
+import { useTenants } from './TenantsContext';
 import {
   getExpenses,
   createExpense,
@@ -12,9 +12,9 @@ import {
   deleteExpense as deleteExpenseRequest,
   importExpenses,
   uploadImage,
-} from '../../../services/api';
-import { onSocketEvent } from '../../../services/socket';
-import { legacyExpensesFor } from '../../workOrders/utils/workOrderHelpers';
+} from '../services/api';
+import { onSocketEvent } from '../services/socket';
+import { legacyExpensesFor } from '../features/workOrders/utils/workOrderHelpers';
 import {
   fromApiExpense,
   toApiExpense,
@@ -25,8 +25,8 @@ import {
   isReceiptKey,
   server_categories,
   server_payment_methods,
-} from '../utils/expenseApi';
-import { expense_categories, payment_methods } from '../../../data/expenseOptions';
+} from '../features/expenses/utils/expenseApi';
+import { expense_categories, payment_methods } from '../data/expenseOptions';
 
 // expenses on the server for a real landlord, the phone's own list everywhere else (the demo, tenants, signed out)
 // the screens keep calling useWorkOrders() and useExpenses() the same way in both modes

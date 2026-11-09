@@ -1,6 +1,6 @@
 import { View } from 'react-native';
-import { SPACING, RADIUS, BORDER, SHADOWS, SIZES } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { SPACING, RADIUS, BORDER, SHADOWS, SIZES } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // the shared look for every bottom sheet and pop-up modal, the modals keep their own layout and spread these in
 // (the fintech pass: white sheets on a soft ink backdrop, a hairline border, and one soft floating shadow)

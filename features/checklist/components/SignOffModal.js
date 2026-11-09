@@ -13,12 +13,12 @@ import {
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
-import { todayString } from '../../../utils/formatDate';
+import { todayString } from '../../../util/formatDate';
 import { checklist_disclaimer } from '../utils/checklistHelpers';
-import { COLORS, SPACING, TYPE } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // props: visible, default_name, not_done (how many items aren't checked), onSign, onClose
 // onSign gets the typed name and the date

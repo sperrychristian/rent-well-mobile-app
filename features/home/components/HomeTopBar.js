@@ -1,7 +1,7 @@
 import { View, Pressable, StyleSheet } from 'react-native';
 import Wordmark from '../../../components/ui/Wordmark';
 import Avatar from '../../../components/ui/Avatar';
-import { SPACING, SIZES, OPACITY } from '../../../theme';
+import { SPACING, SIZES, OPACITY } from '../../../constants/theme';
 
 // the Hearth top of both homes: the wordmark on the left and the person's initials on the right
 // the initials open Settings and Profile, the same place the header's gear goes

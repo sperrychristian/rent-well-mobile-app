@@ -2,9 +2,9 @@ import { View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-nati
 import Input from '../../../components/forms/Input';
 import ChoiceChips from '../../../components/forms/ChoiceChips';
 import { name_max, unit_max } from '../utils/workOrderValidation';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the "where is it" part of the work order form, which depends on who's filling it in
 // variant: local_owner (the demo landlord types the tenant and property), remote_owner (a real landlord picks

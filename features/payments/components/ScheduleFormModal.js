@@ -3,7 +3,7 @@ import { TextInput } from 'react-native';
 import FormSheet from './FormSheet';
 import { Field, MoneyField, form_styles } from './FormBits';
 import DateField from '../../../components/DateField';
-import { centsToInputText } from '../../../utils/formatCurrency';
+import { centsToInputText } from '../../../util/formatCurrency';
 import { validateSchedule, hasErrors } from '../utils/ledgerHelpers';
 import { monthOf, shiftMonth } from '../utils/ledgerMath';
 

@@ -1,9 +1,9 @@
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { TYPE, FONTS, SIZES, BORDER, SPACING, themed } from '../theme';
+import { TYPE, FONTS, SIZES, BORDER, SPACING, themed } from '../constants/theme';
 import { headerTitle, navigation_map } from './navigationMap';
 import { HeaderMenuButton, DrawerHeaderLeft } from './headerButtons';
-import { themedStyles } from '../utils/themedStyles';
+import { themedStyles } from '../util/themedStyles';
 
 // one header style for every screen, all from theme.js
 // the header blends into the screen background so the ScreenTitle card stays the big title

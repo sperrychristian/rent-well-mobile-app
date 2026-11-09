@@ -1,7 +1,7 @@
 import { Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // a filter or choice chip, selected ones fill with the steel blue and get a check so it's not color only
 // (the fintech pass: white with a hairline border, and a soft indigo tint with an indigo border when picked,

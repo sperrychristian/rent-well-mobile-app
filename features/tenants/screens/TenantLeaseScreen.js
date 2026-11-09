@@ -6,18 +6,18 @@ import Button from '../../../components/ui/Button';
 import SectionHeader from '../../../components/ui/SectionHeader';
 import EmptyState from '../../../components/ui/EmptyState';
 import { useToast } from '../../../components/ui/Toast';
-import { useTenants } from '../context/TenantsContext';
+import { useTenants } from '../../../store/TenantsContext';
 import { placeLabel } from '../utils/tenantHelpers';
 import LeaseBlock from '../../leases/components/LeaseBlock';
 import LeaseFormSheet from '../../leases/components/LeaseFormSheet';
 import RenewLeaseSheet from '../../leases/components/RenewLeaseSheet';
 import { useLeaseActions } from '../../leases/hooks/useLeaseActions';
 import { leaseEventLine } from '../../leases/utils/leaseHelpers';
-import { hapticSuccess } from '../../../utils/haptics';
-import { todayString } from '../../../utils/formatDate';
+import { hapticSuccess } from '../../../util/haptics';
+import { todayString } from '../../../util/formatDate';
 import { onSocketEvent } from '../../../services/socket';
-import { SPACING, TYPE, SIZES, BORDER } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { SPACING, TYPE, SIZES, BORDER } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // stub for the assignment: it gets only the tenant's id, shows their name when the tenants data has them,
 // and the id otherwise, then links to the Documents screen where leases live today

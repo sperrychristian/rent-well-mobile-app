@@ -1,6 +1,6 @@
 # Work order shared state: who changes it and who shows it
 
-One store, `WorkOrdersProvider` in `context/WorkOrdersContext.js`, wrapped around the whole navigator in `App.js`. In real mode `RemoteWorkOrdersProvider` (inside it) swaps in the server's orders and actions with the same shape. Every screen below reads it through `useWorkOrders()`.
+One store, `WorkOrdersProvider` in `store/WorkOrdersContext.js`, wrapped around the whole navigator in `App.js`. In real mode `RemoteWorkOrdersProvider` (inside it) swaps in the server's orders and actions with the same shape. Every screen below reads it through `useWorkOrders()`.
 
 ## Screens that change work orders
 
@@ -34,4 +34,4 @@ One store, `WorkOrdersProvider` in `context/WorkOrdersContext.js`, wrapped aroun
 ## How it's proven
 
 - `navigation/sharedState.test.js` renders the real App and navigators: Start Work on the detail updates the list row, the Home subtitle, and the tab badge; a tenant's request shows on the landlord side; switching demo sides keeps one store; Tenant Profile follows a status change; a screen outside the provider throws.
-- `features/workOrders/context/remoteWorkOrders.test.js` covers real mode: the change shows on every reader before the server answers, a failed change rolls back everywhere, and a new request from the socket lands in the list and the badge.
+- `store/remoteWorkOrders.test.js` covers real mode: the change shows on every reader before the server answers, a failed change rolls back everywhere, and a new request from the socket lands in the list and the badge.

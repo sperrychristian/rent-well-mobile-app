@@ -13,14 +13,14 @@ import {
   AppState,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ImagePicker } from '../../../services/systemPickers';
+import { ImagePicker } from '../../../util/systemPickers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
 import ErrorState from '../../../components/ErrorState';
 import MessageBubble from '../components/MessageBubble';
 import ImageViewerModal from '../components/ImageViewerModal';
-import { useMessages } from '../context/MessagesContext';
-import { useTenants } from '../../tenants/context/TenantsContext';
+import { useMessages } from '../../../store/MessagesContext';
+import { useTenants } from '../../../store/TenantsContext';
 import {
   mergeMessages,
   lastSeenMessageId,
@@ -28,8 +28,8 @@ import {
   dayDividerLabel,
   showsTime,
 } from '../utils/messageHelpers';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, OPACITY } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, OPACITY } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the server takes photos up to 10 MB and message text up to 2000 characters
 const max_photo_bytes = 10485760;

@@ -3,12 +3,12 @@ import { Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { useTenants } from '../context/TenantsContext';
-import { useLedger } from '../../payments/context/LedgerContext';
+import { useTenants } from '../../../store/TenantsContext';
+import { useLedger } from '../../../store/LedgerContext';
 import InstructionsModal from '../../payments/components/InstructionsModal';
 import { useToast } from '../../../components/ui/Toast';
-import { SPACING, TYPE, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { SPACING, TYPE, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // stub for the assignment: it gets only the property's id and looks the property up in the shared tenants data
 // (the demo's local copy or the server's), and if it isn't there it just shows the id instead of crashing

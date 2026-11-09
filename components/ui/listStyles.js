@@ -1,6 +1,6 @@
 import { chip_styles } from './Chip';
-import { SPACING, TYPE, RADIUS, BORDER, SIZES, NUMBERS } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { SPACING, TYPE, RADIUS, BORDER, SIZES, NUMBERS } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // the pieces every list screen's filter bar shares (search box, segmented control, chips, offline note, empty text)
 // screens spread these into their own style names so the JSX didn't have to change, and they all match now

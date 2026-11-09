@@ -3,17 +3,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DemoBanner from '../../../components/DemoBanner';
 import LogoutButton from '../../auth/components/LogoutButton';
-import { useAuth } from '../../auth/context/AuthContext';
-import { useMessages } from '../../messages/context/MessagesContext';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { useTenants } from '../../tenants/context/TenantsContext';
+import { useAuth } from '../../../store/AuthContext';
+import { useMessages } from '../../../store/MessagesContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { useTenants } from '../../../store/TenantsContext';
 import { placeLabel } from '../../tenants/utils/tenantHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { ordersForTenant, activeCount } from '../../workOrders/utils/workOrderHelpers';
-import { useLedger } from '../../payments/context/LedgerContext';
+import { useLedger } from '../../../store/LedgerContext';
 import { tenantRentLine, upcomingRent, shortDate } from '../../payments/utils/ledgerHelpers';
 import { deriveLedger } from '../../payments/utils/ledgerMath';
-import { formatCents } from '../../../utils/formatCurrency';
+import { formatCents } from '../../../util/formatCurrency';
 import SummaryBlock from '../../../components/ui/SummaryBlock';
 import ListRow from '../../../components/ui/ListRow';
 import FadeInView from '../../../components/ui/FadeInView';
@@ -22,8 +22,8 @@ import { tenantLeaseLine, leaseStatusLabel, shortLeaseDate } from '../../leases/
 import HeroNote from '../components/HeroNote';
 import DemoTourSheet from '../components/DemoTourSheet';
 import { useDemoTour } from '../hooks/useDemoTour';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the tenant's home: message the landlord or report something that needs fixing
 // the Hearth pass: the wordmark and your initials, then what you owe right now as one big number with the

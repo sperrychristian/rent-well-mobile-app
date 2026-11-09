@@ -1,6 +1,6 @@
 import { View, StyleSheet } from 'react-native';
 import Button from '../../../components/ui/Button';
-import { SPACING } from '../../../theme';
+import { SPACING } from '../../../constants/theme';
 
 // a PrimaryButton that shows a spinner and ignores taps while the request is out
 // props: title, busy_title, busy, onPress

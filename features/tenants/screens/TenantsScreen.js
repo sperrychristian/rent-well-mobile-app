@@ -14,19 +14,28 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DemoBanner from '../../../components/DemoBanner';
 import ErrorState from '../../../components/ErrorState';
-import { useTenants } from '../context/TenantsContext';
+import { useTenants } from '../../../store/TenantsContext';
 import { groupByProperty, splitActivePast, placeLabel } from '../utils/tenantHelpers';
 import {
   pendingInvites,
   formatInviteCode,
   inviteShareText,
 } from '../../invites/utils/inviteHelpers';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, OPACITY, NUMBERS } from '../../../theme';
+import {
+  COLORS,
+  SPACING,
+  TYPE,
+  RADIUS,
+  BORDER,
+  SIZES,
+  OPACITY,
+  NUMBERS,
+} from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import Avatar from '../../../components/ui/Avatar';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // every tenant by property and unit, the invites still waiting, and the past tenants folded away
 function TenantsScreen(props) {

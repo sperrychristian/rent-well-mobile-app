@@ -2,9 +2,9 @@ import { Alert, StyleSheet } from 'react-native';
 import { render, screen, fireEvent, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import App, { forgetNavigationState } from '../App';
-import { navigation_ref } from '../services/navigationRef';
-import { appearance_key } from '../context/ThemeContext';
-import { LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../theme';
+import { navigation_ref } from '../util/navigationRef';
+import { appearance_key } from '../store/ThemeContext';
+import { LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../constants/theme';
 import { invalid_summary } from '../features/workOrders/components/WorkOrderForm';
 
 // the week 10 work order form on the real App with the real navigators, in both demo sides:

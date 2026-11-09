@@ -1,6 +1,6 @@
 // pure helpers for the payments screens: words for statuses, months, balances, form checks, and receipt text
 // nothing here draws anything or touches the network, so the tests can check all of it
-import { formatCents, parseAmountToCents } from '../../../utils/formatCurrency';
+import { formatCents, parseAmountToCents } from '../../../util/formatCurrency';
 import {
   isDate,
   monthOf,

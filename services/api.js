@@ -1,6 +1,6 @@
 import { File } from 'expo-file-system';
 import { createApiClient } from './apiClient';
-import { api_base_url } from './config';
+import { api_base_url } from '../constants/config';
 import { loadTokens, saveTokens, clearTokens } from './tokenStorage';
 import { ApiError, networkError } from './apiHelpers';
 

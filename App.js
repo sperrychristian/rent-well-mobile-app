@@ -1,5 +1,5 @@
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
-import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { ThemeProvider, useTheme } from './store/ThemeContext';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
@@ -15,7 +15,7 @@ import WorkOrdersScreen from './features/workOrders/screens/WorkOrdersScreen';
 import MessagesScreen from './features/messages/screens/MessagesScreen';
 import DocumentsScreen from './features/documents/screens/DocumentsScreen';
 import ExpensesScreen from './features/expenses/screens/ExpensesScreen';
-import { WorkOrdersProvider, useWorkOrders } from './context/WorkOrdersContext';
+import { WorkOrdersProvider, useWorkOrders } from './store/WorkOrdersContext';
 import WorkOrderDetailScreen from './features/workOrders/screens/WorkOrderDetailScreen';
 import MileageScreen from './features/mileage/screens/MileageScreen';
 import YearEndReportScreen from './features/expenses/screens/YearEndReportScreen';
@@ -26,14 +26,14 @@ import RegisterOwnerScreen from './features/auth/screens/RegisterOwnerScreen';
 import RegisterTenantScreen from './features/auth/screens/RegisterTenantScreen';
 import MessageThreadScreen from './features/messages/screens/MessageThreadScreen';
 import InviteTenantScreen from './features/invites/screens/InviteTenantScreen';
-import { AuthProvider, useAuth, homeRouteFor } from './features/auth/context/AuthContext';
-import { MessagesProvider } from './features/messages/context/MessagesContext';
-import { RemoteWorkOrdersProvider } from './features/workOrders/context/RemoteWorkOrdersProvider';
+import { AuthProvider, useAuth, homeRouteFor } from './store/AuthContext';
+import { MessagesProvider } from './store/MessagesContext';
+import { RemoteWorkOrdersProvider } from './store/RemoteWorkOrdersProvider';
 import MyRequestsScreen from './features/workOrders/screens/MyRequestsScreen';
 import RequestDetailScreen from './features/workOrders/screens/RequestDetailScreen';
-import { TenantsProvider } from './features/tenants/context/TenantsContext';
-import { LedgerProvider } from './features/payments/context/LedgerContext';
-import { ExpensesProvider } from './features/expenses/context/ExpensesContext';
+import { TenantsProvider } from './store/TenantsContext';
+import { LedgerProvider } from './store/LedgerContext';
+import { ExpensesProvider } from './store/ExpensesContext';
 import TenantsScreen from './features/tenants/screens/TenantsScreen';
 import TenantDetailScreen from './features/tenants/screens/TenantDetailScreen';
 import PropertiesScreen from './features/tenants/screens/PropertiesScreen';
@@ -44,13 +44,13 @@ import PaymentsScreen from './features/payments/screens/PaymentsScreen';
 import PaymentDetailScreen from './features/payments/screens/PaymentDetailScreen';
 import TenantLedgerScreen from './features/payments/screens/TenantLedgerScreen';
 import { ToastProvider } from './components/ui/Toast';
-import { AppLockProvider } from './features/security/context/AppLockContext';
+import { AppLockProvider } from './store/AppLockContext';
 import SettingsScreen from './features/settings/screens/SettingsScreen';
 import PropertyDetailScreen from './features/tenants/screens/PropertyDetailScreen';
 import TenantLeaseScreen from './features/tenants/screens/TenantLeaseScreen';
 import SearchScreen from './features/search/screens/SearchScreen';
 import CalendarScreen from './features/calendar/screens/CalendarScreen';
-import { navigation_ref } from './services/navigationRef';
+import { navigation_ref } from './util/navigationRef';
 import {
   shared_screen_options,
   optionsFor,
@@ -64,7 +64,7 @@ import { parentsOf, main_route, tabs_route } from './navigation/navigationMap';
 import DrawerContent from './navigation/DrawerContent';
 import { useTabBadges } from './navigation/tabBadges';
 import { useAppRole } from './features/auth/hooks/useAppRole';
-import { SIZES } from './theme';
+import { SIZES } from './constants/theme';
 import {
   HomeHeaderButtons,
   AddWorkOrderHeaderButton,

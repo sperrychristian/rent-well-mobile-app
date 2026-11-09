@@ -5,8 +5,8 @@ import FormSheet from '../../payments/components/FormSheet';
 import { Field, form_styles } from '../../payments/components/FormBits';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
 import { useToast } from '../../../components/ui/Toast';
-import { hapticSuccess } from '../../../utils/haptics';
-import { formatCents } from '../../../utils/formatCurrency';
+import { hapticSuccess } from '../../../util/haptics';
+import { formatCents } from '../../../util/formatCurrency';
 import { useReminders } from '../hooks/useReminders';
 import {
   max_reminder_length,
@@ -14,8 +14,8 @@ import {
   canSendLine,
   formatLongDate,
 } from '../utils/reminderHelpers';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 const kind_options = [
   { value: 'friendly', label: 'Friendly' },

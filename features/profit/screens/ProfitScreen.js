@@ -10,9 +10,9 @@ import ErrorState from '../../../components/ErrorState';
 import ProfitChart from '../components/ProfitChart';
 import TaxSummarySheet from '../components/TaxSummarySheet';
 import { useProfitReport } from '../hooks/useProfitReport';
-import { formatCents } from '../../../utils/formatCurrency';
-import { SPACING, TYPE, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { formatCents } from '../../../util/formatCurrency';
+import { SPACING, TYPE, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // a landlord's year in one place: net profit as the big number, rent in and expenses out under it,
 // net by month as one green chart, then each property as a plain row (tap one to see its months in the chart)

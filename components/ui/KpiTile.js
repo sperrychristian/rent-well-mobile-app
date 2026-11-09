@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from 'react-native';
-import { SPACING, TYPE, NUMBERS, OPACITY } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { SPACING, TYPE, NUMBERS, OPACITY } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // one key number: a small uppercase label, the value big, and a short caption under it
 // the icon sits on top and the label goes under the value, so the numbers line up even when a label wraps

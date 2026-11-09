@@ -6,31 +6,31 @@ import {
   markConversationRead,
   uploadImage,
   getAttachmentUrl,
-} from '../../../services/api';
+} from '../services/api';
 import {
   connectSocket,
   disconnectSocket,
   joinConversation,
   leaveConversation,
-} from '../../../services/socket';
-import { registerForPush, listenForNotificationTaps } from '../../../services/push';
-import { navigation_ref } from '../../../services/navigationRef';
-import { useAuth } from '../../auth/context/AuthContext';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
+} from '../services/socket';
+import { registerForPush, listenForNotificationTaps } from '../services/push';
+import { navigation_ref } from '../util/navigationRef';
+import { useAuth } from './AuthContext';
+import { useWorkOrders } from './WorkOrdersContext';
 import {
   applyNewMessage,
   applyRead,
   sortConversations,
   totalUnread,
-} from '../utils/messageHelpers';
+} from '../features/messages/utils/messageHelpers';
 import {
   buildSampleThreads,
   demo_user_id,
   demo_replies,
   demo_landlord,
   demo_landlord_replies,
-} from '../data/sampleThreads';
-import { demo_tenant } from '../../tenants/data/sampleTenants';
+} from '../features/messages/data/sampleThreads';
+import { demo_tenant } from '../features/tenants/data/sampleTenants';
 
 const MessagesContext = createContext(null);
 const page_size = 30;

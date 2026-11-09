@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { View, Animated } from 'react-native';
 import { useReduceMotion } from './useReduceMotion';
-import { SPACING, RADIUS, BORDER, SIZES } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { SPACING, RADIUS, BORDER, SIZES } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // grey placeholder rows that stand in for a list while it loads, so the screen doesn't jump when the data shows up
 // they pulse gently, or sit still when Reduce Motion is on

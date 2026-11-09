@@ -4,7 +4,7 @@ import FormSheet from './FormSheet';
 import { Field, MoneyField, ChipPicker, form_styles } from './FormBits';
 import DateField from '../../../components/DateField';
 import { charge_kinds, validateCharge, hasErrors } from '../utils/ledgerHelpers';
-import { COLORS } from '../../../theme';
+import { COLORS } from '../../../constants/theme';
 
 // default words for each kind, so picking one fills in the description when it's still empty
 const kind_words = {

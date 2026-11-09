@@ -1,6 +1,6 @@
 import { Text, StyleSheet, Pressable, ActivityIndicator, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { SPACING, TYPE, RADIUS, BORDER, OPACITY, SIZES, themed } from '../../theme';
+import { SPACING, TYPE, RADIUS, BORDER, OPACITY, SIZES, themed } from '../../constants/theme';
 import { lineIcon } from './lineIcon';
 
 // the one button for the whole app, every look comes from a variant so screens don't style their own

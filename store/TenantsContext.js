@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
-import { useAuth } from '../../auth/context/AuthContext';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useAuth } from './AuthContext';
+import { useWorkOrders } from './WorkOrdersContext';
 import {
   api_client,
   getMe,
@@ -20,13 +20,17 @@ import {
   getLease,
   putLease,
   renewLease as renewLeaseRequest,
-} from '../../../services/api';
-import { onSocketEvent } from '../../../services/socket';
-import { listenForTenancyTaps, listenForLeaseTaps } from '../../../services/push';
-import { navigateWhenReady } from '../../../services/navigationRef';
-import { todayString } from '../../../utils/formatDate';
-import { fromApiTenant, fromApiTenancy, fromApiProperty } from '../utils/tenantHelpers';
-import { fromApiWorkOrder } from '../../workOrders/utils/workOrderHelpers';
+} from '../services/api';
+import { onSocketEvent } from '../services/socket';
+import { listenForTenancyTaps, listenForLeaseTaps } from '../services/push';
+import { navigateWhenReady } from '../util/navigationRef';
+import { todayString } from '../util/formatDate';
+import {
+  fromApiTenant,
+  fromApiTenancy,
+  fromApiProperty,
+} from '../features/tenants/utils/tenantHelpers';
+import { fromApiWorkOrder } from '../features/workOrders/utils/workOrderHelpers';
 import {
   buildDemoView,
   demoAddProperty,
@@ -39,10 +43,10 @@ import {
   demoMove,
   demoEnd,
   makeInviteCode,
-} from '../utils/demoTenants';
-import { demo_tenant } from '../data/sampleTenants';
-import { fromApiLease, fromApiLeaseEvent, toApiLease } from '../../leases/utils/leaseHelpers';
-import { demoSetLease, demoRenewLease, demoLeaseEvents } from '../../leases/utils/demoLeases';
+} from '../features/tenants/utils/demoTenants';
+import { demo_tenant } from '../features/tenants/data/sampleTenants';
+import { fromApiLease, fromApiLeaseEvent, toApiLease } from '../features/leases/utils/leaseHelpers';
+import { demoSetLease, demoRenewLease, demoLeaseEvents } from '../features/leases/utils/demoLeases';
 
 const TenantsContext = createContext(null);
 

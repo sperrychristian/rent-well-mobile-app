@@ -21,10 +21,10 @@ const mock_store = {
   updateWorkOrder: jest.fn(),
   getOrder: jest.fn(),
 };
-jest.mock('../../../context/WorkOrdersContext', () => ({
+jest.mock('../../../store/WorkOrdersContext', () => ({
   useWorkOrders: () => mock_store,
 }));
-jest.mock('../../tenants/context/TenantsContext', () => ({
+jest.mock('../../../store/TenantsContext', () => ({
   useTenants: () => ({
     properties: [
       {

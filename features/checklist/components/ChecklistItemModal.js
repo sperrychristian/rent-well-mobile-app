@@ -14,17 +14,26 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ImagePicker } from '../../../services/systemPickers';
+import { ImagePicker } from '../../../util/systemPickers';
 // the pop-up forms share the sheet look from components/ui, the JSX still says Card
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { conditions } from '../data/checklistTemplates';
 import { itemGotWorse } from '../utils/checklistHelpers';
 import { getPhotoUri, saveChecklistPhoto, deleteChecklistPhoto } from '../utils/checklistPhotos';
-import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER, SIZES, themed } from '../../../theme';
+import {
+  COLORS,
+  SPACING,
+  FONTS,
+  TYPE,
+  RADIUS,
+  BORDER,
+  SIZES,
+  themed,
+} from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 const max_photos = 3;
 

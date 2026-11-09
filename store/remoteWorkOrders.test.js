@@ -2,29 +2,29 @@ import { useEffect } from 'react';
 import { Text } from 'react-native';
 import { render, screen, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { WorkOrdersProvider, useWorkOrders } from '../../../context/WorkOrdersContext';
+import { WorkOrdersProvider, useWorkOrders } from './WorkOrdersContext';
 import { RemoteWorkOrdersProvider } from './RemoteWorkOrdersProvider';
-import { openCount } from '../utils/workOrderHelpers';
-import * as api from '../../../services/api';
+import { openCount } from '../features/workOrders/utils/workOrderHelpers';
+import * as api from '../services/api';
 
 // the shared state in real mode: a signed-in landlord, the work order routes mocked like docs/API.md answers,
 // and two small "screens" reading the same store (a list row and a badge), like the Work Orders tab and the tab bar
 
 const mock_user = { id: 'owner-1', role: 'owner', name: 'Olivia Owner' };
-jest.mock('../../auth/context/AuthContext', () => ({
+jest.mock('./AuthContext', () => ({
   useAuth: () => ({ user: mock_user }),
 }));
 // the socket's listeners are kept so a test can play a server event into them
 const mock_socket = {};
-jest.mock('../../../services/socket', () => ({
+jest.mock('../services/socket', () => ({
   onSocketEvent: (name, handler) => {
     mock_socket[name] = handler;
     return () => {};
   },
 }));
-jest.mock('../../../services/push', () => ({ listenForWorkOrderTaps: () => () => {} }));
-jest.mock('../../../services/navigationRef', () => ({ navigateWhenReady: jest.fn() }));
-jest.mock('../../../services/api', () => ({
+jest.mock('../services/push', () => ({ listenForWorkOrderTaps: () => () => {} }));
+jest.mock('../util/navigationRef', () => ({ navigateWhenReady: jest.fn() }));
+jest.mock('../services/api', () => ({
   getAllWorkOrders: jest.fn(),
   getWorkOrder: jest.fn(),
   createTenantWorkOrder: jest.fn(),

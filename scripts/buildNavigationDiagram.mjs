@@ -12,7 +12,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import ELK from 'elkjs/lib/elk.bundled.js';
 import { navigation_map, hubs, drawerScreens } from '../navigation/navigationMap.js';
-import { COLORS } from '../theme.js';
+import { COLORS } from '../constants/theme.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(here, '..');

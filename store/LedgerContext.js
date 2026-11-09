@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth } from '../../auth/context/AuthContext';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useAuth } from './AuthContext';
+import { useWorkOrders } from './WorkOrdersContext';
 import {
   getTenants,
   getTenancyLedger,
@@ -18,13 +18,13 @@ import {
   setRentSchedule as setRentScheduleRequest,
   updateProperty as updatePropertyRequest,
   uploadImage,
-} from '../../../services/api';
-import { ApiError } from '../../../services/apiHelpers';
-import { onSocketEvent } from '../../../services/socket';
-import { listenForLedgerTaps } from '../../../services/push';
-import { navigateWhenReady } from '../../../services/navigationRef';
-import { storageKey } from '../../../utils/storageKeys';
-import { todayString } from '../../../utils/formatDate';
+} from '../services/api';
+import { ApiError } from '../services/apiHelpers';
+import { onSocketEvent } from '../services/socket';
+import { listenForLedgerTaps } from '../services/push';
+import { navigateWhenReady } from '../util/navigationRef';
+import { storageKey } from '../util/storageKeys';
+import { todayString } from '../util/formatDate';
 import {
   fromApiLedger,
   fromApiPayment,
@@ -36,8 +36,8 @@ import {
   toApiSchedule,
   replaceLedger,
   findPayment as findPaymentIn,
-} from '../utils/ledgerApi';
-import { monthSummary, monthOf } from '../utils/ledgerMath';
+} from '../features/payments/utils/ledgerApi';
+import { monthSummary, monthOf } from '../features/payments/utils/ledgerMath';
 import {
   demoCreatePayment,
   demoConfirmPayment,
@@ -46,9 +46,12 @@ import {
   demoAddCharge,
   demoVoidCharge,
   demoSetSchedule,
-} from '../utils/demoLedger';
-import { buildSampleLedgers, buildSampleInstructions } from '../data/sampleLedger';
-import { demo_tenant } from '../../tenants/data/sampleTenants';
+} from '../features/payments/utils/demoLedger';
+import {
+  buildSampleLedgers,
+  buildSampleInstructions,
+} from '../features/payments/data/sampleLedger';
+import { demo_tenant } from '../features/tenants/data/sampleTenants';
 
 // the rent ledger for both modes behind one useLedger(), screens never check which one they got
 // demo: sample ledgers in memory only, never saved, and a fresh set every time the demo starts

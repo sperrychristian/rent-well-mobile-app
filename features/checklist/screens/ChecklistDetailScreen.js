@@ -8,7 +8,7 @@ import ProgressBar from '../components/ProgressBar';
 import ChecklistItemModal from '../components/ChecklistItemModal';
 import SignOffModal from '../components/SignOffModal';
 import NameModal from '../components/NameModal';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
 import {
   checklistProgress,
   roomProgress,
@@ -17,10 +17,10 @@ import {
   checklist_disclaimer,
 } from '../utils/checklistHelpers';
 import { shareChecklistText } from '../utils/exportChecklist';
-import { COLORS, SPACING, TYPE, BORDER, SIZES, OPACITY } from '../../../theme';
+import { COLORS, SPACING, TYPE, BORDER, SIZES, OPACITY } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusLabel from '../../../components/ui/StatusLabel';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 function ChecklistDetailScreen(props) {
   // need the insets so the title clears the notch and status bar

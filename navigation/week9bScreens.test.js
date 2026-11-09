@@ -2,14 +2,14 @@ import { render, screen, fireEvent, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Calendar from 'expo-calendar/legacy';
 import { forgetDemoCalendarEvents } from '../features/calendar/utils/deviceCalendar';
-import { appearance_key } from '../context/ThemeContext';
-import { LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../theme';
+import { appearance_key } from '../store/ThemeContext';
+import { LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../constants/theme';
 import { StyleSheet } from 'react-native';
 import { monthLabel } from '../features/calendar/utils/calendarEvents';
 import { monthOf } from '../features/payments/utils/ledgerMath';
-import { todayString } from '../utils/formatDate';
+import { todayString } from '../util/formatDate';
 import App, { forgetNavigationState } from '../App';
-import { navigation_ref } from '../services/navigationRef';
+import { navigation_ref } from '../util/navigationRef';
 
 // the week 9b screens drawn on the real App in both demo sides and both themes: Search with results,
 // the no matches state, Calendar with its grid and agenda, the add sheet, and Settings

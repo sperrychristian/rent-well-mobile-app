@@ -1,8 +1,8 @@
 import { View, Text, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../context/ThemeContext';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, NUMBERS } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { useTheme } from '../../store/ThemeContext';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, NUMBERS } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // the lecture's Input: a label and a text box, and everything the box needs comes in textInputConfig
 // (keyboardType, maxLength, multiline, placeholder, onChangeText, value), so one component fits every field

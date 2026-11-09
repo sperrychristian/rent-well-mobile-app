@@ -1,7 +1,7 @@
 import { Text, Pressable, View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { toneColors } from '../../../components/ui/uiHelpers';
-import { COLORS, SPACING, TYPE, SIZES, OPACITY } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES, OPACITY } from '../../../constants/theme';
 
 // the one line under a home's hero number: a line icon and words in the tone's color
 // terracotta for "2 tenants are behind", green for all paid up, it opens Payments when it's tappable

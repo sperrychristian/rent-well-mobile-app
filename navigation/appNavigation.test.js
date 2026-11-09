@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, act, within } from '@testing-library/react-native';
 import App from '../App';
-import { navigation_ref } from '../services/navigationRef';
+import { navigation_ref } from '../util/navigationRef';
 import { hubs, drawerScreens, navigation_map, headerTitle } from './navigationMap';
 
 // the real App, signed out, with the real navigators: Welcome, then the demo, then taps like a person would

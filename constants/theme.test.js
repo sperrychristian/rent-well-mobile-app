@@ -11,7 +11,7 @@ import {
   setActiveScheme,
   themed,
 } from './theme';
-import { contrastRatio, meetsAA } from './utils/contrast';
+import { contrastRatio, meetsAA } from '../util/contrast';
 
 // every text color the screens put on every surface it can land on, AA is 4.5 for normal text
 const surfaces = ['background', 'surface', 'surface_raised', 'surface_sunken', 'muted'];

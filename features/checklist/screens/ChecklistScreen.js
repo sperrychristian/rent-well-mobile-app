@@ -5,14 +5,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PrimaryButton from '../../../components/PrimaryButton';
 import ProgressBar from '../components/ProgressBar';
 import NewChecklistModal from '../components/NewChecklistModal';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
 import { checklistProgress, filterChecklists, worseCount } from '../utils/checklistHelpers';
-import { COLORS, SPACING, TYPE, SIZES, OPACITY } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES, OPACITY } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 const status_filters = ['All', 'In progress', 'Complete'];
 

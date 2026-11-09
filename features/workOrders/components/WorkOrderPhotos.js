@@ -1,10 +1,10 @@
 import { View, Text, Image, Pressable, ScrollView, Alert, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ImagePicker } from '../../../services/systemPickers';
+import { ImagePicker } from '../../../util/systemPickers';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { max_photos_per_upload } from '../utils/workOrderHelpers';
-import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, RADIUS } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the server takes photos up to 10 MB
 const max_photo_bytes = 10485760;

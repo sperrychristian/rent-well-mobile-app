@@ -2,13 +2,13 @@ import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { View, AppState, StyleSheet } from 'react-native';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth } from '../../auth/context/AuthContext';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { setNavigationHold, systemDialogActive } from '../../../services/appLock';
-import { openHeldNavigation } from '../../../services/navigationRef';
-import { canLock, shouldLockOnReturn } from '../utils/lockRules';
-import { unlockWithDevice } from '../utils/biometrics';
-import LockScreen from '../components/LockScreen';
+import { useAuth } from './AuthContext';
+import { useWorkOrders } from './WorkOrdersContext';
+import { setNavigationHold, systemDialogActive } from '../util/appLock';
+import { openHeldNavigation } from '../util/navigationRef';
+import { canLock, shouldLockOnReturn } from '../features/security/utils/lockRules';
+import { unlockWithDevice } from '../features/security/utils/biometrics';
+import LockScreen from '../features/security/components/LockScreen';
 
 // the switch is saved on this phone, not per account, like Appearance
 export const biometric_unlock_key = 'rent_well_biometric_unlock';

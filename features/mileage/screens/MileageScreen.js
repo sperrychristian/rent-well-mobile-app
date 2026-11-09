@@ -4,16 +4,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TripModal from '../components/TripModal';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { formatDate } from '../../../utils/formatDate';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { formatDate } from '../../../util/formatDate';
 import { sumMiles } from '../../expenses/utils/expenseStats';
-import { SPACING, TYPE, OPACITY, NUMBERS, SIZES } from '../../../theme';
+import { SPACING, TYPE, OPACITY, NUMBERS, SIZES } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
-import { formatCurrency } from '../../../utils/formatCurrency';
+import { formatCurrency } from '../../../util/formatCurrency';
 import IconCircle from '../../../components/ui/IconCircle';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 function MileageScreen(props) {
   // need the insets so the title clears the notch and status bar

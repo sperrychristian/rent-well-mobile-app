@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { themed } from '../theme';
+import { themed } from '../constants/theme';
 
 // a style sheet that follows the theme: build gets the active palette (named COLORS in each file, so the
 // styles inside read exactly like before) and runs once per palette, so light and dark each have their own

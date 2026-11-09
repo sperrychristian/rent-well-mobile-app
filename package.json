@@ -1,6 +1,8 @@
 {
-  "name": "game-app-starter-code",
+  "name": "rent-well",
   "version": "1.0.0",
+  "description": "Rent Well: a property management app for small landlords and their tenants (work orders, rent, leases, expenses, and messages).",
+  "author": "Christian Sperry",
   "main": "index.js",
   "dependencies": {
     "@expo-google-fonts/dm-sans": "^0.4.2",

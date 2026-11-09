@@ -2,15 +2,15 @@ import { View, Text, FlatList, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ErrorState from '../../../components/ErrorState';
 import { ordersForTenant } from '../../workOrders/utils/workOrderHelpers';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
 import { demo_tenant } from '../data/sampleTenants';
-import { formatDate } from '../../../utils/formatDate';
-import { COLORS, SPACING, FONTS, TYPE, SIZES } from '../../../theme';
+import { formatDate } from '../../../util/formatDate';
+import { COLORS, SPACING, FONTS, TYPE, SIZES } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // a former tenant's requests, read only, straight from the server (reading still works after a tenancy ends)
 // the shared state pass: it used to fetch its own copy here, now it reads the same list the rest of the app does

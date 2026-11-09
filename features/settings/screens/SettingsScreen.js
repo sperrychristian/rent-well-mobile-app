@@ -4,18 +4,18 @@ import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DemoBanner from '../../../components/DemoBanner';
 import LogoutButton from '../../auth/components/LogoutButton';
-import { useAuth } from '../../auth/context/AuthContext';
+import { useAuth } from '../../../store/AuthContext';
 import { useAppRole } from '../../auth/hooks/useAppRole';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { SIZES, SPACING, TYPE } from '../../../theme';
-import { formatCurrency } from '../../../utils/formatCurrency';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { SIZES, SPACING, TYPE } from '../../../constants/theme';
+import { formatCurrency } from '../../../util/formatCurrency';
 import ListRow from '../../../components/ui/ListRow';
 import DemoTourSheet from '../../home/components/DemoTourSheet';
 import { useDemoTour } from '../../home/hooks/useDemoTour';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
-import { useTheme } from '../../../context/ThemeContext';
+import { useTheme } from '../../../store/ThemeContext';
 import SecurityCard from '../../security/components/SecurityCard';
 
 const appearance_choices = [

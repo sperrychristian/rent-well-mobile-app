@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client';
-import { api_base_url } from './config';
+import { api_base_url } from '../constants/config';
 import { api_client } from './api';
 
 // one socket for the whole app, the messages context opens it after login and closes it on logout

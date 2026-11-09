@@ -5,9 +5,9 @@ import * as Calendar from 'expo-calendar/legacy';
 import { forgetDemoCalendarEvents } from '../features/calendar/utils/deviceCalendar';
 import { dayLabel } from '../features/calendar/utils/calendarEvents';
 import { monthOf, shiftMonth } from '../features/payments/utils/ledgerMath';
-import { todayString } from '../utils/formatDate';
+import { todayString } from '../util/formatDate';
 import App, { forgetNavigationState } from '../App';
-import { navigation_ref } from '../services/navigationRef';
+import { navigation_ref } from '../util/navigationRef';
 
 // Calendar on the real App: the drawer item on both sides, the month grid and agenda, past due rows,
 // and "Add to my calendar" with the demo's confirm sheet and a denied permission (the same harness as appNavigation.test.js)

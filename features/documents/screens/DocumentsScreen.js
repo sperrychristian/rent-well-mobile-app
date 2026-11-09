@@ -10,14 +10,14 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ImagePicker } from '../../../services/systemPickers';
+import { ImagePicker } from '../../../util/systemPickers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DocumentDetailModal from '../components/DocumentDetailModal';
 import DocumentFormModal from '../components/DocumentFormModal';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { todayString } from '../../../utils/formatDate';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { todayString } from '../../../util/formatDate';
 import {
   saveDocumentFile,
   deleteDocumentFile,
@@ -26,11 +26,11 @@ import {
 } from '../utils/documentFiles';
 import { iconFor, expiryTag, daysUntil } from '../utils/documentHelpers';
 import { document_categories, expiring_soon_days } from '../../../data/documentOptions';
-import { COLORS, SPACING, TYPE, SIZES, OPACITY, NUMBERS } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES, OPACITY, NUMBERS } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import StatusLabel from '../../../components/ui/StatusLabel';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 const sort_options = ['Newest', 'Name'];
 

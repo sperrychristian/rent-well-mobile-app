@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Modal, View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { SPACING, TYPE, RADIUS, NUMBERS } from '../../../theme';
+import { SPACING, TYPE, RADIUS, NUMBERS } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import { formatCurrency } from '../../../utils/formatCurrency';
+import { formatCurrency } from '../../../util/formatCurrency';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 import ReceiptImage from '../../../components/ReceiptImage';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 function ExpenseDetailsModal(props) {
   // with Reduce Motion on the sheet just appears, no slide or fade

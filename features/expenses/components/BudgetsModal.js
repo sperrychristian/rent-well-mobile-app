@@ -3,11 +3,11 @@ import { Modal, View, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } 
 // the pop-up forms share the sheet look from components/ui, the JSX still says Card
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { SPACING, TYPE } from '../../../theme';
+import { SPACING, TYPE } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // props: visible, properties (list of names), budgets (name to amount), onSave, onClose
 function BudgetsModal(props) {

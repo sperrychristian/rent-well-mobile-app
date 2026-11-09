@@ -4,9 +4,9 @@ import { Modal, View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'r
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TextField from '../../../components/TextField';
-import { SPACING, TYPE, SIZES } from '../../../theme';
+import { SPACING, TYPE, SIZES } from '../../../constants/theme';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // adds a property, or edits the name and address of one (property is null for a new one)
 // props: visible, property, onSave (gets name and address, gives back a promise), onClose

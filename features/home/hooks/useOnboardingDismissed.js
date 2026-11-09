@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { storageKey } from '../../../utils/storageKeys';
+import { storageKey } from '../../../util/storageKeys';
 
 // whether this account hid the setup checklist for good, saved per account so a shared phone keeps them apart
 // gives back [dismissed, dismiss], dismissed is null while it's still being read (so the card doesn't flash)

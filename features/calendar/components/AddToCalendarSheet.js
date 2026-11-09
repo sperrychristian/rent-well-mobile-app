@@ -3,8 +3,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SheetHandle, sheet_styles } from '../../../components/ui/sheet';
 import Button from '../../../components/ui/Button';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { SPACING, TYPE } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { SPACING, TYPE } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the sheet before anything goes on the phone's calendar: how many, where they go, why the phone may ask,
 // and in the demo, that these are sample events landing in the real calendar

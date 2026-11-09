@@ -1,6 +1,6 @@
 import { View } from 'react-native';
-import { RADIUS, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { RADIUS, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // a thin bar that fills up as items get checked off, props are done and total
 function ProgressBar(props) {

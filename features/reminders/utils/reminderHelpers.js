@@ -1,5 +1,5 @@
 import { parseApiError } from '../../../services/apiHelpers';
-import { formatCents } from '../../../utils/formatCurrency';
+import { formatCents } from '../../../util/formatCurrency';
 import { deriveLedger } from '../../payments/utils/ledgerMath';
 
 // rent reminders: the suggested text, who owes what, and the one-a-day rule, a port of the server's

@@ -3,9 +3,9 @@ import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import UnreadBadge from './UnreadBadge';
 import { formatMessageTime } from '../utils/messageHelpers';
-import { COLORS, SPACING, FONTS, TYPE, BORDER, OPACITY, SIZES } from '../../../theme';
+import { COLORS, SPACING, FONTS, TYPE, BORDER, OPACITY, SIZES } from '../../../constants/theme';
 import Avatar from '../../../components/ui/Avatar';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // one thread in the inbox: who, the last message, when, and how many are unread
 // props: conversation, my_user_id, onPress

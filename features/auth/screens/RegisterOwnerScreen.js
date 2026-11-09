@@ -3,10 +3,10 @@ import { Text, Pressable, View } from 'react-native';
 import AuthLayout from '../components/AuthLayout';
 import SubmitButton from '../components/SubmitButton';
 import TextField from '../../../components/TextField';
-import { useAuth, homeRouteFor } from '../context/AuthContext';
+import { useAuth, homeRouteFor } from '../../../store/AuthContext';
 import { checkEmail, checkNewPassword, checkName, collectErrors } from '../utils/authValidation';
-import { SPACING, TYPE, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { SPACING, TYPE, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 function RegisterOwnerScreen(props) {
   const { registerOwner } = useAuth();

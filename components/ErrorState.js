@@ -1,8 +1,8 @@
 import { View, Text } from 'react-native';
 import PrimaryButton from './PrimaryButton';
-import { SPACING, TYPE, SIZES } from '../theme';
+import { SPACING, TYPE, SIZES } from '../constants/theme';
 import IconCircle from './ui/IconCircle';
-import { themedStyles } from '../utils/themedStyles';
+import { themedStyles } from '../util/themedStyles';
 
 // shown instead of a blank screen when something couldn't load, like being offline or the server being down
 // props: message, onRetry
