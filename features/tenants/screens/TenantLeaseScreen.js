@@ -15,18 +15,20 @@ import { useLeaseActions } from '../../leases/hooks/useLeaseActions';
 import { leaseEventLine } from '../../leases/utils/leaseHelpers';
 import { hapticSuccess } from '../../../util/haptics';
 import { todayString } from '../../../util/formatDate';
-import { onSocketEvent } from '../../../services/socket';
 import { SPACING, TYPE, SIZES, BORDER } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 // stub for the assignment: it gets only the tenant's id, shows their name when the tenants data has them,
 // and the id otherwise, then links to the Documents screen where leases live today
 // the leases pass made it real: it opens one tenancy's lease (tenancyId from Leases or a push tap, or tenantId
 // from Tenant Profile, which picks their current tenancy), with Set, Edit, and Renew, and the lease's timeline
 function TenantLeaseScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['tenants', 'ledger']);
   const insets = useSafeAreaInsets();
   const toast = useToast();
-  const { getTenantById, findTenancy, fetchLease, is_demo } = useTenants();
+  const { getTenantById, findTenancy, fetchLease } = useTenants();
   const actions = useLeaseActions();
   const params = props.route.params || {};
   const tenant_id = params.tenantId || null;
@@ -54,14 +56,6 @@ function TenantLeaseScreen(props) {
     () => props.navigation.addListener('focus', () => setReloadCount((count) => count + 1)),
     [props.navigation],
   );
-
-  // a lease changed on another phone comes in as tenancy:updated
-  useEffect(() => {
-    if (is_demo) {
-      return undefined;
-    }
-    return onSocketEvent('tenancy:updated', () => setReloadCount((count) => count + 1));
-  }, [is_demo]);
 
   // the timeline comes from the lease route, so it reloads when the screen comes back and after a change
   useEffect(() => {

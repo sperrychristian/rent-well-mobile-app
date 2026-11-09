@@ -11,18 +11,6 @@ import { invalid_summary } from '../features/workOrders/components/WorkOrderForm
 // a tenant's request reaches the landlord's list, Home count, and badge, the landlord's edit reaches the
 // detail, the list, and the tenant, bad input never gets saved, and the discard prompt only shows when it should
 
-jest.mock('expo-secure-store', () => ({
-  getItemAsync: jest.fn(() => Promise.resolve(null)),
-  setItemAsync: jest.fn(() => Promise.resolve()),
-  deleteItemAsync: jest.fn(() => Promise.resolve()),
-}));
-jest.mock('expo-notifications', () => ({
-  setNotificationHandler: jest.fn(),
-  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
-  getLastNotificationResponseAsync: jest.fn(() => Promise.resolve(null)),
-  clearLastNotificationResponseAsync: jest.fn(() => Promise.resolve()),
-  getPermissionsAsync: jest.fn(() => Promise.resolve({ granted: false, canAskAgain: false })),
-}));
 jest.mock('expo-splash-screen', () => ({
   preventAutoHideAsync: jest.fn(() => Promise.resolve()),
   hideAsync: jest.fn(() => Promise.resolve()),

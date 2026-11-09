@@ -13,9 +13,12 @@ import StatusLabel from '../../../components/ui/StatusLabel';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 // the tenant's own requests, newest first, they update live when the landlord changes something
 function MyRequestsScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['orders']);
   const insets = useSafeAreaInsets();
   const {
     orders,

@@ -1,16 +1,19 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  api_client,
-  login as loginRequest,
-  registerOwner as registerOwnerRequest,
-  registerTenant as registerTenantRequest,
-  logoutSession,
-} from '../services/api';
-import { unregisterForPush } from '../services/push';
+  getUser,
+  getTestAccounts,
+  registerOwnerAccount,
+  registerTenantAccount,
+  setSessionUser,
+} from '../util/http';
 import { resetTo } from '../util/navigationRef';
-import { clearAttachmentUrls } from '../services/attachmentUrls';
 
 const AuthContext = createContext(null);
+
+// milestone 2 has no sign in yet (Firebase Auth comes next milestone), so "logging in" picks a test account
+// from the users node and keeps only its id (plus a copy of the record so the app opens offline) on the phone
+const account_key = 'rent_well_test_account';
 
 // owners land on the existing dashboard and tenants get their own home
 export function homeRouteFor(user) {
@@ -24,73 +27,83 @@ export function AuthProvider(props) {
   // set when the session ran out on its own, so the app opens on Login with a note instead of Welcome
   const [session_expired, setSessionExpired] = useState(false);
 
-  useEffect(() => {
-    // a refresh brings a fresh user, and a dead refresh token means logging in again
-    const stop_listening = api_client.onSessionEvent((event_name, payload) => {
-      if (event_name === 'session') {
-        setUser(payload.user);
-        setStatus('signed_in');
-        setSessionExpired(false);
-      } else if (event_name === 'expired') {
-        setUser(null);
-        setStatus('signed_out');
-        setSessionExpired(true);
-        resetTo('Login');
-      }
-    });
+  // step 1: the data modules read who's signed in from here, so it changes together with the state
+  function signIn(next_user) {
+    setSessionUser(next_user);
+    setUser(next_user);
+    setStatus('signed_in');
+    setSessionExpired(false);
+    AsyncStorage.setItem(account_key, JSON.stringify(next_user)).catch((error) =>
+      console.log('Could not save the test account', error),
+    );
+    return next_user;
+  }
 
+  useEffect(() => {
     // I sign in with the saved user right away so the app opens even offline, then check the session in the background
     async function restoreSession() {
+      let saved = null;
       try {
-        const stored = await api_client.loadStoredSession();
-        if (!stored || !stored.user) {
-          setStatus('signed_out');
-          return;
-        }
-        setUser(stored.user);
-        setStatus('signed_in');
-        api_client.refreshSession().catch((error) => {
-          console.log('Could not refresh the saved session', error.message);
-        });
+        const text = await AsyncStorage.getItem(account_key);
+        saved = text ? JSON.parse(text) : null;
       } catch (error) {
-        console.log('Could not read the saved session', error);
+        console.log('Could not read the saved test account', error);
+      }
+      if (!saved || !saved.id) {
         setStatus('signed_out');
+        return;
+      }
+      setSessionUser(saved);
+      setUser(saved);
+      setStatus('signed_in');
+      try {
+        const fresh = await getUser(saved.id);
+        if (fresh) {
+          setSessionUser(fresh);
+          setUser(fresh);
+          AsyncStorage.setItem(account_key, JSON.stringify(fresh)).catch(() => {});
+        } else {
+          // the record is gone (the database was reset), so this account can't be used anymore
+          await AsyncStorage.removeItem(account_key).catch(() => {});
+          setSessionUser(null);
+          setUser(null);
+          setStatus('signed_out');
+          setSessionExpired(true);
+          resetTo('Login');
+        }
+      } catch (error) {
+        console.log('Could not check the saved test account', error.message);
       }
     }
     restoreSession();
-
-    return stop_listening;
   }, []);
 
-  async function login(email, password) {
-    const session = await loginRequest(email.trim(), password);
-    return session.user;
+  // the test account picker on Log In passes the account it picked
+  async function login(account) {
+    const fresh = await getUser(account.id);
+    if (!fresh) {
+      throw new Error('That test account is gone. Pull to refresh the list.');
+    }
+    return signIn(fresh);
   }
 
+  // fields: name, email (no password until Firebase Auth)
   async function registerOwner(fields) {
-    const session = await registerOwnerRequest(fields);
-    return session.user;
+    return signIn(await registerOwnerAccount(fields));
   }
 
+  // fields: invite_code, email, name
   async function registerTenant(fields) {
-    const session = await registerTenantRequest(fields);
-    return session.user;
+    return signIn(await registerTenantAccount(fields));
   }
 
-  // the push token goes first so this phone stops getting pushes, and a failed request never blocks logging out
   async function logout() {
-    await unregisterForPush();
     try {
-      await logoutSession();
+      await AsyncStorage.removeItem(account_key);
     } catch (error) {
-      console.log('Could not reach the server to log out', error.message);
+      console.log('Could not clear the saved test account', error);
     }
-    try {
-      await api_client.clearSession();
-    } catch (error) {
-      console.log('Could not clear the saved session', error);
-    }
-    clearAttachmentUrls();
+    setSessionUser(null);
     setUser(null);
     setStatus('signed_out');
     setSessionExpired(false);
@@ -105,6 +118,7 @@ export function AuthProvider(props) {
     registerOwner,
     registerTenant,
     logout,
+    loadTestAccounts: getTestAccounts,
   };
 
   return <AuthContext.Provider value={value}>{props.children}</AuthContext.Provider>;

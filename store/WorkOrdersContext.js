@@ -32,6 +32,16 @@ import {
   clearDemoChecklistPhotos,
 } from '../features/checklist/utils/checklistPhotos';
 import { RemoteWorkOrdersContext } from './remoteWorkOrdersContext';
+import {
+  getTrips,
+  saveTripChanges,
+  getDocuments,
+  saveDocumentChanges,
+  getChecklists,
+  saveChecklistChanges,
+  getOwnerSettings,
+  saveOwnerSettings,
+} from '../util/http';
 
 const orders_key = 'rent_well_work_orders';
 const expenses_key = 'rent_well_expenses';
@@ -102,6 +112,14 @@ export function WorkOrdersProvider(props) {
   const demo_ref = useRef(false);
   // which side of the demo is showing, owner (landlord) or tenant, both read and change the same demo data
   const [demo_role, setDemoRole] = useState('owner');
+  // milestone 2: a signed-in landlord's trips, documents, checklists, mileage rate, and budgets live in Firebase
+  // the phone's saved copy still shows first (so it opens offline), then the database's replaces it
+  // cloud is loading, ready, or error, and only a ready cloud gets saves, so a failed load never writes over the database
+  const firebase_owner_id = props.firebase_owner_id || null;
+  const [cloud, setCloud] = useState({ status: firebase_owner_id ? 'loading' : 'off', error: '' });
+  // the last version each list had in the database, a change is compared with this to find what to write
+  const cloud_synced = useRef({});
+  const cloud_owner = useRef(null);
 
   // reads whatever was saved on the device, used on startup and when leaving the demo
   // user_id picks which account's keys to read, gives back false if a newer load or the demo took over
@@ -177,9 +195,119 @@ export function WorkOrdersProvider(props) {
     loadSavedData(current_user).then((applied) => {
       if (applied) {
         setLoadedUser(current_user);
+        loadCloud();
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current_user]);
+
+  // step 1: read the landlord's four lists from Firebase at once, step 2: put them in state and remember them
+  // as what's saved, step 3: from then on every change goes through the save effects below
+  async function loadCloud() {
+    const owner_id = firebase_owner_id;
+    cloud_owner.current = owner_id;
+    if (!owner_id || demo_ref.current) {
+      setCloud({ status: 'off', error: '' });
+      return;
+    }
+    setCloud((current) => ({
+      ...current,
+      status: current.status === 'ready' ? 'ready' : 'loading',
+    }));
+    try {
+      const [cloud_trips, cloud_documents, cloud_checklists, cloud_settings] = await Promise.all([
+        getTrips(owner_id),
+        getDocuments(owner_id),
+        getChecklists(owner_id),
+        getOwnerSettings(owner_id),
+      ]);
+      // the demo started or someone else signed in while this was loading
+      if (demo_ref.current || cloud_owner.current !== owner_id) {
+        return;
+      }
+      const rate =
+        cloud_settings && cloud_settings.mileage_rate !== null
+          ? cloud_settings.mileage_rate
+          : default_mileage_rate;
+      const cloud_budgets = cloud_settings ? cloud_settings.budgets : {};
+      cloud_synced.current = {
+        trips: cloud_trips,
+        documents: cloud_documents,
+        checklists: cloud_checklists,
+        settings: { mileage_rate: rate, budgets: cloud_budgets },
+      };
+      setTrips(cloud_trips);
+      setDocuments(cloud_documents);
+      setChecklists(cloud_checklists);
+      setMileageRate(rate);
+      setBudgets(cloud_budgets);
+      setCloud({ status: 'ready', error: '' });
+    } catch (error) {
+      console.log('Could not load from Firebase', error.message);
+      setCloud({ status: 'error', error: error.message });
+    }
+  }
+
+  // saves one list's changes, and on a failed write puts the list back the way the database has it
+  function syncToCloud(name, list, save, restore) {
+    const before = cloud_synced.current[name];
+    if (before === undefined || before === list) {
+      return;
+    }
+    cloud_synced.current[name] = list;
+    save(before, list, firebase_owner_id).catch((error) => {
+      console.log('Could not save to Firebase', error.message);
+      cloud_synced.current[name] = before;
+      restore(before);
+      setCloud({ status: 'ready', error: "Couldn't save that change: " + error.message });
+    });
+  }
+
+  const cloud_on = cloud.status === 'ready' && !!firebase_owner_id && !demo_mode && loaded;
+
+  useEffect(() => {
+    if (cloud_on) {
+      syncToCloud('trips', trips, saveTripChanges, setTrips);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trips, cloud_on]);
+
+  useEffect(() => {
+    if (cloud_on) {
+      syncToCloud('documents', documents, saveDocumentChanges, setDocuments);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [documents, cloud_on]);
+
+  useEffect(() => {
+    if (cloud_on) {
+      syncToCloud('checklists', checklists, saveChecklistChanges, setChecklists);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checklists, cloud_on]);
+
+  // the rate and the budgets share one small record
+  useEffect(() => {
+    if (!cloud_on) {
+      return;
+    }
+    const before = cloud_synced.current.settings;
+    if (before && before.mileage_rate === mileage_rate && before.budgets === budgets) {
+      return;
+    }
+    const next = { mileage_rate: mileage_rate, budgets: budgets };
+    cloud_synced.current.settings = next;
+    saveOwnerSettings(firebase_owner_id, next).catch((error) => {
+      console.log('Could not save settings to Firebase', error.message);
+      cloud_synced.current.settings = before;
+      if (before) {
+        setMileageRate(before.mileage_rate);
+        setBudgets(before.budgets);
+      }
+      setCloud({ status: 'ready', error: "Couldn't save that change: " + error.message });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mileage_rate, budgets, cloud_on]);
 
   // save every time the orders change, but not until the first load is done and never during the demo
   useEffect(() => {
@@ -337,6 +465,7 @@ export function WorkOrdersProvider(props) {
     demo_ref.current = false;
     if (await loadSavedData(current_user)) {
       setLoadedUser(current_user);
+      loadCloud();
     }
     // files added during the demo lived in the cache and go away with it
     clearDemoFiles();
@@ -434,6 +563,16 @@ export function WorkOrdersProvider(props) {
     setOrders((current_orders) =>
       current_orders.map((order) =>
         order.id === order_id && order.status !== 'Resolved' ? { ...order, ...changes } : order,
+      ),
+    );
+  }
+
+  // the landlord's Delete on Work Order, the order goes and any expense pointing at it stays but loses the link
+  function deleteWorkOrder(order_id) {
+    setOrders((current_orders) => current_orders.filter((order) => order.id !== order_id));
+    setExpenses((current_expenses) =>
+      current_expenses.map((expense) =>
+        expense.work_order_id === order_id ? { ...expense, work_order_id: null } : expense,
       ),
     );
   }
@@ -548,7 +687,7 @@ export function WorkOrdersProvider(props) {
   // the file goes with it, sample documents don't have one
   function deleteDocument(document_id) {
     const removed = documents.find((document) => document.id === document_id);
-    if (removed && !removed.sample) {
+    if (removed && !removed.sample && removed.stored_name) {
       deleteDocumentFile(removed.stored_name, demo_ref.current);
     }
     setDocuments((current_documents) =>
@@ -697,6 +836,7 @@ export function WorkOrdersProvider(props) {
     setMileageRate,
     addWorkOrder,
     updateWorkOrder,
+    deleteWorkOrder,
     addDocument,
     updateDocument,
     deleteDocument,
@@ -711,6 +851,11 @@ export function WorkOrdersProvider(props) {
     deleteChecklist,
     demo_tenant_data,
     setDemoTenantData,
+    // Firebase status for the landlord's trips, documents, checklists, and settings ('off' outside Firebase)
+    cloud_status: cloud.status,
+    cloud_error: cloud.error,
+    refreshCloud: loadCloud,
+    clearCloudError: () => setCloud((current) => ({ ...current, error: '' })),
   };
 
   return <WorkOrdersContext.Provider value={value}>{props.children}</WorkOrdersContext.Provider>;

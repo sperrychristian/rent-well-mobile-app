@@ -12,8 +12,11 @@ import { useAuth } from '../../../store/AuthContext';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 function MessagesScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['messages']);
   const insets = useSafeAreaInsets();
   // the work order screens pass the tenant's name in, so it can be missing when opened from the dashboard
   const tenant = props.route.params ? props.route.params.tenant : null;

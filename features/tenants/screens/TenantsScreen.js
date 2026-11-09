@@ -36,9 +36,12 @@ import Avatar from '../../../components/ui/Avatar';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 // every tenant by property and unit, the invites still waiting, and the past tenants folded away
 function TenantsScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['tenants']);
   const insets = useSafeAreaInsets();
   const {
     mode,

@@ -17,7 +17,8 @@ export function useLeaseActions() {
   async function renew(tenancy_id, value) {
     const schedule = currentSchedule(tenancy_id);
     await tenants.renewLease(tenancy_id, value, !!schedule);
-    if (tenants.is_demo && schedule && value.new_rent_cents) {
+    // with no server, Firebase does the same two parts as the demo
+    if (schedule && value.new_rent_cents) {
       // billed rent keeps its amount, so the new one starts the month of the next rent not billed yet
       const next_due = nextScheduledDue(schedule, ledger_store.today);
       const start_date = next_due ? monthOf(next_due) + '-01' : schedule.start_date;

@@ -9,10 +9,13 @@ import InstructionsModal from '../../payments/components/InstructionsModal';
 import { useToast } from '../../../components/ui/Toast';
 import { SPACING, TYPE, SIZES } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 // stub for the assignment: it gets only the property's id and looks the property up in the shared tenants data
 // (the demo's local copy or the server's), and if it isn't there it just shows the id instead of crashing
 function PropertyDetailScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['tenants', 'ledger']);
   const insets = useSafeAreaInsets();
   const { properties } = useTenants();
   const property_id =

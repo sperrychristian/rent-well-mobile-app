@@ -22,8 +22,13 @@ import { pendingInvites, formatInviteCode, inviteShareText } from '../utils/invi
 import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { useNavigation } from '@react-navigation/native';
 
 function InviteTenantScreen() {
+  const focus_navigation = useNavigation();
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(focus_navigation, ['tenants']);
   const insets = useSafeAreaInsets();
   // the header sits above this screen now, so the keyboard lift has to count its height too
   const header_height = useHeaderHeight();

@@ -24,11 +24,14 @@ import DemoTourSheet from '../components/DemoTourSheet';
 import { useDemoTour } from '../hooks/useDemoTour';
 import { COLORS, SPACING, TYPE, SIZES } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 // the tenant's home: message the landlord or report something that needs fixing
 // the Hearth pass: the wordmark and your initials, then what you owe right now as one big number with the
 // next rent under it, one line saying if anything is late, and the places to go as plain rows
 function TenantHomeScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['tenants', 'ledger', 'orders', 'messages']);
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { unread_total } = useMessages();

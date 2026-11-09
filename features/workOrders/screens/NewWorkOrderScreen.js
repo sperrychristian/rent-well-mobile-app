@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
+import { useState, useLayoutEffect, useRef, useCallback } from 'react';
 import { View, Text, Alert, Platform } from 'react-native';
 import { usePreventRemove } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,7 +10,6 @@ import { useTenants } from '../../../store/TenantsContext';
 import { useAppRole } from '../../auth/hooks/useAppRole';
 import { useToast } from '../../../components/ui/Toast';
 import { hapticSuccess } from '../../../util/haptics';
-import { getMe } from '../../../services/api';
 import { editRuleFor } from '../utils/workOrderHelpers';
 import { placeLabel } from '../../tenants/utils/tenantHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
@@ -56,9 +55,12 @@ function NewWorkOrderScreen(props) {
   const tenant_remote = is_remote && role === 'tenant';
   // a real owner picks the property (and optionally the tenant) from their own list, the Work Orders Add button opens this
   const owner_remote = is_remote && role === 'owner';
-  // both real versions keep a list of up to 5 photos that get uploaded
-  const remote_form = tenant_remote || owner_remote;
-  const { properties: owner_properties, my_active_tenancies } = useTenants();
+  const {
+    properties: owner_properties,
+    my_active_tenancies,
+    status: tenants_status,
+    refresh: refreshTenants,
+  } = useTenants();
   // the tenant demo is Sam, so the name and place fill in from Sam's rental in the demo data, like real mode does
   const tenant_demo = demo_mode && demo_role === 'tenant';
   const demo_place =
@@ -81,7 +83,6 @@ function NewWorkOrderScreen(props) {
   const is_owner = app_role !== 'tenant';
   const edit_rule = editRuleFor(selectedWorkOrder, {
     role: is_owner ? 'owner' : 'tenant',
-    is_remote: is_remote,
     is_own: tenant_demo && selectedWorkOrder ? selectedWorkOrder.tenant === demo_tenant.name : true,
   });
 
@@ -91,42 +92,22 @@ function NewWorkOrderScreen(props) {
   const [is_dirty, setIsDirty] = useState(false);
   // set right before leaving after a save, so the discard prompt never shows for a saved form
   const allow_leave = useRef(false);
-  // the tenant's rentals from GET /me, almost always just one
-  const [tenancies, setTenancies] = useState([]);
+  // the tenant's rentals come from the tenants store (the same tenancies Firebase holds), almost always just one
+  // the form reads them in the old server's shape, so each one gets a small property object
+  const tenancies = tenant_remote
+    ? my_active_tenancies.map((tenancy) => ({
+        id: tenancy.id,
+        property: { name: tenancy.property_name },
+        unitLabel: tenancy.unit_label,
+      }))
+    : [];
   // loading, ready, or error for the rental lookup
-  const [me_status, setMeStatus] = useState('loading');
-  const [me_attempt, setMeAttempt] = useState(0);
+  const me_status = tenants_status;
 
   // step 1: the title says Add or Edit, from the navigation map like every other header
   useLayoutEffect(() => {
     props.navigation.setOptions({ title: headerTitle('NewWorkOrder', props.route.params) });
   }, [props.navigation, props.route.params]);
-
-  useEffect(() => {
-    if (!tenant_remote || isEditing) {
-      return undefined;
-    }
-    let active = true;
-    getMe()
-      .then((me) => {
-        if (!active) {
-          return;
-        }
-        // the server renamed tenancies to activeTenancies, only active ones can file a request
-        const list = me.activeTenancies || me.tenancies || [];
-        setTenancies(list);
-        setMeStatus('ready');
-      })
-      .catch((error) => {
-        console.log('Could not load the rental', error.message);
-        if (active) {
-          setMeStatus('error');
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, [tenant_remote, isEditing, me_attempt]);
 
   // step 2: leaving with unsaved changes (Cancel, the back button, a swipe, Android's back) asks first
   usePreventRemove(is_dirty, (event) => {
@@ -152,9 +133,9 @@ function NewWorkOrderScreen(props) {
         title: workOrderData.title,
         description: workOrderData.description,
         priority: workOrderData.priority,
-        photos: workOrderData.photos,
         // only needed when there's more than one rental to pick from
         tenancy_id: tenancies.length > 1 ? workOrderData.tenancy_id : undefined,
+        preferred_date: workOrderData.preferred_date,
       };
     }
     if (owner_remote) {
@@ -163,11 +144,11 @@ function NewWorkOrderScreen(props) {
         title: workOrderData.title,
         description: workOrderData.description,
         priority: workOrderData.priority,
-        photos: workOrderData.photos,
         unit_label: workOrderData.unit_label,
         tenant_user_id: workOrderData.tenant_user_id,
         contractor: workOrderData.contractor,
         estimate: estimate,
+        preferred_date: workOrderData.preferred_date,
       };
     }
     // the demo tenant's version: it goes in the demo's shared list, so the landlord side sees it as Open
@@ -200,12 +181,19 @@ function NewWorkOrderScreen(props) {
   function buildChanges(workOrderData) {
     const estimate =
       workOrderData.estimate_cents === null ? null : workOrderData.estimate_cents / 100;
+    // Firebase has no server limits, so a landlord changes every field and a tenant changes their own while it's Open
     if (is_remote) {
-      return {
+      const remote_changes = {
+        title: workOrderData.title,
+        description: workOrderData.description,
         priority: workOrderData.priority,
-        contractor: workOrderData.contractor,
-        estimate: estimate,
+        preferred_date: workOrderData.preferred_date,
       };
+      if (is_owner) {
+        remote_changes.contractor = workOrderData.contractor;
+        remote_changes.estimate = estimate;
+      }
+      return remote_changes;
     }
     const changes = {
       title: workOrderData.title,
@@ -242,9 +230,7 @@ function NewWorkOrderScreen(props) {
       if (isEditing) {
         await updateWorkOrder(editedWorkOrderId, buildChanges(workOrderData));
       } else {
-        await addWorkOrder(buildRequest(workOrderData), (number, total) =>
-          setProgressText('Uploading photo ' + number + ' of ' + total + '...'),
-        );
+        await addWorkOrder(buildRequest(workOrderData));
       }
     } catch (error) {
       console.log('Could not save the work order', error.message);
@@ -262,7 +248,7 @@ function NewWorkOrderScreen(props) {
     } else if (tenant_demo) {
       toast.show('Request sent. Switch to the Landlord view to see it.', 'send-outline');
     } else if (!is_owner) {
-      toast.show('Request sent. Your landlord has been notified.', 'send-outline');
+      toast.show('Request sent. Your landlord will see it in their work orders.', 'send-outline');
     } else {
       toast.show('Work order added', 'checkmark-circle-outline');
     }
@@ -296,17 +282,17 @@ function NewWorkOrderScreen(props) {
       isEditing={isEditing}
       variant={variant}
       showLandlordFields={is_owner}
-      // the server has no date for a work order, so the preferred date is only on the phone (the demo)
-      showDate={!is_remote}
-      readOnlyText={isEditing && is_remote}
-      // in real mode photos get added from the detail screen once it exists, the form adds them on create
-      showPhotos={!isEditing || !is_remote}
-      multiplePhotos={remote_form}
+      // the preferred date is saved on the Firebase record too now, so it shows in both modes
+      showDate={true}
+      readOnlyText={false}
+      // photos wait for Firebase Storage, so only the demo shows the photo picker
+      showPhotos={!is_remote}
+      multiplePhotos={false}
       properties={properties}
       ownerProperties={owner_properties}
       tenancies={tenancies}
       meStatus={me_status}
-      onRetryMe={() => setMeAttempt((current) => current + 1)}
+      onRetryMe={refreshTenants}
       placeText={
         isEditing
           ? selectedWorkOrder.property

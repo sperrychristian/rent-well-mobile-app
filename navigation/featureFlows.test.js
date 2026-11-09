@@ -9,18 +9,6 @@ import { COLORS, LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../constants
 // the real App in the demo, both sides: the new Leases, Profit, and reminder flows tapped like a person would,
 // and dark mode drawn on the busiest screens (the same harness as appNavigation.test.js)
 
-jest.mock('expo-secure-store', () => ({
-  getItemAsync: jest.fn(() => Promise.resolve(null)),
-  setItemAsync: jest.fn(() => Promise.resolve()),
-  deleteItemAsync: jest.fn(() => Promise.resolve()),
-}));
-jest.mock('expo-notifications', () => ({
-  setNotificationHandler: jest.fn(),
-  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
-  getLastNotificationResponseAsync: jest.fn(() => Promise.resolve(null)),
-  clearLastNotificationResponseAsync: jest.fn(() => Promise.resolve()),
-  getPermissionsAsync: jest.fn(() => Promise.resolve({ granted: false, canAskAgain: false })),
-}));
 jest.mock('expo-splash-screen', () => ({
   preventAutoHideAsync: jest.fn(() => Promise.resolve()),
   hideAsync: jest.fn(() => Promise.resolve()),

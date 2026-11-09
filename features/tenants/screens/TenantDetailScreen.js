@@ -18,10 +18,13 @@ import { list_styles } from '../../../components/ui/listStyles';
 import Avatar from '../../../components/ui/Avatar';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 // one tenant: how to reach them, where they live now, their work orders, where they lived before,
 // and the owner's actions (message, move, assign, end)
 function TenantDetailScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['tenants', 'orders']);
   const insets = useSafeAreaInsets();
   const tenant_id = props.route.params.tenantId;
   const {

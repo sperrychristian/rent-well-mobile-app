@@ -11,12 +11,15 @@ import { leaseRows, leaseStatusLabel, daysLine, shortLeaseDate } from '../utils/
 import { todayString } from '../../../util/formatDate';
 import { SPACING, TYPE, SIZES } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 // every lease in one list, soonest end first: current tenancies, then past ones that had a lease
 // each row says the tenant, the place, the status in words and color, and the days left
 // tapping one opens that tenancy's lease (Tenant Lease) by its id, where Set, Edit, and Renew live
 // the leases come with the tenants in both modes (each tenancy carries its lease), so nothing extra loads here
 function LeasesScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['tenants']);
   const { tenants, status, error_message, refresh, refreshing } = useTenants();
   const today = todayString();
   const rows = leaseRows(tenants);

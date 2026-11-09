@@ -9,6 +9,7 @@ import { makeIdempotencyKey } from '../utils/ledgerApi';
 import { payment_methods, validatePayment, hasErrors } from '../utils/ledgerHelpers';
 import { COLORS, SPACING, TYPE, SIZES } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
+import { useLedger } from '../../../store/LedgerContext';
 
 const applies_options = [
   { value: 'rent', label: 'Rent' },
@@ -34,6 +35,7 @@ function PaymentFormModal(props) {
   // one key per time the form opens, so tapping Save again after a failed try can't record it twice
   const [idempotency_key] = useState(() => makeIdempotencyKey());
   const [receipt, setReceipt] = useState(null);
+  const ledger_store = useLedger();
   const [errors, setErrors] = useState({});
   const [form_error, setFormError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -152,9 +154,12 @@ function PaymentFormModal(props) {
         />
       </Field>
 
-      <Field label="Receipt photo (optional)">
-        <ReceiptPicker value={receipt} onChange={setReceipt} />
-      </Field>
+      {/* receipt photos wait for Firebase Storage, so only the demo offers one */}
+      {ledger_store.is_demo ? (
+        <Field label="Receipt photo (optional)">
+          <ReceiptPicker value={receipt} onChange={setReceipt} />
+        </Field>
+      ) : null}
     </FormSheet>
   );
 }

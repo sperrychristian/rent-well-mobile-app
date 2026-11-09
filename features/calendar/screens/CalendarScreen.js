@@ -31,6 +31,7 @@ import {
 } from '../utils/calendarEvents';
 import { COLORS, SPACING, TYPE, SIZES, RADIUS, BORDER, FONTS } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 // the legend under the grid, so a dot's color always has words next to it somewhere on screen
 const legend = [
@@ -45,6 +46,8 @@ const legend = [
 // same tokens and line icons as every other screen, and it works the same in light and dark with nothing to install
 // tap a day to see its agenda, tap a row to open it, and the calendar button sends it to the phone's calendar
 function CalendarScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['orders', 'ledger', 'tenants']);
   const insets = useSafeAreaInsets();
   const role = useAppRole();
   const { user } = useAuth();

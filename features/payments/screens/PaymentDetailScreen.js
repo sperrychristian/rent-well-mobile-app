@@ -17,6 +17,7 @@ import { paymentPill, methodLabel, timelineFor } from '../utils/ledgerHelpers';
 import { shareReceipt } from '../utils/shareReceipt';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 const event_icons = {
   recorded: 'create-outline',
@@ -33,6 +34,8 @@ const event_icons = {
 // the tenant sees the same record, read only
 // the only param is paymentId, the payment comes from the ledger store (or the server, for a push tap)
 function PaymentDetailScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['ledger']);
   const insets = useSafeAreaInsets();
   const ledger_store = useLedger();
   const review = useLedgerReview();

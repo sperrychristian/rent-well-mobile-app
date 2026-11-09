@@ -11,11 +11,16 @@ import StatusLabel from '../../../components/ui/StatusLabel';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { useNavigation } from '@react-navigation/native';
 
 // a former tenant's requests, read only, straight from the server (reading still works after a tenancy ends)
 // the shared state pass: it used to fetch its own copy here, now it reads the same list the rest of the app does
 // (the real-mode work order store already loads a former tenant's requests, so there's one copy, not two)
 function PastRequestsScreen() {
+  const focus_navigation = useNavigation();
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(focus_navigation, ['orders', 'tenants']);
   const insets = useSafeAreaInsets();
   // the demo never calls the server, a demo tenant whose rental ended reads Sam's requests from the demo list
   const {

@@ -261,10 +261,13 @@ function ChecklistItemModal(props) {
                 onChangeText={setNote}
               />
 
-              <Text style={styles.label}>
-                Photos ({photos.length} of {max_photos})
-              </Text>
-              {photos.length > 0 && (
+              {/* milestone 2: photos wait for Firebase Storage, so a Firebase checklist leaves them out */}
+              {!props.hide_photos && (
+                <Text style={styles.label}>
+                  Photos ({photos.length} of {max_photos})
+                </Text>
+              )}
+              {!props.hide_photos && photos.length > 0 && (
                 <View style={styles.wrap_row}>
                   {photos.map((stored_name) => (
                     <View key={stored_name} style={styles.photo_wrap}>
@@ -297,7 +300,7 @@ function ChecklistItemModal(props) {
                   ))}
                 </View>
               )}
-              {!locked && photos.length < max_photos && (
+              {!props.hide_photos && !locked && photos.length < max_photos && (
                 <View style={styles.button_row}>
                   <PrimaryButton
                     variant="secondary"

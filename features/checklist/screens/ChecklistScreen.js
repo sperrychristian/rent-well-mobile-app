@@ -13,10 +13,13 @@ import EmptyState from '../../../components/ui/EmptyState';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 const status_filters = ['All', 'In progress', 'Complete'];
 
 function ChecklistScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['cloud']);
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
   const { checklists, properties, addChecklist } = useWorkOrders();

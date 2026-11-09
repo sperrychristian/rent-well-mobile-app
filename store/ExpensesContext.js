@@ -11,9 +11,7 @@ import {
   updateExpense as updateExpenseRequest,
   deleteExpense as deleteExpenseRequest,
   importExpenses,
-  uploadImage,
-} from '../services/api';
-import { onSocketEvent } from '../services/socket';
+} from '../util/http';
 import { legacyExpensesFor } from '../features/workOrders/utils/workOrderHelpers';
 import {
   fromApiExpense,
@@ -22,7 +20,6 @@ import {
   findPropertyId,
   legacyExpenses,
   inBatches,
-  isReceiptKey,
   server_categories,
   server_payment_methods,
 } from '../features/expenses/utils/expenseApi';
@@ -34,18 +31,6 @@ import { expense_categories, payment_methods } from '../data/expenseOptions';
 // the last list the server sent, per account, so Expenses still opens offline
 function cacheKey(user_id) {
   return 'rent_well_expenses_cache_' + user_id;
-}
-
-// a receipt the landlord just picked is a file on the phone, it has to be uploaded to get a key first
-async function receiptKeyFor(receipts) {
-  const first = receipts && receipts.length > 0 ? receipts[0] : null;
-  if (!first) {
-    return null;
-  }
-  if (isReceiptKey(first)) {
-    return first;
-  }
-  return uploadImage(first, 'image/jpeg');
 }
 
 export function ExpensesProvider(props) {
@@ -124,11 +109,8 @@ function RemoteExpensesStore(props) {
       })
       .catch(() => {})
       .finally(() => latest.current.loadAll(false));
-    // a socket reconnect might mean the phone was offline, so it checks again
-    const stop_connect = onSocketEvent('connect', () => latest.current.loadAll(true));
     return () => {
       active = false;
-      stop_connect();
     };
   }, [user_id]);
 
@@ -170,7 +152,8 @@ function RemoteExpensesStore(props) {
     };
     keep([shown, ...list_ref.current]);
     try {
-      const receipt_key = await receiptKeyFor(fields.receipts);
+      // receipts are photos, they wait for Firebase Storage, so none is saved with the expense
+      const receipt_key = null;
       const created = await createExpense(
         toApiExpense({ ...shown, work_order_id: order_id || null }, property_id, receipt_key),
       );
@@ -195,7 +178,7 @@ function RemoteExpensesStore(props) {
     }
     keep(list_ref.current.map((item) => (item.id === expense_id ? merged : item)));
     try {
-      const receipt_key = await receiptKeyFor(merged.receipts);
+      const receipt_key = null;
       const saved = await updateExpenseRequest(
         expense_id,
         toApiExpense(merged, property_id, receipt_key),
@@ -240,8 +223,8 @@ function RemoteExpensesStore(props) {
       const prepared = [];
       for (const expense of items) {
         try {
-          const receipt = expense.receipts && expense.receipts[0];
-          const receipt_key = receipt ? await uploadImage(receipt, 'image/jpeg') : null;
+          // the receipt photo stays on the phone until Firebase Storage, the expense itself goes up
+          const receipt_key = null;
           prepared.push({ expense, item: toImportItem(expense, properties, receipt_key) });
         } catch (error) {
           // a receipt that won't upload keeps that expense on the phone for the next try
@@ -310,6 +293,8 @@ function RemoteExpensesStore(props) {
       await loadAll(false);
       setRefreshing(false);
     },
+    // a reload with no spinner, for when a screen comes back into view
+    reloadQuietly: () => loadAll(true),
     property_names: property_names,
     legacy_count: legacy.length,
     importing: importing,
@@ -346,4 +331,9 @@ export function useExpenses() {
     importing: remote ? remote.importing : null,
     importLegacy: remote ? remote.importLegacy : () => Promise.resolve({ imported: 0, failed: 0 }),
   };
+}
+
+// the Firebase expenses store itself (null in the demo, for tenants, and signed out), for the focus reload
+export function useRemoteExpenses() {
+  return useContext(RemoteExpensesContext);
 }

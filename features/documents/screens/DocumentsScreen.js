@@ -31,14 +31,28 @@ import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { useNavigation } from '@react-navigation/native';
 
 const sort_options = ['Newest', 'Name'];
 
 function DocumentsScreen() {
+  const focus_navigation = useNavigation();
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(focus_navigation, ['cloud']);
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
-  const { documents, properties, demo_mode, addDocument, updateDocument, deleteDocument } =
-    useWorkOrders();
+  const {
+    documents,
+    properties,
+    demo_mode,
+    addDocument,
+    updateDocument,
+    deleteDocument,
+    cloud_status,
+  } = useWorkOrders();
+  // a Firebase landlord's documents are records only until Firebase Storage, the demo keeps real files
+  const records_only = !demo_mode && cloud_status !== 'off';
 
   const [property_filter, setPropertyFilter] = useState('All');
   const [category_filter, setCategoryFilter] = useState('All');
@@ -171,9 +185,11 @@ function DocumentsScreen() {
     }
     Alert.alert(
       'Delete document?',
-      document.sample
-        ? 'This removes the sample document.'
-        : 'This removes the document and its file from this phone. It cannot be undone.',
+      document.record_only
+        ? 'This removes the document record.'
+        : document.sample
+          ? 'This removes the sample document.'
+          : 'This removes the document and its file from this phone. It cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -236,13 +252,16 @@ function DocumentsScreen() {
           style={styles.add_button}
           onPress={openNewForm}
         />
-        <PrimaryButton
-          title="Scan"
-          icon="camera-outline"
-          variant="secondary"
-          style={styles.scan_button}
-          onPress={scanDocument}
-        />
+        {/* a scan is a photo file, which waits for Firebase Storage, so only phone documents have it */}
+        {!records_only && (
+          <PrimaryButton
+            title="Scan"
+            icon="camera-outline"
+            variant="secondary"
+            style={styles.scan_button}
+            onPress={scanDocument}
+          />
+        )}
       </View>
 
       <Text style={styles.section_label}>Property</Text>
@@ -395,6 +414,7 @@ function DocumentsScreen() {
         onDismiss={openPendingEdit}
       />
       <DocumentFormModal
+        records_only={records_only}
         visible={form_open}
         document={editing_document}
         initial_file={prefill_file}

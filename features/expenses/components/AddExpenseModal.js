@@ -403,8 +403,9 @@ function AddExpenseModal(props) {
                 onChangeText={setNotes}
               />
 
-              <Text style={styles.label}>Receipts</Text>
-              {receipts.length > 0 && (
+              {/* receipt photos wait for Firebase Storage, so a Firebase landlord's form leaves them out */}
+              {!is_remote && <Text style={styles.label}>Receipts</Text>}
+              {!is_remote && receipts.length > 0 && (
                 <View style={styles.wrap_row}>
                   {receipts.map((uri, index) => (
                     <View key={uri + index} style={styles.receipt_wrap}>
@@ -432,22 +433,24 @@ function AddExpenseModal(props) {
                   ))}
                 </View>
               )}
-              <View style={styles.button_row}>
-                <PrimaryButton
-                  variant="secondary"
-                  title="Camera"
-                  icon="camera-outline"
-                  onPress={takePhoto}
-                  style={styles.small_button}
-                />
-                <PrimaryButton
-                  variant="secondary"
-                  title="Library"
-                  icon="image-outline"
-                  onPress={choosePhotos}
-                  style={styles.small_button}
-                />
-              </View>
+              {!is_remote && (
+                <View style={styles.button_row}>
+                  <PrimaryButton
+                    variant="secondary"
+                    title="Camera"
+                    icon="camera-outline"
+                    onPress={takePhoto}
+                    style={styles.small_button}
+                  />
+                  <PrimaryButton
+                    variant="secondary"
+                    title="Library"
+                    icon="image-outline"
+                    onPress={choosePhotos}
+                    style={styles.small_button}
+                  />
+                </View>
+              )}
 
               <View style={styles.button_row}>
                 <PrimaryButton

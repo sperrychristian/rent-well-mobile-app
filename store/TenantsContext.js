@@ -1,36 +1,10 @@
 import { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { useWorkOrders } from './WorkOrdersContext';
-import {
-  api_client,
-  getMe,
-  getTenants,
-  getTenant,
-  getProperties,
-  createProperty,
-  updateProperty as updatePropertyRequest,
-  deleteProperty as deletePropertyRequest,
-  getInvites,
-  createInvite as createInviteRequest,
-  revokeInvite as revokeInviteRequest,
-  resendInvite as resendInviteRequest,
-  assignTenancy,
-  moveTenancy as moveTenancyRequest,
-  endTenancy as endTenancyRequest,
-  getLease,
-  putLease,
-  renewLease as renewLeaseRequest,
-} from '../services/api';
-import { onSocketEvent } from '../services/socket';
-import { listenForTenancyTaps, listenForLeaseTaps } from '../services/push';
-import { navigateWhenReady } from '../util/navigationRef';
+import { getTenantData, saveTenantDataChanges } from '../util/http';
 import { todayString } from '../util/formatDate';
-import {
-  fromApiTenant,
-  fromApiTenancy,
-  fromApiProperty,
-} from '../features/tenants/utils/tenantHelpers';
-import { fromApiWorkOrder } from '../features/workOrders/utils/workOrderHelpers';
+import { ordersForTenantRecord } from '../features/workOrders/utils/workOrderHelpers';
+import { generatePushId } from '../util/data/pushId';
 import {
   buildDemoView,
   demoAddProperty,
@@ -45,7 +19,7 @@ import {
   makeInviteCode,
 } from '../features/tenants/utils/demoTenants';
 import { demo_tenant } from '../features/tenants/data/sampleTenants';
-import { fromApiLease, fromApiLeaseEvent, toApiLease } from '../features/leases/utils/leaseHelpers';
+import { fromApiLeaseEvent } from '../features/leases/utils/leaseHelpers';
 import { demoSetLease, demoRenewLease, demoLeaseEvents } from '../features/leases/utils/demoLeases';
 
 const TenantsContext = createContext(null);
@@ -55,19 +29,17 @@ function makeId() {
   return 'demo-' + Date.now().toString() + '-' + Math.random().toString(36).slice(2, 7);
 }
 
-const empty_owner_data = {
-  key: null,
-  tenants: [],
-  properties: [],
-  invites: [],
-  status: 'loading',
-  error: '',
-};
+// Firebase records get push ids instead, so they sort by when they were made
+function firebaseId() {
+  return generatePushId();
+}
 
-const empty_me = { key: null, active: [], ended: [], status: 'loading' };
+// the landlord's bundle from Firebase (properties, tenants, tenancies, invites, leases), in the demo's shape
+const empty_remote = { key: null, data: null, status: 'loading', error: '' };
 
 // one interface for tenants, properties, and invites in both modes
 // demo runs every action on the local data with the server's rules, real mode calls the api
+// milestone 2: real mode runs those same rules on the Firebase records and writes what changed
 // it also knows whether a signed-in tenant still has an active rental, for the read-only mode
 export function TenantsProvider(props) {
   const { user } = useAuth();
@@ -78,153 +50,69 @@ export function TenantsProvider(props) {
   const is_demo_tenant = mode === 'demo' && role === 'tenant';
   // whose data this is, the server data is tagged with it so a different login never sees the last one's
   const session_key = mode + ':' + (user ? user.id : '');
-  const is_real_owner = mode === 'real' && role === 'owner';
   const is_real_tenant = mode === 'real' && role === 'tenant';
+  // the id maker the rule functions get, demo ids in the demo and push ids for Firebase
+  const makeIdFor = () => (mode === 'demo' ? makeId : firebaseId);
 
-  const [owner_data, setOwnerData] = useState(empty_owner_data);
-  const [me, setMe] = useState(empty_me);
+  const [remote, setRemote] = useState(empty_remote);
   const [refreshing, setRefreshing] = useState(false);
+  // the newest bundle, so a change always starts from what was saved last
+  const remote_ref = useRef(remote);
+  // a tenant reads their landlord's bundle and the screens pick out their own rentals
+  const owner_id = user ? (user.role === 'tenant' ? user.ownerId : user.id) : null;
 
-  // ----- loading from the server -----
+  // ----- loading from Firebase -----
 
-  // quiet reloads (after a socket event or a change) keep what's on screen if they fail
-  async function loadOwnerData(key, quiet) {
+  // quiet reloads (after a change or when a screen comes back into view) keep what's on screen if they fail
+  async function loadRemote(key, quiet) {
     try {
-      const [api_tenants, api_properties, api_invites] = await Promise.all([
-        getTenants(),
-        getProperties(),
-        getInvites(),
-      ]);
-      setOwnerData({
-        key: key,
-        tenants: api_tenants.map(fromApiTenant),
-        properties: api_properties.map(fromApiProperty),
-        invites: api_invites,
-        status: 'ready',
-        error: '',
-      });
+      const data = await getTenantData(owner_id);
+      remote_ref.current = { key: key, data: data, status: 'ready', error: '' };
+      setRemote(remote_ref.current);
     } catch (error) {
       console.log('Could not load tenants', error.message);
-      setOwnerData((current) => {
-        const has_data = current.key === key && current.status === 'ready';
-        if (has_data) {
-          return { ...current, error: error.message };
-        }
-        return quiet && current.key === key
-          ? current
-          : { ...empty_owner_data, key: key, status: 'error', error: error.message };
-      });
-    }
-  }
-
-  async function loadMe(key) {
-    try {
-      const api_me = await getMe();
-      setMe({
-        key: key,
-        active: (api_me.activeTenancies || []).map(fromApiTenancy),
-        ended: (api_me.endedTenancies || []).map(fromApiTenancy),
-        status: 'ready',
-      });
-    } catch (error) {
-      console.log('Could not load your rental', error.message);
-      // if it can't be checked I leave the home as it was, the server still blocks writes on its own
-      setMe((current) =>
-        current.key === key ? current : { ...empty_me, key: key, status: 'error' },
-      );
+      const current = remote_ref.current;
+      const has_data = current.key === key && current.status === 'ready';
+      if (has_data) {
+        remote_ref.current = { ...current, error: error.message };
+      } else if (!(quiet && current.key === key)) {
+        remote_ref.current = { ...empty_remote, key: key, status: 'error', error: error.message };
+      }
+      setRemote(remote_ref.current);
     }
   }
 
   function reloadForSession(quiet) {
-    if (is_real_owner) {
-      return loadOwnerData(session_key, quiet);
-    }
-    if (is_real_tenant) {
-      return loadMe(session_key);
+    if (mode === 'real' && owner_id) {
+      return loadRemote(session_key, quiet);
     }
     return Promise.resolve();
   }
 
-  // the socket and push callbacks read the newest version from here
-  const latest = useRef({ reloadForSession });
-  useEffect(() => {
-    latest.current = { reloadForSession, owner_data };
-  });
-
   // loads whenever a different account signs in or the mode changes
   useEffect(() => {
-    latest.current.reloadForSession(false);
+    reloadForSession(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session_key]);
-
-  // tenancy:updated means something moved, so owners reload their tenants and tenants recheck their rental
-  // a socket reconnect might have missed one, and a NO_ACTIVE_TENANCY error means the rental just ended
-  useEffect(() => {
-    if (mode !== 'real') {
-      return undefined;
-    }
-    const reload = () => latest.current.reloadForSession(true);
-    const stop_updated = onSocketEvent('tenancy:updated', reload);
-    const stop_connect = onSocketEvent('connect', reload);
-    const stop_read_only = api_client.onSessionEvent((event_name) => {
-      if (event_name === 'read_only') {
-        reload();
-      }
-    });
-    // a tenant's tap goes home (which shows the right screen for their rental), an owner's opens that tenant
-    const stop_taps = listenForTenancyTaps((tenancy_id) => {
-      reload();
-      if (role === 'tenant') {
-        navigateWhenReady('TenantHome');
-        return;
-      }
-      const found = (latest.current.owner_data.tenants || []).find((tenant) =>
-        [...tenant.active_tenancies, ...tenant.ended_tenancies].some(
-          (tenancy) => tenancy.id === tenancy_id,
-        ),
-      );
-      if (found) {
-        navigateWhenReady('TenantDetail', { tenantId: found.id });
-      } else {
-        navigateWhenReady('Tenants');
-      }
-    });
-    // a lease reminder opens that tenancy's lease for owners, tenants go home where their lease line is
-    const stop_lease_taps = listenForLeaseTaps((tenancy_id) => {
-      reload();
-      if (role === 'tenant') {
-        navigateWhenReady('TenantHome');
-        return;
-      }
-      navigateWhenReady('TenantLease', { tenancyId: tenancy_id });
-    });
-    return () => {
-      stop_updated();
-      stop_connect();
-      stop_read_only();
-      stop_taps();
-      stop_lease_taps();
-    };
-  }, [mode, role, session_key]);
 
   // ----- what the screens see -----
 
+  const remote_ready = mode === 'real' && remote.key === session_key && remote.data;
+  const source_data = mode === 'demo' ? local.demo_tenant_data : remote_ready ? remote.data : null;
   const demo_view = useMemo(
-    () =>
-      mode === 'demo' && local.demo_tenant_data
-        ? buildDemoView(local.demo_tenant_data, local.orders, new Date())
-        : null,
-    [mode, local.demo_tenant_data, local.orders],
+    () => (source_data ? buildDemoView(source_data, local.orders, new Date()) : null),
+    [source_data, local.orders],
   );
 
   let view;
   if (demo_view) {
-    view = { ...demo_view, status: 'ready', error: '' };
-  } else if (is_real_owner && owner_data.key === session_key) {
-    view = owner_data;
-  } else if (is_real_owner) {
-    view = { ...empty_owner_data, status: 'loading' };
+    view = { ...demo_view, status: 'ready', error: mode === 'real' ? remote.error : '' };
+  } else if (mode === 'real' && remote.key === session_key && remote.status === 'error') {
+    view = { tenants: [], properties: [], invites: [], status: 'error', error: remote.error };
+  } else if (mode === 'real') {
+    view = { tenants: [], properties: [], invites: [], status: 'loading', error: '' };
   } else {
-    view = { ...empty_owner_data, status: 'ready' };
+    view = { tenants: [], properties: [], invites: [], status: 'ready', error: '' };
   }
 
   async function refresh() {
@@ -240,188 +128,130 @@ export function TenantsProvider(props) {
     return result;
   }
 
+  // Firebase runs the same rule functions on the saved bundle, shows the result right away,
+  // then writes only what changed in one multi-path PATCH, and puts the old bundle back if that fails
+  async function runRemote(change) {
+    const before = remote_ref.current;
+    const result = change(before.data);
+    const after = result.data || result;
+    remote_ref.current = { ...before, data: after };
+    setRemote(remote_ref.current);
+    try {
+      await saveTenantDataChanges(before.data, after, owner_id);
+    } catch (error) {
+      remote_ref.current = before;
+      setRemote(before);
+      throw error;
+    }
+    // other phones may have changed something too, so it reads the saved copy back quietly
+    loadRemote(session_key, true);
+    return result;
+  }
+
+  // one place that picks the demo or Firebase, every action below goes through it
+  async function run(change) {
+    if (mode === 'demo') {
+      return runDemo(change);
+    }
+    return runRemote(change);
+  }
+
   // ----- properties -----
 
   async function addProperty(name, address) {
-    if (mode === 'demo') {
-      return runDemo((data) => demoAddProperty(data, { name, address }, makeId)).property;
-    }
-    const property = fromApiProperty(await createProperty(name, address));
-    setOwnerData((current) => ({ ...current, properties: [...current.properties, property] }));
-    return property;
+    return (await run((data) => demoAddProperty(data, { name, address }, makeIdFor()))).property;
   }
 
   // fields is { name, address }
   async function updateProperty(property_id, fields) {
-    if (mode === 'demo') {
-      runDemo((data) => demoUpdateProperty(data, property_id, fields));
-      return;
-    }
-    const property = fromApiProperty(await updatePropertyRequest(property_id, fields));
-    setOwnerData((current) => ({
-      ...current,
-      properties: current.properties.map((item) => (item.id === property_id ? property : item)),
-    }));
-    // tenancies and invites show the property name too, so I reload them quietly
-    loadOwnerData(session_key, true);
+    await run((data) => demoUpdateProperty(data, property_id, fields));
   }
 
   async function deleteProperty(property_id) {
-    if (mode === 'demo') {
-      runDemo((data) => demoDeleteProperty(data, property_id, local.orders, new Date()));
-      return;
-    }
-    await deletePropertyRequest(property_id);
-    setOwnerData((current) => ({
-      ...current,
-      properties: current.properties.filter((item) => item.id !== property_id),
-    }));
-    // its pending invites got revoked on the server
-    loadOwnerData(session_key, true);
+    await run((data) => demoDeleteProperty(data, property_id, local.orders, new Date()));
   }
 
   // ----- invites -----
 
   // fields: property_id, tenant_name, unit_label, gives back the invite in the server's shape
   async function createInvite(fields) {
-    if (mode === 'demo') {
-      return runDemo((data) => demoCreateInvite(data, fields, new Date(), makeId, makeInviteCode))
-        .invite;
-    }
-    const invite = await createInviteRequest(fields);
-    setOwnerData((current) => ({ ...current, invites: [invite, ...current.invites] }));
-    return invite;
+    return (
+      await run((data) => demoCreateInvite(data, fields, new Date(), makeIdFor(), makeInviteCode))
+    ).invite;
   }
 
   async function revokeInvite(invite_id) {
-    if (mode === 'demo') {
-      return runDemo((data) => demoRevokeInvite(data, invite_id, new Date())).invite;
-    }
-    const invite = await revokeInviteRequest(invite_id);
-    setOwnerData((current) => ({
-      ...current,
-      invites: current.invites.map((item) => (item.id === invite_id ? invite : item)),
-    }));
-    return invite;
+    return (await run((data) => demoRevokeInvite(data, invite_id, new Date()))).invite;
   }
 
   // gives back the new invite, the old one is now revoked
   async function resendInvite(invite_id) {
-    if (mode === 'demo') {
-      return runDemo((data) =>
-        demoResendInvite(data, invite_id, new Date(), makeId, makeInviteCode),
-      ).invite;
-    }
-    const result = await resendInviteRequest(invite_id);
-    setOwnerData((current) => ({
-      ...current,
-      invites: [
-        result.invite,
-        ...current.invites.map((item) => (item.id === invite_id ? result.revoked_invite : item)),
-      ],
-    }));
-    return result.invite;
+    return (
+      await run((data) =>
+        demoResendInvite(data, invite_id, new Date(), makeIdFor(), makeInviteCode),
+      )
+    ).invite;
   }
 
   // ----- tenancies -----
 
   async function assignTenant(tenant_id, property_id, unit_label) {
-    if (mode === 'demo') {
-      runDemo((data) =>
-        demoAssign(data, { tenant_id, property_id, unit_label }, new Date(), makeId),
-      );
-      return;
-    }
-    await assignTenancy(tenant_id, property_id, unit_label);
-    await loadOwnerData(session_key, true);
+    await run((data) =>
+      demoAssign(data, { tenant_id, property_id, unit_label }, new Date(), makeIdFor()),
+    );
   }
 
   // fields: property_id, unit_label, ended_at, move_out_note
   async function moveTenancy(tenancy_id, fields) {
-    if (mode === 'demo') {
-      runDemo((data) => demoMove(data, tenancy_id, fields, todayString(), new Date(), makeId));
-      return;
-    }
-    await moveTenancyRequest(tenancy_id, fields);
-    await loadOwnerData(session_key, true);
+    await run((data) => demoMove(data, tenancy_id, fields, todayString(), new Date(), makeIdFor()));
   }
 
   // fields: ended_at, move_out_note
   async function endTenancy(tenancy_id, fields) {
-    if (mode === 'demo') {
-      runDemo((data) => demoEnd(data, tenancy_id, fields, todayString()));
-      return;
-    }
-    await endTenancyRequest(tenancy_id, fields);
-    await loadOwnerData(session_key, true);
+    await run((data) => demoEnd(data, tenancy_id, fields, todayString()));
   }
 
   // ----- leases (owner only) -----
 
-  // the lease and its timeline, oldest event first, the demo reads both from its own data
+  // the lease and its timeline, oldest event first, both modes read it from the tenant data
   async function fetchLease(tenancy_id) {
-    if (mode === 'demo') {
-      return {
-        events: demoLeaseEvents(local.demo_tenant_data, tenancy_id).map(fromApiLeaseEvent),
-      };
-    }
-    const result = await getLease(tenancy_id);
-    return { lease: fromApiLease(result.lease), events: result.events.map(fromApiLeaseEvent) };
+    const data = mode === 'demo' ? local.demo_tenant_data : remote_ref.current.data;
+    return {
+      events: demoLeaseEvents(data || { lease_events: {} }, tenancy_id).map(fromApiLeaseEvent),
+    };
   }
 
   // value: { lease_start_on, lease_end_on, lease_term, renewal_notice_days, lease_notes }
   async function setLease(tenancy_id, value) {
-    if (mode === 'demo') {
-      runDemo((data) => demoSetLease(data, tenancy_id, value, todayString(), new Date(), makeId));
-      return;
-    }
-    await putLease(tenancy_id, toApiLease(value));
-    await loadOwnerData(session_key, true);
+    await run((data) =>
+      demoSetLease(data, tenancy_id, value, todayString(), new Date(), makeIdFor()),
+    );
   }
 
-  // value: { new_end_on, new_rent_cents (or null) }, has_schedule is only used by the demo,
-  // since its rent schedule lives in the ledger store (the renew hook changes it there)
+  // value: { new_end_on, new_rent_cents (or null) }, has_schedule says whether the tenancy has a rent schedule,
+  // since the schedule lives in the ledger store (the renew hook changes it there)
   async function renewLease(tenancy_id, value, has_schedule) {
-    if (mode === 'demo') {
-      runDemo((data) =>
-        demoRenewLease(data, tenancy_id, value, todayString(), new Date(), makeId, has_schedule),
-      );
-      return;
-    }
-    const body = { newEndOn: value.new_end_on };
-    if (value.new_rent_cents !== null && value.new_rent_cents !== undefined) {
-      body.newRentCents = value.new_rent_cents;
-    }
-    await renewLeaseRequest(tenancy_id, body);
-    await loadOwnerData(session_key, true);
+    await run((data) =>
+      demoRenewLease(data, tenancy_id, value, todayString(), new Date(), makeIdFor(), has_schedule),
+    );
   }
 
-  // the detail screen gets the tenant fresh plus their recent work orders
-  // the demo has no server, so its work orders come from the local ones with the same name
+  // the detail screen gets the tenant plus their recent work orders, from the shared orders already loaded
   async function fetchTenantDetail(tenant_id) {
-    if (mode === 'demo') {
-      const tenant = view.tenants.find((item) => item.id === tenant_id);
-      if (!tenant) {
-        return null;
-      }
-      return {
-        tenant: tenant,
-        recent_work_orders: local.orders
-          .filter((order) => order.tenant === tenant.name)
-          .sort((a, b) => b.created_at.localeCompare(a.created_at))
-          .slice(0, 10),
-      };
+    if (mode === 'real') {
+      await loadRemote(session_key, true);
     }
-    const api_tenant = await getTenant(tenant_id);
-    const tenant = fromApiTenant(api_tenant);
-    setOwnerData((current) => ({
-      ...current,
-      tenants: current.tenants.map((item) => (item.id === tenant_id ? tenant : item)),
-    }));
-    return {
-      tenant: tenant,
-      recent_work_orders: (api_tenant.recentWorkOrders || []).map(fromApiWorkOrder),
-    };
+    const tenant = view.tenants.find((item) => item.id === tenant_id);
+    if (!tenant) {
+      return null;
+    }
+    const recent =
+      mode === 'demo'
+        ? local.orders
+            .filter((order) => order.tenant === tenant.name)
+            .sort((a, b) => b.created_at.localeCompare(a.created_at))
+        : ordersForTenantRecord(local.orders, tenant);
+    return { tenant: tenant, recent_work_orders: recent.slice(0, 10) };
   }
 
   function getTenantById(tenant_id) {
@@ -429,17 +259,19 @@ export function TenantsProvider(props) {
   }
 
   // a tenant with no active rental only gets to read, but only once that's confirmed, so the home doesn't flash
-  const me_ready = is_real_tenant && me.key === session_key && me.status === 'ready';
-  const is_read_only = me_ready && me.active.length === 0;
   // the demo tenant is Sam, so ending or moving Sam on the landlord side shows up here after switching
-  const demo_me = is_demo_tenant
-    ? view.tenants.find((tenant) => tenant.id === demo_tenant.id) || null
-    : null;
+  const me_id = is_demo_tenant ? demo_tenant.id : is_real_tenant ? user.id : null;
+  const me = me_id && demo_view ? view.tenants.find((tenant) => tenant.id === me_id) || null : null;
+  const me_ready = is_demo_tenant || (is_real_tenant && !!remote_ready);
 
   const value = {
     mode,
     role,
     is_demo: mode === 'demo',
+    // the owner whose records these are, the ledger and reminders scope by it
+    owner_id: mode === 'real' ? owner_id : null,
+    // the bundle itself, the reminders hook reads its log and the demo's from here
+    tenant_data: source_data,
     status: view.status,
     error_message: view.error,
     refreshing,
@@ -447,6 +279,8 @@ export function TenantsProvider(props) {
     properties: view.properties,
     invites: view.invites,
     refresh,
+    // a reload with no spinner, for when a screen comes back into view
+    reloadQuietly: () => reloadForSession(true),
     getTenantById,
     fetchTenantDetail,
     addProperty,
@@ -474,10 +308,10 @@ export function TenantsProvider(props) {
       return null;
     },
     // the tenant side
-    is_read_only: demo_me ? demo_me.active_tenancies.length === 0 : is_read_only,
-    my_active_tenancies: demo_me ? demo_me.active_tenancies : me_ready ? me.active : [],
-    my_ended_tenancies: demo_me ? demo_me.ended_tenancies : me_ready ? me.ended : [],
-    reloadMe: () => (is_real_tenant ? loadMe(session_key) : Promise.resolve()),
+    is_read_only: me_ready && (!me || me.active_tenancies.length === 0),
+    my_active_tenancies: me ? me.active_tenancies : [],
+    my_ended_tenancies: me ? me.ended_tenancies : [],
+    reloadMe: () => (is_real_tenant ? loadRemote(session_key, true) : Promise.resolve()),
   };
 
   return <TenantsContext.Provider value={value}>{props.children}</TenantsContext.Provider>;

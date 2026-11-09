@@ -11,8 +11,11 @@ import { SPACING, TYPE, BORDER, NUMBERS, SIZES } from '../../../constants/theme'
 import { list_styles } from '../../../components/ui/listStyles';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 function YearEndReportScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['expenses', 'cloud']);
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
   const { expenses, trips, mileage_rate } = useWorkOrders();

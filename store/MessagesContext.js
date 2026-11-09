@@ -4,17 +4,7 @@ import {
   getMessages,
   sendMessage as sendMessageRequest,
   markConversationRead,
-  uploadImage,
-  getAttachmentUrl,
-} from '../services/api';
-import {
-  connectSocket,
-  disconnectSocket,
-  joinConversation,
-  leaveConversation,
-} from '../services/socket';
-import { registerForPush, listenForNotificationTaps } from '../services/push';
-import { navigation_ref } from '../util/navigationRef';
+} from '../util/http';
 import { useAuth } from './AuthContext';
 import { useWorkOrders } from './WorkOrdersContext';
 import {
@@ -34,9 +24,12 @@ import { demo_tenant } from '../features/tenants/data/sampleTenants';
 
 const MessagesContext = createContext(null);
 const page_size = 30;
+// REST has no live listener in React Native, so an open thread asks for new messages this often
+export const thread_poll_ms = 8000;
 
 // picks the mode and gives the store a new key when it changes, so logging out or starting the demo starts it clean
 // demo is fully local and never touches the network, real uses the backend, off is signed out
+// (the backend is the Firebase Realtime Database since milestone 2)
 export function MessagesProvider(props) {
   const { user } = useAuth();
   const { demo_mode, demo_role } = useWorkOrders();
@@ -54,15 +47,6 @@ export function MessagesProvider(props) {
       {props.children}
     </MessagesStore>
   );
-}
-
-// opens the thread from a push tap, the navigator might still be starting on a cold launch so I wait a little
-function openThreadWhenReady(conversation_id, tries_left) {
-  if (navigation_ref.isReady()) {
-    navigation_ref.navigate('MessageThread', { conversationId: conversation_id });
-  } else if (tries_left > 0) {
-    setTimeout(() => openThreadWhenReady(conversation_id, tries_left - 1), 300);
-  }
 }
 
 function MessagesStore(props) {
@@ -93,8 +77,8 @@ function MessagesStore(props) {
   // the thread screens listen here for new messages, read receipts, and reconnects
   const listeners = useRef(new Set());
   const conversations_ref = useRef(conversations);
-  // download urls run out after 5 minutes, so I keep them until just before that
-  const attachment_urls = useRef(new Map());
+  // the 8 second timer for the open thread, only in real mode
+  const poll_timer = useRef(null);
 
   useEffect(() => {
     conversations_ref.current = conversations;
@@ -122,7 +106,7 @@ function MessagesStore(props) {
       setStatus('loading');
     }
     try {
-      const list = await getConversations();
+      const list = await getConversations(my_user_id);
       setConversations(sortConversations(list));
       setStatus('ready');
       setErrorMessage('');
@@ -192,14 +176,15 @@ function MessagesStore(props) {
     handlers.current = { handleNewMessage, handleRead, loadConversations };
   });
 
-  // real mode: load the inbox, open the socket, ask for push, and listen for push taps
+  // real mode: load the inbox once, after that it reloads on pull to refresh, when Messages comes back
+  // into view, after every send, and every 8 seconds while a thread is open
   // mode never changes inside one store (a new mode gets a new store), so this runs once
   useEffect(() => {
     if (mode !== 'real') {
       return undefined;
     }
     let active = true;
-    getConversations()
+    getConversations(my_user_id)
       .then((list) => {
         if (active) {
           setConversations(sortConversations(list));
@@ -213,29 +198,14 @@ function MessagesStore(props) {
           setStatus('error');
         }
       });
-
-    connectSocket({
-      onMessageNew: (message) => active && handlers.current.handleNewMessage(message),
-      onMessageRead: (read_event) => active && handlers.current.handleRead(read_event),
-      // after a reconnect anything missed while offline gets picked up
-      onConnect: () => {
-        if (active) {
-          handlers.current.loadConversations(true);
-          emit({ type: 'resync' });
-        }
-      },
-    });
-    registerForPush();
-    const stop_taps = listenForNotificationTaps((conversation_id) =>
-      openThreadWhenReady(conversation_id, 10),
-    );
-
     return () => {
       active = false;
-      stop_taps();
-      disconnectSocket();
+      if (poll_timer.current) {
+        clearInterval(poll_timer.current);
+        poll_timer.current = null;
+      }
     };
-  }, [mode]);
+  }, [mode, my_user_id]);
 
   // the demo's fake replies get cancelled when the demo ends
   useEffect(() => {
@@ -253,7 +223,7 @@ function MessagesStore(props) {
       const has_more = start + page_size < all.length;
       return { messages: page, next_cursor: has_more ? page[page.length - 1].id : null };
     }
-    return getMessages(conversation_id, cursor);
+    return getMessages(conversation_id);
   }
 
   // in the demo the tenant reads the message and answers a moment later
@@ -310,10 +280,8 @@ function MessagesStore(props) {
       scheduleDemoReply(conversation_id);
       return message;
     }
-    // the photo goes up first, the message only sends once the upload worked
-    const attachment_key = photo ? await uploadImage(photo.uri, photo.mime_type) : null;
-    const message = await sendMessageRequest(conversation_id, body, attachment_key);
-    // the socket brings this same message too, the merge drops the repeat
+    // photos wait for Firebase Storage, so a real message is text only (the screen hides the photo button)
+    const message = await sendMessageRequest(conversation_id, my_user_id, body);
     handleNewMessage(message);
     return message;
   }
@@ -357,6 +325,11 @@ function MessagesStore(props) {
       });
       return;
     }
+    // only a thread with something unread gets written, so the 8 second check doesn't write every time
+    const known = conversations_ref.current.find((item) => item.id === conversation_id);
+    if (known && !known.unreadCount) {
+      return;
+    }
     setConversations((current) =>
       current.map((conversation) =>
         conversation.id === conversation_id && conversation.unreadCount !== 0
@@ -364,42 +337,42 @@ function MessagesStore(props) {
           : conversation,
       ),
     );
-    markConversationRead(conversation_id).catch((error) => {
+    markConversationRead(conversation_id, my_user_id).catch((error) => {
       console.log('Could not mark the conversation read', error.message);
     });
   }
 
+  // only demo messages have photos (straight from the phone), Firebase waits for Storage
   async function attachmentUrl(key) {
-    if (is_demo) {
-      return key;
-    }
-    const cached = attachment_urls.current.get(key);
-    if (cached && Date.parse(cached.expires_at) - Date.now() > 30000) {
-      return cached.url;
-    }
-    const fresh = await getAttachmentUrl(key);
-    attachment_urls.current.set(key, fresh);
-    return fresh.url;
+    return key;
   }
 
-  function forgetAttachmentUrl(key) {
-    attachment_urls.current.delete(key);
-  }
+  function forgetAttachmentUrl() {}
 
-  // joining tells the server I'm looking at the thread, so it skips pushes for it
+  // step 1: opening a thread starts the 8 second check in real mode, step 2: each check reloads the inbox
+  // quietly and tells the thread screen to fetch its newest messages (the 'resync' event)
+  // the thread screen closes it when it loses focus or the app goes to the background, so it never runs hidden
   function openThread(conversation_id) {
     open_conversation.current = conversation_id;
-    if (mode === 'real') {
-      joinConversation(conversation_id);
+    if (mode !== 'real') {
+      return;
     }
+    if (poll_timer.current) {
+      clearInterval(poll_timer.current);
+    }
+    poll_timer.current = setInterval(() => {
+      loadConversations(true);
+      emit({ type: 'resync' });
+    }, thread_poll_ms);
   }
 
   function closeThread(conversation_id) {
     if (open_conversation.current === conversation_id) {
       open_conversation.current = null;
-    }
-    if (mode === 'real') {
-      leaveConversation(conversation_id);
+      if (poll_timer.current) {
+        clearInterval(poll_timer.current);
+        poll_timer.current = null;
+      }
     }
   }
 
@@ -435,6 +408,8 @@ function MessagesStore(props) {
     error_message,
     unread_total: totalUnread(visible_conversations),
     reloadConversations: () => loadConversations(false),
+    // a reload with no spinner, for when a screen comes back into view
+    reloadQuietly: () => loadConversations(true),
     getConversation,
     fetchMessages,
     sendMessage,
@@ -442,6 +417,9 @@ function MessagesStore(props) {
     markRead,
     attachmentUrl,
     forgetAttachmentUrl,
+    // photos only travel in the demo until Firebase Storage, the thread hides the photo button otherwise
+    can_attach_photos: is_demo,
+    is_polling: () => !!poll_timer.current,
     openThread,
     closeThread,
     subscribe,

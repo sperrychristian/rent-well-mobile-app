@@ -21,13 +21,17 @@ import { COLORS, SPACING, TYPE, BORDER, SIZES, OPACITY } from '../../../constant
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 function ChecklistDetailScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['cloud']);
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
   const {
     checklists,
     demo_mode,
+    cloud_status,
     addChecklist,
     updateChecklistItem,
     addChecklistItem,
@@ -348,6 +352,7 @@ function ChecklistDetailScreen(props) {
         item={open_item}
         locked={locked}
         in_demo={demo_mode}
+        hide_photos={!demo_mode && cloud_status !== 'off'}
         onSave={saveItem}
         onDelete={deleteItem}
         onClose={() => setItemOpen(false)}

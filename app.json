@@ -31,7 +31,6 @@
       "expo-font",
       "expo-sharing",
       "@react-native-community/datetimepicker",
-      "expo-secure-store",
       [
         "expo-calendar",
         {

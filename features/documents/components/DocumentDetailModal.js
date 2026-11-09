@@ -67,6 +67,9 @@ function DocumentDetailModal(props) {
               {document.sample && (
                 <StatusLabel label="Sample" tone="neutral" icon="document-outline" />
               )}
+              {document.record_only && (
+                <StatusLabel label="Record only" tone="neutral" icon="document-outline" />
+              )}
             </View>
 
             {preview_uri && (
@@ -85,8 +88,10 @@ function DocumentDetailModal(props) {
             <Text style={styles.value}>{end_text}</Text>
             <Text style={styles.label}>File</Text>
             <Text style={styles.value}>
-              {document.file_name}
-              {document.size ? ' · ' + formatSize(document.size) : ''}
+              {document.record_only
+                ? 'No file saved. Files come once Firebase Storage is added.'
+                : document.file_name}
+              {!document.record_only && document.size ? ' · ' + formatSize(document.size) : ''}
             </Text>
             <Text style={styles.label}>Shared with tenant</Text>
             <Text style={styles.value}>{document.shared_with_tenant ? 'Yes' : 'No'}</Text>
@@ -98,13 +103,16 @@ function DocumentDetailModal(props) {
             ) : null}
 
             <View style={styles.button_row}>
-              <PrimaryButton
-                variant="primary"
-                title="Open / Share"
-                icon="share-outline"
-                onPress={props.onOpen}
-                style={styles.open_button}
-              />
+              {/* a Firebase record has no file to open yet, so it only gets Edit */}
+              {!document.record_only && (
+                <PrimaryButton
+                  variant="primary"
+                  title="Open / Share"
+                  icon="share-outline"
+                  onPress={props.onOpen}
+                  style={styles.open_button}
+                />
+              )}
               <PrimaryButton
                 variant="secondary"
                 title="Edit"

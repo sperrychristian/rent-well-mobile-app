@@ -33,12 +33,15 @@ import HeaderIconButton from '../../../components/HeaderIconButton';
 import EditNote from '../components/EditNote';
 import { editRuleFor } from '../utils/workOrderHelpers';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 const priority_options = ['Emergency', 'Normal', 'Low'];
 
 // in real mode a push tap can open an order that isn't in the list yet, so this asks the server for it first
 // the content only shows once the order is here, so its text boxes start with the real notes and contractor
 function WorkOrderDetailScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['orders', 'expenses']);
   const insets = useSafeAreaInsets();
   const { getOrder, is_remote, ensureOrder } = useWorkOrders();
   const order_id = props.route.params.workOrderId;
@@ -97,6 +100,7 @@ function WorkOrderDetailContent(props) {
     setNotes,
     setContractorInfo,
     addExpense,
+    deleteWorkOrder,
     properties: known_properties,
   } = useWorkOrders();
   const { conversations } = useMessages();
@@ -200,6 +204,26 @@ function WorkOrderDetailContent(props) {
       { text: 'Cancel', style: 'cancel' },
       { text: 'Resolve', onPress: () => tryAction(() => resolveWorkOrder(order_id)) },
     ]);
+  }
+
+  // Delete asks first, then the order is gone from every list (its expenses stay, just unlinked)
+  function confirmDelete() {
+    Alert.alert(
+      'Delete work order?',
+      'This removes "' + order.title + '" for good. Its expenses stay in Expenses.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            if (await tryAction(() => deleteWorkOrder(order_id))) {
+              props.navigation.goBack();
+            }
+          },
+        },
+      ],
+    );
   }
 
   function saveExpense(expense) {
@@ -411,6 +435,14 @@ function WorkOrderDetailContent(props) {
               onPress={() => props.navigation.goBack()}
             />
           </View>
+          <PrimaryButton
+            title="Delete Work Order"
+            icon="trash-outline"
+            variant="destructive"
+            style={styles.delete_button}
+            onPress={confirmDelete}
+            accessibilityHint="Asks before deleting"
+          />
         </View>
       </ScrollView>
       <AddExpenseModal
@@ -434,6 +466,9 @@ const styles = themedStyles((COLORS) => ({
   },
   center: {
     justifyContent: 'center',
+  },
+  delete_button: {
+    marginTop: SPACING.sm,
   },
   photo_row: {
     marginTop: SPACING.sm,

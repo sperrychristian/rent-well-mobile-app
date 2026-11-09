@@ -71,7 +71,6 @@ import {
   InviteHeaderButton,
   AddRequestHeaderButton,
 } from './navigation/headerButtons';
-import { setupNotificationHandler } from './services/push';
 import { StatusBar } from 'expo-status-bar';
 
 import { useEffect } from 'react';
@@ -89,9 +88,6 @@ const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
-// set once at startup so a push that arrives while the app is open still shows a banner
-setupNotificationHandler();
-
 // the splash stays up until the fonts are ready, so the first screen never flashes in the wrong font
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -101,8 +97,12 @@ function AccountData(props) {
   // the shared state assignment: WorkOrdersProvider sits up here, above AppNavigator and its NavigationContainer,
   // so every screen in the tabs, the drawer, and the stack reads and changes the same work orders
   return (
-    <WorkOrdersProvider user_id={user ? user.id : null}>
+    <WorkOrdersProvider
+      user_id={user ? user.id : null}
+      firebase_owner_id={user && user.role === 'owner' ? user.id : null}
+    >
       {/* in real mode the work orders come from the server, demo and signed out keep the local ones */}
+      {/* milestone 2: "the server" is the Firebase Realtime Database now */}
       <RemoteWorkOrdersProvider>
         <MessagesProvider>
           {/* tenants and properties: the demo's local copy, or the server's in real mode */}

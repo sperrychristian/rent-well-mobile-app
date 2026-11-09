@@ -107,3 +107,79 @@ Branch `milestone-2-firebase`, off `master` at `3b4dc69`. Newest phase at the bo
   messages (sides, send, read, metadata), and the list modules.
 - Checks: lint 0 errors (5 known warnings), 71 suites and 741 tests passing, format clean, iOS bundle
   with `--clear` exported.
+
+## Phase 4: mode, auth stand-in, and providers
+
+- "Real" mode is Firebase now. The demo is untouched and still fully local.
+- `store/AuthContext.js`: the test accounts stand-in. Log In lists `users` (landlords, then tenants) and
+  keeps only the picked account (id plus a copy for offline) in AsyncStorage under
+  `rent_well_test_account`. On launch it opens signed in from that copy, then re-reads the record; a
+  record that's gone (database reset) goes back to Log In with a note. `homeRouteFor` and role routing
+  are unchanged. The data modules read the signed-in user from `util/data/session.js`, which the auth
+  context sets.
+- Log In (`LoginScreen`, same route name) is the labeled "Test accounts" picker with loading, error,
+  and empty states. Both register screens (same route names) lost their password fields and show a one
+  line note that real sign in comes with Firebase Auth. Tenant sign up checks the invite in `invites`,
+  then writes the user, the tenancy, the conversation, and the used invite in one multi-path PATCH.
+- Providers keep their public hook shapes and their demo halves:
+  - Work orders: `RemoteWorkOrdersProvider` on `util/http.js`, optimistic with rollback, plus a new
+    `deleteWorkOrder` (also added to the local context for the demo). The form edits every field for a
+    landlord and a tenant edits their own while Open (`editRuleFor` lost its real-mode tenant limit).
+    The preferred date is saved on the record.
+  - Expenses: same provider on Firebase, optimistic with rollback and an alert, import in one write.
+  - Tenants, properties, invites, leases: the Firebase bundle runs the demo's rule functions, shows the
+    result right away, writes the difference in one PATCH, and rolls back on failure. Move and end are
+    atomic. A tenant's own rentals and read-only state come from the same bundle.
+  - Ledger: one ledger per tenancy in the demo's shape, every change is a `demoLedger.js` action
+    written with `saveLedgerChange`, rollback on failure. The landlord's load and every pull to refresh
+    run `catchUpLedgers` (rent and late fees with `createIfAbsent`). A tenant's phone works this month's
+    charges out on screen without writing them. Month summaries use `monthSummary`, like the demo.
+  - Messages: Firebase conversations and messages, `lastReadAt` and `unreadCount` per user, an 8 second
+    check while a thread is open (started and stopped by focus, blur, and the app going to the
+    background), read writes only when something is unread.
+  - Reminders: the demo's preview and send rules on the saved log, the message goes in the conversation
+    with `metadata.type: rent_reminder`, then the reminder record is saved.
+  - Profit and the tax summary: worked out on the phone with `profitMath.js` in both modes, loading and
+    error from the expense and ledger stores.
+  - The landlord's trips, documents, checklists, mileage rate, and budgets: `WorkOrdersContext` loads them
+    from Firebase after the phone copy (which stays as an offline cache) and writes each change as a
+    field-level multi-path PATCH, rolling back with an inline message on failure.
+- No uploads in Firebase mode, and nothing left that looks like it would upload: the message camera
+  button, the request Photos card, the work order form's photos, the payment receipt photo, expense
+  receipts and Scan Receipt, the document file picker and Scan, and checklist item photos are hidden
+  outside the demo. Firebase documents are records ("Record only", no Open / Share).
+- Refresh without sockets: `navigation/useRefreshOnFocus.js` reloads the stores a screen shows, quietly,
+  when it comes back into view. Every data screen uses it. Pull to refresh and the reload after every
+  write stay.
+- Work Order Detail has a confirmed Delete Work Order (destructive button, the expenses stay unlinked).
+- Removed: `services/` (api, apiClient and its test, attachmentUrls, push, socket, tokenStorage), the
+  `expo-secure-store` config plugin, and the packages `socket.io-client`, `expo-notifications`, and
+  `expo-secure-store` (`npm uninstall`, nothing added). `RemoteImage` shows the key as a uri now.
+- Tests removed because they only tested the Express API: `services/apiClient.test.js`,
+  `store/remoteWorkOrders.test.js`, `store/expensesRealMode.test.js`,
+  `features/payments/screens/paymentRealMode.test.js`, `features/realModeScreens.test.js`. Rewritten:
+  `NewWorkOrderScreen.test.js` (Firebase rules, every field editable, tenant edit while Open) and one
+  `editRuleFor` case. The secure store and notifications mocks came out of seven navigation tests.
+- New: `store/firebaseProviders.test.js` (19: test accounts, sign ups, each store's load, optimistic
+  change, rollback, error state, refresh, the 8 second check, the cloud lists) and
+  `navigation/firebaseFlows.test.js` (10 flows on the real App: Log In picker, landlord add, edit,
+  delete with Home count and badge, tenant report seen by the landlord, record payment, claim and
+  confirm, end tenancy turns the tenant read only, expense and Profit, message send and receive, light
+  and dark).
+- Comments removed because their code is gone (everything else kept word for word, and four comments I
+  had reworded were put back with a new line under them instead):
+  - `App.js`: the push banner setup.
+  - `store/AuthContext.js`: the refresh token and push token comments.
+  - `store/RemoteWorkOrdersProvider.js`: photo upload, socket, reconnect, and push tap comments, plus
+    the owner-only Update steps and the old Report an Issue note.
+  - `store/ExpensesContext.js`: receipt upload and socket reconnect.
+  - `store/TenantsContext.js`: the server loads, socket and push taps, `GET /me`, and the old lease and
+    detail notes.
+  - `store/LedgerContext.js`: every comment inside the old server store (details, socket, push, upload).
+  - `store/MessagesContext.js`: push tap, attachment url cache, socket, upload, and join and leave.
+  - `features/profit/hooks/useProfitReport.js`: the server report, socket reload, and server tax export.
+  - `features/workOrders/screens/NewWorkOrderScreen.js`: the photo list, `GET /me`, the server date, and
+    the photo-on-detail notes.
+  - `features/workOrders/utils/workOrderHelpers.js`: the real-mode tenant limit.
+  - `features/tenants/screens/TenantLeaseScreen.js`: the `tenancy:updated` listener.
+  - every comment in the deleted `services/` files.

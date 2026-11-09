@@ -50,6 +50,7 @@ function MessageThreadScreen(props) {
     openThread,
     closeThread,
     subscribe,
+    can_attach_photos,
   } = useMessages();
   // it can be missing for a moment when a push tap opens the app straight into the thread
   const conversation = getConversation(conversation_id);
@@ -131,6 +132,22 @@ function MessageThreadScreen(props) {
       actions.current.closeThread(conversation_id);
     };
   }, [conversation_id, loadNewest, my_user_id]);
+
+  // milestone 2: the 8 second check only runs while this screen is the one showing, so opening Payments from a
+  // reminder (or any screen on top) stops it, and coming back starts it again and catches up right away
+  useEffect(() => {
+    const stop_focus = props.navigation.addListener('focus', () => {
+      actions.current.openThread(conversation_id);
+      loadNewest(false);
+    });
+    const stop_blur = props.navigation.addListener('blur', () =>
+      actions.current.closeThread(conversation_id),
+    );
+    return () => {
+      stop_focus();
+      stop_blur();
+    };
+  }, [props.navigation, conversation_id, loadNewest]);
 
   // the list is upside down, so its end is the top and reaching it loads older messages
   async function loadOlder() {
@@ -314,16 +331,19 @@ function MessageThreadScreen(props) {
 
         {!is_read_only && (
           <View style={[styles.composer, { paddingBottom: insets.bottom + SPACING.sm }]}>
-            <Pressable
-              onPress={pickPhoto}
-              disabled={sending}
-              hitSlop={8}
-              style={styles.icon_button}
-              accessibilityRole="button"
-              accessibilityLabel="Attach a photo"
-            >
-              <Ionicons name="camera-outline" size={26} color={COLORS.title} />
-            </Pressable>
+            {/* photos wait for Firebase Storage, so only the demo has the camera button */}
+            {can_attach_photos ? (
+              <Pressable
+                onPress={pickPhoto}
+                disabled={sending}
+                hitSlop={8}
+                style={styles.icon_button}
+                accessibilityRole="button"
+                accessibilityLabel="Attach a photo"
+              >
+                <Ionicons name="camera-outline" size={26} color={COLORS.title} />
+              </Pressable>
+            ) : null}
             <TextInput
               style={styles.input}
               placeholder="Message"

@@ -41,6 +41,7 @@ import ErrorState from '../../../components/ErrorState';
 import { useToast } from '../../../components/ui/Toast';
 import { useExpenses } from '../../../store/ExpensesContext';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 const month_names = [
   'January',
@@ -66,6 +67,8 @@ function monthTitle(month_key) {
 }
 
 function ExpensesScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['expenses', 'cloud']);
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
   const {
@@ -354,13 +357,16 @@ function ExpensesScreen(props) {
           style={styles.add_button}
           onPress={openNewForm}
         />
-        <PrimaryButton
-          title="Scan Receipt"
-          icon="camera-outline"
-          variant="secondary"
-          style={styles.scan_button}
-          onPress={scanReceipt}
-        />
+        {/* scanning makes a receipt photo, which waits for Firebase Storage, so only the phone's own list has it */}
+        {!expense_store.is_remote && (
+          <PrimaryButton
+            title="Scan Receipt"
+            icon="camera-outline"
+            variant="secondary"
+            style={styles.scan_button}
+            onPress={scanReceipt}
+          />
+        )}
       </View>
       <View style={styles.button_row}>
         <PrimaryButton

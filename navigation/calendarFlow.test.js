@@ -12,18 +12,6 @@ import { navigation_ref } from '../util/navigationRef';
 // Calendar on the real App: the drawer item on both sides, the month grid and agenda, past due rows,
 // and "Add to my calendar" with the demo's confirm sheet and a denied permission (the same harness as appNavigation.test.js)
 
-jest.mock('expo-secure-store', () => ({
-  getItemAsync: jest.fn(() => Promise.resolve(null)),
-  setItemAsync: jest.fn(() => Promise.resolve()),
-  deleteItemAsync: jest.fn(() => Promise.resolve()),
-}));
-jest.mock('expo-notifications', () => ({
-  setNotificationHandler: jest.fn(),
-  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
-  getLastNotificationResponseAsync: jest.fn(() => Promise.resolve(null)),
-  clearLastNotificationResponseAsync: jest.fn(() => Promise.resolve()),
-  getPermissionsAsync: jest.fn(() => Promise.resolve({ granted: false, canAskAgain: false })),
-}));
 jest.mock('expo-splash-screen', () => ({
   preventAutoHideAsync: jest.fn(() => Promise.resolve()),
   hideAsync: jest.fn(() => Promise.resolve()),

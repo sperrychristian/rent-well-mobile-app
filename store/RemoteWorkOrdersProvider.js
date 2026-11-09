@@ -13,12 +13,8 @@ import {
   updateWorkOrderNotes,
   updateWorkOrderContractor,
   updateWorkOrderFields,
-  addWorkOrderPhotos,
-  uploadImage,
-} from '../services/api';
-import { onSocketEvent } from '../services/socket';
-import { listenForWorkOrderTaps } from '../services/push';
-import { navigateWhenReady } from '../util/navigationRef';
+  deleteWorkOrder as deleteWorkOrderRequest,
+} from '../util/http';
 import { storageKey } from '../util/storageKeys';
 import { todayString } from '../util/formatDate';
 import {
@@ -53,18 +49,6 @@ export function RemoteWorkOrdersProvider(props) {
       {props.children}
     </RemoteStore>
   );
-}
-
-// uploads the photos one at a time and gives back their keys, onProgress hears which one is going
-async function uploadPhotos(photos, onProgress) {
-  const keys = [];
-  for (let index = 0; index < photos.length; index++) {
-    if (onProgress) {
-      onProgress(index + 1, photos.length);
-    }
-    keys.push(await uploadImage(photos[index].uri, photos[index].mime_type));
-  }
-  return keys;
 }
 
 function RemoteStore(props) {
@@ -149,34 +133,6 @@ function RemoteStore(props) {
     ).catch((error) => console.log('Could not save the work orders', error));
   }, [orders, user.id]);
 
-  // the socket sends the whole order on every change, so I just put it in place by id
-  // after a reconnect I reload quietly in case something changed while I was offline
-  // a tapped push opens the order (owner) or the request (tenant)
-  const latest = useRef({ upsert, loadOrders });
-  useEffect(() => {
-    latest.current = { upsert, loadOrders };
-  });
-  useEffect(() => {
-    const stop_new = onSocketEvent('workorder:new', (payload) =>
-      latest.current.upsert(payload.workOrder),
-    );
-    const stop_updated = onSocketEvent('workorder:updated', (payload) =>
-      latest.current.upsert(payload.workOrder),
-    );
-    const stop_connect = onSocketEvent('connect', () => latest.current.loadOrders(true));
-    const stop_taps = listenForWorkOrderTaps((work_order_id) =>
-      navigateWhenReady(is_tenant ? 'RequestDetail' : 'WorkOrderDetail', {
-        workOrderId: work_order_id,
-      }),
-    );
-    return () => {
-      stop_new();
-      stop_updated();
-      stop_connect();
-      stop_taps();
-    };
-  }, [is_tenant]);
-
   // ----- actions, they all give back a promise and throw an ApiError the screen can show -----
 
   async function refreshOrders() {
@@ -250,27 +206,33 @@ function RemoteStore(props) {
     );
   }
 
-  // the work order form's Update, owners only (the server takes nothing but photos from a tenant after it's sent)
-  // step 1: show the new priority, contractor, and estimate right away
-  // step 2: send them in one PATCH, step 3: changeOrder puts the old order back if the server says no
+  // the work order form's Update for both roles (Firebase has no server limits, so every field the form shows can change)
+  // step 1: show the changes right away
+  // step 2: send them in one PATCH, step 3: changeOrder puts the old order back if the save fails
   function updateWorkOrder(order_id, changes) {
-    const server_changes = {
-      priority: changes.priority,
-      contractor: changes.contractor,
-      estimate: changes.estimate,
-    };
     return changeOrder(
       order_id,
-      (order) => ({ ...order, ...server_changes }),
-      () => updateWorkOrderFields(order_id, server_changes),
+      (order) => ({ ...order, ...changes }),
+      () => updateWorkOrderFields(order_id, changes),
     );
   }
 
-  // the tenant's Report an Issue, request is { title, description, priority, photos, tenancy_id }
-  // photos are { uri, mime_type }, they go up first and only then does the request get created
+  // the landlord's Delete on Work Order: gone from the list right away, back again if the delete fails
+  async function deleteWorkOrder(order_id) {
+    const before = orders_ref.current;
+    setOrders((current) => current.filter((order) => order.id !== order_id));
+    try {
+      await deleteWorkOrderRequest(order_id);
+    } catch (error) {
+      setOrders(before);
+      throw error;
+    }
+  }
+
+  // the tenant's Report an Issue, request is { title, description, priority, tenancy_id, preferred_date }
+  // photos wait for Firebase Storage, so nothing gets uploaded here
   // an owner's request also has property_id, unit_label, and tenant_user_id, since there's no tenancy to read them from
-  async function addWorkOrder(request, onProgress) {
-    const photo_keys = await uploadPhotos(request.photos || [], onProgress);
+  async function addWorkOrder(request) {
     if (!is_tenant) {
       return upsert(
         await createOwnerWorkOrder({
@@ -282,7 +244,7 @@ function RemoteStore(props) {
           tenant_user_id: request.tenant_user_id,
           contractor: request.contractor,
           estimate: request.estimate,
-          photo_keys: photo_keys,
+          preferred_date: request.preferred_date,
         }),
       );
     }
@@ -290,15 +252,10 @@ function RemoteStore(props) {
       title: request.title,
       description: request.description,
       priority: request.priority,
-      photo_keys: photo_keys,
       tenancy_id: request.tenancy_id,
+      preferred_date: request.preferred_date,
     });
     return upsert(api_order);
-  }
-
-  async function addOrderPhotos(order_id, photos, onProgress) {
-    const photo_keys = await uploadPhotos(photos, onProgress);
-    return upsert(await addWorkOrderPhotos(order_id, photo_keys));
   }
 
   // expenses stay on the phone (saved per account), they link to the server's orders by work_order_id
@@ -334,6 +291,7 @@ function RemoteStore(props) {
     setContractorInfo,
     addWorkOrder,
     updateWorkOrder,
+    deleteWorkOrder,
     // only real mode has these, screens check is_remote before using them
     is_remote: true,
     role: user.role,
@@ -342,8 +300,9 @@ function RemoteStore(props) {
     orders_from_cache: from_cache,
     refreshing_orders: refreshing,
     refreshOrders,
+    // a reload with no spinner, for when a screen comes back into view
+    reloadQuietly: () => loadOrders(true),
     ensureOrder,
-    addOrderPhotos,
     open_count: openCount(orders),
     active_count: activeCount(orders),
   };

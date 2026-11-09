@@ -27,12 +27,15 @@ import { demo_landlord } from '../../messages/data/sampleThreads';
 import { leasesSummary, urgentLease } from '../../leases/utils/leaseHelpers';
 import { useProfitReport } from '../../profit/hooks/useProfitReport';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 // the fintech pass: an overview like a bank's home screen, a hello, one indigo summary card with this month's
 // spending and its trend, three key numbers, the four things landlords open most, then everything else
 // the Hearth pass: the wordmark and your initials on top, then one big number (rent collected this month)
 // with a thin progress line and one line about who's behind, then every place to go as plain rows
 function DashboardScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['orders', 'ledger', 'messages', 'tenants', 'expenses']);
   // need the insets so the demo banner clears the notch and status bar
   const insets = useSafeAreaInsets();
   const { unread_total } = useMessages();

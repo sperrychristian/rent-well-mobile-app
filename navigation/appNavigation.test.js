@@ -6,18 +6,6 @@ import { hubs, drawerScreens, navigation_map, headerTitle } from './navigationMa
 // the real App, signed out, with the real navigators: Welcome, then the demo, then taps like a person would
 // SecureStore has nothing saved here, so the app starts signed out on Welcome every time
 
-jest.mock('expo-secure-store', () => ({
-  getItemAsync: jest.fn(() => Promise.resolve(null)),
-  setItemAsync: jest.fn(() => Promise.resolve()),
-  deleteItemAsync: jest.fn(() => Promise.resolve()),
-}));
-jest.mock('expo-notifications', () => ({
-  setNotificationHandler: jest.fn(),
-  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
-  getLastNotificationResponseAsync: jest.fn(() => Promise.resolve(null)),
-  clearLastNotificationResponseAsync: jest.fn(() => Promise.resolve()),
-  getPermissionsAsync: jest.fn(() => Promise.resolve({ granted: false, canAskAgain: false })),
-}));
 jest.mock('expo-splash-screen', () => ({
   preventAutoHideAsync: jest.fn(() => Promise.resolve()),
   hideAsync: jest.fn(() => Promise.resolve()),

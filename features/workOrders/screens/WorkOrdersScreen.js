@@ -24,12 +24,15 @@ import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 // lower number sorts first, so emergencies come out on top
 const priority_rank = { Emergency: 0, Normal: 1, Low: 2 };
 const sort_options = ['Newest', 'Oldest', 'Priority'];
 
 function WorkOrdersScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['orders']);
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
   // the orders and the actions live in the shared context now so every screen sees the same data

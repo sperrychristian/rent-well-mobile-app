@@ -14,8 +14,11 @@ import { formatCurrency } from '../../../util/formatCurrency';
 import IconCircle from '../../../components/ui/IconCircle';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
 import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 function MileageScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['cloud']);
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
   const { trips, addTrip, updateTrip, deleteTrip, mileage_rate, setMileageRate, properties } =

@@ -18,8 +18,8 @@ export function fromDbDocument(record) {
     expires_on: record.expiresOn || null,
     notes: record.notes || '',
     shared_with_tenant: !!record.sharedWithTenant,
-    // a record with no file reads like the samples did, opening it says there's no file
-    sample: true,
+    // a record with no file, the screens leave out Open and say files come with Firebase Storage
+    sample: false,
     record_only: true,
     created_at_iso: record.createdAt || null,
     updated_at_iso: record.updatedAt || null,

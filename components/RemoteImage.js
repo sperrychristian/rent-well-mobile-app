@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { View, Image, Pressable, ActivityIndicator, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { cachedAttachmentUrl, forgetAttachmentUrl } from '../services/attachmentUrls';
 import { COLORS, FONTS, TYPE, SPACING, RADIUS } from '../constants/theme';
 import { themedStyles } from '../util/themedStyles';
 
 // shows an uploaded photo from its key, the key gets swapped for a short-lived url first
 // props: attachment_key, style (size and corners), onPress (gets the url, optional)
+// milestone 2: there's no upload server anymore, so the key is the photo's own uri (demo photos stay on the
+// phone), Firebase records don't have photos until Storage is added
 function RemoteImage(props) {
   const [url, setUrl] = useState(null);
   const [failed, setFailed] = useState(false);
@@ -15,15 +16,14 @@ function RemoteImage(props) {
 
   useEffect(() => {
     let active = true;
-    cachedAttachmentUrl(props.attachment_key)
+    Promise.resolve(props.attachment_key)
       .then((fresh_url) => {
         if (active) {
-          setUrl(fresh_url);
-          setFailed(false);
+          setUrl(fresh_url || null);
+          setFailed(!fresh_url);
         }
       })
-      .catch((error) => {
-        console.log('Could not get the photo link', error.message);
+      .catch(() => {
         if (active) {
           setFailed(true);
         }
@@ -35,7 +35,6 @@ function RemoteImage(props) {
 
   // an expired link is the usual reason a photo stops loading, so I throw it out and get a new one
   function retry() {
-    forgetAttachmentUrl(props.attachment_key);
     setUrl(null);
     setFailed(false);
     setAttempt((current) => current + 1);
