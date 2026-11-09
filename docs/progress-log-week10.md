@@ -1,3 +1,5 @@
+> Historical record: the Express and Postgres API this log describes was replaced by the Firebase Realtime Database in milestone 2.
+
 # Progress log, week 10 (branch `week10-work-order-form`)
 
 Assignment 10A: one validated form in the lecture's structure (Input, ExpenseForm, ManageExpense), for

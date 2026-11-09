@@ -1,3 +1,5 @@
+> Historical record: the Express and Postgres API this log describes was replaced by the Firebase Realtime Database in milestone 2.
+
 # Ledger real mode: progress log
 
 Branch `ledger-real-mode`, made from `hearth-redesign`. Not merged.

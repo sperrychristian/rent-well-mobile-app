@@ -1,3 +1,5 @@
+> Historical record: the Express and Postgres API this log describes was replaced by the Firebase Realtime Database in milestone 2.
+
 # Leases, expenses, and onboarding: progress log
 
 Branch `leases-expenses-onboarding`, made from `master` (which already had `ledger-real-mode` merged in). Not merged.

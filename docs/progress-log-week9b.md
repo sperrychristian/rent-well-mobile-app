@@ -1,3 +1,5 @@
+> Historical record: the Express and Postgres API this log describes was replaced by the Firebase Realtime Database in milestone 2.
+
 # Progress log: week 9b (shared state, search, calendar, biometric unlock)
 
 Branch `week9-shared-state`, off `master` at `e49825f`.

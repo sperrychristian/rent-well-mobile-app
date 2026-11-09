@@ -1,3 +1,5 @@
+> Historical record: the Express and Postgres API this log describes was replaced by the Firebase Realtime Database in milestone 2.
+
 # Progress log: tabs and drawer (branch `tabs-drawer`)
 
 Branch made from `master` after `git pull origin master` (already up to date). `git branch --no-merged master` lists `leases-expenses-onboarding`, which I left alone. The one uncommitted change on master (a deleted comment line in `screens/index.js`) came along in the working tree and is not part of any commit on this branch.

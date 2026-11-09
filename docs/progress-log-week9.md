@@ -1,3 +1,5 @@
+> Historical record: the Express and Postgres API this log describes was replaced by the Firebase Realtime Database in milestone 2.
+
 # Progress log: leases, profit, reminders, dark mode (branch `leases-profit-reminders-dark`)
 
 ## Phase 0: setup

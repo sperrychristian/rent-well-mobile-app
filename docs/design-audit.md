@@ -1,3 +1,5 @@
+> Historical record: the Express and Postgres API this log describes was replaced by the Firebase Realtime Database in milestone 2.
+
 # Design audit (fintech pass)
 
 Phase 0 of the fintech restyle on branch `fintech-polish`. Made by grepping the source on the starting point (`design-polish`), before any change. Each section ends with what the pass does about it.

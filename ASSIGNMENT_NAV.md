@@ -24,7 +24,7 @@ NavigationContainer
 - All three navigators use the dynamic API: `createNativeStackNavigator`, `createDrawerNavigator`, and `createBottomTabNavigator`, with `Navigator` and `Screen` components in `App.js`.
 - The drawer also lists the four tabs at the top of the menu (a "Main" section), so a drawer screen can always get back to a tab.
 - One header per screen: the root stack draws the header for the signed-out and detail screens and hides it for `Main`, the drawer draws it for drawer screens and hides it for `Tabs`, and the tab navigator draws it for each tab. Tab and drawer headers have a menu button on the left, detail screens keep the stack's back arrow.
-- The root stack's router is wrapped by `navigation/hubRouter.js`, so `navigate('Payments')` from a detail screen, a push tap, or a socket handler still lands in the right tab or drawer screen (it pops back to `Main` and opens the screen inside it). No screen had to change how it navigates.
+- The root stack's router is wrapped by `navigation/hubRouter.js`, so `navigate('Payments')` from a detail screen or any code outside a screen still lands in the right tab or drawer screen (it pops back to `Main` and opens the screen inside it). No screen had to change how it navigates.
 - Back: the tabs use `backBehavior="firstRoute"` (Android back from any tab goes to the home tab, then leaves the app), the drawer uses `backBehavior="history"` (back returns to the section you came from). Picking something from the menu clears that history, so its header shows the menu button; a link inside a section (Expenses to Mileage Log, Tenants to Properties) keeps it, so that screen gets a back arrow instead.
 - The drawer swipe only starts within 24 points of the left edge. The iOS back swipe belongs to the root stack's detail screens, which sit above the drawer, so the two gestures never compete (the chat screen is a detail screen too).
 - On a screen 768 wide or more (an iPad), the drawer stays open on the side and the menu button hides.
@@ -167,10 +167,10 @@ Every param in the app is now an id with a name ending in `Id`: `workOrderId`, `
 The main example:
 
 - Passed: `features/workOrders/screens/WorkOrdersScreen.js` calls `props.navigation.navigate('WorkOrderDetail', { workOrderId: item.id })` when a card's Details button is tapped.
-- Read: `features/workOrders/screens/WorkOrderDetailScreen.js` does `props.route.params.workOrderId` and looks the order up with `getOrder` (in real mode it asks the server when the order isn't loaded yet, the same path push notifications use).
-- Shown: the header title is built with the options function form, `({ route }) => ({ title: headerTitle('WorkOrderDetail', route.params) })`, so it reads "Work Order #1" (or the first 8 characters of a server id).
+- Read: `features/workOrders/screens/WorkOrderDetailScreen.js` does `props.route.params.workOrderId` and looks the order up with `getOrder` (with a Firebase account it reads the order from the database when it isn't loaded yet).
+- Shown: the header title is built with the options function form, `({ route }) => ({ title: headerTitle('WorkOrderDetail', route.params) })`, so it reads "Work Order #1" (or the first 8 characters of a Firebase id).
 
-The stub example (now a real screen): `features/payments/screens/PaymentsScreen.js` calls `navigate('PaymentDetail', { paymentId: payment.id })` and `features/payments/screens/PaymentDetailScreen.js` reads `props.route.params.paymentId`, shows it in the header ("Payment Record #demo-pay"), and looks the payment up in the ledger store (or asks the server, for a push tap). The rent ledger added one more: a tenant row on Payments and the Rent Ledger link on Tenant Profile pass `tenancyId` to `features/payments/screens/TenantLedgerScreen.js`.
+The stub example (now a real screen): `features/payments/screens/PaymentsScreen.js` calls `navigate('PaymentDetail', { paymentId: payment.id })` and `features/payments/screens/PaymentDetailScreen.js` reads `props.route.params.paymentId`, shows it in the header ("Payment Record #demo-pay"), and looks the payment up in the ledger store (reloading it from Firebase if it isn't there yet). The rent ledger added one more: a tenant row on Payments and the Rent Ledger link on Tenant Profile pass `tenancyId` to `features/payments/screens/TenantLedgerScreen.js`.
 
 Other changes to keep params as ids:
 
@@ -190,7 +190,7 @@ Other changes to keep params as ids:
 | Landlord Dashboard | gear | Opens Settings and Profile | `SettingsHeaderButton` in `navigation/headerButtons.js` |
 | My Home (tenant) | search | Opens Search | `SearchHeaderButton` |
 | My Home (tenant) | gear | Opens Settings and Profile | `SettingsHeaderButton` |
-| All Work Orders | add | Opens the new work order form (local in the demo, the API in real mode, where owners can now add one) | `AddWorkOrderHeaderButton` |
+| All Work Orders | add | Opens the new work order form (local in the demo, Firebase for a signed-in account) | `AddWorkOrderHeaderButton` |
 | Your Tenants | person add | Opens Invite a New Tenant | `InviteHeaderButton` |
 | Message Inbox | person add (owners and the landlord demo only) | Opens Invite a New Tenant | `InviteHeaderButton` |
 | My Repair Requests | add (hidden when the rental has ended) | Opens Report an Issue | `AddRequestHeaderButton` |
@@ -223,7 +223,7 @@ Every button uses Ionicons, `COLORS.title`, a hitSlop, and an accessibility labe
 - The header now covers the notch, so screens dropped their own top padding, and the keyboard lift on forms counts the header's height.
 - Titles describe the screen in plain words ("All Work Orders", "Property Expenses") instead of repeating the route name. Screens with an id param add a short id.
 - The Dashboard and tenant home scroll now, since the header takes some room and there's a new Payments button.
-- The stubs work in the demo too: they read local data or just show the id, and never call the server.
+- The stubs work in the demo too: they read local data or just show the id, and never call Firebase.
 - Log Out stays where it was and also shows in Settings.
 - With the tabs and drawer, the home screens kept their rows to other sections (a tab or drawer screen is one tap away either way), so nothing on a screen had to change.
 - The diagram uses ELK for the layout (right-angle arrows, fewest crossings) and headless Chrome for the PNG and PDF, so nothing heavy had to be installed.
@@ -235,5 +235,5 @@ Every button uses Ionicons, `COLORS.title`, a hitSlop, and an accessibility labe
 - Guarded routes: App.js only registers the current side's screens in all three navigators (owner screens are left out for a tenant and tenant screens for an owner, in the demo and for real accounts), so an owner screen can't be opened by a tenant even by name. A test checks that the guarded blocks in App.js hold exactly the owner and tenant screens in the map.
 - The demo banner has a Switch to Tenant view / Switch to Landlord view button next to Exit Demo Mode. Switching keeps all the demo data.
 - Both sides share one copy of the demo data. The demo tenant is Sam Rivera at 123 Maple St, Unit 2, who is already on the sample work orders, checklists, documents, and message threads. A request Sam reports shows up for the landlord as Open, the landlord starting or resolving it changes its status on Sam's My Repair Requests, and Sam's messages land in the landlord's thread with Sam (and the other way around), with the fake reply coming from whoever is on the other side.
-- Nothing in either demo side calls the server or reads or saves real account data, and everything resets when the demo exits.
+- Nothing in either demo side calls Firebase or reads or saves real account data, and everything resets when the demo exits.
 
