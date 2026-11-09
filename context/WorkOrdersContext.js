@@ -173,6 +173,7 @@ export function WorkOrdersProvider(props) {
 
   // loads again whenever a different account signs in
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- filling or reloading state when this opens is the point, it runs once per open
     loadSavedData(current_user).then((applied) => {
       if (applied) {
         setLoadedUser(current_user);
@@ -296,6 +297,7 @@ export function WorkOrdersProvider(props) {
     if (!loaded || demo_mode) {
       return;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- filling or reloading state when this opens is the point, it runs once per open
     applyDue(recurring_rules);
   }, [loaded]);
 

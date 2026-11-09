@@ -53,6 +53,7 @@ function DocumentFormModal(props) {
     const existing = props.document;
     const start_file = existing ? null : props.initial_file || null;
     const start_category = existing ? existing.category : props.default_category || 'Lease';
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- filling or reloading state when this opens is the point, it runs once per open
     setNewFile(start_file);
     setName(
       existing

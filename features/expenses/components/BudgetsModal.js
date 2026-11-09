@@ -25,6 +25,7 @@ function BudgetsModal(props) {
     props.properties.forEach((name) => {
       starting_texts[name] = props.budgets[name] ? String(props.budgets[name]) : '';
     });
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- filling or reloading state when this opens is the point, it runs once per open
     setBudgetTexts(starting_texts);
   }, [props.visible]);
 

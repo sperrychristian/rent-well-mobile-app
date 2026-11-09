@@ -37,6 +37,7 @@ function TripModal(props) {
       return;
     }
     const existing = props.trip;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- filling or reloading state when this opens is the point, it runs once per open
     setDateText(existing ? existing.date : todayString());
     setProperty(existing ? existing.property : props.default_property || '');
     setMiles(existing ? String(existing.miles) : '');

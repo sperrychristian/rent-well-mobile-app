@@ -63,6 +63,7 @@ function AddExpenseModal(props) {
       return;
     }
     const existing = props.expense;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- filling or reloading state when this opens is the point, it runs once per open
     setAmount(existing ? String(existing.amount) : '');
     setCategory(existing ? existing.category : 'Repairs');
     setDateText(existing ? existing.date : todayString());
@@ -334,7 +335,7 @@ function AddExpenseModal(props) {
                   </View>
                   {repeat !== 'None' && (
                     <Text style={styles.helper_block}>
-                      This saves today's expense and adds the next ones on their own. You can pause
+                      This saves today&apos;s expense and adds the next ones on their own. You can pause
                       or delete it under Recurring.
                     </Text>
                   )}
