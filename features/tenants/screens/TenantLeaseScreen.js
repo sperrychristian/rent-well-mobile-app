@@ -18,6 +18,7 @@ import { todayString } from '../../../util/formatDate';
 import { SPACING, TYPE, SIZES, BORDER } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 // stub for the assignment: it gets only the tenant's id, shows their name when the tenants data has them,
 // and the id otherwise, then links to the Documents screen where leases live today
@@ -201,7 +202,11 @@ function pickTenancy(params, findTenancy, getTenantById) {
   return tenant && tenancy ? { tenant, tenancy } : null;
 }
 
-export default TenantLeaseScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(TenantLeaseScreen, {
+  stores: ['tenants', 'ledger'],
+  label: 'Loading the lease',
+});
 
 const styles = themedStyles((COLORS) => ({
   // the header has the screen's title now, so the name gets its own plain line instead of the big card

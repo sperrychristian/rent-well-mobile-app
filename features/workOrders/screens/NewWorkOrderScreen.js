@@ -16,6 +16,7 @@ import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { headerTitle } from '../../../navigation/navigationMap';
 import { SPACING, TYPE, SIZES } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 // asks before throwing away typed changes, the web has no Alert buttons so it uses the browser's confirm
 function confirmDiscard(onDiscard) {
@@ -310,7 +311,11 @@ function NewWorkOrderScreen(props) {
   );
 }
 
-export default NewWorkOrderScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(NewWorkOrderScreen, {
+  stores: ['tenants'],
+  label: 'Loading your properties and rentals',
+});
 
 const styles = themedStyles((COLORS) => ({
   message_screen: {

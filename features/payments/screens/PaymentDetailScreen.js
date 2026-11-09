@@ -18,6 +18,7 @@ import { shareReceipt } from '../utils/shareReceipt';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 const event_icons = {
   recorded: 'create-outline',
@@ -280,7 +281,11 @@ function PaymentDetailScreen(props) {
   );
 }
 
-export default PaymentDetailScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(PaymentDetailScreen, {
+  stores: ['ledger'],
+  label: 'Loading the payment',
+});
 
 const styles = themedStyles((COLORS) => ({
   container: {

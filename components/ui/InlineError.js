@@ -4,7 +4,7 @@ import { COLORS, SPACING, TYPE, SIZES, RADIUS } from '../../constants/theme';
 import { themedStyles } from '../../util/themedStyles';
 
 // a small banner over data that's still on screen: a refresh failed, or a save didn't go through
-// props: message, onRetry (adds a Retry button), style
+// props: message, onRetry (adds a Retry button), retry_label (OK for a save message), style
 // the words carry the meaning (never color only), and it's announced when it shows
 function InlineError(props) {
   if (!props.message) {
@@ -28,11 +28,11 @@ function InlineError(props) {
         <Pressable
           onPress={props.onRetry}
           accessibilityRole="button"
-          accessibilityLabel="Retry"
+          accessibilityLabel={props.retry_label || 'Retry'}
           hitSlop={8}
           style={({ pressed }) => [styles.retry, pressed && styles.retry_pressed]}
         >
-          <Text style={styles.retry_text}>Retry</Text>
+          <Text style={styles.retry_text}>{props.retry_label || 'Retry'}</Text>
         </Pressable>
       ) : null}
     </View>

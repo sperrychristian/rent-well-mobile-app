@@ -183,3 +183,71 @@ Branch `milestone-2-firebase`, off `master` at `3b4dc69`. Newest phase at the bo
   - `features/workOrders/utils/workOrderHelpers.js`: the real-mode tenant limit.
   - `features/tenants/screens/TenantLeaseScreen.js`: the `tenancy:updated` listener.
   - every comment in the deleted `services/` files.
+
+## Phase 5: loading, error, and empty states
+
+- New shared pieces in `components/ui/`:
+  - `ScreenState`: loading (spinner and a label, a still icon with Reduce Motion), error (the message
+    and Try Again), and empty (the existing EmptyState). Loading and error are announced to screen
+    readers and use live regions.
+  - `InlineError`: a small banner (words and an icon, never color only, 44pt Retry or OK) for a
+    refresh that failed over older data or a save that didn't go through.
+  - `DataScreen.js` (`withDataScreen(Screen, { stores, label })`) and `store/useScreenData.js`: one
+    answer for "is this screen's data ready" across the stores it reads. The wrapped screen always
+    stays in the same place in the tree, so a banner never resets a form.
+- `components/ErrorState.js` now draws `ScreenState`, so every existing error looks and reads the same.
+- Wrapped: Dashboard, Tenant Home, Tenant Lease, Property Overview, Tenant Profile, Documents,
+  Checklists, Checklist, Mileage, Year-End Report, Rent Ledger, Payment Record, Calendar, Search, and
+  the work order form. Bare spinners on Work Order, Request, Tenant Profile, Invite Tenant, and the
+  message thread became labeled `ScreenState`s. Settings shows a save banner but never blocks, so Log
+  Out is always reachable.
+- Fixed while testing: the skeleton loader had `accessibilityRole="progressbar"` but wasn't
+  `accessible`, so screen readers never heard "Loading". It is now.
+- `navigation/screenCoverage.js` is the coverage matrix (below). `navigation/screenCoverage.test.js`
+  checks it lists every screen in the navigation map, then opens each data screen on the real App in
+  Firebase mode three ways: loading (the database never answers), error (no connection), and empty (an
+  account with nothing yet). 75 cases, all passing.
+
+### Screen coverage matrix
+
+`*` = fully implemented: it reads or writes Firebase and handles loading and error.
+
+| Screen | Reads | Writes | Loading | Error | Empty |
+| --- | --- | --- | --- | --- | --- |
+| Welcome | static | - | - | - | - |
+| DemoChooser | static | - | - | - | - |
+| Login * | users | - | spinner | error with Try Again (and the setup message when .env has no address) | no test accounts yet, with the seed command |
+| RegisterOwner * | users | users | busy button | inline error, the form keeps its values | - |
+| RegisterTenant * | invites, users | users, tenancies, conversations, invites | busy button | inline error, the form keeps its values | - |
+| Dashboard * | orders, ledger, tenants, messages, expenses | charges (the rent catch-up) | spinner | error with Try Again, banner when a refresh fails | zero counts and the setup checklist |
+| WorkOrders * | orders | - | skeleton | error with Try Again, banner over the saved list | no work orders, with Add |
+| WorkOrderDetail * | orders, expenses, messages | workOrders (start, resolve, priority, notes, contractor, delete), expenses | spinner | error with Try Again, an alert when a save fails | - |
+| Tenants * | tenants | invites (resend, revoke) | skeleton | error with Try Again, banner over the saved list | no tenants, with Invite |
+| TenantDetail * | tenants, orders, messages | tenancies (move, assign, end) | spinner | error with Try Again, inline error in the move and end forms | - |
+| TenantLease * | tenants, ledger | leases, leaseEvents, rentSchedules (renew with new rent) | spinner | error with Try Again, inline error in the lease forms | no lease yet, with Set Lease |
+| Leases * | tenants | - | skeleton | error with Try Again | no leases, with Tenants |
+| Properties * | tenants | properties (add, edit, delete) | skeleton | error with Try Again, banner, inline error in the form | no properties, with Add |
+| PropertyDetail * | tenants, ledger | properties (payment instructions) | spinner | error with Try Again | - |
+| InviteTenant * | tenants | invites, properties | spinner | error with Try Again, inline error in the form | no pending invites |
+| Documents * | cloud | documents (records only) | spinner | error with Try Again, banner when a save fails | no documents, with Add |
+| Checklist * | cloud | checklists (new, delete) | spinner | error with Try Again, banner when a save fails | no checklists, with New |
+| ChecklistDetail * | cloud | checklists (items, rooms, sign) | spinner | error with Try Again, banner when a save fails | - |
+| Expenses * | expenses, cloud | expenses (add, edit, delete, import), ownerSettings (budgets) | skeleton | error with Try Again, banner over the saved list, an alert when a save fails | no expenses, with Add |
+| Profit * | expenses, ledger, tenants | - | skeleton | error with Try Again | nothing for the year yet |
+| Mileage * | cloud | mileage | spinner | error with Try Again, banner when a save fails | no trips, with Add |
+| YearEndReport * | expenses, cloud | - | spinner | error with Try Again | zero totals for the year |
+| TenantHome * | tenants, ledger, orders, messages | - | spinner | error with Try Again | No Active Rental (read only) for a former tenant |
+| MyRequests * | orders | - | skeleton | error with Try Again, banner over the saved list | no requests, with Report an Issue |
+| RequestDetail * | orders | - | spinner | error with Try Again | - |
+| PastRequests * | orders, tenants | - | skeleton | error with Try Again | no past requests |
+| NewWorkOrder * | tenants, orders | workOrders (add, edit) | rental lookup spinner | inline error, the form keeps its values | - |
+| Messages * | messages | - | skeleton | error with Try Again | no conversations |
+| MessageThread * | messages | messages, conversations (send, read) | spinner | error with Try Again, the draft stays when a send fails | no messages yet |
+| Payments * | ledger | payments (claims, confirm, reject), charges (catch-up) | skeleton | error with Try Again, banner over the saved ledgers | no tenants to collect from |
+| TenantLedger * | ledger | payments, charges, rentSchedules, reminders, messages | spinner | error with Try Again, inline error in each form | nothing on the ledger yet |
+| PaymentDetail * | ledger | payments (confirm, reject, void) | spinner | error with Try Again | - |
+| Settings | cloud | ownerSettings (mileage rate) | - | banner when a save fails | - |
+| Calendar * | orders, ledger, tenants | - | spinner | error with Try Again | nothing this month |
+| Search * | orders, tenants, ledger | - | spinner | error with Try Again | no matches |
+
+Fully implemented: 32 of 35 screens. Static: Welcome and Demo Chooser (the way in and the local demo). Settings is mostly device settings (appearance, Face ID, the demo tour), only the mileage rate saves to Firebase, so it is not counted.

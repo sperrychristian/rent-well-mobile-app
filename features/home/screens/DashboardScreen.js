@@ -28,6 +28,7 @@ import { leasesSummary, urgentLease } from '../../leases/utils/leaseHelpers';
 import { useProfitReport } from '../../profit/hooks/useProfitReport';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 // the fintech pass: an overview like a bank's home screen, a hello, one indigo summary card with this month's
 // spending and its trend, three key numbers, the four things landlords open most, then everything else
@@ -248,7 +249,11 @@ function DashboardScreen(props) {
   );
 }
 
-export default DashboardScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(DashboardScreen, {
+  stores: ['orders', 'ledger', 'tenants'],
+  label: 'Loading your rentals',
+});
 
 const styles = themedStyles((COLORS) => ({
   container: {

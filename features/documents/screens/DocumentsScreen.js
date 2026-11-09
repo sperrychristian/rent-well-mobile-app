@@ -33,6 +33,7 @@ import StatusLabel from '../../../components/ui/StatusLabel';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 import { useNavigation } from '@react-navigation/native';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 const sort_options = ['Newest', 'Name'];
 
@@ -429,7 +430,11 @@ function DocumentsScreen() {
   );
 }
 
-export default DocumentsScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(DocumentsScreen, {
+  stores: ['cloud'],
+  label: 'Loading documents',
+});
 
 const styles = themedStyles((COLORS) => ({
   container: {

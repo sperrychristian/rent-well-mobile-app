@@ -18,6 +18,7 @@ import { list_styles } from '../../../components/ui/listStyles';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import ScreenState from '../../../components/ui/ScreenState';
 
 // the server takes photos up to 10 MB
 const max_photo_bytes = 10485760;
@@ -91,7 +92,7 @@ function RequestDetailScreen(props) {
             }}
           />
         ) : (
-          <ActivityIndicator color={COLORS.title} size="large" />
+          <ScreenState status="loading" label="Loading your request" />
         )}
       </View>
     );

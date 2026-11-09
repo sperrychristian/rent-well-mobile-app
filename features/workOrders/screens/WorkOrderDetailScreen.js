@@ -9,7 +9,6 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
@@ -34,6 +33,7 @@ import EditNote from '../components/EditNote';
 import { editRuleFor } from '../utils/workOrderHelpers';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import ScreenState from '../../../components/ui/ScreenState';
 
 const priority_options = ['Emergency', 'Normal', 'Low'];
 
@@ -79,7 +79,7 @@ function WorkOrderDetailScreen(props) {
             }}
           />
         ) : (
-          <ActivityIndicator color={COLORS.title} size="large" />
+          <ScreenState status="loading" label="Loading the work order" />
         )}
       </View>
     );

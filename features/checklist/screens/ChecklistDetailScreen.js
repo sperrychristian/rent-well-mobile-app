@@ -22,6 +22,7 @@ import { list_styles } from '../../../components/ui/listStyles';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 function ChecklistDetailScreen(props) {
   // Firebase has no live updates, so this screen reloads quietly when it comes back into view
@@ -379,7 +380,11 @@ function ChecklistDetailScreen(props) {
   );
 }
 
-export default ChecklistDetailScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(ChecklistDetailScreen, {
+  stores: ['cloud'],
+  label: 'Loading the checklist',
+});
 
 const styles = themedStyles((COLORS) => ({
   // the header has the screen's title now, so the name gets its own plain line instead of the big card

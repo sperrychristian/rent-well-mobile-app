@@ -31,6 +31,7 @@ import {
 import { COLORS, SPACING, TYPE, SIZES, NUMBERS } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 function placeOf(ledger) {
   return ledger.unit_label ? ledger.property_name + ', ' + ledger.unit_label : ledger.property_name;
@@ -471,7 +472,11 @@ function TenantLedgerScreen(props) {
   );
 }
 
-export default TenantLedgerScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(TenantLedgerScreen, {
+  stores: ['ledger'],
+  label: 'Loading the rent ledger',
+});
 
 const styles = themedStyles((COLORS) => ({
   container: {

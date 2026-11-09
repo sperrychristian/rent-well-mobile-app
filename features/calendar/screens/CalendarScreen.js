@@ -32,6 +32,7 @@ import {
 import { COLORS, SPACING, TYPE, SIZES, RADIUS, BORDER, FONTS } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 // the legend under the grid, so a dot's color always has words next to it somewhere on screen
 const legend = [
@@ -290,7 +291,11 @@ function CalendarScreen(props) {
   );
 }
 
-export default CalendarScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(CalendarScreen, {
+  stores: ['orders', 'ledger', 'tenants'],
+  label: 'Loading the calendar',
+});
 
 const styles = themedStyles((COLORS) => ({
   screen: {

@@ -15,6 +15,7 @@ import IconCircle from '../../../components/ui/IconCircle';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 function MileageScreen(props) {
   // Firebase has no live updates, so this screen reloads quietly when it comes back into view
@@ -210,7 +211,11 @@ function MileageScreen(props) {
   );
 }
 
-export default MileageScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(MileageScreen, {
+  stores: ['cloud'],
+  label: 'Loading trips',
+});
 
 const styles = themedStyles((COLORS) => ({
   container: {

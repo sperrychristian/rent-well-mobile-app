@@ -30,6 +30,8 @@ function SkeletonList(props) {
   return (
     <View
       style={[styles.list, props.style]}
+      // one element for screen readers, so "Loading" is read once instead of the empty rows
+      accessible={true}
       accessibilityRole="progressbar"
       accessibilityLabel="Loading"
     >

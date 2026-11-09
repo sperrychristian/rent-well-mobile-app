@@ -25,6 +25,7 @@ import {
 } from '../utils/searchIndex';
 import { COLORS, SPACING, TYPE, SIZES, FONTS } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 // how long typing has to stop before the search runs
 const debounce_ms = 250;
@@ -247,7 +248,11 @@ function SearchScreen(props) {
   );
 }
 
-export default SearchScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(SearchScreen, {
+  stores: ['orders', 'tenants', 'ledger'],
+  label: 'Loading what you can search',
+});
 
 const styles = themedStyles((COLORS) => ({
   container: {

@@ -14,6 +14,7 @@ import StatusLabel from '../../../components/ui/StatusLabel';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 const status_filters = ['All', 'In progress', 'Complete'];
 
@@ -174,7 +175,11 @@ function ChecklistScreen(props) {
   );
 }
 
-export default ChecklistScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(ChecklistScreen, {
+  stores: ['cloud'],
+  label: 'Loading checklists',
+});
 
 const styles = themedStyles((COLORS) => ({
   container: {

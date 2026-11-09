@@ -10,6 +10,7 @@ import { useToast } from '../../../components/ui/Toast';
 import { SPACING, TYPE, SIZES } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 // stub for the assignment: it gets only the property's id and looks the property up in the shared tenants data
 // (the demo's local copy or the server's), and if it isn't there it just shows the id instead of crashing
@@ -116,7 +117,11 @@ function PropertyDetailScreen(props) {
   );
 }
 
-export default PropertyDetailScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(PropertyDetailScreen, {
+  stores: ['tenants', 'ledger'],
+  label: 'Loading the property',
+});
 
 const styles = themedStyles((COLORS) => ({
   // the header has the screen's title now, so the name gets its own plain line instead of the big card

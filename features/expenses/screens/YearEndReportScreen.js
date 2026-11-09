@@ -12,6 +12,7 @@ import { list_styles } from '../../../components/ui/listStyles';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 function YearEndReportScreen(props) {
   // Firebase has no live updates, so this screen reloads quietly when it comes back into view
@@ -161,7 +162,11 @@ function YearEndReportScreen(props) {
   );
 }
 
-export default YearEndReportScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(YearEndReportScreen, {
+  stores: ['expenses', 'cloud'],
+  label: 'Loading the year-end report',
+});
 
 const styles = themedStyles((COLORS) => ({
   container: {

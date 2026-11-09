@@ -30,6 +30,7 @@ import {
 } from '../utils/messageHelpers';
 import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, OPACITY } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
+import ScreenState from '../../../components/ui/ScreenState';
 
 // the server takes photos up to 10 MB and message text up to 2000 characters
 const max_photo_bytes = 10485760;
@@ -243,7 +244,7 @@ function MessageThreadScreen(props) {
   } else if (status === 'loading' && messages.length === 0) {
     list = (
       <View style={styles.center}>
-        <ActivityIndicator color={COLORS.title} size="large" />
+        <ScreenState status="loading" label="Loading messages" />
       </View>
     );
   } else {

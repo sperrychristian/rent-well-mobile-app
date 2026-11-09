@@ -25,6 +25,7 @@ import { useDemoTour } from '../hooks/useDemoTour';
 import { COLORS, SPACING, TYPE, SIZES } from '../../../constants/theme';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 // the tenant's home: message the landlord or report something that needs fixing
 // the Hearth pass: the wordmark and your initials, then what you owe right now as one big number with the
@@ -256,7 +257,11 @@ function TenantHomeScreen(props) {
   );
 }
 
-export default TenantHomeScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(TenantHomeScreen, {
+  stores: ['tenants', 'ledger', 'orders'],
+  label: 'Loading your rental',
+});
 
 const styles = themedStyles((COLORS) => ({
   scroll: {

@@ -17,6 +17,7 @@ import { themedStyles } from '../../../util/themedStyles';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
 import { useTheme } from '../../../store/ThemeContext';
 import SecurityCard from '../../security/components/SecurityCard';
+import InlineError from '../../../components/ui/InlineError';
 
 const appearance_choices = [
   { value: 'system', label: 'System' },
@@ -29,7 +30,7 @@ const appearance_choices = [
 function SettingsScreen(props) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const { demo_mode, mileage_rate } = useWorkOrders();
+  const { demo_mode, mileage_rate, cloud_error, cloud_status, clearCloudError } = useWorkOrders();
   // the demo has a side now, so the role comes from the demo while it runs and from the account otherwise
   const role = useAppRole();
   // owners and the demo get the mileage rate, tenants don't track mileage
@@ -51,6 +52,16 @@ function SettingsScreen(props) {
     >
       {/* only shows while the demo is running, it's the demo's way out */}
       <DemoBanner />
+
+      {/* a mileage rate that didn't save says so here, Log Out stays reachable either way */}
+      {cloud_status === 'ready' && cloud_error ? (
+        <InlineError
+          message={cloud_error}
+          onRetry={clearCloudError}
+          retry_label="OK"
+          style={styles.banner}
+        />
+      ) : null}
 
       <Card>
         <Text style={styles.heading}>Profile</Text>
@@ -138,6 +149,10 @@ function SettingsScreen(props) {
 export default SettingsScreen;
 
 const styles = themedStyles((COLORS) => ({
+  banner: {
+    marginHorizontal: SIZES.screen_padding,
+    marginTop: SPACING.md,
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background,

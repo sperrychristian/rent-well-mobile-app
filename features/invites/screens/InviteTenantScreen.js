@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   Pressable,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Share,
@@ -24,6 +23,7 @@ import { list_styles } from '../../../components/ui/listStyles';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 import { useNavigation } from '@react-navigation/native';
+import ScreenState from '../../../components/ui/ScreenState';
 
 function InviteTenantScreen() {
   const focus_navigation = useNavigation();
@@ -142,7 +142,9 @@ function InviteTenantScreen() {
 
   let content;
   if (status === 'loading') {
-    content = <ActivityIndicator style={styles.spinner} color={COLORS.title} size="large" />;
+    content = (
+      <ScreenState status="loading" label="Loading your properties" style={styles.spinner} />
+    );
   } else if (status === 'error') {
     content = <ErrorState message={error_message} onRetry={retry} />;
   } else {
