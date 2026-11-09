@@ -13,6 +13,7 @@ import { formatCurrency } from '../../../util/formatCurrency';
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 import { withDataScreen } from '../../../components/ui/DataScreen';
+import { useExpenses } from '../../../store/ExpensesContext';
 
 function YearEndReportScreen(props) {
   // Firebase has no live updates, so this screen reloads quietly when it comes back into view
@@ -20,6 +21,9 @@ function YearEndReportScreen(props) {
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
   const { expenses, trips, mileage_rate } = useWorkOrders();
+  // a Firebase landlord can't attach receipt photos until Storage, so receipt coverage only shows in the demo
+  // and on the phone's own list (the totals don't change either way)
+  const show_receipts = !useExpenses().is_remote;
 
   const current_year = String(new Date().getFullYear());
   // the Expenses screen passes its selected year in, and this falls back to the current year
@@ -44,7 +48,7 @@ function YearEndReportScreen(props) {
       return;
     }
     try {
-      await shareYearEndCsv(year, data, mileage_rate);
+      await shareYearEndCsv(year, data, mileage_rate, { show_receipts: show_receipts });
     } catch (error) {
       console.log('Could not export the year-end summary', error);
       Alert.alert('Export failed', 'The file could not be created or shared.');
@@ -93,23 +97,25 @@ function YearEndReportScreen(props) {
           </Text>
         </Card>
 
-        <Card>
-          <Text style={styles.heading}>Receipts</Text>
-          <Text style={styles.detail}>
-            {data.with_receipts} of {data.expense_count} expenses have a receipt attached
-          </Text>
-          {data.missing_receipts.slice(0, 5).map((expense) => (
-            <Text key={expense.id} style={styles.missing_text}>
-              {formatDate(expense.date)} · {formatCurrency(expense.amount)} ·{' '}
-              {expense.vendor || expense.category}
-            </Text>
-          ))}
-          {data.missing_receipts.length > 5 && (
+        {show_receipts && (
+          <Card>
+            <Text style={styles.heading}>Receipts</Text>
             <Text style={styles.detail}>
-              and {data.missing_receipts.length - 5} more without a receipt
+              {data.with_receipts} of {data.expense_count} expenses have a receipt attached
             </Text>
-          )}
-        </Card>
+            {data.missing_receipts.slice(0, 5).map((expense) => (
+              <Text key={expense.id} style={styles.missing_text}>
+                {formatDate(expense.date)} · {formatCurrency(expense.amount)} ·{' '}
+                {expense.vendor || expense.category}
+              </Text>
+            ))}
+            {data.missing_receipts.length > 5 && (
+              <Text style={styles.detail}>
+                and {data.missing_receipts.length - 5} more without a receipt
+              </Text>
+            )}
+          </Card>
+        )}
 
         {data.per_property.map((item) => (
           <Card key={item.property}>

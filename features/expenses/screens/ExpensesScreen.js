@@ -353,7 +353,10 @@ function ExpensesScreen(props) {
       order_titles[order.id] = order.title;
     });
     try {
-      await shareExpensesCsv(filtered_expenses, year, order_titles);
+      // no receipt column for a Firebase landlord, they can't attach receipt photos until Storage
+      await shareExpensesCsv(filtered_expenses, year, order_titles, {
+        show_receipts: !expense_store.is_remote,
+      });
     } catch (error) {
       console.log('Could not export expenses', error);
       Alert.alert('Export failed', 'The file could not be created or shared.');
@@ -748,7 +751,7 @@ function ExpensesScreen(props) {
                       </Text>
                     </Pressable>
                   )}
-                  {receipts.length === 0 && (
+                  {receipts.length === 0 && !expense_store.is_remote && (
                     <View style={[styles.tag, styles.missing_tag]}>
                       <Text style={[styles.tag_text, styles.missing_text]}>No receipt</Text>
                     </View>
