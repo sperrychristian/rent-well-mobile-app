@@ -109,17 +109,18 @@ the tab it came from.
 
 ### Problems Encountered/Questions
 
-- **No live updates over REST.** The Realtime Database's REST endpoints have no listener I can keep open
-  in React Native (my old app used a socket for this). I reload a screen's data when it comes back into
-  view, on pull to refresh, and after every save, and an open conversation checks for new messages every
-  8 seconds, stopping when the screen loses focus or the app goes to the background.
+- **No live updates over REST.** The Realtime Database's REST endpoints have no listener I can keep
+  open in React Native, so the app can't be told when data changes. I reload a screen's data when it
+  comes back into view, on pull to refresh, and after every save. An open conversation also checks for
+  new messages every 8 seconds, stopping when the screen loses focus or the app goes to the background.
 - **REST queries need index rules.** `orderBy` and `equalTo` only work with `.indexOn` rules, so I keep
   the tree flat, read a whole small node, and filter by `ownerId` or `tenantUserId` on the phone. That's
   fine for a landlord with a few units, and I would add indexes if the data grew.
-- **No server jobs.** My old server billed rent and late fees every hour. Now the landlord's phone runs
-  the same rules when the app opens, on pull to refresh, and after a rent schedule change. Each charge has
-  a fixed id (the tenancy and the month), and it is created with a conditional write that fails if the
-  record already exists, so running it twice or on two phones never double charges. I tested both cases.
+- **No server to run scheduled work.** Rent and late fees need to be billed on a schedule, but the app
+  talks straight to the database and has no server of its own. So the landlord's phone does it when the
+  app opens, on pull to refresh, and after a rent schedule change. Each charge has a fixed id (the
+  tenancy and the month), and it is created with a conditional write that fails if the record already
+  exists, so running it twice or on two phones never double charges. I tested both cases.
 - **No arrays.** Firebase turns arrays into objects with numbered keys, so checklist rooms and items and
   payment timelines are saved as keyed objects. I also found that messages need push-style keys made
   from their time, or a new message sorted as the oldest one.
@@ -130,9 +131,6 @@ the tab it came from.
 - **Test mode rules run out.** The database is in test mode, which allows anyone to read and write and
   expires after 30 days. Next milestone I'll add Firebase Auth and rules that only let each landlord and
   tenant reach their own records.
-- **Question:** the rubric says six data-driven screens in one place and eight in another. Which number
-  should I plan for? I built all of the data screens against Firebase so I'm covered either way, but I'd
-  like to know which one is graded.
 
 ![Work orders with Firebase data](screenshots/m2-work-orders.png)
 
