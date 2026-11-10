@@ -4,10 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import Button from '../../../components/ui/Button';
 import ProgressLine from '../../../components/ui/ProgressLine';
 import { useToast } from '../../../components/ui/Toast';
-import { hapticSuccess } from '../../../utils/haptics';
-import { useExpenses } from '../context/ExpensesContext';
-import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { hapticSuccess } from '../../../util/haptics';
+import { useExpenses } from '../../../store/ExpensesContext';
+import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // a quiet card on Expenses for a real landlord who still has expenses saved only on this phone
 // one tap uploads them (with their receipts), the phone's copy is only cleared once the server has each one,

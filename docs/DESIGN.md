@@ -6,7 +6,7 @@ The Hearth look is on branch `hearth-redesign`. It should feel refined, calm, an
 - hairlines instead of cards
 - plain text rows with simple line icons
 
-Everything comes from `theme.js` and `components/ui/`. `CLAUDE.md` has the short version, and this is the full guide. It replaces the indigo fintech look. The token names stayed the same, so older styles pick up the new colors.
+Everything comes from `constants/theme.js` and `components/ui/`. `CLAUDE.md` has the short version, and this is the full guide. It replaces the indigo fintech look. The token names stayed the same, so older styles pick up the new colors.
 
 | Welcome | Landlord overview | Tenant overview |
 | --- | --- | --- |
@@ -25,7 +25,7 @@ Everything comes from `theme.js` and `components/ui/`. `CLAUDE.md` has the short
 - **Line icons only:** Ionicons outline at 24 in rows. There are no icon circles, tinted squares, or pills behind anything.
 - **Spacing:** 24 of side padding on a screen, rows at least 64 tall, and a 4 point grid.
 
-## Tokens (`theme.js`)
+## Tokens (`constants/theme.js`)
 
 ### Colors
 
@@ -51,7 +51,7 @@ Contrast is AA (at least 4.5 to 1) for every pairing:
 - Green is 6.8 on the paper, terracotta 5.4, and amber 5.75.
 - White on green is 7.5.
 
-`theme.test.js`, `components/ui/stylePairs.test.js`, and `components/ui/hearth.test.js` check every pair.
+`constants/theme.test.js`, `components/ui/stylePairs.test.js`, and `components/ui/hearth.test.js` check every pair.
 
 ### Type (`TYPE`)
 
@@ -157,12 +157,12 @@ Contrast is AA (at least 4.5 to 1) for every pairing:
   - A section header with "1 of 3", the green progress line, and a green "Hide this for good" text button.
   - It goes away once every step is done.
 - **Demo tour** (`features/home/components/DemoTourSheet.js`): the standard bottom sheet. A Fraunces title, one muted line, four ruled rows each with a green line icon and a sentence, and one green "Got It" pill.
-- **Empty states:** every list says what goes there in a Fraunces title and one muted sentence, with the screen's own add action as the one green pill. A list that only a server fills (Messages for a tenant, Past Requests, tenant Payments) has no button.
+- **Empty states:** every list says what goes there in a Fraunces title and one muted sentence, with the screen's own add action as the one green pill. A list that only someone else fills (Messages for a tenant, Past Requests, tenant Payments) has no button.
 
 ## Dark mode
 
 - **Appearance:** Settings has System, Light, and Dark. It's saved on the phone under `rent_well_appearance` (not per account), so it holds before login, in the demo, and after logging out. System follows the phone's setting live. The splash stays up until the choice is read, so the first screen is never the wrong theme. The native splash follows the phone's own setting (`app.json` has a dark splash background), since nothing can be read before the app starts.
-- **The palette:** `theme.js` has `LIGHT_COLORS` and `DARK_COLORS` with the same token names, and `COLORS` always reads the active one. The dark one stays warm Hearth:
+- **The palette:** `constants/theme.js` has `LIGHT_COLORS` and `DARK_COLORS` with the same token names, and `COLORS` always reads the active one. The dark one stays warm Hearth:
 
 | Token | Dark | What it is |
 | --- | --- | --- |
@@ -182,10 +182,10 @@ Contrast is AA (at least 4.5 to 1) for every pairing:
 
 - **Rules:**
   - Colors only come from `COLORS`, in both themes. No hex anywhere else.
-  - Styles are built with `themedStyles((COLORS) => ({ ... }))` (`utils/themedStyles.js`), once per palette. Color tables and navigator options use `themed((COLORS) => ...)` from `theme.js`. Colors read while drawing (`color={COLORS.cta}`) are always the active palette.
-  - `useTheme()` (`context/ThemeContext.js`) gives `scheme`, `is_dark`, `colors`, `preference`, and `setPreference`.
+  - Styles are built with `themedStyles((COLORS) => ({ ... }))` (`util/themedStyles.js`), once per palette. Color tables and navigator options use `themed((COLORS) => ...)` from `constants/theme.js`. Colors read while drawing (`color={COLORS.cta}`) are always the active palette.
+  - `useTheme()` (`store/ThemeContext.js`) gives `scheme`, `is_dark`, `colors`, `preference`, and `setPreference`.
   - A theme switch redraws the navigator and puts you back on the same screen. The status bar, the navigation theme, the tab bar, the drawer, headers, sheets, toasts, inputs, chat bubbles, the Profit chart, skeletons, the demo banner, Welcome, and the wordmark all read the palette.
-  - Every text and surface pair, every state on its tint, every fill, the style pairs, and the tab bar and drawer pairs are checked for AA in both palettes (`theme.test.js`, `components/ui/stylePairs.test.js`, `navigation/chromeStyles.test.js`).
+  - Every text and surface pair, every state on its tint, every fill, the style pairs, and the tab bar and drawer pairs are checked for AA in both palettes (`constants/theme.test.js`, `components/ui/stylePairs.test.js`, `navigation/chromeStyles.test.js`).
 
 ## Payments screens
 
@@ -219,6 +219,29 @@ The work order form (`features/workOrders/components/WorkOrderForm.js`) is built
 - **ChoiceChips** (`components/forms/ChoiceChips.js`): a labeled radio group of the standard chips with the same inline error under them. An invalid group gives every chip a `danger_text` border.
 - **DateInput** (`components/forms/DateInput.js`): a typed YYYY-MM-DD box (`maxLength` 10) with a 44 square calendar button inside the row. iOS opens the inline picker in a card under the box with a Done text button, Android opens its dialog, and the web just types. The picker follows the theme (`themeVariant`) and uses `cta` as its accent, and the minimum and maximum dates come from the form's rules.
 - **The form around them:** one column at most `content_max_width` wide, in a ScrollView inside a KeyboardAvoidingView. A failed submit puts the lecture's one summary line ("Invalid input values, please check your data") above the buttons in `danger_text` with the alert icon, scrolls to the first bad field, and announces it. Cancel is a tertiary text button next to the green pill (Add or Update), each half the row.
+
+## Loading, error, and empty states (milestone 2)
+
+Every screen that reads the Firebase database shows one of these instead of a blank screen.
+
+- **`ScreenState`** (`components/ui/ScreenState.js`): `status` is `loading`, `error`, or `empty`.
+  - Loading: a green spinner and a muted label ("Loading documents"). With Reduce Motion on, the
+    spinner is a still hourglass icon. It's one accessible element with the progress bar role.
+  - Error: the cloud-offline line icon in amber, a Fraunces title ("Couldn't load this"), the message,
+    and a secondary Try Again pill. It's announced as an alert.
+  - Empty: the existing EmptyState (line icon, Fraunces title, one sentence, one green pill).
+- **`InlineError`** (`components/ui/InlineError.js`): an amber banner (`warning_tint` with
+  `warning_text`, AA in both themes) over data that's still on screen, when a refresh failed or a save
+  didn't go through. Words and an icon carry the meaning, never color alone, and Retry (or OK for a save
+  message) is a 44pt target.
+- **`withDataScreen(Screen, { stores, label })`** (`components/ui/DataScreen.js`): wraps a screen so
+  it shows the loading or error `ScreenState` while its stores load, and the banner on top once it has
+  data. The screen keeps the same place in the tree, so a banner never clears a form.
+- `ErrorState` and the skeleton list still work as before. `ErrorState` draws `ScreenState` now, and the
+  skeleton is a single accessible "Loading" element.
+- Forms keep what was typed when a save fails, and say why in an inline error above the buttons.
+- Upload buttons (photos, receipts, document files, scans) only show in the demo until Firebase Storage
+  is added, so no screen offers something that can't work.
 
 ## Visual QA
 

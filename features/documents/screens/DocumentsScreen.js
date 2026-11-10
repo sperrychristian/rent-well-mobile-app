@@ -10,14 +10,14 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ImagePicker } from '../../../services/systemPickers';
+import { ImagePicker } from '../../../util/systemPickers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DocumentDetailModal from '../components/DocumentDetailModal';
 import DocumentFormModal from '../components/DocumentFormModal';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { todayString } from '../../../utils/formatDate';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { todayString } from '../../../util/formatDate';
 import {
   saveDocumentFile,
   deleteDocumentFile,
@@ -26,19 +26,34 @@ import {
 } from '../utils/documentFiles';
 import { iconFor, expiryTag, daysUntil } from '../utils/documentHelpers';
 import { document_categories, expiring_soon_days } from '../../../data/documentOptions';
-import { COLORS, SPACING, TYPE, SIZES, OPACITY, NUMBERS } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES, OPACITY, NUMBERS } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import EmptyState from '../../../components/ui/EmptyState';
+import ScreenState from '../../../components/ui/ScreenState';
 import StatusLabel from '../../../components/ui/StatusLabel';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { useNavigation } from '@react-navigation/native';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 const sort_options = ['Newest', 'Name'];
 
 function DocumentsScreen() {
+  const focus_navigation = useNavigation();
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(focus_navigation, ['cloud']);
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
-  const { documents, properties, demo_mode, addDocument, updateDocument, deleteDocument } =
-    useWorkOrders();
+  const {
+    documents,
+    properties,
+    demo_mode,
+    addDocument,
+    updateDocument,
+    deleteDocument,
+    cloud_status,
+  } = useWorkOrders();
+  // a Firebase landlord's documents are records only until Firebase Storage, the demo keeps real files
+  const records_only = !demo_mode && cloud_status !== 'off';
 
   const [property_filter, setPropertyFilter] = useState('All');
   const [category_filter, setCategoryFilter] = useState('All');
@@ -98,6 +113,13 @@ function DocumentsScreen() {
 
   const detail_document = documents.find((document) => document.id === detail_id);
   const editing_document = documents.find((document) => document.id === editing_id);
+
+  // the empty list's Clear Filters puts every filter and the search back to the start
+  function clearFilters() {
+    setPropertyFilter('All');
+    setCategoryFilter('All');
+    setSearchText('');
+  }
 
   function openNewForm() {
     setEditingId(null);
@@ -171,9 +193,11 @@ function DocumentsScreen() {
     }
     Alert.alert(
       'Delete document?',
-      document.sample
-        ? 'This removes the sample document.'
-        : 'This removes the document and its file from this phone. It cannot be undone.',
+      document.record_only
+        ? 'This removes the document record.'
+        : document.sample
+          ? 'This removes the sample document.'
+          : 'This removes the document and its file from this phone. It cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -236,13 +260,16 @@ function DocumentsScreen() {
           style={styles.add_button}
           onPress={openNewForm}
         />
-        <PrimaryButton
-          title="Scan"
-          icon="camera-outline"
-          variant="secondary"
-          style={styles.scan_button}
-          onPress={scanDocument}
-        />
+        {/* a scan is a photo file, which waits for Firebase Storage, so only phone documents have it */}
+        {!records_only && (
+          <PrimaryButton
+            title="Scan"
+            icon="camera-outline"
+            variant="secondary"
+            style={styles.scan_button}
+            onPress={scanDocument}
+          />
+        )}
       </View>
 
       <Text style={styles.section_label}>Property</Text>
@@ -336,14 +363,28 @@ function DocumentsScreen() {
         contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
         ListHeaderComponent={list_header}
         ListEmptyComponent={
-          <EmptyState
-            illustration="empty_documents"
-            title="No documents match"
-            message="Try another property or category, or add a document above."
-            action_label="Add Document"
-            action_icon="add-circle-outline"
-            onAction={openNewForm}
-          />
+          // nothing saved at all gets the first-run message, a search or filter that finds nothing gets Clear
+          documents.length === 0 ? (
+            <ScreenState
+              status="empty"
+              illustration="empty_documents"
+              title="No documents yet"
+              message="Keep leases, insurance, and inspection reports here, by property."
+              action_label="Add Document"
+              action_icon="add-circle-outline"
+              onAction={openNewForm}
+            />
+          ) : (
+            <ScreenState
+              status="empty"
+              illustration="empty_documents"
+              title="No documents match"
+              message="Nothing fits this property, category, and search. Clear them to see every document."
+              action_label="Clear Filters"
+              action_icon="close-circle-outline"
+              onAction={clearFilters}
+            />
+          )
         }
         renderItem={({ item }) => {
           const tag = expiryTag(item.expires_on);
@@ -395,6 +436,7 @@ function DocumentsScreen() {
         onDismiss={openPendingEdit}
       />
       <DocumentFormModal
+        records_only={records_only}
         visible={form_open}
         document={editing_document}
         initial_file={prefill_file}
@@ -409,7 +451,11 @@ function DocumentsScreen() {
   );
 }
 
-export default DocumentsScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(DocumentsScreen, {
+  stores: ['cloud'],
+  label: 'Loading documents',
+});
 
 const styles = themedStyles((COLORS) => ({
   container: {

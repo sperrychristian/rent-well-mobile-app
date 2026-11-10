@@ -1,8 +1,8 @@
 import { View, Text, Pressable, Platform } from 'react-native';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-import { stringToDate, dateToString } from '../utils/dateInput';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../theme';
-import { themedStyles } from '../utils/themedStyles';
+import { stringToDate, dateToString } from '../util/dateInput';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../constants/theme';
+import { themedStyles } from '../util/themedStyles';
 
 // value is a date text like 2026-10-07 and onChange gets the new date text back
 function DateField(props) {

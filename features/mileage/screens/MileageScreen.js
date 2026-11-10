@@ -4,18 +4,22 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TripModal from '../components/TripModal';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { formatDate } from '../../../utils/formatDate';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { formatDate } from '../../../util/formatDate';
 import { sumMiles } from '../../expenses/utils/expenseStats';
-import { SPACING, TYPE, OPACITY, NUMBERS, SIZES } from '../../../theme';
+import { SPACING, TYPE, OPACITY, NUMBERS, SIZES } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import EmptyState from '../../../components/ui/EmptyState';
-import { formatCurrency } from '../../../utils/formatCurrency';
+import ScreenState from '../../../components/ui/ScreenState';
+import { formatCurrency } from '../../../util/formatCurrency';
 import IconCircle from '../../../components/ui/IconCircle';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 function MileageScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['cloud']);
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
   const { trips, addTrip, updateTrip, deleteTrip, mileage_rate, setMileageRate, properties } =
@@ -31,6 +35,15 @@ function MileageScreen(props) {
   const years = [...new Set([...trips.map((trip) => trip.date.slice(0, 4)), current_year])].sort(
     (a, b) => b.localeCompare(a),
   );
+
+  // the year is the only filter here, so clearing it goes to the newest year that has trips
+  function clearFilters() {
+    const newest_year = trips.reduce(
+      (newest, trip) => (trip.date.slice(0, 4) > newest ? trip.date.slice(0, 4) : newest),
+      '',
+    );
+    setYear(newest_year || current_year);
+  }
 
   const year_trips = trips
     .filter((trip) => trip.date.slice(0, 4) === year)
@@ -162,14 +175,30 @@ function MileageScreen(props) {
         contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
         ListHeaderComponent={list_header}
         ListEmptyComponent={
-          <EmptyState
-            illustration="empty_mileage"
-            title={'No trips logged for ' + year}
-            message="Log each drive to a property, the deduction adds itself up for tax time."
-            action_label="Add Trip"
-            action_icon="add-circle-outline"
-            onAction={openNewForm}
-          />
+          // no trips at all gets the first-run message, a year with none (while other years have some) gets Clear
+          trips.length === 0 ? (
+            <ScreenState
+              status="empty"
+              illustration="empty_mileage"
+              title="No trips yet"
+              message="Log each drive to a property, the deduction adds itself up for tax time."
+              action_label="Add Trip"
+              action_icon="add-circle-outline"
+              onAction={openNewForm}
+            />
+          ) : (
+            <ScreenState
+              status="empty"
+              illustration="empty_mileage"
+              title="No trips match"
+              message={
+                'No trips were logged in ' + year + '. Clear the year to see your latest trips.'
+              }
+              action_label="Clear Filters"
+              action_icon="close-circle-outline"
+              onAction={clearFilters}
+            />
+          )
         }
         renderItem={({ item }) => (
           <Pressable
@@ -207,7 +236,11 @@ function MileageScreen(props) {
   );
 }
 
-export default MileageScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(MileageScreen, {
+  stores: ['cloud'],
+  label: 'Loading trips',
+});
 
 const styles = themedStyles((COLORS) => ({
   container: {

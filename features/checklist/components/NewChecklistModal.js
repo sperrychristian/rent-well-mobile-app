@@ -14,10 +14,10 @@ import {
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { checklist_types } from '../data/checklistTemplates';
-import { COLORS, SPACING, TYPE } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // props: visible, property_names, move_ins (signed move-in checklists), onCreate, onClose
 // onCreate gets property, type, tenant, and move_in_id (null for a blank template)

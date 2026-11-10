@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { initialsFor } from './uiHelpers';
-import { COLORS, SIZES, FONTS, BORDER } from '../../theme';
+import { COLORS, SIZES, FONTS, BORDER } from '../../constants/theme';
 
 // a circle with someone's initials, the same name always gets the same color
 // props: name, size (default SIZES.avatar), style

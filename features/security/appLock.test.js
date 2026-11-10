@@ -1,23 +1,23 @@
 import { Text, AppState, StyleSheet } from 'react-native';
-import { LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../../theme';
+import { LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../../constants/theme';
 import { render, screen, fireEvent, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as LocalAuthentication from 'expo-local-authentication';
-import { AppLockProvider, biometric_unlock_key } from './context/AppLockContext';
+import { AppLockProvider, biometric_unlock_key } from '../../store/AppLockContext';
 import SecurityCard from './components/SecurityCard';
 import { canLock, shouldLockOnReturn, lock_after_ms } from './utils/lockRules';
 import { biometricLabel, cannotCheck, countsAsFailure } from './utils/biometrics';
-import { navigation_ref, navigateWhenReady } from '../../services/navigationRef';
-import { whileSystemDialog, resetSystemDialogs } from '../../services/appLock';
+import { navigation_ref, navigateWhenReady } from '../../util/navigationRef';
+import { whileSystemDialog, resetSystemDialogs } from '../../util/appLock';
 
 // the app lock with a fake phone: Face ID answers how each test says, and AppState changes are played in by hand
 
 const mock_auth = { user: null, status: 'restoring', logout: jest.fn() };
-jest.mock('../auth/context/AuthContext', () => ({
+jest.mock('../../store/AuthContext', () => ({
   useAuth: () => mock_auth,
 }));
 const mock_mode = { demo_mode: false };
-jest.mock('../../context/WorkOrdersContext', () => ({
+jest.mock('../../store/WorkOrdersContext', () => ({
   useWorkOrders: () => mock_mode,
 }));
 jest.mock('expo-local-authentication', () => ({

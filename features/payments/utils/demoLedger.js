@@ -2,7 +2,7 @@
 // real server in docs/API.md
 // each one takes the list of ledgers and gives back { ledgers, ledger } with the changed ledger brought up to date
 // pure, so the tests can run the whole claim, confirm, and void story with no server
-import { parseApiError } from '../../../services/apiHelpers';
+import { parseApiError } from '../../../util/apiHelpers';
 import { syncLedger } from './ledgerMath';
 
 // the same friendly message the app shows for the real error

@@ -1,6 +1,6 @@
 import { View, Pressable } from 'react-native';
-import { SPACING, RADIUS, BORDER, SHADOWS } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { SPACING, RADIUS, BORDER, SHADOWS } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // a surface that groups related things, all three looks share the same padding and corners
 // variants: flat (sits on the page with a border), raised (lifted with a shadow), interactive (raised and tappable)

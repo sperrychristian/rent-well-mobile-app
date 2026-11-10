@@ -5,8 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import Card from '../../../components/ui/Card';
 import Wordmark from '../../../components/ui/Wordmark';
 import FadeInView from '../../../components/ui/FadeInView';
-import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the shared frame for login and both sign up screens: title, a card for the form, and room for the keyboard
 // props: title, error (a message from the server shown above the form), children, footer

@@ -1,6 +1,6 @@
 import { View, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SPACING, SIZES } from '../../../theme';
+import { SPACING, SIZES } from '../../../constants/theme';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DemoBanner from '../../../components/DemoBanner';
 import SummaryBlock from '../../../components/ui/SummaryBlock';
@@ -13,26 +13,30 @@ import HeroNote from '../components/HeroNote';
 import OnboardingCard from '../components/OnboardingCard';
 import DemoTourSheet from '../components/DemoTourSheet';
 import { useDemoTour } from '../hooks/useDemoTour';
-import { useMessages } from '../../messages/context/MessagesContext';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { useAuth } from '../../auth/context/AuthContext';
-import { useTenants } from '../../tenants/context/TenantsContext';
+import { useMessages } from '../../../store/MessagesContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { useAuth } from '../../../store/AuthContext';
+import { useTenants } from '../../../store/TenantsContext';
 import { openCount, activeCount } from '../../workOrders/utils/workOrderHelpers';
 import { monthlyTotals, shortMonth } from '../utils/overviewStats';
-import { formatCurrency, formatCents } from '../../../utils/formatCurrency';
-import { useLedger } from '../../payments/context/LedgerContext';
+import { formatCurrency, formatCents } from '../../../util/formatCurrency';
+import { useLedger } from '../../../store/LedgerContext';
 import { ownerPaymentsLine, behindSummary, monthTitle } from '../../payments/utils/ledgerHelpers';
 import { collectedShare, monthOf } from '../../payments/utils/ledgerMath';
 import { demo_landlord } from '../../messages/data/sampleThreads';
 import { leasesSummary, urgentLease } from '../../leases/utils/leaseHelpers';
 import { useProfitReport } from '../../profit/hooks/useProfitReport';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 // the fintech pass: an overview like a bank's home screen, a hello, one indigo summary card with this month's
 // spending and its trend, three key numbers, the four things landlords open most, then everything else
 // the Hearth pass: the wordmark and your initials on top, then one big number (rent collected this month)
 // with a thin progress line and one line about who's behind, then every place to go as plain rows
 function DashboardScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['orders', 'ledger', 'messages', 'tenants', 'expenses']);
   // need the insets so the demo banner clears the notch and status bar
   const insets = useSafeAreaInsets();
   const { unread_total } = useMessages();
@@ -245,7 +249,11 @@ function DashboardScreen(props) {
   );
 }
 
-export default DashboardScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(DashboardScreen, {
+  stores: ['orders', 'ledger', 'tenants'],
+  label: 'Loading your rentals',
+});
 
 const styles = themedStyles((COLORS) => ({
   container: {

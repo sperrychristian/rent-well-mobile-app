@@ -3,8 +3,8 @@ import { Modal, View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'r
 import ModalCard from '../../../components/ui/ModalCard';
 import Button from '../../../components/ui/Button';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { SPACING, TYPE } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { SPACING, TYPE } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the frame every payments form sits in: a sheet over a dim backdrop, a title and a line under it,
 // the fields, a form-level error, and Cancel on the left with the main action on the right

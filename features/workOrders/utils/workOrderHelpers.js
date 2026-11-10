@@ -52,6 +52,9 @@ export function fromApiWorkOrder(api_order) {
     // the local orders had one photo object, api orders have a list of upload keys instead
     photo: null,
     photos: (api_order.photos || []).map((photo) => photo.key),
+    // the work order form's optional date, the Firebase records keep it now
+    preferred_date: api_order.preferredDate || '',
+    tenancy_id: api_order.tenancyId || null,
     reported_by_tenant: !!api_order.createdBy && api_order.createdBy !== api_order.ownerId,
   };
 }
@@ -159,8 +162,8 @@ export function legacyExpensesFor(expenses, order_id) {
 
 // who can open the edit form for an order, and the short reason shown when they can't
 // a landlord can edit anything on their properties until it's Resolved, a tenant only their own request while it's still Open
-// real mode tenants can't change a request at all after it's sent (the server only takes new photos from them)
 // options: role ('owner' or 'tenant'), is_remote, is_own (false when the request isn't the tenant's)
+// with Firebase there are no server limits anymore, so the rule is the same in both modes
 export function editRuleFor(order, options) {
   const settings = options || {};
   if (!order) {
@@ -174,12 +177,6 @@ export function editRuleFor(order, options) {
       return {
         canEdit: false,
         reason: 'Work has started, so this request is locked. Message your landlord with changes.',
-      };
-    }
-    if (settings.is_remote) {
-      return {
-        canEdit: false,
-        reason: "A sent request can't be changed, but you can still add photos below.",
       };
     }
     return { canEdit: true, reason: '' };

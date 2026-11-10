@@ -2,31 +2,19 @@ import { render, screen, fireEvent, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Calendar from 'expo-calendar/legacy';
 import { forgetDemoCalendarEvents } from '../features/calendar/utils/deviceCalendar';
-import { appearance_key } from '../context/ThemeContext';
-import { LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../theme';
+import { appearance_key } from '../store/ThemeContext';
+import { LIGHT_COLORS, DARK_COLORS, setActiveScheme } from '../constants/theme';
 import { StyleSheet } from 'react-native';
 import { monthLabel } from '../features/calendar/utils/calendarEvents';
 import { monthOf } from '../features/payments/utils/ledgerMath';
-import { todayString } from '../utils/formatDate';
+import { todayString } from '../util/formatDate';
 import App, { forgetNavigationState } from '../App';
-import { navigation_ref } from '../services/navigationRef';
+import { navigation_ref } from '../util/navigationRef';
 
 // the week 9b screens drawn on the real App in both demo sides and both themes: Search with results,
 // the no matches state, Calendar with its grid and agenda, the add sheet, and Settings
 // the colors are checked against the palette the app is drawing with, so dark mode can't fall back to light
 
-jest.mock('expo-secure-store', () => ({
-  getItemAsync: jest.fn(() => Promise.resolve(null)),
-  setItemAsync: jest.fn(() => Promise.resolve()),
-  deleteItemAsync: jest.fn(() => Promise.resolve()),
-}));
-jest.mock('expo-notifications', () => ({
-  setNotificationHandler: jest.fn(),
-  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
-  getLastNotificationResponseAsync: jest.fn(() => Promise.resolve(null)),
-  clearLastNotificationResponseAsync: jest.fn(() => Promise.resolve()),
-  getPermissionsAsync: jest.fn(() => Promise.resolve({ granted: false, canAskAgain: false })),
-}));
 jest.mock('expo-splash-screen', () => ({
   preventAutoHideAsync: jest.fn(() => Promise.resolve()),
   hideAsync: jest.fn(() => Promise.resolve()),

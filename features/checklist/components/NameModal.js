@@ -3,10 +3,10 @@ import { Modal, View, Text, TextInput, Alert, KeyboardAvoidingView, Platform } f
 // the pop-up forms share the sheet look from components/ui, the JSX still says Card
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { COLORS, SPACING, TYPE } from '../../../theme';
+import { COLORS, SPACING, TYPE } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // a small form with one name box, used for adding a room or an item
 // Alert.prompt only works on iOS, so this works on both

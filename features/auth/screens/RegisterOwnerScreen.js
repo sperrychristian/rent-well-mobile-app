@@ -3,17 +3,16 @@ import { Text, Pressable, View } from 'react-native';
 import AuthLayout from '../components/AuthLayout';
 import SubmitButton from '../components/SubmitButton';
 import TextField from '../../../components/TextField';
-import { useAuth, homeRouteFor } from '../context/AuthContext';
-import { checkEmail, checkNewPassword, checkName, collectErrors } from '../utils/authValidation';
-import { SPACING, TYPE, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { useAuth, homeRouteFor } from '../../../store/AuthContext';
+import { checkEmail, checkName, collectErrors } from '../utils/authValidation';
+import { SPACING, TYPE, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 function RegisterOwnerScreen(props) {
   const { registerOwner } = useAuth();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [field_errors, setFieldErrors] = useState({});
   const [server_error, setServerError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -22,7 +21,6 @@ function RegisterOwnerScreen(props) {
     const errors = collectErrors({
       name: checkName(name, true),
       email: checkEmail(email),
-      password: checkNewPassword(password),
     });
     setFieldErrors(errors);
     setServerError('');
@@ -34,7 +32,6 @@ function RegisterOwnerScreen(props) {
       const user = await registerOwner({
         name: name.trim(),
         email: email.trim(),
-        password: password,
       });
       props.navigation.reset({ index: 0, routes: [{ name: homeRouteFor(user) }] });
     } catch (error) {
@@ -65,7 +62,7 @@ function RegisterOwnerScreen(props) {
             accessibilityRole="link"
             style={styles.link_press}
           >
-            <Text style={styles.link}>Already have an account? Log in</Text>
+            <Text style={styles.link}>Already have an account? Pick a test account</Text>
           </Pressable>
         </View>
       }
@@ -90,18 +87,12 @@ function RegisterOwnerScreen(props) {
         keyboardType="email-address"
         textContentType="username"
         autoComplete="email"
-      />
-      <TextField
-        label="Password"
-        value={password}
-        onChangeText={setPassword}
-        error={field_errors.password}
-        placeholder="At least 10 characters"
-        secureTextEntry
-        textContentType="newPassword"
-        autoComplete="new-password"
         onSubmitEditing={handleRegister}
       />
+      {/* milestone 2 has no passwords, Firebase Auth adds them next milestone */}
+      <Text style={styles.note}>
+        No password yet: this makes a test account, and real sign in comes with Firebase Auth.
+      </Text>
       <SubmitButton
         title="Create Account"
         busy_title="Creating account..."
@@ -124,6 +115,11 @@ const styles = themedStyles((COLORS) => ({
     minHeight: SIZES.touch,
     justifyContent: 'center',
     paddingHorizontal: SPACING.sm,
+  },
+  note: {
+    ...TYPE.body_small,
+    color: COLORS.text_muted,
+    marginBottom: SPACING.sm,
   },
   link: {
     ...TYPE.subheading,

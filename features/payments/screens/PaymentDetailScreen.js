@@ -10,13 +10,15 @@ import Button from '../../../components/ui/Button';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
 import RemoteImage from '../../../components/RemoteImage';
-import { useLedger } from '../context/LedgerContext';
+import { useLedger } from '../../../store/LedgerContext';
 import { useLedgerReview } from '../hooks/useLedgerReview';
-import { formatCents } from '../../../utils/formatCurrency';
+import { formatCents } from '../../../util/formatCurrency';
 import { paymentPill, methodLabel, timelineFor } from '../utils/ledgerHelpers';
 import { shareReceipt } from '../utils/shareReceipt';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 const event_icons = {
   recorded: 'create-outline',
@@ -33,6 +35,8 @@ const event_icons = {
 // the tenant sees the same record, read only
 // the only param is paymentId, the payment comes from the ledger store (or the server, for a push tap)
 function PaymentDetailScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['ledger']);
   const insets = useSafeAreaInsets();
   const ledger_store = useLedger();
   const review = useLedgerReview();
@@ -277,7 +281,11 @@ function PaymentDetailScreen(props) {
   );
 }
 
-export default PaymentDetailScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(PaymentDetailScreen, {
+  stores: ['ledger'],
+  label: 'Loading the payment',
+});
 
 const styles = themedStyles((COLORS) => ({
   container: {

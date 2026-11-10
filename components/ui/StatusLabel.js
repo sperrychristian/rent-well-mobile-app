@@ -2,7 +2,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { statusTone, tone_colors } from './uiHelpers';
 import { lineIcon } from './lineIcon';
-import { SPACING, TYPE, SIZES } from '../../theme';
+import { SPACING, TYPE, SIZES } from '../../constants/theme';
 
 // a status as a small line icon and colored words, no pill behind it (the Hearth pass)
 // green for paid or done, terracotta for overdue or urgent, muted for neutral, and always the words too

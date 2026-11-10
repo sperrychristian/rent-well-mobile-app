@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { View, Image, Pressable, ActivityIndicator, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useMessages } from '../context/MessagesContext';
-import { COLORS, SPACING, FONTS, TYPE, RADIUS } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { useMessages } from '../../../store/MessagesContext';
+import { COLORS, SPACING, FONTS, TYPE, RADIUS } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // shows a message photo, the key gets swapped for a short-lived url first
 // props: attachment_key, onPress (gets the url for the full size view)

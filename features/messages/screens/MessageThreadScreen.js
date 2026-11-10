@@ -13,14 +13,14 @@ import {
   AppState,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ImagePicker } from '../../../services/systemPickers';
+import { ImagePicker } from '../../../util/systemPickers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
 import ErrorState from '../../../components/ErrorState';
 import MessageBubble from '../components/MessageBubble';
 import ImageViewerModal from '../components/ImageViewerModal';
-import { useMessages } from '../context/MessagesContext';
-import { useTenants } from '../../tenants/context/TenantsContext';
+import { useMessages } from '../../../store/MessagesContext';
+import { useTenants } from '../../../store/TenantsContext';
 import {
   mergeMessages,
   lastSeenMessageId,
@@ -28,8 +28,9 @@ import {
   dayDividerLabel,
   showsTime,
 } from '../utils/messageHelpers';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, OPACITY } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES, OPACITY } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
+import ScreenState from '../../../components/ui/ScreenState';
 
 // the server takes photos up to 10 MB and message text up to 2000 characters
 const max_photo_bytes = 10485760;
@@ -50,6 +51,7 @@ function MessageThreadScreen(props) {
     openThread,
     closeThread,
     subscribe,
+    can_attach_photos,
   } = useMessages();
   // it can be missing for a moment when a push tap opens the app straight into the thread
   const conversation = getConversation(conversation_id);
@@ -131,6 +133,22 @@ function MessageThreadScreen(props) {
       actions.current.closeThread(conversation_id);
     };
   }, [conversation_id, loadNewest, my_user_id]);
+
+  // milestone 2: the 8 second check only runs while this screen is the one showing, so opening Payments from a
+  // reminder (or any screen on top) stops it, and coming back starts it again and catches up right away
+  useEffect(() => {
+    const stop_focus = props.navigation.addListener('focus', () => {
+      actions.current.openThread(conversation_id);
+      loadNewest(false);
+    });
+    const stop_blur = props.navigation.addListener('blur', () =>
+      actions.current.closeThread(conversation_id),
+    );
+    return () => {
+      stop_focus();
+      stop_blur();
+    };
+  }, [props.navigation, conversation_id, loadNewest]);
 
   // the list is upside down, so its end is the top and reaching it loads older messages
   async function loadOlder() {
@@ -226,7 +244,7 @@ function MessageThreadScreen(props) {
   } else if (status === 'loading' && messages.length === 0) {
     list = (
       <View style={styles.center}>
-        <ActivityIndicator color={COLORS.title} size="large" />
+        <ScreenState status="loading" label="Loading messages" />
       </View>
     );
   } else {
@@ -314,16 +332,19 @@ function MessageThreadScreen(props) {
 
         {!is_read_only && (
           <View style={[styles.composer, { paddingBottom: insets.bottom + SPACING.sm }]}>
-            <Pressable
-              onPress={pickPhoto}
-              disabled={sending}
-              hitSlop={8}
-              style={styles.icon_button}
-              accessibilityRole="button"
-              accessibilityLabel="Attach a photo"
-            >
-              <Ionicons name="camera-outline" size={26} color={COLORS.title} />
-            </Pressable>
+            {/* photos wait for Firebase Storage, so only the demo has the camera button */}
+            {can_attach_photos ? (
+              <Pressable
+                onPress={pickPhoto}
+                disabled={sending}
+                hitSlop={8}
+                style={styles.icon_button}
+                accessibilityRole="button"
+                accessibilityLabel="Attach a photo"
+              >
+                <Ionicons name="camera-outline" size={26} color={COLORS.title} />
+              </Pressable>
+            ) : null}
             <TextInput
               style={styles.input}
               placeholder="Message"

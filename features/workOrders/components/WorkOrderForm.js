@@ -23,10 +23,10 @@ import {
   description_max,
   contractor_max,
 } from '../utils/workOrderValidation';
-import { centsToInputText } from '../../../utils/formatCurrency';
-import { todayString } from '../../../utils/formatDate';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { centsToInputText } from '../../../util/formatCurrency';
+import { todayString } from '../../../util/formatDate';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // the work order form, built like the lecture's ExpenseForm: one inputs object in state, every field shaped
 // { value, isValid, errorText }, typing clears that one field's error, and submit checks everything at once

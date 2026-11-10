@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPE } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { COLORS, SPACING, TYPE } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // the Rent Well lockup: the pixel house, the name in the pixel font, and a one-line tagline in Inter
 // the pixel font is only ever this big, it gets hard to read small, everything else stays Inter

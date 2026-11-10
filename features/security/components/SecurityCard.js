@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { View, Text, Switch } from 'react-native';
 import Card from '../../../components/Card';
-import { useAppLock } from '../context/AppLockContext';
+import { useAppLock } from '../../../store/AppLockContext';
 import { biometricSupport } from '../utils/biometrics';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // Settings, Security: the "Unlock with Face ID" switch, worded for whatever this phone has
 // a phone with no Face ID or Touch ID set up gets a short line saying how to set it up instead of a switch

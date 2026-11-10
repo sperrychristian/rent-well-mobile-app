@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { View, Text, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../theme';
-import { themedStyles } from '../utils/themedStyles';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../constants/theme';
+import { themedStyles } from '../util/themedStyles';
 
 // a labeled text box with its error right underneath, extra props go straight to the TextInput
 // props: label, error, value, onChangeText, plus anything TextInput takes

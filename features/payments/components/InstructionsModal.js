@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { TextInput } from 'react-native';
 import FormSheet from './FormSheet';
 import { Field, form_styles } from './FormBits';
-import { COLORS } from '../../../theme';
+import { COLORS } from '../../../constants/theme';
 
 const max_length = 1000;
 

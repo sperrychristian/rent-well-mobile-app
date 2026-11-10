@@ -6,8 +6,8 @@ import StatusLabel from './StatusLabel';
 import SummaryBlock from './SummaryBlock';
 import ProgressLine from './ProgressLine';
 import { lineIcon } from './lineIcon';
-import { COLORS, TYPE, RADIUS, SIZES, BORDER } from '../../theme';
-import { contrastRatio, meetsAA } from '../../utils/contrast';
+import { COLORS, TYPE, RADIUS, SIZES, BORDER } from '../../constants/theme';
+import { contrastRatio, meetsAA } from '../../util/contrast';
 
 // the Hearth pieces: what they draw and that every new text and background pair is readable
 

@@ -6,7 +6,7 @@ import {
   calendar_events_key,
   forgetDemoCalendarEvents,
 } from './deviceCalendar';
-import { systemDialogActive, resetSystemDialogs } from '../../../services/appLock';
+import { systemDialogActive, resetSystemDialogs } from '../../../util/appLock';
 
 // the phone's calendar, played by a small fake that remembers what was added
 

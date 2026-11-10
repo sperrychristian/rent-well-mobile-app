@@ -13,19 +13,19 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ImagePicker } from '../../../services/systemPickers';
+import { ImagePicker } from '../../../util/systemPickers';
 // the pop-up forms share the sheet look from components/ui, the JSX still says Card
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
-import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../theme';
-import { useExpenses } from '../context/ExpensesContext';
-import { todayString } from '../../../utils/formatDate';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../../constants/theme';
+import { useExpenses } from '../../../store/ExpensesContext';
+import { todayString } from '../../../util/formatDate';
 import { list_styles } from '../../../components/ui/listStyles';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
 import ReceiptImage from '../../../components/ReceiptImage';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 const repeat_options = ['None', 'Monthly', 'Yearly'];
 
@@ -63,6 +63,7 @@ function AddExpenseModal(props) {
       return;
     }
     const existing = props.expense;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- filling or reloading state when this opens is the point, it runs once per open
     setAmount(existing ? String(existing.amount) : '');
     setCategory(existing ? existing.category : 'Repairs');
     setDateText(existing ? existing.date : todayString());
@@ -334,8 +335,8 @@ function AddExpenseModal(props) {
                   </View>
                   {repeat !== 'None' && (
                     <Text style={styles.helper_block}>
-                      This saves today's expense and adds the next ones on their own. You can pause
-                      or delete it under Recurring.
+                      This saves today&apos;s expense and adds the next ones on their own. You can
+                      pause or delete it under Recurring.
                     </Text>
                   )}
                 </View>
@@ -402,8 +403,9 @@ function AddExpenseModal(props) {
                 onChangeText={setNotes}
               />
 
-              <Text style={styles.label}>Receipts</Text>
-              {receipts.length > 0 && (
+              {/* receipt photos wait for Firebase Storage, so a Firebase landlord's form leaves them out */}
+              {!is_remote && <Text style={styles.label}>Receipts</Text>}
+              {!is_remote && receipts.length > 0 && (
                 <View style={styles.wrap_row}>
                   {receipts.map((uri, index) => (
                     <View key={uri + index} style={styles.receipt_wrap}>
@@ -431,22 +433,24 @@ function AddExpenseModal(props) {
                   ))}
                 </View>
               )}
-              <View style={styles.button_row}>
-                <PrimaryButton
-                  variant="secondary"
-                  title="Camera"
-                  icon="camera-outline"
-                  onPress={takePhoto}
-                  style={styles.small_button}
-                />
-                <PrimaryButton
-                  variant="secondary"
-                  title="Library"
-                  icon="image-outline"
-                  onPress={choosePhotos}
-                  style={styles.small_button}
-                />
-              </View>
+              {!is_remote && (
+                <View style={styles.button_row}>
+                  <PrimaryButton
+                    variant="secondary"
+                    title="Camera"
+                    icon="camera-outline"
+                    onPress={takePhoto}
+                    style={styles.small_button}
+                  />
+                  <PrimaryButton
+                    variant="secondary"
+                    title="Library"
+                    icon="image-outline"
+                    onPress={choosePhotos}
+                    style={styles.small_button}
+                  />
+                </View>
+              )}
 
               <View style={styles.button_row}>
                 <PrimaryButton

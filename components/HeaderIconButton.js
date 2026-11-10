@@ -1,7 +1,7 @@
 import { Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SIZES, RADIUS, OPACITY } from '../theme';
-import { themedStyles } from '../utils/themedStyles';
+import { COLORS, SIZES, RADIUS, OPACITY } from '../constants/theme';
+import { themedStyles } from '../util/themedStyles';
 
 // an icon button for the header, the label is what a screen reader says since there's no text
 // props: icon, label, onPress

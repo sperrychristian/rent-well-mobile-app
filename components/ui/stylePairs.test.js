@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { LIGHT_COLORS, DARK_COLORS } from '../../theme';
-import { contrastRatio } from '../../utils/contrast';
+import { LIGHT_COLORS, DARK_COLORS } from '../../constants/theme';
+import { contrastRatio } from '../../util/contrast';
 
 // reads every style block in the app's source, and wherever one block sets both a text color and a background,
 // the pair has to be AA (4.5 to 1), so a token change can't quietly make a button or a tag unreadable

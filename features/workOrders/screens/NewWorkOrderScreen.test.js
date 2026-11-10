@@ -6,9 +6,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import NewWorkOrderScreen from './NewWorkOrderScreen';
 import { optionsFor } from '../../../navigation/screenOptions';
 
-// the work order screen in real mode, with the shared context mocked the way RemoteWorkOrdersProvider answers:
+// the work order screen in Firebase mode, with the shared context mocked the way RemoteWorkOrdersProvider answers:
 // a failed save keeps the form open with the values, a good one goes back with no discard prompt,
-// and an owner's edit only sends what the server can change
+// and with no server limits an owner's edit sends every field the form shows, a tenant's rental comes from the tenants store
 
 const mock_store = {
   is_remote: true,
@@ -21,10 +21,10 @@ const mock_store = {
   updateWorkOrder: jest.fn(),
   getOrder: jest.fn(),
 };
-jest.mock('../../../context/WorkOrdersContext', () => ({
+jest.mock('../../../store/WorkOrdersContext', () => ({
   useWorkOrders: () => mock_store,
 }));
-jest.mock('../../tenants/context/TenantsContext', () => ({
+jest.mock('../../../store/TenantsContext', () => ({
   useTenants: () => ({
     properties: [
       {
@@ -35,17 +35,15 @@ jest.mock('../../tenants/context/TenantsContext', () => ({
         ],
       },
     ],
-    my_active_tenancies: [],
+    my_active_tenancies:
+      mock_store.role === 'tenant'
+        ? [{ id: 'ten-1', property_name: 'Maple Court', unit_label: '2B' }]
+        : [],
+    status: 'ready',
+    refresh: jest.fn(),
   }),
 }));
 jest.mock('../../auth/hooks/useAppRole', () => ({ useAppRole: () => mock_store.role }));
-jest.mock('../../../services/api', () => ({
-  getMe: jest.fn(() =>
-    Promise.resolve({
-      activeTenancies: [{ id: 'ten-1', property: { name: 'Maple Court' }, unitLabel: '2B' }],
-    }),
-  ),
-}));
 
 const Stack = createNativeStackNavigator();
 
@@ -127,8 +125,10 @@ describe('a real landlord adds a work order', () => {
   test('a failed save stays on the form with the values and the server message', async () => {
     mock_store.addWorkOrder.mockRejectedValue(new Error("Can't reach the server."));
     await openForm();
-    // the real owner picks a property, and there's no preferred date (the server has nowhere to keep it)
-    expect(screen.queryByLabelText('Preferred date (optional)')).toBeNull();
+    // the real owner picks a property, and the preferred date is there now (Firebase keeps it on the record)
+    expect(screen.getByLabelText('Preferred date (optional)')).toBeTruthy();
+    // photos wait for Firebase Storage, so the form has no photo picker
+    expect(screen.queryByText('Camera')).toBeNull();
     fireEvent.press(screen.getByLabelText('Maple Court'));
     fireEvent.press(screen.getByLabelText('Tara Tenant, 2B'));
     expect(screen.getByLabelText('Unit (optional)').props.value).toBe('2B');
@@ -145,11 +145,11 @@ describe('a real landlord adds a work order', () => {
       title: 'Clean gutters',
       description: 'Leaves everywhere along the back.',
       priority: 'Low',
-      photos: [],
       unit_label: '2B',
       tenant_user_id: 'u-tara',
       contractor: '',
       estimate: 150,
+      preferred_date: '',
     });
     expect(screen.getByText("Not sent: Can't reach the server.")).toBeTruthy();
     expect(screen.getByLabelText('Title').props.value).toBe('Clean gutters');
@@ -185,11 +185,12 @@ describe('a real landlord adds a work order', () => {
 });
 
 describe('a real landlord edits a work order', () => {
-  test('title and description are read only and only priority, contractor, and estimate are sent', async () => {
+  test('every field can change, and a failed save keeps the form with the message', async () => {
     mock_store.getOrder.mockReturnValue(saved_order);
     mock_store.updateWorkOrder.mockRejectedValueOnce(new Error('Server error'));
     await openForm({ workOrderId: 'wo-1' });
-    expect(screen.getByLabelText('Title').props.editable).toBe(false);
+    expect(screen.getByLabelText('Title').props.editable).not.toBe(false);
+    type('Title', 'Clean gutters and downspouts');
     expect(screen.getByText('Maple Court, 2B')).toBeTruthy();
     fireEvent.press(screen.getByLabelText('Emergency priority'));
     type('Contractor (optional)', 'Gutter Pros');
@@ -197,7 +198,10 @@ describe('a real landlord edits a work order', () => {
     fireEvent.press(screen.getByText('Update'));
     await settle();
     expect(mock_store.updateWorkOrder).toHaveBeenCalledWith('wo-1', {
+      title: 'Clean gutters and downspouts',
+      description: 'Leaves everywhere along the back.',
       priority: 'Emergency',
+      preferred_date: '',
       contractor: 'Gutter Pros',
       estimate: 99.95,
     });
@@ -221,7 +225,23 @@ describe('a real landlord edits a work order', () => {
 });
 
 describe('a real tenant reports an issue', () => {
-  test('the rental comes from GET /me and a sent request opens My Requests', async () => {
+  test('a tenant can edit their own request while it is Open', async () => {
+    mock_store.role = 'tenant';
+    mock_store.getOrder.mockReturnValue(saved_order);
+    mock_store.updateWorkOrder.mockResolvedValue({});
+    await openForm({ workOrderId: 'wo-1' });
+    type('Description', 'Leaves and a bird nest along the back.');
+    fireEvent.press(screen.getByText('Update'));
+    await settle();
+    expect(mock_store.updateWorkOrder).toHaveBeenCalledWith('wo-1', {
+      title: 'Clean gutters before winter',
+      description: 'Leaves and a bird nest along the back.',
+      priority: 'Low',
+      preferred_date: '',
+    });
+  });
+
+  test('the rental comes from the tenants store and a sent request opens My Requests', async () => {
     mock_store.role = 'tenant';
     mock_store.addWorkOrder.mockResolvedValue({ id: 'wo-3' });
     await openForm();
@@ -236,8 +256,8 @@ describe('a real tenant reports an issue', () => {
       title: 'No hot water',
       description: 'Nothing but cold water since this morning.',
       priority: 'Emergency',
-      photos: [],
       tenancy_id: undefined,
+      preferred_date: '',
     });
     expect(screen.getByText('My requests list')).toBeTruthy();
   });

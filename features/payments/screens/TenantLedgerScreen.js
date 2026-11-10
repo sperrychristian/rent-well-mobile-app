@@ -16,10 +16,10 @@ import PaymentFormModal from '../components/PaymentFormModal';
 import ChargeFormModal from '../components/ChargeFormModal';
 import ScheduleFormModal from '../components/ScheduleFormModal';
 import ReminderSheet from '../../reminders/components/ReminderSheet';
-import { useLedger } from '../context/LedgerContext';
+import { useLedger } from '../../../store/LedgerContext';
 import { useLedgerReview } from '../hooks/useLedgerReview';
-import { hapticSuccess } from '../../../utils/haptics';
-import { formatCents } from '../../../utils/formatCurrency';
+import { hapticSuccess } from '../../../util/haptics';
+import { formatCents } from '../../../util/formatCurrency';
 import { deriveLedger } from '../utils/ledgerMath';
 import {
   formatBalance,
@@ -28,8 +28,10 @@ import {
   shortDate,
   upcomingRent,
 } from '../utils/ledgerHelpers';
-import { COLORS, SPACING, TYPE, SIZES, NUMBERS } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, SIZES, NUMBERS } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 function placeOf(ledger) {
   return ledger.unit_label ? ledger.property_name + ', ' + ledger.unit_label : ledger.property_name;
@@ -55,6 +57,8 @@ function scheduleLine(schedule) {
 // claims waiting on them, and every charge and payment by month
 // the only param is tenancyId, everything else comes from the ledger store
 function TenantLedgerScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['ledger']);
   const insets = useSafeAreaInsets();
   const ledger_store = useLedger();
   const review = useLedgerReview();
@@ -468,7 +472,11 @@ function TenantLedgerScreen(props) {
   );
 }
 
-export default TenantLedgerScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(TenantLedgerScreen, {
+  stores: ['ledger'],
+  label: 'Loading the rent ledger',
+});
 
 const styles = themedStyles((COLORS) => ({
   container: {

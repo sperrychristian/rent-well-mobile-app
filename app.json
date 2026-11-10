@@ -1,7 +1,9 @@
 {
   "expo": {
-    "name": "rent-well-mobile",
+    "name": "Rent Well",
     "slug": "rent-well-mobile",
+    "description": "Property management for small landlords and their tenants: work orders, rent and payments, leases, expenses, and messages.",
+    "author": "Christian Sperry",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/hearth-icon.png",
@@ -29,7 +31,6 @@
       "expo-font",
       "expo-sharing",
       "@react-native-community/datetimepicker",
-      "expo-secure-store",
       [
         "expo-calendar",
         {

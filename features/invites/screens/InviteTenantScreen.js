@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   Pressable,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Share,
@@ -17,13 +16,19 @@ import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TextField from '../../../components/TextField';
 import ErrorState from '../../../components/ErrorState';
-import { useTenants } from '../../tenants/context/TenantsContext';
+import { useTenants } from '../../../store/TenantsContext';
 import { pendingInvites, formatInviteCode, inviteShareText } from '../utils/inviteHelpers';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { useNavigation } from '@react-navigation/native';
+import ScreenState from '../../../components/ui/ScreenState';
 
 function InviteTenantScreen() {
+  const focus_navigation = useNavigation();
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(focus_navigation, ['tenants']);
   const insets = useSafeAreaInsets();
   // the header sits above this screen now, so the keyboard lift has to count its height too
   const header_height = useHeaderHeight();
@@ -137,7 +142,9 @@ function InviteTenantScreen() {
 
   let content;
   if (status === 'loading') {
-    content = <ActivityIndicator style={styles.spinner} color={COLORS.title} size="large" />;
+    content = (
+      <ScreenState status="loading" label="Loading your properties" style={styles.spinner} />
+    );
   } else if (status === 'error') {
     content = <ErrorState message={error_message} onRetry={retry} />;
   } else {

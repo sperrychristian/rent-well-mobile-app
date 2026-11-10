@@ -16,15 +16,15 @@ import { Ionicons } from '@expo/vector-icons';
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
-import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
+import { COLORS, SPACING, FONTS, TYPE, RADIUS, BORDER, SIZES } from '../../../constants/theme';
 import { document_categories, dated_categories } from '../../../data/documentOptions';
-import { todayString } from '../../../utils/formatDate';
-import { addPeriod } from '../../../utils/recurring';
+import { todayString } from '../../../util/formatDate';
+import { addPeriod } from '../../../util/recurring';
 import { pickDocument } from '../utils/documentFiles';
 import { nameFromFile, iconFor, formatSize } from '../utils/documentHelpers';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // props: visible, onSave, onClose, plus optional document (edit mode), initial_file (a scan taken first),
 // default_name, default_category, default_property, and property_names
@@ -53,6 +53,7 @@ function DocumentFormModal(props) {
     const existing = props.document;
     const start_file = existing ? null : props.initial_file || null;
     const start_category = existing ? existing.category : props.default_category || 'Lease';
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- filling or reloading state when this opens is the point, it runs once per open
     setNewFile(start_file);
     setName(
       existing
@@ -103,7 +104,7 @@ function DocumentFormModal(props) {
 
   // I check everything first so a document never gets saved without a file, name, or property
   function handleSave() {
-    if (!is_editing && !new_file) {
+    if (!is_editing && !new_file && !props.records_only) {
       Alert.alert('Pick a file', 'Choose the file this document is for.');
       return;
     }
@@ -156,8 +157,14 @@ function DocumentFormModal(props) {
             <Card>
               <Text style={styles.heading}>{is_editing ? 'Edit Document' : 'Add Document'}</Text>
 
-              <Text style={styles.label}>File</Text>
-              {shown_file && (
+              {/* milestone 2: a Firebase landlord saves the record only, files wait for Firebase Storage */}
+              {props.records_only ? (
+                <Text style={styles.helper_block}>
+                  Saved as a record. Files can be attached once Firebase Storage is added.
+                </Text>
+              ) : null}
+              {!props.records_only && <Text style={styles.label}>File</Text>}
+              {!props.records_only && shown_file && (
                 <View style={styles.file_row}>
                   <Ionicons name={iconFor(shown_file.mime_type)} size={22} color={COLORS.text} />
                   <View style={styles.file_text}>
@@ -168,19 +175,23 @@ function DocumentFormModal(props) {
                   </View>
                 </View>
               )}
-              {is_sample && (
+              {!props.records_only && is_sample && (
                 <Text style={styles.helper_block}>
                   Sample document, pick a file to attach a real one.
                 </Text>
               )}
-              <PrimaryButton
-                variant="secondary"
-                title={shown_file ? 'Replace File' : 'Choose File'}
-                icon="folder-open-outline"
-                onPress={chooseFile}
-                style={styles.file_button}
-              />
-              <Text style={styles.helper_block}>PDF, image, or Word file, up to 25 MB.</Text>
+              {!props.records_only && (
+                <PrimaryButton
+                  variant="secondary"
+                  title={shown_file ? 'Replace File' : 'Choose File'}
+                  icon="folder-open-outline"
+                  onPress={chooseFile}
+                  style={styles.file_button}
+                />
+              )}
+              {!props.records_only && (
+                <Text style={styles.helper_block}>PDF, image, or Word file, up to 25 MB.</Text>
+              )}
 
               <Text style={styles.label}>Name</Text>
               <TextInput

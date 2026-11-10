@@ -3,17 +3,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DemoBanner from '../../../components/DemoBanner';
 import LogoutButton from '../../auth/components/LogoutButton';
-import { useAuth } from '../../auth/context/AuthContext';
-import { useMessages } from '../../messages/context/MessagesContext';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { useTenants } from '../../tenants/context/TenantsContext';
+import { useAuth } from '../../../store/AuthContext';
+import { useMessages } from '../../../store/MessagesContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { useTenants } from '../../../store/TenantsContext';
 import { placeLabel } from '../../tenants/utils/tenantHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { ordersForTenant, activeCount } from '../../workOrders/utils/workOrderHelpers';
-import { useLedger } from '../../payments/context/LedgerContext';
+import { useLedger } from '../../../store/LedgerContext';
 import { tenantRentLine, upcomingRent, shortDate } from '../../payments/utils/ledgerHelpers';
 import { deriveLedger } from '../../payments/utils/ledgerMath';
-import { formatCents } from '../../../utils/formatCurrency';
+import { formatCents } from '../../../util/formatCurrency';
 import SummaryBlock from '../../../components/ui/SummaryBlock';
 import ListRow from '../../../components/ui/ListRow';
 import FadeInView from '../../../components/ui/FadeInView';
@@ -22,13 +22,17 @@ import { tenantLeaseLine, leaseStatusLabel, shortLeaseDate } from '../../leases/
 import HeroNote from '../components/HeroNote';
 import DemoTourSheet from '../components/DemoTourSheet';
 import { useDemoTour } from '../hooks/useDemoTour';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 // the tenant's home: message the landlord or report something that needs fixing
 // the Hearth pass: the wordmark and your initials, then what you owe right now as one big number with the
 // next rent under it, one line saying if anything is late, and the places to go as plain rows
 function TenantHomeScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['tenants', 'ledger', 'orders', 'messages']);
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { unread_total } = useMessages();
@@ -253,7 +257,11 @@ function TenantHomeScreen(props) {
   );
 }
 
-export default TenantHomeScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(TenantHomeScreen, {
+  stores: ['tenants', 'ledger', 'orders'],
+  label: 'Loading your rental',
+});
 
 const styles = themedStyles((COLORS) => ({
   scroll: {

@@ -1,22 +1,24 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { View, Text, ScrollView, ActivityIndicator, Alert, Image, Pressable } from 'react-native';
-import { ImagePicker } from '../../../services/systemPickers';
+import { ImagePicker } from '../../../util/systemPickers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import ErrorState from '../../../components/ErrorState';
 import RemoteImage from '../../../components/RemoteImage';
 import ImageViewerModal from '../../messages/components/ImageViewerModal';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
 import { canTenantAddPhotos, photosLeft, editRuleFor } from '../utils/workOrderHelpers';
 import HeaderIconButton from '../../../components/HeaderIconButton';
 import EditNote from '../components/EditNote';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
-import { formatDate } from '../../../utils/formatDate';
-import { COLORS, SPACING, TYPE, RADIUS } from '../../../theme';
+import { formatDate } from '../../../util/formatDate';
+import { COLORS, SPACING, TYPE, RADIUS } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusLabel from '../../../components/ui/StatusLabel';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import ScreenState from '../../../components/ui/ScreenState';
 
 // the server takes photos up to 10 MB
 const max_photo_bytes = 10485760;
@@ -24,6 +26,8 @@ const max_photo_bytes = 10485760;
 // one of the tenant's requests: where it's at, the photos, and the landlord's notes
 // it updates on its own when the landlord changes something, since it reads the live list
 function RequestDetailScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['orders']);
   const insets = useSafeAreaInsets();
   const { getOrder, is_remote, ensureOrder, addOrderPhotos, demo_mode } = useWorkOrders();
   const order_id = props.route.params.workOrderId;
@@ -88,7 +92,7 @@ function RequestDetailScreen(props) {
             }}
           />
         ) : (
-          <ActivityIndicator color={COLORS.title} size="large" />
+          <ScreenState status="loading" label="Loading your request" />
         )}
       </View>
     );
@@ -190,62 +194,67 @@ function RequestDetailScreen(props) {
           <Text style={styles.body}>{order.notes || 'No notes yet.'}</Text>
         </Card>
 
-        <Card>
-          <Text style={styles.heading}>Photos ({photo_total})</Text>
-          {local_photo ? (
-            <Pressable
-              onPress={() => local_photo.uri && setViewerUrl(local_photo.uri)}
-              accessibilityRole="imagebutton"
-              accessibilityLabel="Open photo"
-            >
-              <Image source={local_photo} style={[styles.photo_thumb, styles.local_photo]} />
-            </Pressable>
-          ) : order.photos && order.photos.length > 0 ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {order.photos.map((key) => (
-                <RemoteImage
-                  key={key}
-                  attachment_key={key}
-                  style={styles.photo_thumb}
-                  onPress={setViewerUrl}
-                />
-              ))}
-            </ScrollView>
-          ) : (
-            <Text style={styles.detail}>No photos.</Text>
-          )}
-          {/* photos can only be added while nobody has started on it */}
-          {can_add && (
-            <View>
-              {busy ? (
-                <View style={styles.busy_row}>
-                  <ActivityIndicator color={COLORS.title} />
-                  <Text style={styles.detail}>{progress_text || 'Saving...'}</Text>
-                </View>
-              ) : (
-                <View style={styles.button_row}>
-                  <PrimaryButton
-                    title="Camera"
-                    icon="camera-outline"
-                    variant="secondary"
-                    onPress={takePhoto}
-                    style={styles.photo_button}
+        {/* milestone 2: photos wait for Firebase Storage, so the Photos card is only in the demo */}
+        {!is_remote && (
+          <Card>
+            <Text style={styles.heading}>Photos ({photo_total})</Text>
+            {local_photo ? (
+              <Pressable
+                onPress={() => local_photo.uri && setViewerUrl(local_photo.uri)}
+                accessibilityRole="imagebutton"
+                accessibilityLabel="Open photo"
+              >
+                <Image source={local_photo} style={[styles.photo_thumb, styles.local_photo]} />
+              </Pressable>
+            ) : order.photos && order.photos.length > 0 ? (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {order.photos.map((key) => (
+                  <RemoteImage
+                    key={key}
+                    attachment_key={key}
+                    style={styles.photo_thumb}
+                    onPress={setViewerUrl}
                   />
-                  <PrimaryButton
-                    title="Library"
-                    icon="image-outline"
-                    variant="secondary"
-                    onPress={choosePhotos}
-                    style={styles.photo_button}
-                  />
-                </View>
-              )}
-            </View>
-          )}
-          {is_remote && order.status !== 'Open' && (
-            <Text style={styles.helper}>Photos can be added while the request is still open.</Text>
-          )}
-        </Card>
+                ))}
+              </ScrollView>
+            ) : (
+              <Text style={styles.detail}>No photos.</Text>
+            )}
+            {/* photos can only be added while nobody has started on it */}
+            {can_add && (
+              <View>
+                {busy ? (
+                  <View style={styles.busy_row}>
+                    <ActivityIndicator color={COLORS.title} />
+                    <Text style={styles.detail}>{progress_text || 'Saving...'}</Text>
+                  </View>
+                ) : (
+                  <View style={styles.button_row}>
+                    <PrimaryButton
+                      title="Camera"
+                      icon="camera-outline"
+                      variant="secondary"
+                      onPress={takePhoto}
+                      style={styles.photo_button}
+                    />
+                    <PrimaryButton
+                      title="Library"
+                      icon="image-outline"
+                      variant="secondary"
+                      onPress={choosePhotos}
+                      style={styles.photo_button}
+                    />
+                  </View>
+                )}
+              </View>
+            )}
+            {is_remote && order.status !== 'Open' && (
+              <Text style={styles.helper}>
+                Photos can be added while the request is still open.
+              </Text>
+            )}
+          </Card>
+        )}
       </ScrollView>
       <ImageViewerModal url={viewer_url} onClose={() => setViewerUrl(null)} />
     </View>

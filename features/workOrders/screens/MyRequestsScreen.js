@@ -3,19 +3,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PrimaryButton from '../../../components/PrimaryButton';
 import ErrorState from '../../../components/ErrorState';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
 import { ordersForTenant } from '../utils/workOrderHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
-import { formatDate } from '../../../utils/formatDate';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
+import { formatDate } from '../../../util/formatDate';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import EmptyState from '../../../components/ui/EmptyState';
 import SkeletonList from '../../../components/ui/Skeleton';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 // the tenant's own requests, newest first, they update live when the landlord changes something
 function MyRequestsScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['orders']);
   const insets = useSafeAreaInsets();
   const {
     orders,

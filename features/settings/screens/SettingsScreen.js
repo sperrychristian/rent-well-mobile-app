@@ -4,19 +4,20 @@ import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DemoBanner from '../../../components/DemoBanner';
 import LogoutButton from '../../auth/components/LogoutButton';
-import { useAuth } from '../../auth/context/AuthContext';
+import { useAuth } from '../../../store/AuthContext';
 import { useAppRole } from '../../auth/hooks/useAppRole';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { SIZES, SPACING, TYPE } from '../../../theme';
-import { formatCurrency } from '../../../utils/formatCurrency';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { SIZES, SPACING, TYPE } from '../../../constants/theme';
+import { formatCurrency } from '../../../util/formatCurrency';
 import ListRow from '../../../components/ui/ListRow';
 import DemoTourSheet from '../../home/components/DemoTourSheet';
 import { useDemoTour } from '../../home/hooks/useDemoTour';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
-import { useTheme } from '../../../context/ThemeContext';
+import { useTheme } from '../../../store/ThemeContext';
 import SecurityCard from '../../security/components/SecurityCard';
+import InlineError from '../../../components/ui/InlineError';
 
 const appearance_choices = [
   { value: 'system', label: 'System' },
@@ -29,7 +30,7 @@ const appearance_choices = [
 function SettingsScreen(props) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const { demo_mode, mileage_rate } = useWorkOrders();
+  const { demo_mode, mileage_rate, cloud_error, cloud_status, clearCloudError } = useWorkOrders();
   // the demo has a side now, so the role comes from the demo while it runs and from the account otherwise
   const role = useAppRole();
   // owners and the demo get the mileage rate, tenants don't track mileage
@@ -51,6 +52,16 @@ function SettingsScreen(props) {
     >
       {/* only shows while the demo is running, it's the demo's way out */}
       <DemoBanner />
+
+      {/* a mileage rate that didn't save says so here, Log Out stays reachable either way */}
+      {cloud_status === 'ready' && cloud_error ? (
+        <InlineError
+          message={cloud_error}
+          onRetry={clearCloudError}
+          retry_label="OK"
+          style={styles.banner}
+        />
+      ) : null}
 
       <Card>
         <Text style={styles.heading}>Profile</Text>
@@ -138,6 +149,10 @@ function SettingsScreen(props) {
 export default SettingsScreen;
 
 const styles = themedStyles((COLORS) => ({
+  banner: {
+    marginHorizontal: SIZES.screen_padding,
+    marginTop: SPACING.md,
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background,

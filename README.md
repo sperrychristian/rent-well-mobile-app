@@ -39,33 +39,43 @@ npm install
 npx expo start -c
 ```
 
-## Running against the local backend
-The demo works with no backend. Logging in, signing up, messages, and work orders need the API from the `rent-well-api` repo running on your computer.
+## Backend: Firebase Realtime Database
+Rent Well's only backend is a Firebase Realtime Database, used through its REST endpoints with plain
+`fetch`. The demo needs no backend at all. Signing in, signing up, and everything a real account sees
+read and write the database.
 
-1. In `rent-well-api`, start Postgres and the server (first time: `npm install`, `cp .env.example .env`, then `npm run migrate` and `npm run seed`):
-   ```bash
-   docker compose up -d
-   npm run dev
-   ```
-   Check it with `curl http://localhost:4000/health`.
-2. In this repo, start the app with `npx expo start -c`.
-   - iOS simulator: works as is (`http://localhost:4000`).
-   - Android emulator: works as is (`http://10.0.2.2:4000`).
-   - Physical phone: open `services/config.js`, set `lan_api_url` to your computer's address, like `'http://192.168.1.20:4000'` (find it with `ipconfig getifaddr en0`). The phone and computer need to be on the same wifi.
-3. Log in with a seed account (password `password1234`): `owner@example.com` (landlord), `tenant@example.com` (tenant), `roommate@example.com` (shares Tara's unit), or `former@example.com` (a former tenant, read only). To try tenant sign up, use invite code `WELCOME2`. Run `npm run seed` in the API repo again to reset the seed data.
+Setup, step by step: [docs/firebase-setup.md](docs/firebase-setup.md). The short version:
 
-Tenant management, as the landlord: Dashboard, then Tenants. Tenants are grouped by property and unit, with pending invites (Resend, Revoke) and Past Tenants underneath. Tap a tenant to message, move, assign, or end their tenancy. Properties is in the Tenants header. Changes show up live on other devices signed in to the same account.
+1. Create a Firebase project, then a Realtime Database in test mode.
+2. Copy `.env.example` to `.env` and set `EXPO_PUBLIC_FIREBASE_DB_URL` to your database address
+   (like `https://your-project-default-rtdb.firebaseio.com`, no slash at the end). `.env` is git
+   ignored, so the address never gets committed. `EXPO_PUBLIC_FIREBASE_API_KEY` can stay blank for now.
+3. Paste `database.rules.json` into the console's Rules tab and publish.
+4. Fill the database: `npm run firebase:seed`, then check it with `npm run firebase:check`.
+5. Start the app with `npx expo start -c` (the `-c` picks up a changed `.env`).
 
-As `former@example.com` the home says "No Active Rental" and messages are read-only. If the landlord assigns them to a property again, the normal home comes back without logging out.
+Signing in: Firebase Auth comes next milestone, so Log In lists the **test accounts** in the database
+and you pick one (Taylor Brooks is the landlord, Sam Rivera a tenant, Morgan Diaz a former tenant,
+Jamie Ortiz a landlord with no data yet). Sign up makes a new test account. For tenant sign up use the
+invite code `K7M2QX9P`.
 
-What to try once you're signed in:
-- As the landlord: Work Orders loads from the server. Pull down to refresh, start or resolve an order, and edit priority, notes, contractor, and estimate on its detail screen. The Dashboard badge counts orders nobody has started.
-- As the tenant: My Requests on the home screen lists your requests, and Report an Issue sends one with up to 5 photos. Changes the landlord makes show up live.
-- Expenses on work orders still save on the phone only.
+- **The data model:** [docs/data-model.md](docs/data-model.md), with the diagram
+  [docs/data-model.png](docs/data-model.png).
+- **Where the code is:** every database call is in `util/http.js` and the resource modules in
+  `util/data/`. Shared state is React Context in `store/`.
+- **No live updates over REST:** screens reload when they come back into view, on pull to refresh, and
+  after every save. An open message thread checks for new messages every 8 seconds.
+- **Rent billing:** the landlord's phone bills rent and late fees when the app opens, on pull to
+  refresh of Payments, and after a rent schedule change. Each charge has a fixed id and is only
+  created if it isn't there yet, so running it twice never double charges.
+- **No photos yet:** the database can't hold files, so photos, receipts, and document files wait for
+  Firebase Storage. Those buttons only show in the demo. Documents and checklists save their records.
+- **No push notifications** in this milestone.
+- **Trying it without your own project:** `npm run firebase:fake` starts a small local stand-in on
+  port 9000. Seed it with `npm run firebase:seed -- --url=http://localhost:9000` and set `.env` to
+  `http://localhost:9000` (on a phone, use the computer's address on the wifi).
 
-If the server stops, the work order list keeps showing the last copy it loaded with a note at the top, and pulling down tries again.
-
-Push notifications need a development build with an EAS project id. In Expo Go or the simulator the app skips push and logs why.
+The milestone 2 write-up is in [docs/project_journal.md](docs/project_journal.md).
 
 ## Payments and rent
 
@@ -86,7 +96,7 @@ A rent ledger for each tenancy, in both roles. Rent Well never takes payments: t
 
 Try it in the demo: as the landlord, open Payments and Rent, confirm Jordan's $75 claim, then open Sam's ledger and record a payment. As the tenant (Sam), tap I Paid. Then switch to the landlord view and confirm it.
 
-Real mode uses the backend's rent ledger (the Rent ledger section of `docs/API.md`). The server works out every status and balance, and the app shows them as is. New rent from a schedule shows up after the server's ledger job runs (hourly, or `npm run ledger:run` in `rent-well-api`).
+With a Firebase account the ledger lives in the database (`charges`, `payments`, and `rentSchedules`), and the app works out every status and balance with the same ledger math the demo uses. New rent from a schedule is billed by the landlord's phone when the app opens, on pull to refresh, and right after a schedule change.
 
 | Landlord | Rent Ledger | Tenant | Payment Record |
 | --- | --- | --- | --- |
@@ -108,7 +118,7 @@ The full guide is in `docs/DESIGN.md`.
 ## Leases, profit, rent reminders, and dark mode
 
 - **Leases:** the landlord drawer has Leases, every lease sorted by end date with its status (Active, Expiring soon, Expired, Month to month, No lease) and days left. A row opens that tenancy's lease, where Set, Edit, and Renew (with an optional new rent) open as sheets, under a history of every change. The Dashboard says how many end soon and shows a terracotta line when one ends within 30 days. Tenants see "Your lease ends Jan 15" on My Home within 90 days.
-- **Expenses on the server:** a signed-in landlord's expenses live on the server now (the demo keeps its own). The same screens work offline from a saved copy, and expenses saved only on this phone can be uploaded once with "Upload N expenses from this phone", which keeps anything that fails for another try.
+- **Expenses in Firebase:** a signed-in landlord's expenses live in the database (the demo keeps its own). The same screens work offline from a saved copy, and expenses saved only on this phone can be uploaded once with "Upload N expenses from this phone", which keeps anything that fails for another try.
 - **Profit:** the drawer's Profit shows the year's net profit, rent collected and expenses, net by month as one green chart, and each property as a row (tap one to chart it). Tax Summary shares a Schedule E style summary as a CSV or text, from Profit or Expenses.
 - **Rent reminders:** on an overdue tenant in Payments (Remind) or from the Rent Ledger's More sheet, pick Friendly or Overdue notice, edit the suggested text, and Send. It lands in the chat with a "Payment reminder" label that opens Payments for the tenant. One per tenant every 24 hours.
 - **Dark mode:** Settings, Appearance: System, Light, or Dark, saved on the phone.
@@ -200,8 +210,8 @@ One validated form adds and edits a work order, built like the lecture's ManageE
 
 ## Shared state (course assignment)
 
-Work orders are the shared state. One `WorkOrdersProvider` (React Context, `context/WorkOrdersContext.js`) wraps the whole navigator in `App.js`, and every screen reads it with `useWorkOrders()`, so a status change on Work Order Detail shows at once on the Work Orders list, the Home subtitle, the tab badge, a tenant's profile, and the tenant's own Repairs list.
+Work orders are the shared state. One `WorkOrdersProvider` (React Context, `store/WorkOrdersContext.js`) wraps the whole navigator in `App.js`, and every screen reads it with `useWorkOrders()`, so a status change on Work Order Detail shows at once on the Work Orders list, the Home subtitle, the tab badge, a tenant's profile, and the tenant's own Repairs list.
 
 - The short explanation: [ASSIGNMENT_STATE.md](ASSIGNMENT_STATE.md)
 - Which screens change it and which show it: [docs/shared-state.md](docs/shared-state.md)
-- The tests that prove it: `navigation/sharedState.test.js` (the real navigators) and `features/workOrders/context/remoteWorkOrders.test.js` (real mode)
+- The tests that prove it: `navigation/sharedState.test.js` (the real navigators), `store/firebaseProviders.test.js` and `navigation/firebaseFlows.test.js` (Firebase mode)

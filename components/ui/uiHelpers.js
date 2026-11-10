@@ -1,4 +1,4 @@
-import { themed } from '../../theme';
+import { themed } from '../../constants/theme';
 
 // pure helpers for the ui pieces, nothing here draws anything so the tests can check them
 

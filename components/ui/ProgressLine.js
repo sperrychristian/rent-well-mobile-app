@@ -1,6 +1,6 @@
 import { View } from 'react-native';
-import { SIZES, RADIUS } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { SIZES, RADIUS } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // the Hearth progress line: 4pt of forest green with a round end on a hairline-colored track
 // props: share (0 to 1), label (what screen readers hear), style

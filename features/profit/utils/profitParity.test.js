@@ -12,7 +12,7 @@ import {
 } from './profitMath';
 import { monthSummary } from '../../payments/utils/ledgerMath';
 import { buildSampleLedgers } from '../../payments/data/sampleLedger';
-import { formatCents } from '../../../utils/formatCurrency';
+import { formatCents } from '../../../util/formatCurrency';
 
 // the backend's own report cases (rent-well-api tests/reportMath.test.js), run against the app's port
 // in the style of the ledger's backendParity test, so the demo's profit numbers can't drift from the server's

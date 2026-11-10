@@ -8,7 +8,7 @@ import ProgressBar from '../components/ProgressBar';
 import ChecklistItemModal from '../components/ChecklistItemModal';
 import SignOffModal from '../components/SignOffModal';
 import NameModal from '../components/NameModal';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
 import {
   checklistProgress,
   roomProgress,
@@ -17,17 +17,22 @@ import {
   checklist_disclaimer,
 } from '../utils/checklistHelpers';
 import { shareChecklistText } from '../utils/exportChecklist';
-import { COLORS, SPACING, TYPE, BORDER, SIZES, OPACITY } from '../../../theme';
+import { COLORS, SPACING, TYPE, BORDER, SIZES, OPACITY } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import StatusLabel from '../../../components/ui/StatusLabel';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 function ChecklistDetailScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['cloud']);
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
   const {
     checklists,
     demo_mode,
+    cloud_status,
     addChecklist,
     updateChecklistItem,
     addChecklistItem,
@@ -348,6 +353,7 @@ function ChecklistDetailScreen(props) {
         item={open_item}
         locked={locked}
         in_demo={demo_mode}
+        hide_photos={!demo_mode && cloud_status !== 'off'}
         onSave={saveItem}
         onDelete={deleteItem}
         onClose={() => setItemOpen(false)}
@@ -374,7 +380,11 @@ function ChecklistDetailScreen(props) {
   );
 }
 
-export default ChecklistDetailScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(ChecklistDetailScreen, {
+  stores: ['cloud'],
+  label: 'Loading the checklist',
+});
 
 const styles = themedStyles((COLORS) => ({
   // the header has the screen's title now, so the name gets its own plain line instead of the big card

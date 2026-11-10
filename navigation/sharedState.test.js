@@ -2,24 +2,12 @@ import { Alert, Text } from 'react-native';
 import { render, screen, fireEvent, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import App, { forgetNavigationState } from '../App';
-import { navigation_ref } from '../services/navigationRef';
-import { useWorkOrders } from '../context/WorkOrdersContext';
+import { navigation_ref } from '../util/navigationRef';
+import { useWorkOrders } from '../store/WorkOrdersContext';
 
 // the shared state assignment: one work order store, read and changed from screens in different tabs,
 // proven on the real App with the real navigators (the same harness as appNavigation.test.js)
 
-jest.mock('expo-secure-store', () => ({
-  getItemAsync: jest.fn(() => Promise.resolve(null)),
-  setItemAsync: jest.fn(() => Promise.resolve()),
-  deleteItemAsync: jest.fn(() => Promise.resolve()),
-}));
-jest.mock('expo-notifications', () => ({
-  setNotificationHandler: jest.fn(),
-  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
-  getLastNotificationResponseAsync: jest.fn(() => Promise.resolve(null)),
-  clearLastNotificationResponseAsync: jest.fn(() => Promise.resolve()),
-  getPermissionsAsync: jest.fn(() => Promise.resolve({ granted: false, canAskAgain: false })),
-}));
 jest.mock('expo-splash-screen', () => ({
   preventAutoHideAsync: jest.fn(() => Promise.resolve()),
   hideAsync: jest.fn(() => Promise.resolve()),

@@ -5,12 +5,12 @@ import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
 import TextField from '../../../components/TextField';
-import { todayString } from '../../../utils/formatDate';
+import { todayString } from '../../../util/formatDate';
 import { checkEndDate, placeLabel } from '../utils/tenantHelpers';
-import { SPACING, TYPE, SIZES } from '../../../theme';
+import { SPACING, TYPE, SIZES } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 const max_note_length = 1000;
 

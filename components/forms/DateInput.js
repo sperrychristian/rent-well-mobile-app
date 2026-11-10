@@ -4,11 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import Input from './Input';
 import PrimaryButton from '../PrimaryButton';
-import { useTheme } from '../../context/ThemeContext';
-import { stringToDate, dateToString } from '../../utils/dateInput';
-import { todayString } from '../../utils/formatDate';
-import { COLORS, SPACING, SIZES, RADIUS, BORDER, OPACITY } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { useTheme } from '../../store/ThemeContext';
+import { stringToDate, dateToString } from '../../util/dateInput';
+import { todayString } from '../../util/formatDate';
+import { COLORS, SPACING, SIZES, RADIUS, BORDER, OPACITY } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // a date you can type (YYYY-MM-DD) or pick: the calendar button opens the phone's own picker
 // both feed the same onChangeText, so the form's state and its rules don't care which one was used

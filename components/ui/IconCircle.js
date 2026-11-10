@@ -2,7 +2,7 @@ import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { toneColors } from './uiHelpers';
 import { lineIcon } from './lineIcon';
-import { SIZES } from '../../theme';
+import { SIZES } from '../../constants/theme';
 
 // a soft tinted circle with an icon in the matching darker color, the leading piece of rows, tiles, and actions
 // it's decoration next to a label, so screen readers skip it and read the label instead

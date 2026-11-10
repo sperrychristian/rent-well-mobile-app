@@ -10,14 +10,19 @@ import ErrorState from '../../../components/ErrorState';
 import ProfitChart from '../components/ProfitChart';
 import TaxSummarySheet from '../components/TaxSummarySheet';
 import { useProfitReport } from '../hooks/useProfitReport';
-import { formatCents } from '../../../utils/formatCurrency';
-import { SPACING, TYPE, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { formatCents } from '../../../util/formatCurrency';
+import { SPACING, TYPE, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { useNavigation } from '@react-navigation/native';
 
 // a landlord's year in one place: net profit as the big number, rent in and expenses out under it,
 // net by month as one green chart, then each property as a plain row (tap one to see its months in the chart)
 // real mode reads GET /reports/profit, the demo works out the same numbers from its own rent and expenses
 function ProfitScreen() {
+  const focus_navigation = useNavigation();
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(focus_navigation, ['expenses', 'ledger', 'tenants']);
   const this_year = new Date().getFullYear();
   const years = [String(this_year), String(this_year - 1), String(this_year - 2)];
   const [year, setYear] = useState(years[0]);

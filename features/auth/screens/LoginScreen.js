@@ -1,53 +1,93 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Text, Pressable, View } from 'react-native';
 import AuthLayout from '../components/AuthLayout';
-import SubmitButton from '../components/SubmitButton';
-import TextField from '../../../components/TextField';
-import { useAuth, homeRouteFor } from '../context/AuthContext';
-import { checkEmail, checkLoginPassword, collectErrors } from '../utils/authValidation';
-import { SPACING, TYPE, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import ListRow from '../../../components/ui/ListRow';
+import ScreenState from '../../../components/ui/ScreenState';
+import { useAuth, homeRouteFor } from '../../../store/AuthContext';
+import { isFirebaseConfigured } from '../../../util/http';
+import { SPACING, TYPE, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
+// milestone 2: there's no real sign in yet, so Log In lists the test accounts in the database and you pick one
+// (Firebase Auth replaces this next milestone, the screen keeps its route name so navigation doesn't change)
 function LoginScreen(props) {
-  const { login, session_expired } = useAuth();
+  const { login, session_expired, loadTestAccounts } = useAuth();
   // expired is set when the app sent someone here because their session ran out
   // it comes from the auth context now, so only ids ever travel as route params
   const expired = session_expired;
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [field_errors, setFieldErrors] = useState({});
-  const [server_error, setServerError] = useState(
-    expired ? 'Your session ended. Please log in again.' : '',
+  const [accounts, setAccounts] = useState([]);
+  // loading, ready, or error for the list of test accounts
+  const [status, setStatus] = useState(isFirebaseConfigured() ? 'loading' : 'error');
+  const [load_error, setLoadError] = useState(
+    isFirebaseConfigured()
+      ? ''
+      : 'The database address is missing. Add EXPO_PUBLIC_FIREBASE_DB_URL to .env, then restart Expo with npx expo start -c.',
   );
-  const [busy, setBusy] = useState(false);
+  const [server_error, setServerError] = useState(
+    expired ? 'That test account is gone from the database. Pick another one.' : '',
+  );
+  const [busy_id, setBusyId] = useState(null);
 
-  async function handleLogin() {
-    const errors = collectErrors({
-      email: checkEmail(email),
-      password: checkLoginPassword(password),
-    });
-    setFieldErrors(errors);
-    setServerError('');
-    if (Object.keys(errors).length > 0) {
+  // step 1: read every test account from the users node
+  const loadAccounts = useCallback(async () => {
+    if (!isFirebaseConfigured()) {
       return;
     }
-    setBusy(true);
+    setStatus('loading');
     try {
-      const user = await login(email, password);
+      setAccounts(await loadTestAccounts());
+      setStatus('ready');
+      setLoadError('');
+    } catch (error) {
+      setLoadError(error.message);
+      setStatus('error');
+    }
+  }, [loadTestAccounts]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loading the list when the screen opens is the point
+    loadAccounts();
+  }, [loadAccounts]);
+
+  // step 2: picking one signs in as it
+  async function handlePick(account) {
+    setBusyId(account.id);
+    setServerError('');
+    try {
+      const user = await login(account);
       // reset so back can't return to the login form
       props.navigation.reset({ index: 0, routes: [{ name: homeRouteFor(user) }] });
     } catch (error) {
-      setFieldErrors(error.field_errors || {});
       setServerError(error.message);
-      setBusy(false);
+      setBusyId(null);
     }
+  }
+
+  const landlords = accounts.filter((account) => account.role === 'owner');
+  const tenants = accounts.filter((account) => account.role === 'tenant');
+
+  function accountRow(account, index, list) {
+    return (
+      <ListRow
+        key={account.id}
+        avatar_name={account.name}
+        title={account.name}
+        subtitle={busy_id === account.id ? 'Signing in...' : account.email}
+        chevron
+        divider={index < list.length - 1}
+        onPress={busy_id ? undefined : () => handlePick(account)}
+        accessibilityLabel={
+          'Sign in as ' + account.name + ', ' + (account.role === 'owner' ? 'landlord' : 'tenant')
+        }
+      />
+    );
   }
 
   return (
     <AuthLayout
-      title="Log In"
-      subtitle="Welcome back. Log in to manage your rentals."
+      title="Test Accounts"
+      subtitle="Pick an account to sign in as. Real sign in with a password comes with Firebase Auth next milestone."
       error={server_error}
       footer={
         <View style={styles.links}>
@@ -57,7 +97,7 @@ function LoginScreen(props) {
             accessibilityRole="link"
             style={styles.link_press}
           >
-            <Text style={styles.link}>New landlord? Create an account</Text>
+            <Text style={styles.link}>New landlord? Create a test account</Text>
           </Pressable>
           <Pressable
             onPress={() => props.navigation.navigate('RegisterTenant')}
@@ -70,30 +110,45 @@ function LoginScreen(props) {
         </View>
       }
     >
-      <TextField
-        label="Email"
-        value={email}
-        onChangeText={setEmail}
-        error={field_errors.email}
-        placeholder="you@example.com"
-        autoCapitalize="none"
-        autoCorrect={false}
-        keyboardType="email-address"
-        textContentType="username"
-        autoComplete="email"
-      />
-      <TextField
-        label="Password"
-        value={password}
-        onChangeText={setPassword}
-        error={field_errors.password}
-        placeholder="Password"
-        secureTextEntry
-        textContentType="password"
-        autoComplete="password"
-        onSubmitEditing={handleLogin}
-      />
-      <SubmitButton title="Log In" busy_title="Logging in..." busy={busy} onPress={handleLogin} />
+      {/* the clear label the brief asks for: this is a picker, not a sign in form */}
+      <Text style={styles.heading} accessibilityRole="header">
+        Test accounts
+      </Text>
+      {status === 'loading' ? <ScreenState status="loading" label="Loading test accounts" /> : null}
+      {status === 'error' ? (
+        <ScreenState
+          status="error"
+          title="Couldn't load the test accounts"
+          message={load_error}
+          onRetry={isFirebaseConfigured() ? loadAccounts : undefined}
+        />
+      ) : null}
+      {status === 'ready' && accounts.length === 0 ? (
+        <ScreenState
+          status="empty"
+          icon="people-outline"
+          title="No test accounts yet"
+          message="Seed the database with npm run firebase:seed, or create a landlord account below."
+          action_label="Try Again"
+          onAction={loadAccounts}
+        />
+      ) : null}
+      {status === 'ready' && landlords.length > 0 ? (
+        <View>
+          <Text style={styles.section} accessibilityRole="header">
+            Landlords
+          </Text>
+          {landlords.map(accountRow)}
+        </View>
+      ) : null}
+      {status === 'ready' && tenants.length > 0 ? (
+        <View>
+          <Text style={styles.section} accessibilityRole="header">
+            Tenants
+          </Text>
+          {tenants.map(accountRow)}
+        </View>
+      ) : null}
     </AuthLayout>
   );
 }
@@ -115,5 +170,15 @@ const styles = themedStyles((COLORS) => ({
     ...TYPE.subheading,
     color: COLORS.cta,
     textAlign: 'center',
+  },
+  heading: {
+    ...TYPE.heading,
+    color: COLORS.text,
+  },
+  section: {
+    ...TYPE.label,
+    color: COLORS.text_muted,
+    marginTop: SPACING.md,
+    marginBottom: SPACING.xs,
   },
 }));

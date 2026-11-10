@@ -1,4 +1,4 @@
-import { formatCents } from '../../../utils/formatCurrency';
+import { formatCents } from '../../../util/formatCurrency';
 
 // pure helpers for leases, nothing here touches the network so they're easy to test
 // a lease lives on its tenancy, and its status is worked out every time it's read (docs/API.md, Lease block),

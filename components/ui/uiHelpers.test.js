@@ -8,8 +8,8 @@ import {
   toneColors,
   tone_colors,
 } from './uiHelpers';
-import { COLORS } from '../../theme';
-import { meetsAA } from '../../utils/contrast';
+import { COLORS } from '../../constants/theme';
+import { meetsAA } from '../../util/contrast';
 
 describe('statusTone', () => {
   test('keeps the meanings the app already used for work orders, as soft tints', () => {

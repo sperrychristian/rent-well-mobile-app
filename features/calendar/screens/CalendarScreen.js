@@ -7,11 +7,11 @@ import SectionHeader from '../../../components/ui/SectionHeader';
 import { toneColors } from '../../../components/ui/uiHelpers';
 import AddToCalendarSheet from '../components/AddToCalendarSheet';
 import { useDeviceCalendar } from '../hooks/useDeviceCalendar';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { useAuth } from '../../auth/context/AuthContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { useAuth } from '../../../store/AuthContext';
 import { useAppRole } from '../../auth/hooks/useAppRole';
-import { useTenants } from '../../tenants/context/TenantsContext';
-import { useLedger } from '../../payments/context/LedgerContext';
+import { useTenants } from '../../../store/TenantsContext';
+import { useLedger } from '../../../store/LedgerContext';
 import { ordersForTenant } from '../../workOrders/utils/workOrderHelpers';
 import { demo_tenant } from '../../tenants/data/sampleTenants';
 import { monthOf } from '../../payments/utils/ledgerMath';
@@ -29,8 +29,10 @@ import {
   upcomingForExport,
   canExport,
 } from '../utils/calendarEvents';
-import { COLORS, SPACING, TYPE, SIZES, RADIUS, BORDER, FONTS } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, SIZES, RADIUS, BORDER, FONTS } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 // the legend under the grid, so a dot's color always has words next to it somewhere on screen
 const legend = [
@@ -45,6 +47,8 @@ const legend = [
 // same tokens and line icons as every other screen, and it works the same in light and dark with nothing to install
 // tap a day to see its agenda, tap a row to open it, and the calendar button sends it to the phone's calendar
 function CalendarScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['orders', 'ledger', 'tenants']);
   const insets = useSafeAreaInsets();
   const role = useAppRole();
   const { user } = useAuth();
@@ -287,7 +291,11 @@ function CalendarScreen(props) {
   );
 }
 
-export default CalendarScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(CalendarScreen, {
+  stores: ['orders', 'ledger', 'tenants'],
+  label: 'Loading the calendar',
+});
 
 const styles = themedStyles((COLORS) => ({
   screen: {

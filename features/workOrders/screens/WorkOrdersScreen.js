@@ -9,27 +9,31 @@ import {
   RefreshControl,
 } from 'react-native';
 import ExpenseDetailsModal from '../../expenses/components/ExpenseDetailsModal';
-import { COLORS, SPACING, FONTS, SIZES } from '../../../theme';
+import { COLORS, SPACING, FONTS, SIZES } from '../../../constants/theme';
 import WorkOrderCard from '../components/WorkOrderCard';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import AddExpenseModal from '../../expenses/components/AddExpenseModal';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
 import ErrorState from '../../../components/ErrorState';
-import { useTenants } from '../../tenants/context/TenantsContext';
-import { useMessages } from '../../messages/context/MessagesContext';
+import { useTenants } from '../../../store/TenantsContext';
+import { useMessages } from '../../../store/MessagesContext';
 import { openConversationFor } from '../../messages/utils/openConversation';
 import { list_styles } from '../../../components/ui/listStyles';
 import EmptyState from '../../../components/ui/EmptyState';
+import ScreenState from '../../../components/ui/ScreenState';
 import SkeletonList from '../../../components/ui/Skeleton';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 // lower number sorts first, so emergencies come out on top
 const priority_rank = { Emergency: 0, Normal: 1, Low: 2 };
 const sort_options = ['Newest', 'Oldest', 'Priority'];
 
 function WorkOrdersScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['orders']);
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
   // the orders and the actions live in the shared context now so every screen sees the same data
@@ -108,6 +112,13 @@ function WorkOrdersScreen(props) {
   const property_names = ['All', ...new Set(orders.map((order) => order.property))];
 
   const search_lower = search_text.trim().toLowerCase();
+  // any filter or search narrowing the list, and Clear Filters to put them all back
+  const filters_on = search_lower !== '' || property_filter !== 'All' || !!only_property_id;
+  function clearFilters() {
+    setSearchText('');
+    setPropertyFilter('All');
+    setOnlyPropertyId(null);
+  }
 
   // filter here so the FlatList only ever gets the orders for the current toggle, chip, and search
   const visible_orders = orders
@@ -262,18 +273,44 @@ function WorkOrdersScreen(props) {
           }
           ListHeaderComponent={list_header}
           ListEmptyComponent={
-            <EmptyState
-              illustration="empty_work_orders"
-              title={show_resolved ? 'No resolved work orders found' : 'No open work orders found'}
-              message={
-                search_text || property_filter !== 'All'
-                  ? 'Try a different search or property.'
-                  : 'New requests show up here as soon as they come in.'
-              }
-              action_label="Add a Work Order"
-              action_icon="add-circle-outline"
-              onAction={() => props.navigation.navigate('NewWorkOrder')}
-            />
+            // three cases: nothing saved at all, a search or filter with no hits (Clear Filters), or just
+            // nothing on this tab yet (the old message, since Active and Resolved are views, not filters)
+            orders.length === 0 ? (
+              <ScreenState
+                status="empty"
+                illustration="empty_work_orders"
+                title="No work orders yet"
+                message="New requests from tenants show up here, and you can add your own."
+                action_label="Add a Work Order"
+                action_icon="add-circle-outline"
+                onAction={() => props.navigation.navigate('NewWorkOrder')}
+              />
+            ) : filters_on ? (
+              <ScreenState
+                status="empty"
+                illustration="empty_work_orders"
+                title="No work orders match"
+                message="Nothing fits this search and property. Clear them to see every work order."
+                action_label="Clear Filters"
+                action_icon="close-circle-outline"
+                onAction={clearFilters}
+              />
+            ) : (
+              <EmptyState
+                illustration="empty_work_orders"
+                title={
+                  show_resolved ? 'No resolved work orders found' : 'No open work orders found'
+                }
+                message={
+                  search_text || property_filter !== 'All'
+                    ? 'Try a different search or property.'
+                    : 'New requests show up here as soon as they come in.'
+                }
+                action_label="Add a Work Order"
+                action_icon="add-circle-outline"
+                onAction={() => props.navigation.navigate('NewWorkOrder')}
+              />
+            )
           }
           renderItem={({ item }) => (
             <WorkOrderCard

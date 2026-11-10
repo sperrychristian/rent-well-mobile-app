@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native';
-import { SPACING, TYPE, NUMBERS } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { SPACING, TYPE, NUMBERS } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // the big fact at the top of a screen: a small label, the key figure large, a caption, and room for extras under it
 // variants: brand (the indigo card with white text, for the one overview card on a home screen) and plain (white card)

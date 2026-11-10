@@ -1,3 +1,5 @@
+> Historical record: the Express and Postgres API this log describes was replaced by the Firebase Realtime Database in milestone 2.
+
 # Payments and rent ledger: progress log
 
 Branch `payments-ledger-app`, made from `fintech-polish` because there's no `polish-2` branch. Not merged.

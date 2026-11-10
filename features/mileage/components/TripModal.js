@@ -14,11 +14,11 @@ import {
 import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import DateField from '../../../components/DateField';
-import { COLORS, SPACING, TYPE } from '../../../theme';
-import { todayString } from '../../../utils/formatDate';
+import { COLORS, SPACING, TYPE } from '../../../constants/theme';
+import { todayString } from '../../../util/formatDate';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // props: visible, onSave, onClose, property_names, plus optional trip (edit mode), onDelete, default_property
 function TripModal(props) {
@@ -37,6 +37,7 @@ function TripModal(props) {
       return;
     }
     const existing = props.trip;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- filling or reloading state when this opens is the point, it runs once per open
     setDateText(existing ? existing.date : todayString());
     setProperty(existing ? existing.property : props.default_property || '');
     setMiles(existing ? String(existing.miles) : '');

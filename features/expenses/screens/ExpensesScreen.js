@@ -1,14 +1,24 @@
 import { useState, useRef, useEffect } from 'react';
-import { View, Text, FlatList, Pressable, ScrollView, TextInput, Alert } from 'react-native';
-import { ImagePicker } from '../../../services/systemPickers';
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  ScrollView,
+  TextInput,
+  Alert,
+  useWindowDimensions,
+} from 'react-native';
+import { ImagePicker } from '../../../util/systemPickers';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
+import ScreenState from '../../../components/ui/ScreenState';
 import AddExpenseModal from '../components/AddExpenseModal';
 import RecurringModal from '../components/RecurringModal';
 import BudgetsModal from '../components/BudgetsModal';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
-import { formatDate } from '../../../utils/formatDate';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
+import { formatDate } from '../../../util/formatDate';
 import {
   sumAmounts,
   totalsByCategory,
@@ -19,10 +29,18 @@ import {
   splitAmount,
 } from '../utils/expenseStats';
 import { shareExpensesCsv } from '../utils/exportExpenses';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SHADOWS, SIZES, NUMBERS } from '../../../theme';
+import {
+  COLORS,
+  SPACING,
+  TYPE,
+  RADIUS,
+  BORDER,
+  SHADOWS,
+  SIZES,
+  NUMBERS,
+} from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import EmptyState from '../../../components/ui/EmptyState';
-import { formatCurrency } from '../../../utils/formatCurrency';
+import { formatCurrency } from '../../../util/formatCurrency';
 import IconCircle from '../../../components/ui/IconCircle';
 import ReceiptImage from '../../../components/ReceiptImage';
 import ImportExpensesCard from '../components/ImportExpensesCard';
@@ -30,8 +48,9 @@ import TaxSummarySheet from '../../profit/components/TaxSummarySheet';
 import SkeletonList from '../../../components/ui/Skeleton';
 import ErrorState from '../../../components/ErrorState';
 import { useToast } from '../../../components/ui/Toast';
-import { useExpenses } from '../context/ExpensesContext';
-import { themedStyles } from '../../../utils/themedStyles';
+import { useExpenses } from '../../../store/ExpensesContext';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 
 const month_names = [
   'January',
@@ -56,7 +75,19 @@ function monthTitle(month_key) {
   return month_names[parseInt(parts[1], 10) - 1] + ' ' + parts[0];
 }
 
+// at this font scale and up the quick actions stack one per row (iOS Larger Text starts past 1.3)
+export const quick_stack_scale = 1.35;
+
 function ExpensesScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['expenses', 'cloud']);
+  // the quick actions sit two to a row, but with big text one word like "Summary" won't fit in half the
+  // screen, so they stack one per row instead and a title only ever wraps at a space
+  const { fontScale } = useWindowDimensions();
+  const stack_quick = fontScale >= quick_stack_scale;
+  const quick_row_style = [styles.button_row, stack_quick && styles.button_stack];
+  // stacked, each button sizes to its own label instead of sharing the row
+  const quick_button_style = [styles.quick_button, stack_quick && styles.quick_button_stacked];
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
   const {
@@ -162,6 +193,20 @@ function ExpensesScreen(props) {
   const shown_vendors = show_all_vendors ? vendor_totals : vendor_totals.slice(0, 5);
 
   const editing_expense = expenses.find((expense) => expense.id === editing_id);
+
+  // Clear Filters: every filter and the search back to the start, on the newest year that has expenses
+  // (this year when it has any), so clearing always shows something
+  function clearFilters() {
+    const newest_year = expenses.reduce(
+      (newest, expense) => (expense.date.slice(0, 4) > newest ? expense.date.slice(0, 4) : newest),
+      '',
+    );
+    const has_this_year = expenses.some((expense) => expense.date.slice(0, 4) === current_year);
+    setYear(has_this_year || !newest_year ? current_year : newest_year);
+    setPropertyFilter('All');
+    setCategoryFilter(null);
+    setSearchText('');
+  }
 
   function openNewForm() {
     setEditingId(null);
@@ -322,7 +367,10 @@ function ExpensesScreen(props) {
       order_titles[order.id] = order.title;
     });
     try {
-      await shareExpensesCsv(filtered_expenses, year, order_titles);
+      // no receipt column for a Firebase landlord, they can't attach receipt photos until Storage
+      await shareExpensesCsv(filtered_expenses, year, order_titles, {
+        show_receipts: !expense_store.is_remote,
+      });
     } catch (error) {
       console.log('Could not export expenses', error);
       Alert.alert('Export failed', 'The file could not be created or shared.');
@@ -345,38 +393,41 @@ function ExpensesScreen(props) {
           style={styles.add_button}
           onPress={openNewForm}
         />
-        <PrimaryButton
-          title="Scan Receipt"
-          icon="camera-outline"
-          variant="secondary"
-          style={styles.scan_button}
-          onPress={scanReceipt}
-        />
+        {/* scanning makes a receipt photo, which waits for Firebase Storage, so only the phone's own list has it */}
+        {!expense_store.is_remote && (
+          <PrimaryButton
+            title="Scan Receipt"
+            icon="camera-outline"
+            variant="secondary"
+            style={styles.scan_button}
+            onPress={scanReceipt}
+          />
+        )}
       </View>
-      <View style={styles.button_row}>
+      <View style={quick_row_style}>
         <PrimaryButton
           title="Mileage"
           icon="car-outline"
           variant="tertiary"
-          style={styles.mileage_button}
+          style={[styles.mileage_button, ...quick_button_style]}
           onPress={() => props.navigation.navigate('Mileage')}
         />
         <PrimaryButton
           title="Year-End"
           icon="document-text-outline"
           variant="tertiary"
-          style={styles.report_button}
+          style={[styles.report_button, ...quick_button_style]}
           onPress={() => props.navigation.navigate('YearEndReport', { yearId: year })}
         />
       </View>
-      <View style={styles.button_row}>
+      <View style={quick_row_style}>
         {/* recurring rules make expenses on the phone, so they stay out of real mode until the server has them */}
         {!expense_store.is_remote && (
           <PrimaryButton
             title="Recurring"
             icon="repeat-outline"
             variant="tertiary"
-            style={styles.grey_button}
+            style={[styles.grey_button, ...quick_button_style]}
             onPress={() => setRecurringOpen(true)}
           />
         )}
@@ -384,23 +435,23 @@ function ExpensesScreen(props) {
           title="Budgets"
           icon="wallet-outline"
           variant="tertiary"
-          style={styles.grey_button}
+          style={[styles.grey_button, ...quick_button_style]}
           onPress={() => setBudgetsOpen(true)}
         />
       </View>
-      <View style={styles.button_row}>
+      <View style={quick_row_style}>
         <PrimaryButton
           title="Export CSV"
           icon="share-outline"
           variant="tertiary"
-          style={styles.export_button}
+          style={[styles.export_button, ...quick_button_style]}
           onPress={exportCsv}
         />
         <PrimaryButton
           title="Tax Summary"
           icon="document-text-outline"
           variant="tertiary"
-          style={styles.export_button}
+          style={[styles.export_button, ...quick_button_style]}
           onPress={() => setTaxOpen(true)}
         />
       </View>
@@ -633,14 +684,28 @@ function ExpensesScreen(props) {
         contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg + 56 }}
         ListHeaderComponent={list_header}
         ListEmptyComponent={
-          <EmptyState
-            illustration="empty_expenses"
-            title="No expenses match"
-            message="Change the year or filters, or add an expense above."
-            action_label="Add Expense"
-            action_icon="add-circle-outline"
-            onAction={openNewForm}
-          />
+          // nothing saved at all gets the first-run message, a year, filter, or search with no hits gets Clear
+          expenses.length === 0 ? (
+            <ScreenState
+              status="empty"
+              illustration="empty_expenses"
+              title="No expenses yet"
+              message="Log repairs, insurance, taxes, and supplies here, and the Schedule E totals add up for you."
+              action_label="Add Expense"
+              action_icon="add-circle-outline"
+              onAction={openNewForm}
+            />
+          ) : (
+            <ScreenState
+              status="empty"
+              illustration="empty_expenses"
+              title="No expenses match"
+              message="Nothing fits this year, property, category, and search. Clear them to see your expenses."
+              action_label="Clear Filters"
+              action_icon="close-circle-outline"
+              onAction={clearFilters}
+            />
+          )
         }
         renderItem={({ item }) => {
           if (item.type === 'header') {
@@ -714,7 +779,7 @@ function ExpensesScreen(props) {
                       </Text>
                     </Pressable>
                   )}
-                  {receipts.length === 0 && (
+                  {receipts.length === 0 && !expense_store.is_remote && (
                     <View style={[styles.tag, styles.missing_tag]}>
                       <Text style={[styles.tag_text, styles.missing_text]}>No receipt</Text>
                     </View>
@@ -822,6 +887,19 @@ const styles = themedStyles((COLORS) => ({
   export_button: {
     flex: 1,
     marginHorizontal: 0,
+  },
+  // text-only quick actions don't need the pill's wide side padding, so the label gets that room instead
+  quick_button: {
+    paddingHorizontal: SPACING.xs,
+  },
+  quick_button_stacked: {
+    flex: 0,
+    flexBasis: 'auto',
+  },
+  // big text: one quick action per row, full width
+  button_stack: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
   },
   section_label: {
     ...TYPE.label,

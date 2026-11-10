@@ -6,19 +6,19 @@ import ProgressLine from '../../../components/ui/ProgressLine';
 import Button from '../../../components/ui/Button';
 import { useToast } from '../../../components/ui/Toast';
 import ScheduleFormModal from '../../payments/components/ScheduleFormModal';
-import { useLedger } from '../../payments/context/LedgerContext';
-import { useTenants } from '../../tenants/context/TenantsContext';
-import { useAuth } from '../../auth/context/AuthContext';
+import { useLedger } from '../../../store/LedgerContext';
+import { useTenants } from '../../../store/TenantsContext';
+import { useAuth } from '../../../store/AuthContext';
 import { useOnboardingDismissed } from '../hooks/useOnboardingDismissed';
-import { hapticSuccess } from '../../../utils/haptics';
+import { hapticSuccess } from '../../../util/haptics';
 import {
   onboardingSteps,
   onboardingProgress,
   rentTarget,
   showsOnboarding,
 } from '../utils/onboarding';
-import { COLORS, SPACING, TYPE, BORDER, SIZES, OPACITY } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, BORDER, SIZES, OPACITY } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 const step_icons = {
   property: 'home-outline',

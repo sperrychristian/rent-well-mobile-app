@@ -4,8 +4,8 @@ import FormSheet from '../../payments/components/FormSheet';
 import { Field, form_styles } from '../../payments/components/FormBits';
 import DateField from '../../../components/DateField';
 import { checkLeaseForm, addDaysTo } from '../utils/leaseHelpers';
-import { COLORS, SPACING, TYPE, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // set or edit a lease: start, end (or month to month), how many days of notice before it ends, and notes
 // a save replaces the whole lease, same as the server's PUT

@@ -1,4 +1,4 @@
-import { parseAmountToCents } from '../../../utils/formatCurrency';
+import { parseAmountToCents } from '../../../util/formatCurrency';
 
 // the rules for the work order form, kept pure so the form stays small and the rules get unit tested
 // every check gives back { isValid, errorText }, errorText is '' when the value is fine

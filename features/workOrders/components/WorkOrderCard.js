@@ -3,10 +3,10 @@ import Card from '../../../components/Card';
 import PrimaryButton from '../../../components/PrimaryButton';
 import RemoteImage from '../../../components/RemoteImage';
 import StatusLabel from '../../../components/ui/StatusLabel';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, themed } from '../../../theme';
-import { formatDate } from '../../../utils/formatDate';
-import { formatCurrency } from '../../../utils/formatCurrency';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, themed } from '../../../constants/theme';
+import { formatDate } from '../../../util/formatDate';
+import { formatCurrency } from '../../../util/formatCurrency';
+import { themedStyles } from '../../../util/themedStyles';
 
 // I keep one color per status so the badge is readable at a glance
 export const status_colors = themed((COLORS) => ({

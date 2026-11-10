@@ -14,7 +14,7 @@ import {
   monthTitle,
   shortDate,
 } from '../../payments/utils/ledgerHelpers';
-import { formatCents } from '../../../utils/formatCurrency';
+import { formatCents } from '../../../util/formatCurrency';
 
 export const weekday_labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 // the spoken names, so a screen reader says "Monday" and not "Mon"

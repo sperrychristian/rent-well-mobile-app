@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert, Linking } from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Card from '../../../components/Card';
@@ -7,21 +7,26 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import ErrorState from '../../../components/ErrorState';
 import PlaceModal from '../components/PlaceModal';
 import EndTenancyModal from '../components/EndTenancyModal';
-import { useTenants } from '../context/TenantsContext';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useTenants } from '../../../store/TenantsContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
 import { ordersForTenantRecord, activeCount } from '../../workOrders/utils/workOrderHelpers';
-import { useMessages } from '../../messages/context/MessagesContext';
+import { useMessages } from '../../../store/MessagesContext';
 import { openConversationFor } from '../../messages/utils/openConversation';
 import { placeLabel, findMoveInChecklist } from '../utils/tenantHelpers';
-import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../../theme';
+import { COLORS, SPACING, TYPE, BORDER, SIZES } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import Avatar from '../../../components/ui/Avatar';
 import StatusLabel from '../../../components/ui/StatusLabel';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import ScreenState from '../../../components/ui/ScreenState';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 // one tenant: how to reach them, where they live now, their work orders, where they lived before,
 // and the owner's actions (message, move, assign, end)
 function TenantDetailScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['tenants', 'orders']);
   const insets = useSafeAreaInsets();
   const tenant_id = props.route.params.tenantId;
   const {
@@ -89,7 +94,7 @@ function TenantDetailScreen(props) {
         {load_error ? (
           <ErrorState message={load_error} onRetry={() => setLoadCount((current) => current + 1)} />
         ) : detail === null ? (
-          <ActivityIndicator color={COLORS.title} size="large" />
+          <ScreenState status="loading" label="Loading the tenant" />
         ) : (
           <ErrorState
             message="That tenant could not be found."
@@ -378,7 +383,11 @@ function TenantDetailScreen(props) {
   );
 }
 
-export default TenantDetailScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(TenantDetailScreen, {
+  stores: ['tenants'],
+  label: 'Loading the tenant',
+});
 
 const styles = themedStyles((COLORS) => ({
   // the header has the screen's title now, so the name gets its own plain line instead of the big card

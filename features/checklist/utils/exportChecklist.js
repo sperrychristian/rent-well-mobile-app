@@ -1,5 +1,5 @@
 import { File, Paths } from 'expo-file-system';
-import { Sharing } from '../../../services/systemPickers';
+import { Sharing } from '../../../util/systemPickers';
 import { buildChecklistText } from './checklistHelpers';
 
 // turns an address into something safe for a file name

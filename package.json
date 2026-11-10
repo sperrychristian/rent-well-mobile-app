@@ -1,6 +1,8 @@
 {
-  "name": "game-app-starter-code",
+  "name": "rent-well",
   "version": "1.0.0",
+  "description": "Rent Well: a property management app for small landlords and their tenants (work orders, rent, leases, expenses, and messages).",
+  "author": "Christian Sperry",
   "main": "index.js",
   "dependencies": {
     "@expo-google-fonts/dm-sans": "^0.4.2",
@@ -26,8 +28,6 @@
     "expo-haptics": "~57.0.3",
     "expo-image-picker": "~57.0.20",
     "expo-local-authentication": "~57.0.3",
-    "expo-notifications": "~57.0.22",
-    "expo-secure-store": "~57.0.4",
     "expo-sharing": "~57.0.22",
     "expo-splash-screen": "~57.0.10",
     "expo-status-bar": "~57.0.1",
@@ -38,8 +38,7 @@
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
     "react-native-svg": "15.15.4",
-    "react-native-worklets": "0.10.1",
-    "socket.io-client": "^4.8.4"
+    "react-native-worklets": "0.10.1"
   },
   "scripts": {
     "start": "expo start",
@@ -51,7 +50,12 @@
     "test:watch": "jest --watchAll",
     "format:check": "prettier --check .",
     "diagram": "node --no-warnings scripts/buildNavigationDiagram.mjs",
-    "assets": "node --no-warnings scripts/buildAppAssets.mjs"
+    "datamodel": "node --no-warnings scripts/buildDataModelDiagram.mjs",
+    "assets": "node --no-warnings scripts/buildAppAssets.mjs",
+    "data-model": "node --no-warnings scripts/buildDataModelDiagram.mjs",
+    "firebase:fake": "node --no-warnings scripts/fakeFirebase.mjs",
+    "firebase:seed": "node --no-warnings --import ./scripts/appModules.mjs scripts/seedFirebase.mjs",
+    "firebase:check": "node --no-warnings --import ./scripts/appModules.mjs scripts/seedFirebase.mjs --check"
   },
   "private": true,
   "devDependencies": {

@@ -1,6 +1,6 @@
 import { Text } from 'react-native';
-import { formatCurrency, isNegativeAmount } from '../../utils/formatCurrency';
-import { COLORS, NUMBERS } from '../../theme';
+import { formatCurrency, isNegativeAmount } from '../../util/formatCurrency';
+import { COLORS, NUMBERS } from '../../constants/theme';
 
 // an amount of money drawn the same way everywhere: formatCurrency, tabular digits, and red when it's negative
 // props: value, signed (a + on positive amounts, and green for them), cents (false drops the .00), style

@@ -21,13 +21,13 @@ const mock_state = {
     setRentSchedule: jest.fn(() => Promise.resolve()),
   },
 };
-jest.mock('../../auth/context/AuthContext', () => ({
+jest.mock('../../../store/AuthContext', () => ({
   useAuth: () => ({ user: mock_state.user }),
 }));
-jest.mock('../../tenants/context/TenantsContext', () => ({
+jest.mock('../../../store/TenantsContext', () => ({
   useTenants: () => mock_state.tenants,
 }));
-jest.mock('../../payments/context/LedgerContext', () => ({
+jest.mock('../../../store/LedgerContext', () => ({
   useLedger: () => mock_state.ledger,
 }));
 jest.mock('react-native-safe-area-context', () => {

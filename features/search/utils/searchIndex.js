@@ -7,7 +7,7 @@ import {
   chargeStatusLine,
   paymentStatusLine,
 } from '../../payments/utils/ledgerHelpers';
-import { formatCents, formatCurrency } from '../../../utils/formatCurrency';
+import { formatCents, formatCurrency } from '../../../util/formatCurrency';
 
 // the section order on screen, landlords see all of them and tenants only the ones about their own rental
 export const search_sections = [

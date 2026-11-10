@@ -3,7 +3,7 @@ import FormSheet from '../../payments/components/FormSheet';
 import { Field, MoneyField } from '../../payments/components/FormBits';
 import DateField from '../../../components/DateField';
 import { checkRenewForm, suggestedRenewEnd, shortLeaseDate } from '../utils/leaseHelpers';
-import { parseAmountToCents, formatCents } from '../../../utils/formatCurrency';
+import { parseAmountToCents, formatCents } from '../../../util/formatCurrency';
 
 // renew a lease: a new end date, and the new monthly rent if it's changing
 // rent already billed never changes, the new amount starts the first month that hasn't been billed

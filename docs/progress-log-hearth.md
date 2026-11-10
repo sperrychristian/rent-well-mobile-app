@@ -1,3 +1,5 @@
+> Historical record: the Express and Postgres API this log describes was replaced by the Firebase Realtime Database in milestone 2.
+
 # Hearth redesign: progress log
 
 Branch `hearth-redesign`, made from `payments-ledger-app`. Not merged. This is a visual pass only: no routes, params, titles, data, API calls, or business logic change.

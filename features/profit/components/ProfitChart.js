@@ -1,9 +1,9 @@
 import { View, Text, useWindowDimensions } from 'react-native';
 import Svg, { Line, Rect } from 'react-native-svg';
 import { month_short } from '../utils/profitMath';
-import { formatCents } from '../../../utils/formatCurrency';
-import { COLORS, SPACING, TYPE, SIZES, BORDER } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { formatCents } from '../../../util/formatCurrency';
+import { COLORS, SPACING, TYPE, SIZES, BORDER } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // net profit by month as one set of forest green bars on the paper, with hairline gridlines and no card
 // a month that lost money draws below the zero line (the same green, the words under it say which)

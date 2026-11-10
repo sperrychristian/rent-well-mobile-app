@@ -1,4 +1,4 @@
-import { parseAmountToCents, formatCurrency } from '../../../utils/formatCurrency';
+import { parseAmountToCents, formatCurrency } from '../../../util/formatCurrency';
 
 // pure helpers between the app's expense shape and the server's (docs/API.md, Expenses)
 // the screens keep the shape they've always used (amount in dollars, a category label, a property name),

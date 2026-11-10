@@ -14,10 +14,10 @@ import Card from '../../../components/ui/ModalCard';
 import PrimaryButton from '../../../components/PrimaryButton';
 import TextField from '../../../components/TextField';
 import { checkPlace, unitSuggestions, placeLabel } from '../utils/tenantHelpers';
-import { SPACING, TYPE } from '../../../theme';
+import { SPACING, TYPE } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
 import { useReduceMotion } from '../../../components/ui/useReduceMotion';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
 
 // picks a property and a unit for Move or Assign, then asks before doing it
 // props: visible, title, confirm_word ('Move' or 'Assign'), tenant, moving_tenancy (null for assign),

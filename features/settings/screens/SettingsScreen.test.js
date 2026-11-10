@@ -4,10 +4,10 @@ import SettingsScreen from './SettingsScreen';
 
 // Settings reads the account and the demo from these, the tests set them instead of signing in
 const mock_state = { user: null, demo_mode: true, demo_role: 'owner' };
-jest.mock('../../auth/context/AuthContext', () => ({
+jest.mock('../../../store/AuthContext', () => ({
   useAuth: () => ({ user: mock_state.user, logout: jest.fn() }),
 }));
-jest.mock('../../../context/WorkOrdersContext', () => ({
+jest.mock('../../../store/WorkOrdersContext', () => ({
   useWorkOrders: () => ({
     demo_mode: mock_state.demo_mode,
     demo_role: mock_state.demo_role,
@@ -17,7 +17,7 @@ jest.mock('../../../context/WorkOrdersContext', () => ({
   }),
 }));
 // the Security card reads the app lock, its own tests are in features/security
-jest.mock('../../security/context/AppLockContext', () => ({
+jest.mock('../../../store/AppLockContext', () => ({
   useAppLock: () => ({ enabled: false, loaded: true, setEnabled: jest.fn() }),
 }));
 jest.mock('@react-navigation/native', () => ({

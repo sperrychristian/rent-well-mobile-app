@@ -1,5 +1,5 @@
 import { File, Paths } from 'expo-file-system';
-import { Sharing } from '../../../services/systemPickers';
+import { Sharing } from '../../../util/systemPickers';
 import { totalsByCategory, sumAmounts } from './expenseStats';
 
 // wraps a value in quotes when it has a comma, quote, or line break so the columns don't shift
@@ -33,7 +33,10 @@ export async function shareCsvText(csv, file_name, dialog_title) {
 }
 
 // every expense as a row, then the category totals underneath for tax time
-export function buildExpensesCsv(expenses, order_titles) {
+// options.show_receipts is false for a Firebase landlord (no receipt photos until Storage), so the
+// Receipts column is left out, everything else and every total stays the same
+export function buildExpensesCsv(expenses, order_titles, options) {
+  const show_receipts = !options || options.show_receipts !== false;
   const header = [
     'Date',
     'Property',
@@ -45,7 +48,7 @@ export function buildExpensesCsv(expenses, order_titles) {
     'Billed to tenant',
     'Recovered',
     'Notes',
-    'Receipts',
+    ...(show_receipts ? ['Receipts'] : []),
     'Work order',
   ];
   const lines = [header.join(',')];
@@ -64,7 +67,7 @@ export function buildExpensesCsv(expenses, order_titles) {
         expense.billed_to_tenant ? 'Yes' : 'No',
         (expense.recovered || 0).toFixed(2),
         expense.notes,
-        (expense.receipts || []).length,
+        ...(show_receipts ? [(expense.receipts || []).length] : []),
         expense.work_order_id ? order_titles[expense.work_order_id] || '' : '',
       ];
       lines.push(row.map(csvField).join(','));
@@ -87,13 +90,15 @@ export function buildExpensesCsv(expenses, order_titles) {
   return lines.join('\n');
 }
 
-export async function shareExpensesCsv(expenses, year, order_titles) {
-  const csv = buildExpensesCsv(expenses, order_titles);
+export async function shareExpensesCsv(expenses, year, order_titles, options) {
+  const csv = buildExpensesCsv(expenses, order_titles, options);
   await shareCsvText(csv, 'rent-well-expenses-' + year + '.csv', 'Export expenses');
 }
 
 // one block per property, then the all properties totals, receipts coverage, and vendor totals
-export function buildYearEndCsv(year, data, mileage_rate) {
+// options.show_receipts false leaves out the receipt coverage line (a Firebase landlord can't add photos yet)
+export function buildYearEndCsv(year, data, mileage_rate, options) {
+  const show_receipts = !options || options.show_receipts !== false;
   const lines = ['Rent Well year-end summary for ' + year, ''];
 
   data.per_property.forEach((item) => {
@@ -116,7 +121,9 @@ export function buildYearEndCsv(year, data, mileage_rate) {
   lines.push('Capital improvements (depreciated),' + data.capital.toFixed(2));
   lines.push('Miles driven,' + data.miles.toFixed(1));
   lines.push('Mileage deduction,' + data.mileage_deduction.toFixed(2));
-  lines.push('Expenses with a receipt,' + data.with_receipts + ' of ' + data.expense_count);
+  if (show_receipts) {
+    lines.push('Expenses with a receipt,' + data.with_receipts + ' of ' + data.expense_count);
+  }
   lines.push('');
   lines.push('Vendor,Total paid');
   data.vendors.forEach((row) => {
@@ -126,7 +133,7 @@ export function buildYearEndCsv(year, data, mileage_rate) {
   return lines.join('\n');
 }
 
-export async function shareYearEndCsv(year, data, mileage_rate) {
-  const csv = buildYearEndCsv(year, data, mileage_rate);
+export async function shareYearEndCsv(year, data, mileage_rate, options) {
+  const csv = buildYearEndCsv(year, data, mileage_rate, options);
   await shareCsvText(csv, 'rent-well-year-end-' + year + '.csv', 'Export year-end summary');
 }

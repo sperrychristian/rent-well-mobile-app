@@ -4,8 +4,8 @@ import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useReduceMotion } from './useReduceMotion';
 import { lineIcon } from './lineIcon';
-import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // a short dark bar at the bottom for routine success ("Payment recorded"), it goes away by itself
 // one host at the root so a toast still shows after the form that started it closes or the screen goes back

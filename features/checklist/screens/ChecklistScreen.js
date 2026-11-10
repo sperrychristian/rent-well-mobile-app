@@ -5,18 +5,22 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PrimaryButton from '../../../components/PrimaryButton';
 import ProgressBar from '../components/ProgressBar';
 import NewChecklistModal from '../components/NewChecklistModal';
-import { useWorkOrders } from '../../../context/WorkOrdersContext';
+import { useWorkOrders } from '../../../store/WorkOrdersContext';
 import { checklistProgress, filterChecklists, worseCount } from '../utils/checklistHelpers';
-import { COLORS, SPACING, TYPE, SIZES, OPACITY } from '../../../theme';
+import { COLORS, SPACING, TYPE, SIZES, OPACITY } from '../../../constants/theme';
 import { list_styles } from '../../../components/ui/listStyles';
-import EmptyState from '../../../components/ui/EmptyState';
+import ScreenState from '../../../components/ui/ScreenState';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import SegmentedControl from '../../../components/ui/SegmentedControl';
-import { themedStyles } from '../../../utils/themedStyles';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 const status_filters = ['All', 'In progress', 'Complete'];
 
 function ChecklistScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['cloud']);
   // need the insets so the title clears the notch and status bar
   const insets = useSafeAreaInsets();
   const { checklists, properties, addChecklist } = useWorkOrders();
@@ -85,17 +89,19 @@ function ChecklistScreen(props) {
         contentContainerStyle={{ paddingBottom: insets.bottom + SPACING.lg }}
         ListHeaderComponent={list_header}
         ListEmptyComponent={
-          <EmptyState
+          // nothing saved keeps New Checklist, a status filter with no hits gets Clear Filters instead
+          <ScreenState
+            status="empty"
             illustration="empty_checklists"
             title={checklists.length === 0 ? 'No checklists yet' : 'No checklists match'}
             message={
               checklists.length === 0
                 ? 'Walk a unit at move-in and move-out, room by room, so deposits are easy to settle.'
-                : 'Try another status above.'
+                : 'Nothing has this status. Clear the filter to see every checklist.'
             }
-            action_label="New Checklist"
-            action_icon="add-circle-outline"
-            onAction={openNewForm}
+            action_label={checklists.length === 0 ? 'New Checklist' : 'Clear Filters'}
+            action_icon={checklists.length === 0 ? 'add-circle-outline' : 'close-circle-outline'}
+            onAction={checklists.length === 0 ? openNewForm : () => setStatusFilter('All')}
           />
         }
         renderItem={({ item }) => {
@@ -171,7 +177,11 @@ function ChecklistScreen(props) {
   );
 }
 
-export default ChecklistScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(ChecklistScreen, {
+  stores: ['cloud'],
+  label: 'Loading checklists',
+});
 
 const styles = themedStyles((COLORS) => ({
   container: {

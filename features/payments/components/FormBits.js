@@ -1,11 +1,11 @@
 import { View, Text, Image, Pressable, Alert } from 'react-native';
-import { ImagePicker } from '../../../services/systemPickers';
+import { ImagePicker } from '../../../util/systemPickers';
 import { Ionicons } from '@expo/vector-icons';
 import Chip from '../../../components/ui/Chip';
 import CurrencyInput from '../../../components/ui/CurrencyInput';
 import Button from '../../../components/ui/Button';
-import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { COLORS, SPACING, TYPE, RADIUS, BORDER, SIZES } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // small pieces the payments forms share: a labeled field wrapper, a money box, a chip picker, and a receipt photo
 

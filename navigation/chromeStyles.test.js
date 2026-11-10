@@ -1,5 +1,12 @@
-import { COLORS, LIGHT_COLORS, DARK_COLORS, SIZES, TYPE, setActiveScheme } from '../theme';
-import { contrastRatio, meetsAA } from '../utils/contrast';
+import {
+  COLORS,
+  LIGHT_COLORS,
+  DARK_COLORS,
+  SIZES,
+  TYPE,
+  setActiveScheme,
+} from '../constants/theme';
+import { contrastRatio, meetsAA } from '../util/contrast';
 import { shared_tab_options, shared_drawer_options, shared_screen_options } from './screenOptions';
 
 // the tab bar and drawer colors, sizes, and fonts, checked the same way theme.test.js checks the screens

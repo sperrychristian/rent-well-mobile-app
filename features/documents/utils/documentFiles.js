@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 import { File, Directory, Paths } from 'expo-file-system';
-import { DocumentPicker, Sharing } from '../../../services/systemPickers';
+import { DocumentPicker, Sharing } from '../../../util/systemPickers';
 import { allowed_mime_types, max_document_bytes } from '../../../data/documentOptions';
 import { extensionOf, guessMimeType } from './documentHelpers';
 

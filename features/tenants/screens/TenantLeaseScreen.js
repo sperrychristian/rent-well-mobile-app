@@ -6,27 +6,30 @@ import Button from '../../../components/ui/Button';
 import SectionHeader from '../../../components/ui/SectionHeader';
 import EmptyState from '../../../components/ui/EmptyState';
 import { useToast } from '../../../components/ui/Toast';
-import { useTenants } from '../context/TenantsContext';
+import { useTenants } from '../../../store/TenantsContext';
 import { placeLabel } from '../utils/tenantHelpers';
 import LeaseBlock from '../../leases/components/LeaseBlock';
 import LeaseFormSheet from '../../leases/components/LeaseFormSheet';
 import RenewLeaseSheet from '../../leases/components/RenewLeaseSheet';
 import { useLeaseActions } from '../../leases/hooks/useLeaseActions';
 import { leaseEventLine } from '../../leases/utils/leaseHelpers';
-import { hapticSuccess } from '../../../utils/haptics';
-import { todayString } from '../../../utils/formatDate';
-import { onSocketEvent } from '../../../services/socket';
-import { SPACING, TYPE, SIZES, BORDER } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { hapticSuccess } from '../../../util/haptics';
+import { todayString } from '../../../util/formatDate';
+import { SPACING, TYPE, SIZES, BORDER } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
+import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
+import { withDataScreen } from '../../../components/ui/DataScreen';
 
 // stub for the assignment: it gets only the tenant's id, shows their name when the tenants data has them,
 // and the id otherwise, then links to the Documents screen where leases live today
 // the leases pass made it real: it opens one tenancy's lease (tenancyId from Leases or a push tap, or tenantId
 // from Tenant Profile, which picks their current tenancy), with Set, Edit, and Renew, and the lease's timeline
 function TenantLeaseScreen(props) {
+  // Firebase has no live updates, so this screen reloads quietly when it comes back into view
+  useRefreshOnFocus(props.navigation, ['tenants', 'ledger']);
   const insets = useSafeAreaInsets();
   const toast = useToast();
-  const { getTenantById, findTenancy, fetchLease, is_demo } = useTenants();
+  const { getTenantById, findTenancy, fetchLease } = useTenants();
   const actions = useLeaseActions();
   const params = props.route.params || {};
   const tenant_id = params.tenantId || null;
@@ -54,14 +57,6 @@ function TenantLeaseScreen(props) {
     () => props.navigation.addListener('focus', () => setReloadCount((count) => count + 1)),
     [props.navigation],
   );
-
-  // a lease changed on another phone comes in as tenancy:updated
-  useEffect(() => {
-    if (is_demo) {
-      return undefined;
-    }
-    return onSocketEvent('tenancy:updated', () => setReloadCount((count) => count + 1));
-  }, [is_demo]);
 
   // the timeline comes from the lease route, so it reloads when the screen comes back and after a change
   useEffect(() => {
@@ -207,7 +202,11 @@ function pickTenancy(params, findTenancy, getTenantById) {
   return tenant && tenancy ? { tenant, tenancy } : null;
 }
 
-export default TenantLeaseScreen;
+// never blank while the Firebase data loads: a spinner, then the error with Try Again, or a banner
+export default withDataScreen(TenantLeaseScreen, {
+  stores: ['tenants', 'ledger'],
+  label: 'Loading the lease',
+});
 
 const styles = themedStyles((COLORS) => ({
   // the header has the screen's title now, so the name gets its own plain line instead of the big card

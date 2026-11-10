@@ -265,7 +265,7 @@ describe('editRuleFor', () => {
     });
   });
 
-  test('a tenant can edit their own request only while it is Open, and only on the phone', () => {
+  test('a tenant can edit their own request only while it is Open, in the demo and with Firebase', () => {
     expect(editRuleFor(open_order, { role: 'tenant' }).canEdit).toBe(true);
     expect(editRuleFor(started, { role: 'tenant' }).reason).toBe(
       'Work has started, so this request is locked. Message your landlord with changes.',
@@ -273,10 +273,12 @@ describe('editRuleFor', () => {
     expect(editRuleFor(open_order, { role: 'tenant', is_own: false }).reason).toBe(
       'Only requests you sent can be edited.',
     );
+    // the old server's limit is gone, a Firebase tenant follows the same rule as the demo
     expect(editRuleFor(open_order, { role: 'tenant', is_remote: true })).toEqual({
-      canEdit: false,
-      reason: "A sent request can't be changed, but you can still add photos below.",
+      canEdit: true,
+      reason: '',
     });
+    expect(editRuleFor(started, { role: 'tenant', is_remote: true }).canEdit).toBe(false);
   });
 
   test('no order means no edit and no reason', () => {

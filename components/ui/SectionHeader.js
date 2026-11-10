@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from 'react-native';
-import { SPACING, TYPE, SIZES } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { SPACING, TYPE, SIZES } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // a small heading over a group of rows or cards, with an optional count and an action on the right
 // props: title, count, action_label, onAction, style

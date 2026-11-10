@@ -1,8 +1,8 @@
 import { View, Text } from 'react-native';
 import StatusLabel from '../../../components/ui/StatusLabel';
 import { leaseStatusLabel, daysLine, shortLeaseDate } from '../utils/leaseHelpers';
-import { SPACING, TYPE, BORDER, NUMBERS } from '../../../theme';
-import { themedStyles } from '../../../utils/themedStyles';
+import { SPACING, TYPE, BORDER, NUMBERS } from '../../../constants/theme';
+import { themedStyles } from '../../../util/themedStyles';
 
 // one lease as plain ruled lines on the paper: the status, the dates, the days left, the notice, and notes
 // tenants see the same block without the notes (the server never sends them a tenant's copy anyway)

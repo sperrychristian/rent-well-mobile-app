@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from 'react-native';
-import { SPACING, TYPE, BORDER, SIZES, NUMBERS } from '../../theme';
-import { themedStyles } from '../../utils/themedStyles';
+import { SPACING, TYPE, BORDER, SIZES, NUMBERS } from '../../constants/theme';
+import { themedStyles } from '../../util/themedStyles';
 
 // a row of tabs in a gray track where the picked one sits on a white pill, for filters that act like tabs
 // props: options (a list of { value, label, count }), value (the picked value), onChange, style, label (for screen readers)

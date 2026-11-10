@@ -17,7 +17,7 @@ import {
   timelineFor,
 } from './ledgerHelpers';
 import { toneColors } from '../../../components/ui/uiHelpers';
-import { meetsAA } from '../../../utils/contrast';
+import { meetsAA } from '../../../util/contrast';
 
 const today = '2026-10-14';
 

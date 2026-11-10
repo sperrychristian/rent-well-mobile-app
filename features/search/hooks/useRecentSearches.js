@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { storageKey } from '../../../utils/storageKeys';
+import { storageKey } from '../../../util/storageKeys';
 import { addRecentSearch } from '../utils/searchIndex';
 
 export const recent_searches_key = 'rent_well_recent_searches';

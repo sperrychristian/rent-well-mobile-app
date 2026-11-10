@@ -30,7 +30,8 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# local env files (the real Firebase URL and key live in .env and never get committed)
+.env
 .env*.local
 
 # typescript

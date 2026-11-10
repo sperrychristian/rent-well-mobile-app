@@ -1,9 +1,9 @@
 import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useWorkOrders } from '../context/WorkOrdersContext';
-import { COLORS, SPACING, TYPE, RADIUS, SIZES, OPACITY } from '../theme';
-import { themedStyles } from '../utils/themedStyles';
+import { useWorkOrders } from '../store/WorkOrdersContext';
+import { COLORS, SPACING, TYPE, RADIUS, SIZES, OPACITY } from '../constants/theme';
+import { themedStyles } from '../util/themedStyles';
 
 // shows a strip with an exit button, and only while the demo is running
 // it also has the switch between the landlord and tenant sides, which keeps the same demo data

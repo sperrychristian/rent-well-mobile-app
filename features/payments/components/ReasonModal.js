@@ -3,7 +3,7 @@ import { Alert, TextInput } from 'react-native';
 import FormSheet from './FormSheet';
 import { Field, form_styles } from './FormBits';
 import { validateReason } from '../utils/ledgerHelpers';
-import { COLORS } from '../../../theme';
+import { COLORS } from '../../../constants/theme';
 
 // asks why before something gets voided or rejected, the reason stays on the record for both sides to see
 // confirm_title and confirm_message turn on a second "are you sure" step, the voids use it since they take money back out
