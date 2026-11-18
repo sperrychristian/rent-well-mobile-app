@@ -60,8 +60,8 @@ This is how the app looked at the start of the branch, after the two merges. Eve
 
 | Route | File | Header title | Reached from | Params it received | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Welcome | `features/home/screens/WelcomeScreen.js` | none (header hidden) | start, Log Out, Exit Demo | none | |
-| Login | `features/auth/screens/LoginScreen.js` | none | Welcome, sign up links | `expired` (not an id) | |
+| Welcome | `features/home/screens/WelcomeScreen.js` | none (header hidden) | start, Exit Demo | none | |
+| Login | `features/auth/screens/LoginScreen.js` | none | Welcome, sign up links, Log Out | `expired` (not an id) | |
 | RegisterOwner | `features/auth/screens/RegisterOwnerScreen.js` | none | Welcome, Login | none | |
 | RegisterTenant | `features/auth/screens/RegisterTenantScreen.js` | none | Login, RegisterOwner | none | |
 | Dashboard | `features/home/screens/DashboardScreen.js` | none | start (owner, demo), login | none | |
@@ -106,9 +106,9 @@ Requirements before the changes:
 
 | Route | Header title | Lives in | Role | Params | Reached from (besides the tab bar and drawer) | File |
 | --- | --- | --- | --- | --- | --- | --- |
-| Welcome | Welcome to Rent Well | root stack (signed out) | auth | none | Dashboard [reset], TenantHome [reset], Settings [reset] | `features/home/screens/WelcomeScreen.js` |
+| Welcome | Welcome to Rent Well | root stack (signed out) | auth | none | Dashboard [reset], TenantHome [reset] (Exit Demo) | `features/home/screens/WelcomeScreen.js` |
 | DemoChooser | Pick a Demo Role | root stack (signed out) | auth | none | Welcome | `features/home/screens/DemoChooserScreen.js` |
-| Login | Log In to Rent Well | root stack (signed out) | auth | none | Welcome, RegisterOwner, RegisterTenant | `features/auth/screens/LoginScreen.js` |
+| Login | Log In to Rent Well | root stack (signed out) | auth | none | Welcome, RegisterOwner, RegisterTenant, Dashboard [reset], TenantHome [reset], Settings [reset] (Log Out) | `features/auth/screens/LoginScreen.js` |
 | RegisterOwner | Landlord Sign Up | root stack (signed out) | auth | none | Welcome, Login | `features/auth/screens/RegisterOwnerScreen.js` |
 | RegisterTenant | Tenant Sign Up | root stack (signed out) | auth | none | Login, RegisterOwner | `features/auth/screens/RegisterTenantScreen.js` |
 | Dashboard | Landlord Dashboard | landlord tab 1 "Home" | owner | none | DemoChooser [demo], Login [reset], RegisterOwner [reset], TenantHome [demo] | `features/home/screens/DashboardScreen.js` |

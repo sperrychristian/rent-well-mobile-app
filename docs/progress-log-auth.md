@@ -57,3 +57,9 @@ Branch `assignment-12-auth`, built off `master` at `3821765`.
 - Fixed: the drawer showed two "Account" headers (Settings already sits in an Account section), so the Log Out row now sits right under Settings without its own header.
 - Fixed: a box kept its error after you typed in it. Editing a box now clears its own message (from the phone's check or from the server), and the other boxes keep theirs. Test added.
 - Checked and fine: the 8 character hint, the eye button (44pt, next to the box like the date picker's button), the loading overlay at every size, the tablet drawer with Log Out, and the web fallback keeping the session (a reload opened signed in).
+
+## Docs, sweeps, and the diagram
+- `ASSIGNMENT_AUTH.md` (the write-up), README pointer and setup steps, `docs/firebase-setup.md` (Email/Password, the Web API key, `SEED_ACCOUNT_PASSWORD`, publishing the rules last), `docs/data-model.md` with the regenerated diagram (`authLinks`, `authUid`), `docs/DESIGN.md` (auth forms), `ASSIGNMENT_STATE.md`, the journal, and `CLAUDE.md`.
+- Sweeps: no hex outside the theme, no `fetch` or Firebase url outside `util/`, `constants/config.js`, and the scripts, no `localhost` in app code, and no API key, database url, project id, or seed password anywhere in the branch's diffs or commit messages. The seed password isn't in the iOS bundle either (the API key is, as every `EXPO_PUBLIC_` value is).
+- Wording sweep: nothing unfinished in any text people read. Old code comments in tests still say "test account" (kept word for word, with an assignment 12 note beside each).
+- `npm run diagram`: the drawn diagram leaves out reset arrows, so the PNG and SVG came out the same (35 screens, one page). `navigation.mmd` and the PDF were rewritten with Log Out going to Login. `ASSIGNMENT_NAV.md` rows for Welcome and Log In updated, the counts didn't change.
