@@ -9,7 +9,8 @@ import { themedStyles } from '../../util/themedStyles';
 // changes one box, and the button sends everything up to AuthContent
 // mode is 'login' (email and password), 'owner' (name, email twice, password twice),
 // or 'tenant' (the invite code, an optional name, email twice, password twice)
-// props: mode, credentialsInvalid (a message per box that's wrong), onSubmit, isAuthenticating, submitTitle
+// props: mode, credentialsInvalid (a message per box that's wrong), onSubmit, onEdit (a box changed),
+//   isAuthenticating, submitTitle
 function AuthForm(props) {
   const is_login = props.mode === 'login';
   const [enteredInviteCode, setEnteredInviteCode] = useState('');
@@ -27,6 +28,9 @@ function AuthForm(props) {
 
   // step 1: one handler for every box, the lecture's switch on inputType
   function updateInputValueHandler(inputType, enteredValue) {
+    if (props.onEdit) {
+      props.onEdit(inputType);
+    }
     switch (inputType) {
       case 'invite_code':
         setEnteredInviteCode(enteredValue);

@@ -95,6 +95,14 @@ describe('Log In', () => {
     expect(firebase.auth.counts.signInWithPassword).toBe(0);
   });
 
+  test('typing in a box clears its message, the other boxes keep theirs', async () => {
+    await open('Login');
+    await press('Log In');
+    type('Email', 't');
+    expect(screen.queryByText('Enter your email.')).toBeNull();
+    shows('Enter your password.');
+  });
+
   test('an email that does not look like one is caught on the phone', async () => {
     await open('Login');
     type('Email', 'nope');

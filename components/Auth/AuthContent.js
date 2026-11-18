@@ -27,6 +27,11 @@ import { themedStyles } from '../../util/themedStyles';
 function AuthContent(props) {
   const navigation = useNavigation();
   const [credentialsInvalid, setCredentialsInvalid] = useState({});
+  // the boxes edited since the server's last answer, their server message goes away once they change
+  const [edited, setEdited] = useState({ source: props.serverFieldErrors, fields: [] });
+  if (edited.source !== props.serverFieldErrors) {
+    setEdited({ source: props.serverFieldErrors, fields: [] });
+  }
   // the setup message (no database address or API key in .env) wins over everything, the form can't work
   const setup_message = authSetupMessage();
   const form_error = setup_message || props.serverError || '';
@@ -90,8 +95,22 @@ function AuthContent(props) {
     });
   }
 
+  // typing in a box clears its message, so a fixed box doesn't keep saying it's wrong
+  function editHandler(inputType) {
+    if (credentialsInvalid[inputType]) {
+      const rest = { ...credentialsInvalid };
+      delete rest[inputType];
+      setCredentialsInvalid(rest);
+    }
+    if (!edited.fields.includes(inputType)) {
+      setEdited({ source: edited.source, fields: [...edited.fields, inputType] });
+    }
+  }
+
   // the server's messages for a box sit next to mine, mine win since they're about what's typed now
-  const field_errors = { ...(props.serverFieldErrors || {}), ...credentialsInvalid };
+  const server_fields = { ...(props.serverFieldErrors || {}) };
+  edited.fields.forEach((field) => delete server_fields[field]);
+  const field_errors = { ...server_fields, ...credentialsInvalid };
 
   return (
     <View style={styles.fill}>
@@ -119,6 +138,7 @@ function AuthContent(props) {
           mode={props.mode}
           credentialsInvalid={field_errors}
           onSubmit={submitHandler}
+          onEdit={editHandler}
           isAuthenticating={props.isAuthenticating}
           submitTitle={props.submitTitle}
         />

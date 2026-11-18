@@ -113,8 +113,8 @@ function DrawerContent(props) {
         </View>
       ))}
       {/* assignment 12: a clear way out at the bottom of the menu, for both roles (Exit Demo in the demo) */}
-      <View style={styles.section}>
-        <SectionHeader title="Account" />
+      {/* it sits right under the Account section (Settings), so it doesn't get a second Account header */}
+      <View style={styles.logout}>
         <LogoutButton as_row />
       </View>
     </DrawerContentScrollView>
@@ -139,6 +139,10 @@ const styles = themedStyles((COLORS) => ({
   },
   section: {
     marginTop: SPACING.sm,
+  },
+  // the hairline under Settings already closes the section, so the row just sits a little below it
+  logout: {
+    marginTop: SPACING.xs,
   },
   row: {
     flexDirection: 'row',

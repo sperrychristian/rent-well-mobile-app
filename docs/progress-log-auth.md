@@ -51,3 +51,9 @@ Branch `assignment-12-auth`, built off `master` at `3821765`.
 - `navigation/navigationMap.js`: the homes' "Log Out or Exit Demo" edge is now two edges (Log Out to Login, Exit Demo to Welcome), and Settings' Log Out goes to Login. The screen count is still 35.
 - No provider fetches before there's a token: the token is set before the user, and signed out makes no database calls at all (tested).
 - Tests: `navigation/authFlows.test.js` (8 cases through the real navigators with the database requiring auth: the signed-out screens, a private link going to Login, no calls before a token, a new landlord's whole story with a relaunch, log out clearing the last account, a tenant sign up, a quiet refresh at launch, and Taylor's work orders, payments, and messages).
+
+## Visual QA (web render in a scratch copy, outside the repo)
+- The fake server ran with `--require-auth` and was seeded with the seed script. A copy of the app with `react-native-web` (only in the copy) was pointed at it and driven with headless Chrome: Log In, Landlord Sign Up, and Tenant Sign Up (empty, errors, filled, loading, server error), then a signed-in pass as Taylor (dashboard and drawer) and as Sam (home), at 360x640, 390x844, and 1024x1366, light and dark. 78 screenshots, no page errors.
+- Fixed: the drawer showed two "Account" headers (Settings already sits in an Account section), so the Log Out row now sits right under Settings without its own header.
+- Fixed: a box kept its error after you typed in it. Editing a box now clears its own message (from the phone's check or from the server), and the other boxes keep theirs. Test added.
+- Checked and fine: the 8 character hint, the eye button (44pt, next to the box like the date picker's button), the loading overlay at every size, the tablet drawer with Log Out, and the web fallback keeping the session (a reload opened signed in).
