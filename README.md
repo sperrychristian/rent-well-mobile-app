@@ -41,23 +41,29 @@ npx expo start -c
 
 ## Backend: Firebase Realtime Database
 Rent Well's only backend is a Firebase Realtime Database, used through its REST endpoints with plain
-`fetch`. The demo needs no backend at all. Signing in, signing up, and everything a real account sees
-read and write the database.
+`fetch`, with Firebase Authentication (email and password, also over REST) for signing in. The demo
+needs no backend at all. Everything a real account sees reads and writes the database.
+
+Authentication (Assignment 12): [ASSIGNMENT_AUTH.md](ASSIGNMENT_AUTH.md).
 
 Setup, step by step: [docs/firebase-setup.md](docs/firebase-setup.md). The short version:
 
-1. Create a Firebase project, then a Realtime Database in test mode.
+1. Create a Firebase project, a Realtime Database in test mode, and turn on Email/Password under
+   Authentication > Sign-in method.
 2. Copy `.env.example` to `.env` and set `EXPO_PUBLIC_FIREBASE_DB_URL` to your database address
-   (like `https://your-project-default-rtdb.firebaseio.com`, no slash at the end). `.env` is git
-   ignored, so the address never gets committed. `EXPO_PUBLIC_FIREBASE_API_KEY` can stay blank for now.
-3. Paste `database.rules.json` into the console's Rules tab and publish.
-4. Fill the database: `npm run firebase:seed`, then check it with `npm run firebase:check`.
-5. Start the app with `npx expo start -c` (the `-c` picks up a changed `.env`).
+   (like `https://your-project-default-rtdb.firebaseio.com`, no slash at the end),
+   `EXPO_PUBLIC_FIREBASE_API_KEY` to the Web API key, and `SEED_ACCOUNT_PASSWORD` to a password of your
+   own for the seeded accounts. `.env` is git ignored, so none of it gets committed.
+3. Fill the database: `npm run firebase:seed` (it makes the seeded accounts too), then check it with
+   `npm run firebase:check`.
+4. Start the app with `npx expo start -c` (the `-c` picks up a changed `.env`) and log in.
+5. Once that works, paste `database.rules.json` (signed-in users only) into the console's Rules tab
+   and publish.
 
-Signing in: Firebase Auth comes next milestone, so Log In lists the **test accounts** in the database
-and you pick one (Taylor Brooks is the landlord, Sam Rivera a tenant, Morgan Diaz a former tenant,
-Jamie Ortiz a landlord with no data yet). Sign up makes a new test account. For tenant sign up use the
-invite code `K7M2QX9P`.
+Signing in: Log In takes an email and password. The seeded people are `taylor@example.com` (the
+landlord), `sam@example.com` (a tenant), `morgan@example.com` (a former tenant), and
+`jamie@example.com` (a landlord with no data yet), all with `SEED_ACCOUNT_PASSWORD`. Landlord Sign Up
+makes a new landlord. For tenant sign up use the invite code `K7M2QX9P`.
 
 - **The data model:** [docs/data-model.md](docs/data-model.md), with the diagram
   [docs/data-model.png](docs/data-model.png).

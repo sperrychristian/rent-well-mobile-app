@@ -135,3 +135,13 @@ the tab it came from.
 ![Work orders with Firebase data](screenshots/m2-work-orders.png)
 
 ![Payments and Rent with Firebase data](screenshots/m2-payments.png)
+
+## Assignment 12: real sign in
+
+- **Firebase Auth replaced the stand-in.** Log In and both sign up screens use email and password through the Firebase Auth REST API (`util/auth.js`, in the lecture's shape). The test account picker is gone, and the seed script makes a real account for every seeded person with one password from `.env`.
+- **Accounts link to records.** `authLinks/{localId}` says which user record a Firebase account is, and new users are keyed by their own `localId`, so a new landlord's records carry their Firebase id. The seeded records kept their ids.
+- **The token.** It lives in `AuthContext`, is saved with SecureStore, goes on every database request as `?auth=`, and is refreshed when it's within 5 minutes of running out. A refresh that's turned down sends you to Log In.
+- **Rules.** `database.rules.json` now asks for a signed-in user (`auth != null`) with no end date. Per-user rules are still the next step, since the data would need regrouping by owner for the rules to check it.
+- **Signed out sees five screens.** Welcome, the demo chooser, Log In, and the two sign up screens are the only ones registered until someone logs in or starts the demo.
+- Log: [progress-log-auth.md](progress-log-auth.md). Write-up: [ASSIGNMENT_AUTH.md](../ASSIGNMENT_AUTH.md).
+

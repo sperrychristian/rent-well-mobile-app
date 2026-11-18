@@ -22,6 +22,9 @@ the list below. ([SVG version](data-model.svg))
     created with a conditional `PUT` (`if-match: null_etag`), so a record that already exists is
     never overwritten and running the rent catch-up twice, or on two phones, can never double charge.
   - `messages/{conversationId}/{pushId}`: push ids sort oldest to newest, so a thread reads in order.
+  - `authLinks/{localId}`: one per Firebase Auth account, the value is the user id it signs in as.
+    Users who sign up in the app are keyed by their own `localId` (so a new landlord's `ownerId` is
+    their `localId`), and the seeded users keep their old ids and are linked by the seed script.
 - **Scoped by owner.** Nearly every record has `ownerId` (the landlord's user id). Records a tenant
   sees also carry `tenantUserId` and usually `tenancyId`. The app reads a whole small node and
   filters on the phone by these fields. It never uses REST queries (`orderBy`, `equalTo`), since
@@ -36,6 +39,9 @@ the list below. ([SVG version](data-model.svg))
   mileage rate, which the app always kept in dollars.
 - **Dates** are date-only `YYYY-MM-DD` text (`dueOn`, `paidOn`, `spentOn`). Moments in time are
   ISO timestamps (`createdAt`, `updatedAt`). Nothing is shifted between time zones.
+- **Signed in only.** `database.rules.json` lets any signed-in Firebase account read and write
+  (`auth != null`), and every request carries the account's ID token as `?auth=`. Per-user rules
+  are the next step (see `docs/database-rules-test-mode.md`).
 - **No files.** The Realtime Database can't hold file bytes, so photos, receipts, and document
   files stay out of it until Firebase Storage is added. Documents and checklist items save their
   records only.
@@ -54,8 +60,12 @@ object). `(copy)` marks a display copy of a name stored elsewhere.
       "name": "string",
       "email": "string",
       "ownerId": "string (tenants only: their landlord)",
+      "authUid": "string (the Firebase Auth localId of this user's account)",
       "createdAt": "iso", "updatedAt": "iso"
     }
+  },
+  "authLinks": {
+    "{localId}": "string -> users (the userId this Firebase account signs in as)"
   },
   "properties": {
     "{propertyId}": {
@@ -237,7 +247,8 @@ object). `(copy)` marks a display copy of a name stored elsewhere.
 
 | Node | Read by (screens) | Written by |
 | --- | --- | --- |
-| `users` | Login (test accounts), Tenants, Tenant Profile, Messages | Register Landlord, Register Tenant |
+| `users` | Log In (after Firebase Auth, through `authLinks`), Tenants, Tenant Profile, Messages | Landlord Sign Up, Tenant Sign Up |
+| `authLinks` | Log In, and every launch that restores a saved session | Landlord Sign Up, Tenant Sign Up, the seed script |
 | `properties` | Properties, Property Overview, Tenants, Invite Tenant, work order form, Expenses | Properties (add, edit, delete), Property Overview (payment instructions) |
 | `tenancies` | Tenants, Tenant Profile, Leases, Tenant Lease, Payments, tenant Home, Calendar | Assign, Move, End (Tenant Profile), Register Tenant |
 | `leases`, `leaseEvents` | Leases, Tenant Lease, both Homes, Calendar | Tenant Lease (set, edit, renew) |
@@ -258,7 +269,8 @@ object). `(copy)` marks a display copy of a name stored elsewhere.
 These are per device preferences, not shared data, so they stay in AsyncStorage or SecureStore:
 
 - Appearance (System, Light, Dark), the Face ID unlock switch, and the demo tour flag.
-- The signed-in test account's user id (`rent_well_test_account`), until Firebase Auth replaces it.
+- The signed-in session (`rent_well_auth_session`: the ID token, refresh token, Firebase `localId`,
+  when the token runs out, and a copy of the user record), in SecureStore on a phone.
 - Recent searches, the device calendar ids, and the dismissed onboarding card.
 - Cached copies of work orders, expenses, and ledgers, so a screen still shows the last data offline.
 - Recurring expense rules (the Recurring button is hidden in Firebase mode until it moves over).

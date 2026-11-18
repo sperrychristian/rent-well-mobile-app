@@ -243,6 +243,17 @@ Every screen that reads the Firebase database shows one of these instead of a bl
 - Upload buttons (photos, receipts, document files, scans) only show in the demo until Firebase Storage
   is added, so no screen offers something that can't work.
 
+## Auth forms (Assignment 12)
+
+Log In, Landlord Sign Up, and Tenant Sign Up share one set of pieces in `components/Auth/`, in the lecture's shape.
+
+- **AuthInput** wraps `components/forms/Input`, so the box, the label, and the message under it look exactly like the work order form. Email boxes use the email keyboard with no capitals or autocorrect. Passwords are hidden, with a 44 square eye button beside the box (the same spot as the date picker's button) that says "Show password" or "Hide password". `textContentType` and `autoComplete` are set (username, password, newPassword) so iOS password managers fill and save them.
+- **AuthForm**: one column, Next on the keyboard moves down the boxes and Done on the last one submits. The submit is the full width green pill (Log In, Create Account, Join). Sign up asks for the email and the password twice, and "At least 8 characters." sits under the password as a helper line.
+- **Messages:** each box gets its own message under it (the alert icon plus `danger_text`, never color only), the confirm boxes only speak up once the first box is right, and typing in a box clears its own message. A failure from Firebase (wrong email or password, no network, email taken) shows on the `danger_tint` line above the form, which is an alert for screen readers, and if it belongs to a box it shows under that box too. Raw Firebase codes never reach the screen.
+- **LoadingOverlay**: while the request runs, a backdrop covers the form with a small white sheet (12 corners, the one sheet shadow) holding the shared `ScreenState` loading ("Logging in..." or "Creating user..."). The form stays underneath with what was typed, it's hidden from screen readers while the sheet is up, and the button is disabled so a second tap sends nothing. With Reduce Motion the spinner is the still hourglass.
+- **Setup message:** with no API key or database address in `.env`, the three screens show one message on the error line saying what to add, and the button sends nothing.
+- **Log Out** stays a secondary pill on Settings and both homes, and the drawer ends with a Log Out row under Settings (the log-out line icon and the label in `danger_text`). In the demo the same row says Exit Demo.
+
 ## Visual QA
 
 The screenshots come from rendering the demo on the web in a scratch copy of the repo outside the project:
