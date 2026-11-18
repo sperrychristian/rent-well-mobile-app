@@ -62,7 +62,7 @@ The code so far was written in an earlier chat session and has been run only par
 - `components/ui/`: the design system primitives (see Design system below)
 - `components/forms/`: Input (the lecture's label, style, invalid, textInputConfig, plus errorText, helperText, counter, accessory), ChoiceChips, DateInput (typed YYYY-MM-DD plus the native picker). Only the work order form uses them so far.
 - `components/` (shared): HeaderIconButton (44pt icon button for headerRight), ScreenTitle (indigo shimmer hero card, only on the tenant's "No Active Rental" home now), Card (the old card, now full width with a top margin and drawn by `ui/Card`, screens bring their own side padding), PrimaryButton (wraps `ui/Button`, plain variant by default), DateField, DemoBanner (Switch to Tenant or Landlord view, and Exit Demo Mode), TextField (label, input, inline error), ErrorState (message and Try Again, for offline or server down), RemoteImage (shows an uploaded photo from its key). `components/ui/Toast.js`: `ToastProvider` at the root, `useToast().show(text, icon)`
-- `util/` (shared helpers, and from milestone 2 the data access layer): formatDate.js (formatDate, todayString), dateInput.js, recurring.js (addPeriod, used by the context and documents), storageKeys.js (per-account AsyncStorage keys), haptics.js (`hapticSuccess`, only on confirm and save), formatCurrency.js (also `formatCents`, `parseAmountToCents`, `centsToInputText` for whole cents)
+- `util/` (shared helpers, and from milestone 2 the data access layer): formatDate.js (formatDate, todayString), dateInput.js, recurring.js (addPeriod, used by the context and documents), storageKeys.js (per-account AsyncStorage keys), haptics.js (`hapticSuccess`, only on confirm and save), fitFontSize.js (the big numbers' size from their width), formatCurrency.js (also `formatCents`, `parseAmountToCents`, `centsToInputText` for whole cents)
 - `data/`: workOrders.js, expenses.js, expenseOptions.js, expenseExtras.js, documents.js, documentOptions.js (mock and seed data)
 
 ## How the data works
@@ -155,7 +155,7 @@ The app is light and warm (the Hearth pass, see the Design system section): pape
   - Touch targets are 44 (rows 64).
   - Text is AA (`constants/theme.test.js`, `stylePairs.test.js`, `components/ui/hearth.test.js`).
   - Status is never color only.
-  - Hero numbers cap font scaling at 1.2 and shrink to fit.
+  - Hero numbers cap font scaling at 1.2 and step down to fit the measured width (`util/fitFontSize.js`, `useFitFontSize` in SummaryBlock, KpiTile, and the Rent Ledger balance). Never use `adjustsFontSizeToFit`, iOS drew the hero as a speck with it.
   - Sheets and toasts check Reduce Motion.
 - **Headers** keep one shared style in `navigation/screenOptions.js`: a paper bar with no line or shadow, a DM Sans 600 title, and an ink back chevron.
 - **Visual QA:** the demo can be rendered on the web in a scratch copy outside the repo (react-native-web plus small mocks for the native modules). Never add web packages to this repo.

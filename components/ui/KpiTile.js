@@ -1,6 +1,7 @@
 import { View, Text, Pressable } from 'react-native';
 import { SPACING, TYPE, NUMBERS, OPACITY } from '../../constants/theme';
 import { themedStyles } from '../../util/themedStyles';
+import { useFitFontSize, number_steps } from '../../util/fitFontSize';
 
 // one key number: a small uppercase label, the value big, and a short caption under it
 // the icon sits on top and the label goes under the value, so the numbers line up even when a label wraps
@@ -9,15 +10,16 @@ import { themedStyles } from '../../util/themedStyles';
 // the Hearth pass: no tile and no icon, just a muted label, the number in Fraunces, and a muted caption,
 // so a row of them reads like figures in a magazine (icon and tone are still accepted and ignored)
 function KpiTile(props) {
+  // the number's size comes from the tile's measured width (util/fitFontSize.js), not iOS shrink to fit
+  const fit = useFitFontSize(props.value, TYPE.number, number_steps, 1.3);
   const content = (
     <>
       <Text style={styles.label} numberOfLines={2}>
         {props.label}
       </Text>
       <Text
-        style={[styles.value, NUMBERS]}
+        style={[styles.value, NUMBERS, fit.fit_style]}
         numberOfLines={1}
-        adjustsFontSizeToFit
         maxFontSizeMultiplier={1.3}
       >
         {props.value}
@@ -32,7 +34,12 @@ function KpiTile(props) {
   const label = props.label + ', ' + props.value + (props.caption ? ', ' + props.caption : '');
   if (!props.onPress) {
     return (
-      <View style={[styles.tile, props.style]} accessible accessibilityLabel={label}>
+      <View
+        style={[styles.tile, props.style]}
+        onLayout={fit.onLayout}
+        accessible
+        accessibilityLabel={label}
+      >
         {content}
       </View>
     );
@@ -43,6 +50,7 @@ function KpiTile(props) {
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityHint={props.accessibilityHint}
+      onLayout={fit.onLayout}
       style={({ pressed }) => [styles.tile, props.style, pressed && styles.pressed]}
     >
       {content}

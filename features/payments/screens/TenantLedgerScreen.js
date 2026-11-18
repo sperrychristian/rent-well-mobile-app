@@ -32,6 +32,7 @@ import { COLORS, SPACING, TYPE, SIZES, NUMBERS } from '../../../constants/theme'
 import { themedStyles } from '../../../util/themedStyles';
 import { useRefreshOnFocus } from '../../../navigation/useRefreshOnFocus';
 import { withDataScreen } from '../../../components/ui/DataScreen';
+import { useFitFontSize, hero_steps } from '../../../util/fitFontSize';
 
 function placeOf(ledger) {
   return ledger.unit_label ? ledger.property_name + ', ' + ledger.unit_label : ledger.property_name;
@@ -76,6 +77,14 @@ function TenantLedgerScreen(props) {
   // the rent reminder sheet, from More
   const [reminder_open, setReminderOpen] = useState(false);
   const [void_open, setVoidOpen] = useState(false);
+  // the balance's size is picked from the measured width (util/fitFontSize.js), up here so the hook runs
+  // before the early return below
+  const balance_fit = useFitFontSize(
+    derived ? formatCents(Math.abs(derived.balance_cents)) : '',
+    TYPE.hero,
+    hero_steps,
+    1.2,
+  );
 
   function openForm(name) {
     setFormKey((current) => current + 1);
@@ -235,7 +244,7 @@ function TenantLedgerScreen(props) {
         </Text>
         <Text style={styles.address}>{placeOf(ledger)}</Text>
 
-        <View style={styles.hero}>
+        <View style={styles.hero} onLayout={balance_fit.onLayout}>
           <StatusLabel
             label={
               derived.overdue_cents > 0
@@ -262,9 +271,8 @@ function TenantLedgerScreen(props) {
             }
           />
           <Text
-            style={[styles.balance, NUMBERS]}
+            style={[styles.balance, NUMBERS, balance_fit.fit_style]}
             numberOfLines={1}
-            adjustsFontSizeToFit
             maxFontSizeMultiplier={1.2}
             accessibilityLabel={balance.text}
           >
