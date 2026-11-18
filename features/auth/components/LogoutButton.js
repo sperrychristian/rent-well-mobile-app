@@ -15,10 +15,11 @@ function LogoutButton(props) {
   }
 
   // logging out resets the stack so back can't return to the account's screens
+  // assignment 12: it lands on Login now (App.js opens the fresh navigator there too)
   async function handleLogout() {
     setBusy(true);
     await logout();
-    navigation.reset({ index: 0, routes: [{ name: 'Welcome' }] });
+    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
   }
 
   function confirmLogout() {

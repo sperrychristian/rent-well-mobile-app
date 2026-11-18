@@ -6,7 +6,11 @@ import { buildYearEndCsv, buildExpensesCsv } from './exportExpenses';
 import { buildYearEndData } from './expenseStats';
 import { seed_expenses } from '../../../data/expenses';
 import { seed_trips } from '../../../data/expenseExtras';
-import { seededFirebase, uninstallFakeFirebase } from '../../../scripts/testing/fakeFirebase';
+import {
+  seededFirebase,
+  uninstallFakeFirebase,
+  signInAs,
+} from '../../../scripts/testing/fakeFirebase';
 
 // receipt photos are off for a Firebase landlord until Storage, so the Year-End Report, its CSV, and the
 // expenses CSV leave out every receipt line for them, the demo keeps them, and the money is the same in both
@@ -107,10 +111,7 @@ describe('the Year-End Report screen', () => {
 
   test('a Firebase landlord sees no receipt wording, and the totals match the demo', async () => {
     const firebase = seededFirebase();
-    await AsyncStorage.setItem(
-      'rent_well_test_account',
-      JSON.stringify(firebase.database.dump().users['owner-taylor']),
-    );
+    await signInAs(firebase, 'owner-taylor');
     render(<App />);
     await settle(10);
     act(() => navigation_ref.navigate('YearEndReport', { yearId: '2026' }));

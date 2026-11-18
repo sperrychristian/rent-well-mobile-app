@@ -4,6 +4,7 @@
 // so screens and providers only ever import from util/http.js
 import { ApiError } from './apiHelpers';
 import { firebaseDbUrl } from '../constants/config';
+import { freshAuthToken, forceRefresh, currentAuthToken } from './authToken';
 
 export const request_timeout_ms = 10000;
 
@@ -62,20 +63,27 @@ function errorForStatus(status) {
   return httpError(status, 'BAD_REQUEST');
 }
 
-// step 3: one request with the time limit, every primitive below goes through here
-// headers is for the conditional write, body is any JSON value (left out for GET and DELETE)
-export async function request(method, path, body, headers) {
-  const url = nodeUrl(path);
+// assignment 12: the signed-in token goes on the url as ?auth=TOKEN, the way the Realtime Database REST API
+// takes it. the url already ends in .json, so the token is added after it (with & if there's already a ?),
+// and it's encoded so a token can't break the url. the url with the token is never logged or put in an error
+export function withAuth(url, token) {
+  if (!token) {
+    return url;
+  }
+  return url + (url.includes('?') ? '&' : '?') + 'auth=' + encodeURIComponent(token);
+}
+
+// one try with the time limit, request() below calls it once, or twice after a refresh
+async function send(method, url, body, headers) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), request_timeout_ms);
-  let response;
   try {
     const init = { method: method, headers: { ...(headers || {}) }, signal: controller.signal };
     if (body !== undefined) {
       init.headers['Content-Type'] = 'application/json';
       init.body = JSON.stringify(body);
     }
-    response = await fetch(url, init);
+    return await fetch(url, init);
   } catch (error) {
     // an abort means my own timer ran out, anything else means the phone couldn't reach the database
     if (controller.signal.aborted || (error && error.name === 'AbortError')) {
@@ -84,6 +92,36 @@ export async function request(method, path, body, headers) {
     throw httpError(0, 'NETWORK_ERROR');
   } finally {
     clearTimeout(timer);
+  }
+}
+
+// the token for this request, refreshed first when it's about to run out
+// a refresh that was turned down already signed the person out, so the request stops with the permission message
+async function tokenForRequest() {
+  try {
+    return await freshAuthToken();
+  } catch {
+    throw httpError(401, 'PERMISSION_DENIED');
+  }
+}
+
+// step 3: one request with the time limit, every primitive below goes through here
+// headers is for the conditional write, body is any JSON value (left out for GET and DELETE)
+// a 401 or 403 with a token gets exactly one more try after a refresh, in case the token had just run out
+export async function request(method, path, body, headers) {
+  const url = nodeUrl(path);
+  // signed out (or the demo) has no token, so the request goes straight out
+  const token = currentAuthToken() ? await tokenForRequest() : null;
+  let response = await send(method, withAuth(url, token), body, headers);
+  if ((response.status === 401 || response.status === 403) && token) {
+    let fresh = null;
+    try {
+      fresh = await forceRefresh();
+    } catch {
+      // no network for the refresh, or it was turned down (AuthContext signed out), either way it stops here
+      throw errorForStatus(response.status);
+    }
+    response = await send(method, withAuth(url, fresh), body, headers);
   }
   if (!response.ok) {
     throw errorForStatus(response.status);

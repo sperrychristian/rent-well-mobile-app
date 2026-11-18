@@ -330,7 +330,7 @@ function navigationThemeFor(theme) {
 // the providers above start fresh (and remount this) whenever the mode or account changes,
 // so the first screen has to match the mode: the demo's dashboard, a role's home, or Login after a session ran out
 function AppNavigator() {
-  const { status, user, session_expired } = useAuth();
+  const { status, user, session_expired, opens_on_login } = useAuth();
   const { demo_mode, demo_role } = useWorkOrders();
   const role = useAppRole();
   // switching the theme starts the navigator over so every screen draws in the new colors,
@@ -345,7 +345,8 @@ function AppNavigator() {
   } else if (demo_mode) {
     // the demo opens on the home of the side picked in the chooser (or switched to from the banner)
     first_route = homeRouteFor({ role: demo_role });
-  } else if (session_expired) {
+  } else if (session_expired || opens_on_login) {
+    // assignment 12: log out comes back on Login too, not Welcome
     first_route = 'Login';
   }
   // the homes are tabs inside Main now, so the root stack starts on Main and the tabs pick the home

@@ -8,13 +8,20 @@ import { MessagesProvider, useMessages, thread_poll_ms } from './MessagesContext
 import { TenantsProvider, useTenants } from './TenantsContext';
 import { LedgerProvider, useLedger } from './LedgerContext';
 import { ExpensesProvider, useExpenses } from './ExpensesContext';
-import { seededFirebase, uninstallFakeFirebase } from '../scripts/testing/fakeFirebase';
+import {
+  seededFirebase,
+  uninstallFakeFirebase,
+  signInAs,
+  test_password,
+  test_session_key,
+} from '../scripts/testing/fakeFirebase';
 import { openCount } from '../features/workOrders/utils/workOrderHelpers';
 import { deriveLedger } from '../features/payments/utils/ledgerMath';
 
 // every Firebase provider through the real provider tree (the same order App.js uses), against the seeded
 // fake database: first load, a change that shows right away, a failed write that rolls back, the error
 // state, and refresh, plus the test accounts sign in and the 8 second message check
+// (assignment 12: the sign in is Firebase Auth now, the fake one, with the session saved the way Log In saves it)
 
 jest.mock('../util/navigationRef', () => ({
   resetTo: jest.fn(),
@@ -76,10 +83,10 @@ async function settle(rounds) {
 }
 
 // signs in by saving the test account the way Log In does, then renders the providers
+// (now a fake Firebase Auth session from signInAs)
 async function renderAs(user_id) {
   const firebase = seededFirebase();
-  const user = firebase.database.dump().users[user_id];
-  await AsyncStorage.setItem('rent_well_test_account', JSON.stringify(user));
+  await signInAs(firebase, user_id);
   const view = render(
     <AuthProvider>
       <AccountData>
@@ -101,7 +108,7 @@ afterEach(() => {
   jest.useRealTimers();
 });
 
-describe('test accounts', () => {
+describe('accounts', () => {
   test('a saved landlord account opens signed in and every store loads its records', async () => {
     await renderAs('owner-taylor');
     expect(peek.auth.user).toMatchObject({ id: 'owner-taylor', role: 'owner' });
@@ -134,8 +141,11 @@ describe('test accounts', () => {
     expect(peek.ledger.is_read_only).toBe(true);
   });
 
-  test('picking an account signs in, log out forgets it, and a deleted account goes back to Log In', async () => {
+  test('logging in finds the profile through authLinks, log out forgets it, and a deleted record goes back to Log In', async () => {
     const firebase = seededFirebase();
+    // a Firebase account for Jordan, linked the way the seed script links it, then signed out again
+    const { email } = await signInAs(firebase, 'tenant-jordan');
+    await AsyncStorage.clear();
     render(
       <AuthProvider>
         <AuthPeek />
@@ -143,25 +153,19 @@ describe('test accounts', () => {
     );
     await settle();
     expect(peek.auth.status).toBe('signed_out');
-    const accounts = await peek.auth.loadTestAccounts();
     await act(async () => {
-      await peek.auth.login(accounts.find((account) => account.id === 'tenant-jordan'));
+      await peek.auth.login(email, test_password);
     });
     expect(peek.auth.user).toMatchObject({ id: 'tenant-jordan', role: 'tenant' });
-    expect(JSON.parse(await AsyncStorage.getItem('rent_well_test_account')).id).toBe(
-      'tenant-jordan',
-    );
+    expect(JSON.parse(await AsyncStorage.getItem(test_session_key)).user.id).toBe('tenant-jordan');
     await act(async () => {
       await peek.auth.logout();
     });
     expect(peek.auth.status).toBe('signed_out');
-    expect(await AsyncStorage.getItem('rent_well_test_account')).toBeNull();
+    expect(await AsyncStorage.getItem(test_session_key)).toBeNull();
     // a saved account whose record is gone (someone reset the database) opens on Log In with a note
-    firebase.database.reset({ users: {} });
-    await AsyncStorage.setItem(
-      'rent_well_test_account',
-      JSON.stringify({ id: 'tenant-jordan', role: 'tenant' }),
-    );
+    await signInAs(firebase, 'tenant-jordan');
+    firebase.database.handle('DELETE', 'authLinks');
     render(
       <AuthProvider>
         <AuthPeek />
@@ -182,15 +186,22 @@ describe('test accounts', () => {
     );
     await settle();
     await act(async () => {
-      await peek.auth.registerOwner({ name: 'Robin Hale', email: 'robin@example.com' });
+      await peek.auth.registerOwner({
+        name: 'Robin Hale',
+        email: 'robin@example.com',
+        password: test_password,
+      });
     });
     expect(peek.auth.user).toMatchObject({ role: 'owner', name: 'Robin Hale' });
+    // the new landlord's user id is their Firebase localId
+    expect(peek.auth.user.id).toBe(peek.auth.localId);
     await act(async () => {
       await peek.auth.logout();
       await peek.auth.registerTenant({
         invite_code: 'K7M2QX9P',
         email: 'casey@example.com',
         name: 'Casey Nguyen',
+        password: test_password,
       });
     });
     expect(peek.auth.user).toMatchObject({ role: 'tenant', ownerId: 'owner-taylor' });
@@ -265,10 +276,7 @@ describe('work orders', () => {
   test('a first load with no connection is an error state, and refresh recovers', async () => {
     const firebase = seededFirebase();
     firebase.fetch.offline = true;
-    await AsyncStorage.setItem(
-      'rent_well_test_account',
-      JSON.stringify(firebase.database.dump().users['owner-taylor']),
-    );
+    await signInAs(firebase, 'owner-taylor');
     render(
       <AuthProvider>
         <AccountData>
@@ -430,10 +438,7 @@ describe('the rent ledger', () => {
     // the landlord's phone, reading the same database
     const { installFakeFirebase } = require('../scripts/testing/fakeFirebase');
     const landlord_db = installFakeFirebase(tree);
-    await AsyncStorage.setItem(
-      'rent_well_test_account',
-      JSON.stringify(tree.users['owner-taylor']),
-    );
+    await signInAs(landlord_db, 'owner-taylor');
     render(
       <AuthProvider>
         <AccountData>
