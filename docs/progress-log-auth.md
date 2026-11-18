@@ -42,3 +42,12 @@ Branch `assignment-12-auth`, built off `master` at `3821765`.
 - A double tap can't send two requests (a ref flips before the state does, and the button is disabled while busy).
 - `features/auth/utils/authValidation.js`: the 8 character rule, `checkConfirmEmail`, `checkConfirmPassword`, `serverFieldErrors`. `features/auth/utils/authErrors.js` picks the words for a failure. `features/auth/components/SubmitButton.js` is removed (only the old screens used it).
 - Tests: `features/auth/screens/authScreens.test.js` (19 cases), and the Log In test in `navigation/firebaseFlows.test.js` is back on with email and password.
+
+## Phase 5: require an account everywhere
+- `App.js`: signed out (no account and no demo) only registers Welcome, Pick a Demo Role, Log In, Landlord Sign Up, and Tenant Sign Up. Main (the drawer and tabs) and every detail screen sit in one `has_account_screens` group. Logging in or starting the demo changes `navigator_key`, which starts the navigator over with the rest registered, so the auth screens don't reset to a home themselves anymore.
+- `util/navigationRef.js`: `routeWhileSignedOut` sends a link or push to a private screen to Login while signed out.
+- Log out: `opens_on_login` is set in the same update as the sign out, so the fresh navigator opens on Login with nothing to go back to. The providers are keyed by the user, so they start over empty and the next account never sees the last one's lists.
+- The drawer has an Account section with a Log Out row for both roles (`LogoutButton as_row`), and in the demo the same row says Exit Demo and leaves the demo. Settings and the homes keep their Log Out button.
+- `navigation/navigationMap.js`: the homes' "Log Out or Exit Demo" edge is now two edges (Log Out to Login, Exit Demo to Welcome), and Settings' Log Out goes to Login. The screen count is still 35.
+- No provider fetches before there's a token: the token is set before the user, and signed out makes no database calls at all (tested).
+- Tests: `navigation/authFlows.test.js` (8 cases through the real navigators with the database requiring auth: the signed-out screens, a private link going to Login, no calls before a token, a new landlord's whole story with a relaunch, log out clearing the last account, a tenant sign up, a quiet refresh at launch, and Taylor's work orders, payments, and messages).

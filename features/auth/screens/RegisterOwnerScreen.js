@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import AuthContent from '../../../components/Auth/AuthContent';
-import { useAuth, homeRouteFor } from '../../../store/AuthContext';
+import { useAuth } from '../../../store/AuthContext';
 import { describeAuthFailure } from '../utils/authErrors';
 
 // assignment 12: the lecture's SignupScreen for landlords: name, email twice, password twice,
@@ -16,12 +16,12 @@ function RegisterOwnerScreen(props) {
     setServerError('');
     setServerFields({});
     try {
-      const user = await registerOwner({
+      await registerOwner({
         name: credentials.name,
         email: credentials.email,
         password: credentials.password,
       });
-      props.navigation.reset({ index: 0, routes: [{ name: homeRouteFor(user) }] });
+      // App.js starts a fresh navigator on the new account's home (homeRouteFor) as soon as it's signed in
     } catch (error) {
       const failure = describeAuthFailure(error);
       setServerError(failure.message);

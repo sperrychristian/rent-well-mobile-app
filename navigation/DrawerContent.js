@@ -4,6 +4,7 @@ import { CommonActions } from '@react-navigation/native';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
 import Wordmark from '../components/ui/Wordmark';
 import SectionHeader from '../components/ui/SectionHeader';
+import LogoutButton from '../features/auth/components/LogoutButton';
 import { useAppRole } from '../features/auth/hooks/useAppRole';
 import { useWorkOrders } from '../store/WorkOrdersContext';
 import { navigation_map, hubs, tabs_route } from './navigationMap';
@@ -111,6 +112,11 @@ function DrawerContent(props) {
           ))}
         </View>
       ))}
+      {/* assignment 12: a clear way out at the bottom of the menu, for both roles (Exit Demo in the demo) */}
+      <View style={styles.section}>
+        <SectionHeader title="Account" />
+        <LogoutButton as_row />
+      </View>
     </DrawerContentScrollView>
   );
 }

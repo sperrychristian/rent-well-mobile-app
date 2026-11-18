@@ -249,8 +249,9 @@ export function AuthProvider(props) {
 
   // step 4: log out forgets the token in memory and on the phone, and the app comes back on Login
   async function logout() {
-    await signOutLocal(false);
+    // set in the same update as the sign out, so the fresh navigator already opens on Login
     setOpensOnLogin(true);
+    await signOutLocal(false);
   }
 
   const value = {

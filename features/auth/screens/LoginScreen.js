@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import AuthContent from '../../../components/Auth/AuthContent';
-import { useAuth, homeRouteFor } from '../../../store/AuthContext';
+import { useAuth } from '../../../store/AuthContext';
 import { authErrorMessage } from '../../../util/auth';
 import { describeAuthFailure } from '../utils/authErrors';
 
@@ -21,9 +21,10 @@ function LoginScreen(props) {
     setServerError('');
     setServerFields({});
     try {
-      const user = await login(credentials.email, credentials.password);
+      await login(credentials.email, credentials.password);
       // reset so back can't return to the login form
-      props.navigation.reset({ index: 0, routes: [{ name: homeRouteFor(user) }] });
+      // App.js does that reset itself now: once the user is set it starts a fresh navigator on their home
+      // (homeRouteFor), and the signed-out stack doesn't even have the homes to reset to
     } catch (error) {
       const failure = describeAuthFailure(error);
       setServerError(failure.message);

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import AuthContent from '../../../components/Auth/AuthContent';
-import { useAuth, homeRouteFor } from '../../../store/AuthContext';
+import { useAuth } from '../../../store/AuthContext';
 import { normalizeInviteCode } from '../utils/authValidation';
 import { describeAuthFailure } from '../utils/authErrors';
 
@@ -17,13 +17,13 @@ function RegisterTenantScreen(props) {
     setServerError('');
     setServerFields({});
     try {
-      const user = await registerTenant({
+      await registerTenant({
         invite_code: normalizeInviteCode(credentials.invite_code),
         name: credentials.name,
         email: credentials.email,
         password: credentials.password,
       });
-      props.navigation.reset({ index: 0, routes: [{ name: homeRouteFor(user) }] });
+      // App.js starts a fresh navigator on the new account's home (homeRouteFor) as soon as it's signed in
     } catch (error) {
       const failure = describeAuthFailure(error);
       setServerError(failure.message);

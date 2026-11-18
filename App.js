@@ -122,6 +122,7 @@ function AccountData(props) {
 // the tab bar inside the drawer: the role's four daily places, from navigation/navigationMap.js (hubs)
 // each one keeps the header title from the map and gets the menu button on the left (shared_tab_options)
 // signed out shows both sides' tabs, but nobody sees that: login and the demo remount the navigator on their own side
+// (assignment 12: signed out doesn't register Main at all now, so these tabs only ever mount for a role)
 function MainTabs() {
   const role = useAppRole();
   const shows_owner = role !== 'tenant';
@@ -360,6 +361,10 @@ function AppNavigator() {
   // a new key starts the navigator over, so switching demo sides rebuilds the stack on that side's home
   // the role is in it for real accounts too, so logging in as the other role never keeps the old tabs
   const navigator_key = demo_mode ? 'demo-' + demo_role : 'app-' + (role || 'signed-out');
+  // assignment 12: signed out (no account and no demo) only registers the five signed-out screens, so no
+  // private screen can be opened by name, a deep link, or a push before logging in. logging in or starting
+  // the demo changes navigator_key, which starts the navigator over with the rest registered
+  const has_account_screens = !!user || demo_mode;
 
   return (
     <NavigationContainer
@@ -401,85 +406,90 @@ function AppNavigator() {
           options={optionsFor('DemoChooser')}
         />
 
-        {/* the drawer and the tabs, they draw their own headers so the stack's is off (one header per screen) */}
-        <Stack.Screen name="Main" component={MainDrawer} options={{ headerShown: false }} />
-
-        {/* owner screens, left out in the tenant demo */}
-        {/* (the owner's tabs and drawer sections moved into MainTabs and MainDrawer, these are the details) */}
-        {shows_owner && (
+        {/* everything past this point needs an account (or the demo) */}
+        {has_account_screens && (
           <Stack.Group>
+            {/* the drawer and the tabs, they draw their own headers so the stack's is off (one header per screen) */}
+            <Stack.Screen name="Main" component={MainDrawer} options={{ headerShown: false }} />
+
+            {/* owner screens, left out in the tenant demo */}
+            {/* (the owner's tabs and drawer sections moved into MainTabs and MainDrawer, these are the details) */}
+            {shows_owner && (
+              <Stack.Group>
+                <Stack.Screen
+                  name="WorkOrderDetail"
+                  component={WorkOrderDetailScreen}
+                  options={optionsFor('WorkOrderDetail')}
+                />
+                <Stack.Screen
+                  name="TenantDetail"
+                  component={TenantDetailScreen}
+                  options={optionsFor('TenantDetail')}
+                />
+                <Stack.Screen
+                  name="TenantLease"
+                  component={TenantLeaseScreen}
+                  options={optionsFor('TenantLease')}
+                />
+                <Stack.Screen
+                  name="PropertyDetail"
+                  component={PropertyDetailScreen}
+                  options={optionsFor('PropertyDetail')}
+                />
+                {/* one tenancy's rent ledger, the header's add button is set by the screen since the form lives there */}
+                <Stack.Screen
+                  name="TenantLedger"
+                  component={TenantLedgerScreen}
+                  options={optionsFor('TenantLedger')}
+                />
+                <Stack.Screen
+                  name="InviteTenant"
+                  component={InviteTenantScreen}
+                  options={optionsFor('InviteTenant')}
+                />
+                <Stack.Screen
+                  name="ChecklistDetail"
+                  component={ChecklistDetailScreen}
+                  options={optionsFor('ChecklistDetail')}
+                />
+                <Stack.Screen
+                  name="YearEndReport"
+                  component={YearEndReportScreen}
+                  options={optionsFor('YearEndReport')}
+                />
+              </Stack.Group>
+            )}
+
+            {/* tenant screens, left out in the landlord demo */}
+            {shows_tenant && (
+              <Stack.Group>
+                <Stack.Screen
+                  name="RequestDetail"
+                  component={RequestDetailScreen}
+                  options={optionsFor('RequestDetail')}
+                />
+              </Stack.Group>
+            )}
+
             <Stack.Screen
-              name="WorkOrderDetail"
-              component={WorkOrderDetailScreen}
-              options={optionsFor('WorkOrderDetail')}
+              name="NewWorkOrder"
+              component={NewWorkOrderScreen}
+              options={optionsFor('NewWorkOrder')}
             />
             <Stack.Screen
-              name="TenantDetail"
-              component={TenantDetailScreen}
-              options={optionsFor('TenantDetail')}
+              name="MessageThread"
+              component={MessageThreadScreen}
+              options={optionsFor('MessageThread')}
             />
             <Stack.Screen
-              name="TenantLease"
-              component={TenantLeaseScreen}
-              options={optionsFor('TenantLease')}
+              name="PaymentDetail"
+              component={PaymentDetailScreen}
+              options={optionsFor('PaymentDetail')}
             />
-            <Stack.Screen
-              name="PropertyDetail"
-              component={PropertyDetailScreen}
-              options={optionsFor('PropertyDetail')}
-            />
-            {/* one tenancy's rent ledger, the header's add button is set by the screen since the form lives there */}
-            <Stack.Screen
-              name="TenantLedger"
-              component={TenantLedgerScreen}
-              options={optionsFor('TenantLedger')}
-            />
-            <Stack.Screen
-              name="InviteTenant"
-              component={InviteTenantScreen}
-              options={optionsFor('InviteTenant')}
-            />
-            <Stack.Screen
-              name="ChecklistDetail"
-              component={ChecklistDetailScreen}
-              options={optionsFor('ChecklistDetail')}
-            />
-            <Stack.Screen
-              name="YearEndReport"
-              component={YearEndReportScreen}
-              options={optionsFor('YearEndReport')}
-            />
+            {/* one search over everything already loaded, opened from the magnifying glass on both homes */}
+            <Stack.Screen name="Search" component={SearchScreen} options={optionsFor('Search')} />
           </Stack.Group>
         )}
-
-        {/* tenant screens, left out in the landlord demo */}
-        {shows_tenant && (
-          <Stack.Group>
-            <Stack.Screen
-              name="RequestDetail"
-              component={RequestDetailScreen}
-              options={optionsFor('RequestDetail')}
-            />
-          </Stack.Group>
-        )}
-
-        <Stack.Screen
-          name="NewWorkOrder"
-          component={NewWorkOrderScreen}
-          options={optionsFor('NewWorkOrder')}
-        />
-        <Stack.Screen
-          name="MessageThread"
-          component={MessageThreadScreen}
-          options={optionsFor('MessageThread')}
-        />
-        <Stack.Screen
-          name="PaymentDetail"
-          component={PaymentDetailScreen}
-          options={optionsFor('PaymentDetail')}
-        />
-        {/* one search over everything already loaded, opened from the magnifying glass on both homes */}
-        <Stack.Screen name="Search" component={SearchScreen} options={optionsFor('Search')} />
       </Stack.Navigator>
     </NavigationContainer>
   );
