@@ -3,7 +3,12 @@
 // that call it, createUser and login. the lecture used axios and the API key was typed into the file,
 // here the key comes from .env (constants/config.js) and every answer and every failure is handled
 // screens never call fetch for this, they go through AuthContext, which calls these
-import { firebaseApiKey, firebaseAuthUrl, firebaseTokenUrl } from '../constants/config';
+import {
+  firebaseApiKey,
+  firebaseAuthUrl,
+  firebaseTokenUrl,
+  firebaseDbUrl,
+} from '../constants/config';
 
 export const auth_timeout_ms = 10000;
 
@@ -58,6 +63,18 @@ const rejected_refresh_codes = [
 // every screen reads its message from here, an unknown code gets the safe fallback
 export function authErrorMessage(code) {
   return auth_messages[code] || auth_messages.UNKNOWN;
+}
+
+// the one setup message the signed-out screens show when .env is missing something, '' when it's all there
+// (the database address is checked first, then the API key, the demo needs neither)
+export function authSetupMessage() {
+  if (!firebaseDbUrl()) {
+    return 'The database address is missing. Add EXPO_PUBLIC_FIREBASE_DB_URL to .env, then restart Expo with npx expo start -c.';
+  }
+  if (!firebaseApiKey()) {
+    return auth_messages.NOT_CONFIGURED;
+  }
+  return '';
 }
 
 // one error type for every way auth can fail: code is mine or Firebase's, message is always the friendly one

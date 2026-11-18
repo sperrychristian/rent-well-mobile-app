@@ -100,7 +100,7 @@ afterEach(() => {
 afterAll(() => setActiveScheme('light'));
 
 describe('signing in with email and password', () => {
-  test.skip('Log In with a seeded account opens that role home and saves the session', async () => {
+  test('Log In with a seeded account opens that role home and saves the session', async () => {
     const { email } = await signInAs(firebase, 'tenant-sam');
     await AsyncStorage.clear();
     forgetNavigationState();
