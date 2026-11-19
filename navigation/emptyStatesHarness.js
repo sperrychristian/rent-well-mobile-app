@@ -4,6 +4,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import App, { forgetNavigationState } from '../App';
 import { navigation_ref } from '../util/navigationRef';
+import { signInAs } from '../scripts/testing/fakeFirebase';
 
 export async function settle(rounds) {
   for (let index = 0; index < (rounds || 6); index++) {
@@ -26,10 +27,7 @@ export async function openDemo() {
 
 export async function openAs(firebase, user_id) {
   await AsyncStorage.clear();
-  await AsyncStorage.setItem(
-    'rent_well_test_account',
-    JSON.stringify(firebase.database.dump().users[user_id]),
-  );
+  await signInAs(firebase, user_id);
   forgetNavigationState();
   render(<App />);
   await settle(10);

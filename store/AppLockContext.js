@@ -35,6 +35,10 @@ export function AppLockProvider(props) {
   if (cold_pending && decided && !lockable) {
     setColdPending(false);
   }
+  // assignment 12: log out drops a lock that was waiting, so the next person to log in never meets it
+  if (!user && locked) {
+    setLocked(false);
+  }
   const show_lock = lockable && (locked || (cold_pending && decided));
   // while it's still deciding, a signed-in launch shows the cover with no buttons so the app never flashes
   const covering = show_lock || (cold_pending && !decided && !!user);

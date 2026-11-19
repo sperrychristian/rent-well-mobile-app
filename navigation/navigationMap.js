@@ -156,7 +156,9 @@ export const navigation_map = {
         label: 'Setup: Invite a tenant',
         roles: ['owner'],
       },
-      { to: 'Welcome', param: null, via: 'reset', label: 'Log Out or Exit Demo' },
+      // assignment 12: log out lands on Login now, only leaving the demo goes back to Welcome
+      { to: 'Login', param: null, via: 'reset', label: 'Log Out' },
+      { to: 'Welcome', param: null, via: 'reset', label: 'Exit Demo' },
       // the demo banner's switch, it keeps the demo data and starts the stack over on the tenant home
       {
         to: 'TenantHome',
@@ -431,7 +433,9 @@ export const navigation_map = {
       { to: 'Calendar', param: null, via: 'card', label: 'Calendar' },
       { to: 'Payments', param: null, via: 'card', label: 'Payments and Rent' },
       { to: 'PastRequests', param: null, via: 'card', label: 'Past Requests (no rental)' },
-      { to: 'Welcome', param: null, via: 'reset', label: 'Log Out or Exit Demo' },
+      // assignment 12: log out lands on Login now, only leaving the demo goes back to Welcome
+      { to: 'Login', param: null, via: 'reset', label: 'Log Out' },
+      { to: 'Welcome', param: null, via: 'reset', label: 'Exit Demo' },
       {
         to: 'Dashboard',
         param: null,
@@ -602,7 +606,7 @@ export const navigation_map = {
     params: [],
     edges: [
       { to: 'Mileage', param: null, via: 'button', label: 'Mileage rate', roles: ['owner'] },
-      { to: 'Welcome', param: null, via: 'reset', label: 'Log Out' },
+      { to: 'Login', param: null, via: 'reset', label: 'Log Out' },
     ],
     place: 'drawer',
     nav_label: 'Settings',

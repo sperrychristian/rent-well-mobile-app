@@ -5,7 +5,13 @@ import App, { forgetNavigationState } from '../App';
 import { navigation_ref } from '../util/navigationRef';
 import { setActiveScheme } from '../constants/theme';
 import { appearance_key } from '../store/ThemeContext';
-import { seededFirebase, uninstallFakeFirebase } from '../scripts/testing/fakeFirebase';
+import {
+  seededFirebase,
+  uninstallFakeFirebase,
+  signInAs,
+  test_password,
+  test_session_key,
+} from '../scripts/testing/fakeFirebase';
 import { formatCents } from '../util/formatCurrency';
 
 // milestone 2 flows on the real App with the real navigators, signed in to a test account, against the
@@ -60,9 +66,9 @@ function badge(tab) {
 }
 
 // opens the App already signed in to a test account, the way the next launch after Log In does
+// (assignment 12: a fake Firebase Auth session saved on the phone, from signInAs)
 async function startAs(user_id, firebase) {
-  const user = firebase.database.dump().users[user_id];
-  await AsyncStorage.setItem('rent_well_test_account', JSON.stringify(user));
+  await signInAs(firebase, user_id);
   forgetNavigationState();
   const view = render(<App />);
   await settle(12);
@@ -93,19 +99,20 @@ afterEach(() => {
 
 afterAll(() => setActiveScheme('light'));
 
-describe('signing in with a test account', () => {
-  test('Log In lists the test accounts, and picking one opens that role home', async () => {
+describe('signing in with email and password', () => {
+  test('Log In with a seeded account opens that role home and saves the session', async () => {
+    const { email } = await signInAs(firebase, 'tenant-sam');
+    await AsyncStorage.clear();
     forgetNavigationState();
     render(<App />);
     await settle();
     await go('Login');
-    expect(await screen.findByText('Test accounts')).toBeTruthy();
-    expect(screen.getByText('Landlords')).toBeTruthy();
-    expect(screen.getByText('Tenants')).toBeTruthy();
-    await press(screen.getByLabelText('Sign in as Sam Rivera, tenant'));
+    type('Email', email);
+    type('Password', test_password);
+    await press(screen.getByLabelText('Log In'));
     await settle(10);
     expect(focusedRoute()).toBe('TenantHome');
-    expect(JSON.parse(await AsyncStorage.getItem('rent_well_test_account')).id).toBe('tenant-sam');
+    expect(JSON.parse(await AsyncStorage.getItem(test_session_key)).user.id).toBe('tenant-sam');
   });
 });
 

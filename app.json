@@ -56,6 +56,13 @@
             "backgroundColor": "#1B1814"
           }
         }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true,
+          "faceIDPermission": "Rent Well uses Face ID to unlock the app, only after you turn on Unlock with Face ID in Settings."
+        }
       ]
     ],
     "backgroundColor": "#F7F3EC"

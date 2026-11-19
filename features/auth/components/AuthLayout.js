@@ -35,7 +35,8 @@ function AuthLayout(props) {
           {props.subtitle ? <Text style={styles.subtitle}>{props.subtitle}</Text> : null}
         </FadeInView>
         {props.error ? (
-          <View style={styles.error_box} accessibilityLiveRegion="polite">
+          // assignment 12: it's an alert too, so a screen reader says the server error when it shows
+          <View style={styles.error_box} accessibilityLiveRegion="polite" accessibilityRole="alert">
             <Ionicons name="alert-circle-outline" size={SIZES.icon} color={COLORS.danger_text} />
             <Text style={styles.error_text}>{props.error}</Text>
           </View>

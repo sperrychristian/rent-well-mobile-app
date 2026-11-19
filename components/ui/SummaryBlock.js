@@ -1,6 +1,7 @@
 import { View, Text } from 'react-native';
 import { SPACING, TYPE, NUMBERS } from '../../constants/theme';
 import { themedStyles } from '../../util/themedStyles';
+import { useFitFontSize, hero_steps, number_steps } from '../../util/fitFontSize';
 
 // the big fact at the top of a screen: a small label, the key figure large, a caption, and room for extras under it
 // variants: brand (the indigo card with white text, for the one overview card on a home screen) and plain (white card)
@@ -9,19 +10,26 @@ import { themedStyles } from '../../util/themedStyles';
 // (size small makes it the 30pt secondary number), a muted caption, and whatever goes under it
 function SummaryBlock(props) {
   const is_small = props.size === 'small';
+  // the size is picked from the measured width now (util/fitFontSize.js), not iOS shrink to fit
+  const fit = useFitFontSize(
+    props.value,
+    is_small ? TYPE.number : TYPE.hero,
+    is_small ? number_steps : hero_steps,
+    1.2,
+  );
   return (
     <View style={[styles.block, props.style]} accessibilityRole="summary">
       <View
         accessible
+        onLayout={fit.onLayout}
         accessibilityLabel={
           props.label + ', ' + props.value + (props.caption ? ', ' + props.caption : '')
         }
       >
         <Text style={styles.label}>{props.label}</Text>
         <Text
-          style={[styles.value, is_small && styles.value_small, NUMBERS]}
+          style={[styles.value, is_small && styles.value_small, NUMBERS, fit.fit_style]}
           numberOfLines={1}
-          adjustsFontSizeToFit
           // the hero is already 58, so it only grows a little with the system text size and shrinks to fit
           maxFontSizeMultiplier={1.2}
         >

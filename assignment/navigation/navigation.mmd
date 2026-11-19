@@ -76,6 +76,7 @@ flowchart LR
   Dashboard -->|tenancyId| TenantLease
   Dashboard --> Properties
   Dashboard --> InviteTenant
+  Dashboard -.-> Login
   Dashboard -.-> Welcome
   Dashboard -.->|Switch to Tenant view| TenantHome
   WorkOrders -->|header: Add| NewWorkOrder
@@ -111,6 +112,7 @@ flowchart LR
   TenantHome --> Calendar
   TenantHome --> Payments
   TenantHome --> PastRequests
+  TenantHome -.-> Login
   TenantHome -.-> Welcome
   TenantHome -.->|Switch to Landlord view| Dashboard
   MyRequests -->|header: Add| NewWorkOrder
@@ -125,7 +127,7 @@ flowchart LR
   TenantLedger -->|paymentId| PaymentDetail
   PaymentDetail -->|tenancyId| TenantLedger
   Settings --> Mileage
-  Settings -.-> Welcome
+  Settings -.-> Login
   Calendar -->|tenancyId| TenantLedger
   Calendar -->|paymentId| PaymentDetail
   Calendar -->|tenancyId| TenantLease

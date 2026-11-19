@@ -9,17 +9,27 @@ export const nodes = [
     name: 'users',
     key: 'userId',
     group: 'people',
-    note: 'test accounts (landlords and tenants)',
+    note: 'landlords and tenants, one per Firebase account',
     fields: [
       ['id', 'string'],
       ['role', "'owner' | 'tenant'"],
       ['name', 'string'],
       ['email', 'string'],
       ['ownerId', 'string, tenants only'],
+      ['authUid', 'string, Firebase localId'],
       ['createdAt', 'iso'],
       ['updatedAt', 'iso'],
     ],
     refs: [['ownerId', 'users']],
+  },
+  // assignment 12: which user record a Firebase Auth account is, keyed by the account's localId
+  {
+    name: 'authLinks',
+    key: 'localId',
+    group: 'people',
+    note: 'Firebase account to user record',
+    fields: [['userId', 'string (the value)']],
+    refs: [['userId', 'users']],
   },
   {
     name: 'properties',

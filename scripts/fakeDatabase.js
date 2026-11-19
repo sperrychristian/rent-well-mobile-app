@@ -208,7 +208,10 @@ export function createFakeDatabase(initial) {
 
 // a fetch for the tests: same url shape as the real one, answers from a fake database
 // base is the database url the test set in EXPO_PUBLIC_FIREBASE_DB_URL
-export function createFakeFetch(database, base) {
+// assignment 12: options can add a fake Auth (auth, auth_base, token_base), and require_auth makes every
+// database request without a good ?auth= token answer 401 like the new rules do
+export function createFakeFetch(database, base, options) {
+  const settings_all = options || {};
   const calls = [];
   async function fakeFetch(url, init) {
     const settings = init || {};
@@ -217,20 +220,41 @@ export function createFakeFetch(database, base) {
     if (fakeFetch.offline) {
       throw new TypeError('Network request failed');
     }
+    const parsed = new URL(url);
+    const body = settings.body ? JSON.parse(settings.body) : undefined;
+    // the Auth servers first, they don't care about the database switches
+    if (settings_all.auth && isUnder(url, settings_all.auth_base, settings_all.token_base)) {
+      if (fakeFetch.auth_offline) {
+        throw new TypeError('Network request failed');
+      }
+      const answer = settings_all.auth.handle(parsed.pathname, parsed.searchParams, body);
+      return response(answer.status, answer.body, {});
+    }
     if (fakeFetch.fail_status) {
       return response(fakeFetch.fail_status, { error: 'Forced failure' }, {});
+    }
+    if (fakeFetch.require_auth) {
+      const token = parsed.searchParams.get('auth');
+      if (!settings_all.auth || !settings_all.auth.isValidToken(token)) {
+        return response(401, { error: 'Permission denied' }, {});
+      }
     }
     const prefix = base.replace(/\/+$/, '') + '/';
     const without_query = url.split('?')[0];
     const path = without_query.slice(prefix.length).replace(/\.json$/, '');
-    const body = settings.body ? JSON.parse(settings.body) : undefined;
     const result = database.handle(method, path, body, settings.headers);
     return response(result.status, result.body, result.headers || {});
   }
   fakeFetch.calls = calls;
   fakeFetch.offline = false;
+  fakeFetch.auth_offline = false;
   fakeFetch.fail_status = 0;
+  fakeFetch.require_auth = !!settings_all.require_auth;
   return fakeFetch;
+}
+
+function isUnder(url, ...bases) {
+  return bases.some((item) => item && url.startsWith(item.replace(/\/+$/, '') + '/'));
 }
 
 function response(status, body, headers) {

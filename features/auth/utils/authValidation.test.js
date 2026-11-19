@@ -7,6 +7,9 @@ import {
   normalizeInviteCode,
   checkInviteCode,
   collectErrors,
+  checkConfirmEmail,
+  checkConfirmPassword,
+  serverFieldErrors,
 } from './authValidation';
 
 describe('authValidation', () => {
@@ -23,10 +26,14 @@ describe('authValidation', () => {
     expect(checkEmail(' Tara@Example.com ')).toBeNull();
   });
 
-  test('passwords: login only needs something, new ones need 10 characters and at most 72 bytes', () => {
+  // assignment 12: new passwords need 8 characters now (this used to check 10)
+  test('passwords: login only needs something, new ones need 8 characters and at most 72 bytes', () => {
     expect(checkLoginPassword('')).toMatch(/password/);
     expect(checkLoginPassword('x')).toBeNull();
-    expect(checkNewPassword('short')).toMatch(/10/);
+    expect(checkNewPassword('')).toBe('Enter a password.');
+    expect(checkNewPassword('short')).toBe('Use at least 8 characters.');
+    expect(checkNewPassword('1234567')).toMatch(/8/);
+    expect(checkNewPassword('12345678')).toBeNull();
     expect(checkNewPassword('long enough')).toBeNull();
     expect(checkNewPassword('a'.repeat(72))).toBeNull();
     expect(checkNewPassword('😀'.repeat(19))).toMatch(/too long/);
@@ -47,6 +54,22 @@ describe('authValidation', () => {
     expect(checkInviteCode('K7M2QX9')).toMatch(/8 letters/);
     // 0, O, 1, I, and L are never used in codes
     expect(checkInviteCode('K7M2QX0P')).toMatch(/8 letters/);
+  });
+
+  test('the confirm boxes have to match', () => {
+    expect(checkConfirmEmail('a@example.com', '')).toBe('Enter your email again.');
+    expect(checkConfirmEmail('a@example.com', 'b@example.com')).toBe("The emails don't match.");
+    expect(checkConfirmEmail('A@example.com ', ' a@example.com')).toBeNull();
+    expect(checkConfirmPassword('secret123', '')).toBe('Enter your password again.');
+    expect(checkConfirmPassword('secret123', 'secret124')).toBe("The passwords don't match.");
+    expect(checkConfirmPassword('secret123', 'secret123')).toBeNull();
+  });
+
+  test('server answers land under the right box', () => {
+    expect(serverFieldErrors('EMAIL_EXISTS', 'taken')).toEqual({ email: 'taken' });
+    expect(serverFieldErrors('WEAK_PASSWORD', 'weak')).toEqual({ password: 'weak' });
+    expect(serverFieldErrors('INVITE_INVALID', 'bad')).toEqual({ invite_code: 'bad' });
+    expect(serverFieldErrors('INVALID_LOGIN_CREDENTIALS', 'nope')).toEqual({});
   });
 
   test('collectErrors keeps only real messages', () => {

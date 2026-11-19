@@ -4,6 +4,7 @@ import { CommonActions } from '@react-navigation/native';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
 import Wordmark from '../components/ui/Wordmark';
 import SectionHeader from '../components/ui/SectionHeader';
+import LogoutButton from '../features/auth/components/LogoutButton';
 import { useAppRole } from '../features/auth/hooks/useAppRole';
 import { useWorkOrders } from '../store/WorkOrdersContext';
 import { navigation_map, hubs, tabs_route } from './navigationMap';
@@ -111,6 +112,11 @@ function DrawerContent(props) {
           ))}
         </View>
       ))}
+      {/* assignment 12: a clear way out at the bottom of the menu, for both roles (Exit Demo in the demo) */}
+      {/* it sits right under the Account section (Settings), so it doesn't get a second Account header */}
+      <View style={styles.logout}>
+        <LogoutButton as_row />
+      </View>
     </DrawerContentScrollView>
   );
 }
@@ -133,6 +139,10 @@ const styles = themedStyles((COLORS) => ({
   },
   section: {
     marginTop: SPACING.sm,
+  },
+  // the hairline under Settings already closes the section, so the row just sits a little below it
+  logout: {
+    marginTop: SPACING.xs,
   },
   row: {
     flexDirection: 'row',

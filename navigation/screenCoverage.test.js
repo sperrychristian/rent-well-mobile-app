@@ -4,7 +4,7 @@ import App, { forgetNavigationState } from '../App';
 import { navigation_ref } from '../util/navigationRef';
 import { navigation_map } from './navigationMap';
 import { screen_coverage } from './screenCoverage';
-import { seededFirebase, uninstallFakeFirebase } from '../scripts/testing/fakeFirebase';
+import { seededFirebase, uninstallFakeFirebase, signInAs } from '../scripts/testing/fakeFirebase';
 
 // one test per data screen in the coverage matrix, on the real App in Firebase mode:
 // loading (the database never answers), error (no connection), and empty (an account with nothing yet)
@@ -39,8 +39,7 @@ async function settle(rounds) {
 async function openScreen(route_name, account, params, answer) {
   const firebase = seededFirebase();
   if (account) {
-    const user = firebase.database.dump().users[account];
-    await AsyncStorage.setItem('rent_well_test_account', JSON.stringify(user));
+    await signInAs(firebase, account);
   }
   if (answer === 'loading') {
     global.fetch = jest.fn(() => new Promise(() => {}));

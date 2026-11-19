@@ -1,138 +1,50 @@
 import { useState } from 'react';
-import { Text, Pressable, View } from 'react-native';
-import AuthLayout from '../components/AuthLayout';
-import SubmitButton from '../components/SubmitButton';
-import TextField from '../../../components/TextField';
-import { useAuth, homeRouteFor } from '../../../store/AuthContext';
-import {
-  checkEmail,
-  checkName,
-  checkInviteCode,
-  normalizeInviteCode,
-  collectErrors,
-} from '../utils/authValidation';
-import { SPACING, TYPE, SIZES } from '../../../constants/theme';
-import { themedStyles } from '../../../util/themedStyles';
+import AuthContent from '../../../components/Auth/AuthContent';
+import { useAuth } from '../../../store/AuthContext';
+import { normalizeInviteCode } from '../utils/authValidation';
+import { describeAuthFailure } from '../utils/authErrors';
 
+// assignment 12: the lecture's SignupScreen for tenants: the invite code from the landlord comes first
+// (checked against the invites node after the Firebase account is made), then the name, email, and passwords
 function RegisterTenantScreen(props) {
   const { registerTenant } = useAuth();
-
-  const [invite_code, setInviteCode] = useState('');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [field_errors, setFieldErrors] = useState({});
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [server_error, setServerError] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [server_fields, setServerFields] = useState({});
 
-  async function handleRegister() {
-    const errors = collectErrors({
-      invite_code: checkInviteCode(invite_code),
-      name: checkName(name, false),
-      email: checkEmail(email),
-    });
-    setFieldErrors(errors);
+  async function signupHandler(credentials) {
+    setIsAuthenticating(true);
     setServerError('');
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
-    setBusy(true);
+    setServerFields({});
     try {
-      const user = await registerTenant({
-        invite_code: normalizeInviteCode(invite_code),
-        name: name.trim(),
-        email: email.trim(),
+      await registerTenant({
+        invite_code: normalizeInviteCode(credentials.invite_code),
+        name: credentials.name,
+        email: credentials.email,
+        password: credentials.password,
       });
-      props.navigation.reset({ index: 0, routes: [{ name: homeRouteFor(user) }] });
+      // App.js starts a fresh navigator on the new account's home (homeRouteFor) as soon as it's signed in
     } catch (error) {
-      // the server calls the code field inviteCode, my form calls it invite_code
-      const server_fields = error.field_errors || {};
-      setFieldErrors({ ...server_fields, invite_code: server_fields.inviteCode });
-      setServerError(error.message);
-      setBusy(false);
+      const failure = describeAuthFailure(error);
+      setServerError(failure.message);
+      setServerFields(failure.field_errors);
+      setIsAuthenticating(false);
     }
   }
 
   return (
-    <AuthLayout
-      title="Tenant Sign Up"
+    <AuthContent
+      mode="tenant"
       subtitle="Join your rental with the code from your landlord."
-      error={server_error}
-      footer={
-        <View style={styles.links}>
-          <Pressable
-            onPress={() => props.navigation.navigate('Login')}
-            hitSlop={8}
-            accessibilityRole="link"
-            style={styles.link_press}
-          >
-            <Text style={styles.link}>Already have an account? Pick a test account</Text>
-          </Pressable>
-        </View>
-      }
-    >
-      <TextField
-        label="Invite code"
-        value={invite_code}
-        onChangeText={setInviteCode}
-        error={field_errors.invite_code}
-        placeholder="K7M2-QX9P"
-        autoCapitalize="characters"
-        autoCorrect={false}
-        // the hint lives in the field now, so it sits under the box and swaps out for an error
-        helper="Your landlord sends this. Dashes and spaces are fine."
-      />
-      <TextField
-        label="Your name (optional)"
-        value={name}
-        onChangeText={setName}
-        error={field_errors.name}
-        placeholder="Leave blank to use the name on the invite"
-        textContentType="name"
-        autoComplete="name"
-      />
-      <TextField
-        label="Email"
-        value={email}
-        onChangeText={setEmail}
-        error={field_errors.email}
-        placeholder="you@example.com"
-        autoCapitalize="none"
-        autoCorrect={false}
-        keyboardType="email-address"
-        textContentType="username"
-        autoComplete="email"
-        onSubmitEditing={handleRegister}
-      />
-      {/* milestone 2 has no passwords, Firebase Auth adds them next milestone */}
-      <Text style={styles.note}>
-        No password yet: this makes a test account, and real sign in comes with Firebase Auth.
-      </Text>
-      <SubmitButton title="Join" busy_title="Joining..." busy={busy} onPress={handleRegister} />
-    </AuthLayout>
+      submitTitle="Join"
+      loadingMessage="Creating user..."
+      isAuthenticating={isAuthenticating}
+      onAuthenticate={signupHandler}
+      serverError={server_error}
+      serverFieldErrors={server_fields}
+      links={[{ label: 'Already have an account? Log in', to: 'Login' }]}
+    />
   );
 }
 
 export default RegisterTenantScreen;
-
-const styles = themedStyles((COLORS) => ({
-  links: {
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  // each link is a full 44pt tall row so it's easy to tap
-  link_press: {
-    minHeight: SIZES.touch,
-    justifyContent: 'center',
-    paddingHorizontal: SPACING.sm,
-  },
-  note: {
-    ...TYPE.body_small,
-    color: COLORS.text_muted,
-    marginBottom: SPACING.sm,
-  },
-  link: {
-    ...TYPE.subheading,
-    color: COLORS.cta,
-    textAlign: 'center',
-  },
-}));

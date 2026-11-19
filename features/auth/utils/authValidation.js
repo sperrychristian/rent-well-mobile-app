@@ -33,18 +33,58 @@ export function checkEmail(email) {
 }
 
 // logging in only needs something typed, the 10 character rule is for new accounts
+// assignment 12: the rule is 8 now (Firebase allows 6, Rent Well asks for a little more)
+export const min_password_length = 8;
+
 export function checkLoginPassword(password) {
   return password === '' ? 'Enter your password.' : null;
 }
 
 export function checkNewPassword(password) {
-  if (password.length < 10) {
-    return 'Use at least 10 characters.';
+  if (password === '') {
+    return 'Enter a password.';
+  }
+  if (password.length < min_password_length) {
+    return 'Use at least ' + min_password_length + ' characters.';
   }
   if (utf8Length(password) > 72) {
     return 'That password is too long.';
   }
   return null;
+}
+
+// the confirm boxes on sign up, checked only once the first box is fine
+export function checkConfirmEmail(email, confirm_email) {
+  if (confirm_email.trim() === '') {
+    return 'Enter your email again.';
+  }
+  if (confirm_email.trim().toLowerCase() !== email.trim().toLowerCase()) {
+    return "The emails don't match.";
+  }
+  return null;
+}
+
+export function checkConfirmPassword(password, confirm_password) {
+  if (confirm_password === '') {
+    return 'Enter your password again.';
+  }
+  if (confirm_password !== password) {
+    return "The passwords don't match.";
+  }
+  return null;
+}
+
+// which box a server answer belongs under, so the message shows by the field as well as at the top
+export function serverFieldErrors(code, message) {
+  const field_for_code = {
+    EMAIL_EXISTS: 'email',
+    INVALID_EMAIL: 'email',
+    EMAIL_TAKEN: 'email',
+    WEAK_PASSWORD: 'password',
+    INVITE_INVALID: 'invite_code',
+  };
+  const field = field_for_code[code];
+  return field ? { [field]: message } : {};
 }
 
 export function checkName(name, required) {
